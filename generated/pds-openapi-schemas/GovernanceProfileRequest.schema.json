@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:GovernanceProfileRequest",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/GovernanceProfileRequest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

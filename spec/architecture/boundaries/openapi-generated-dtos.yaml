@@ -1,0 +1,202 @@
+version: 1
+description: >
+  Split architecture boundary fragment for OpenAPI-derived Rust DTO contract
+  crates.
+
+source_groups:
+  - id: xapi-openapi-contract-target
+    description: xAPI DTO generation has a concrete OpenAPI contract crate target and the server parses/projects Statement-family payloads through that generated boundary.
+    paths:
+      - Cargo.toml
+      - crates/kiva-xapi-openapi-contract/Cargo.toml
+      - crates/kiva-xapi-openapi-contract/src/lib.rs
+      - spec/openapi/dto-boundary-ledger.yaml
+      - spec/openapi/generated-contract-dto-map.yaml
+    required_text:
+      - "crates/kiva-xapi-openapi-contract"
+      - "kiva-xapi-openapi-contract"
+      - "XAPI_OPENAPI_CONTRACT"
+      - "spec/openapi/kiva-xapi.yaml"
+      - "generated-contract-crate"
+      - "kiva-xapi-generated-contract"
+      - "pub struct Statement"
+      - "pub struct StatementResult"
+      - "pub struct About"
+      - "pub struct Person"
+      - "pub struct Document"
+  - id: xapi-openapi-generated-contract-runtime-slice
+    description: xAPI Statement request and response paths use the generated OpenAPI DTO crate as the external HTTP contract gate before internal xAPI normalization or wire projection.
+    paths:
+      - crates/kiva-server/Cargo.toml
+      - crates/kiva-server/src/surfaces/xapi/request/content.rs
+      - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+      - crates/kiva-server/src/surfaces/xapi/request/openapi.rs
+      - crates/kiva-server/src/surfaces/xapi/wire.rs
+      - crates/kiva-server/src/surfaces/xapi/response.rs
+      - spec/openapi/dto-boundary-ledger.yaml
+    required_text:
+      - "kiva-xapi-openapi-contract"
+      - "kiva_xapi_openapi_contract"
+      - "statement_body_from_openapi_contract"
+      - "xapi_contract::Statement"
+      - "xapi_contract::StatementResult"
+      - "xapi_contract::About"
+      - "xapi_contract::Person"
+      - "wire::statement_response"
+      - "wire::statement_result_response"
+      - "generated-request-response-handler-adopted"
+  - id: pds-openapi-generated-contract-slice
+    description: PDS request DTOs are represented by a generated OpenAPI contract crate.
+    paths:
+      - Cargo.toml
+      - crates/kiva-pds-openapi-contract/Cargo.toml
+      - crates/kiva-pds-openapi-contract/src/lib.rs
+      - spec/openapi/dto-boundary-ledger.yaml
+      - spec/openapi/generated-contract-dto-map.yaml
+      - spec/openapi/semantic-compatibility-map.yaml
+    required_text:
+      - "crates/kiva-pds-openapi-contract"
+      - "pub struct ConsentGrantRequest"
+      - "pub struct ConsentRevocationRequest"
+      - "pub struct DataProductRequest"
+      - "pub struct DataProductReadRequest"
+      - "pub struct LifecycleEventRequest"
+      - "pub struct RetentionPolicyRequest"
+      - "pub struct LifecycleCaseRequest"
+      - "pub struct GovernanceProfileRequest"
+      - "pub struct AccessCheckRequest"
+      - "pub struct AccessCheckResponse"
+      - "pub struct ConsentGrant"
+      - "pub struct ConsentGrantList"
+      - "pub struct DataProduct"
+      - "pub struct DataProductList"
+      - "pub struct DataProductReadResponse"
+      - "pub struct ProviderBinding"
+      - "pub struct ProviderBindingList"
+      - "pub struct RecordInventory"
+      - "pub struct MetadataExport"
+      - "pub struct PortabilityExport"
+      - "pub struct PortabilityStatement"
+      - "pub struct AccessAuditEvent"
+      - "pub struct AccessAuditEventList"
+      - "pub struct ReleaseArtifactRef"
+      - "pub enum ConsentScope"
+      - "pub enum ConsentState"
+      - "pub enum DataProductSourceKind"
+      - "pub enum LegalBasis"
+      - "pub enum DataClass"
+      - "pub enum PrincipalRole"
+      - "pub enum ResourceClass"
+      - "pub enum PolicyAction"
+      - "pub enum LifecycleEventType"
+      - "pub enum LifecycleResourceKind"
+      - "pub enum TombstonePublicationRule"
+      - "pub enum LifecycleCaseType"
+      - "pub enum LifecycleCaseStatus"
+      - "pub enum GovernanceProfileKind"
+      - "pub enum PolicyDecision"
+      - "pub enum ReleaseArtifactKind"
+      - "pub enum ConfidentialMechanismKind"
+      - "pub enum SecretComputeProviderKind"
+      - "pub enum SecretComputeProviderCapability"
+      - "pub enum SecretComputeProviderProfile"
+      - "pub enum SecretComputeProviderEvidenceGate"
+      - "pub enum SecretComputeProviderReleaseGate"
+      - "pub enum SecretComputeProviderRuntimeClass"
+      - "active_generated_slice:"
+      - "kiva-pds-generated-request-contract"
+      - "generated_response_slice:"
+      - "kiva-pds-generated-response-contract"
+  - id: pds-openapi-generated-contract-runtime-slice
+    description: PDS HTTP write/read-command paths parse generated OpenAPI DTOs before converting into internal PDS command-input or intent types.
+    paths:
+      - crates/kiva-server/Cargo.toml
+      - crates/kiva-server/src/surfaces/pds/handlers/prelude.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/request.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi.rs
+    required_text:
+      - "kiva-pds-openapi-contract"
+      - "PdsOpenApiConsentGrantRequest"
+      - "PdsOpenApiConsentRevocationRequest"
+      - "PdsOpenApiDataProductRequest"
+      - "PdsOpenApiDataProductReadRequest"
+      - "PdsOpenApiLifecycleEventRequest"
+      - "PdsOpenApiRetentionPolicyRequest"
+      - "PdsOpenApiLifecycleCaseRequest"
+      - "PdsOpenApiGovernanceProfileRequest"
+      - "PdsOpenApiAccessCheckRequest"
+      - "parse_pds_openapi_body"
+      - "consent_grant_command_input_from_openapi"
+      - "consent_revocation_command_input_from_openapi"
+      - "data_product_registration_command_input_from_openapi"
+      - "data_product_read_intent_from_openapi"
+      - "lifecycle_event_command_input_from_openapi"
+      - "retention_policy_command_input_from_openapi"
+      - "lifecycle_case_command_input_from_openapi"
+      - "governance_profile_command_input_from_openapi"
+      - "access_check_intent_from_openapi"
+      - "kiva_pds_openapi_contract"
+
+cargo_dependency_rules:
+  - id: generated-xapi-contract-stays-runtime-independent
+    description: Generated xAPI OpenAPI DTO contract crate must remain wire-only and runtime independent.
+    manifests:
+      - crates/kiva-xapi-openapi-contract/Cargo.toml
+    forbidden_dependencies:
+      - axum
+      - sqlx
+      - tokio
+      - tracing
+      - tracing-subscriber
+      - reqwest
+  - id: generated-pds-contract-stays-runtime-independent
+    description: Generated PDS OpenAPI DTO contract crate must remain wire-only and runtime independent.
+    manifests:
+      - crates/kiva-pds-openapi-contract/Cargo.toml
+    forbidden_dependencies:
+      - axum
+      - sqlx
+      - tokio
+      - tracing
+      - tracing-subscriber
+      - reqwest
+  - id: server-adopts-generated-pds-openapi-dto-slice
+    description: The server owns runtime adoption of the generated PDS OpenAPI DTO crate.
+    manifests:
+      - crates/kiva-server/Cargo.toml
+    required_dependencies:
+      - kiva-pds-openapi-contract
+  - id: server-adopts-generated-xapi-openapi-dto-slice
+    description: The server owns runtime adoption of the generated xAPI OpenAPI DTO crate.
+    manifests:
+      - crates/kiva-server/Cargo.toml
+    required_dependencies:
+      - kiva-xapi-openapi-contract
+
+dependency_rules:
+  - id: generated-xapi-contract-stays-adapter-free
+    description: Generated xAPI OpenAPI DTO contract source must not import server adapters or persistence APIs.
+    paths:
+      - crates/kiva-xapi-openapi-contract/src
+    forbidden_patterns:
+      - "use axum"
+      - "axum::"
+      - "use sqlx"
+      - "sqlx::"
+      - "crate::surfaces::"
+  - id: generated-pds-contract-stays-adapter-free
+    description: Generated PDS OpenAPI DTO contract source must not import server adapters or persistence APIs.
+    paths:
+      - crates/kiva-pds-openapi-contract/src
+    forbidden_patterns:
+      - "use axum"
+      - "axum::"
+      - "use sqlx"
+      - "sqlx::"
+      - "crate::surfaces::"

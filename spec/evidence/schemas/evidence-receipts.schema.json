@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:evidence:receipts:1",
+  "title": "Kiva EvidenceReceipt index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "description",
+    "generated_from",
+    "generated_artifacts",
+    "receipt_model",
+    "summary",
+    "evidence_receipts",
+    "verification_receipts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-evidence-receipt-index" },
+    "status": { "const": "active" },
+    "description": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_index", "markdown"],
+      "properties": {
+        "receipt_index": { "$ref": "#/$defs/nonEmptyString" },
+        "markdown": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "receipt_model": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["evidence_root_type", "verification_root_type", "generated_status", "release_rule"],
+      "properties": {
+        "evidence_root_type": { "const": "EvidenceReceipt" },
+        "verification_root_type": { "const": "VerificationReceipt" },
+        "generated_status": { "$ref": "#/$defs/nonEmptyString" },
+        "release_rule": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_receipt_count", "verification_receipt_count", "receipt_count"],
+      "properties": {
+        "evidence_receipt_count": { "type": "integer", "minimum": 0 },
+        "verification_receipt_count": { "type": "integer", "minimum": 0 },
+        "receipt_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evidence_receipts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidenceReceipt" }
+    },
+    "verification_receipts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/verificationReceipt" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "checkRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "check_id"],
+      "properties": {
+        "group": { "$ref": "#/$defs/nonEmptyString" },
+        "check_id": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "evidenceReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "root_type",
+        "status",
+        "check_ref",
+        "script",
+        "artifact_class",
+        "input_count",
+        "output_count",
+        "ready_claim_count",
+        "receipt_policy"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "root_type": { "const": "EvidenceReceipt" },
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "check_ref": { "$ref": "#/$defs/checkRef" },
+        "script": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact_class": { "$ref": "#/$defs/nonEmptyString" },
+        "input_count": { "type": "integer", "minimum": 0 },
+        "output_count": { "type": "integer", "minimum": 0 },
+        "ready_claim_count": { "type": "integer", "minimum": 0 },
+        "receipt_policy": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "verificationReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "root_type",
+        "status",
+        "obligation_id",
+        "method",
+        "source_field",
+        "declared_discharge_count",
+        "receipt_policy"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "root_type": { "const": "VerificationReceipt" },
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "obligation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "method": { "$ref": "#/$defs/nonEmptyString" },
+        "source_field": { "$ref": "#/$defs/nonEmptyString" },
+        "declared_discharge_count": { "type": "integer", "minimum": 1 },
+        "receipt_policy": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

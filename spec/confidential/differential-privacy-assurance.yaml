@@ -1,0 +1,85 @@
+schema_version: 1
+kind: differential-privacy-assurance-profile
+standard: Kiva Architecture
+status: published
+claim_boundary: >
+  Kiva supports a bounded integer differential privacy release profile for
+  add/remove-one-subject aggregate releases. This profile is engineering
+  assurance evidence for the implemented Kiva release gate and sampler; it is
+  not legal certification or a proof of every possible analytical query.
+mechanism:
+  id: kiva-discrete-laplace-add-remove-v1
+  label: discreteLaplace
+  distribution: two-sided-geometric
+  sampler: difference-of-independent-geometric-magnitudes
+  adjacency_model: addRemoveOneSubject
+  accounting_scope: subjectBudget
+  epsilon_unit: microunit
+  delta_unit: microunit
+  l1_sensitivity_unit: aggregate-unit
+  random_source: os-csprng
+  deterministic_sampler_entrypoint: sample_differential_privacy_discrete_laplace_noise_from_uniforms
+release_gate:
+  requires_persisted_aggregate: true
+  requires_minimum_population_at_least: 2
+  requires_nonzero_epsilon: true
+  requires_epsilon_within_subject_budget: true
+  requires_applied_noise: true
+  hides_raw_aggregate: true
+  hides_noise_sample: true
+composition:
+  enforced_rule: basicSequential
+  advanced_rule: drvPureDp
+  advanced_delta_microunits: 1
+  formula: >
+    sum(eps_i * (exp(eps_i) - 1)) +
+    sqrt(2 * ln(1 / delta') * sum(eps_i^2))
+  scope_dimensions:
+    - subjectBudget
+    - release
+    - timeWindow
+  release_windows:
+    - id: school-term
+      max_days: 120
+      lifecycle: active
+    - id: fiscal-year
+      max_days: 366
+      lifecycle: active
+budget_policy_lifecycle:
+  statuses:
+    - draft
+    - active
+    - superseded
+    - retired
+  allowed_transitions:
+    draft:
+      - draft
+      - active
+      - retired
+    active:
+      - active
+      - superseded
+      - retired
+    superseded:
+      - superseded
+      - retired
+    retired:
+      - retired
+statistical_validation:
+  profile_id: sampler-smoke-epsilon-1-sensitivity-1
+  sample_count: 8192
+  epsilon_microunits: 1000000
+  l1_sensitivity: 1
+  splitmix_seed: 0
+  zero_probability_tolerance: 0.025
+  mean_absolute_tolerance: 0.08
+evidence:
+  rust_core: crates/kiva-confidential/src/lib.rs
+  server: crates/kiva-server/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_differential_privacy_budget_boundary.spthy
+  fstar_budget: fstar/Kiva.Confidential.PrivacyBudget.fst
+  fstar_noise: fstar/Kiva.Confidential.PrivacyNoise.fst
+  fstar_gate: fstar/Kiva.Confidential.PrivacyGate.fst
+  design_note: docs/architecture/differential-privacy-assurance.md

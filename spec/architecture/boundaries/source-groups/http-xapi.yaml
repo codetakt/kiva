@@ -1,0 +1,115 @@
+description: >
+  Source-group boundary anchors split by architectural area.
+
+source_groups:
+  - id: http-surface-contexts
+    description: AppState projection into bounded public HTTP contexts.
+    paths:
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/core/state/generated_surface_profiles.rs
+      - crates/kiva-server/src/core/state/http_context.rs
+      - crates/kiva-server/src/core/state/surface_operation.rs
+      - crates/kiva-server/src/core/state/authorization.rs
+      - crates/kiva-server/src/core/request_guards.rs
+      - crates/kiva-server/src/core/bootstrap.rs
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+      - crates/kiva-server/src/surfaces/confidential/routes.rs
+    required_text:
+      - "mod authorization;"
+      - "mod generated_surface_profiles;"
+      - "mod http_context;"
+      - "pub(crate) struct XapiHttpContext"
+      - "pub(crate) struct PdsHttpContext"
+      - "pub(crate) struct PdsApplicationHttpContext"
+      - "pub(crate) struct ConfidentialHttpContext"
+      - "pub(crate) struct SystemHttpContext"
+      - "pub(crate) struct ApplicationApp"
+      - "fn authorize_xapi_read_request("
+      - "fn authorize_pds_read_request("
+      - "fn authorize_confidential_read_request("
+      - "fn authorize_typed_xapi_request"
+      - "fn authorize_typed_pds_request"
+      - "fn authorize_typed_confidential_request"
+      - "fn rate_limit_response("
+      - "pub(crate) async fn from_env("
+      - "pub(crate) fn pds_application_http_context("
+      - "pub(crate) fn confidential_http_context("
+      - "pub(crate) struct RequestGuards"
+      - "pub(crate) struct SurfaceProfileSpec"
+      - "surface_profile_spec"
+      - "SURFACE_PROFILE_COUNT"
+      - "PDS_REPOSITORY_APPLICATION_SURFACE"
+      - "PdsApplicationSurfaceProfile"
+      - "ConfidentialSurfaceProfile"
+  - id: xapi-handler-families
+    description: xAPI handlers split by resource family behind a module owner.
+    paths:
+      - crates/kiva-server/src/surfaces/xapi/handlers.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers/about.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers/common.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - id: xapi-request-families
+    description: xAPI request parsing split into payload, attachment, normalization, query, and projection helpers.
+    paths:
+      - crates/kiva-server/src/surfaces/xapi/request.rs
+      - crates/kiva-server/src/surfaces/xapi/request/attachments.rs
+      - crates/kiva-server/src/surfaces/xapi/request/content.rs
+      - crates/kiva-server/src/surfaces/xapi/request/json.rs
+      - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+      - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+      - crates/kiva-server/src/surfaces/xapi/request/person.rs
+      - crates/kiva-server/src/surfaces/xapi/request/query.rs
+      - crates/kiva-server/src/surfaces/xapi/request/projection.rs
+      - crates/kiva-server/src/core/state/authorization.rs
+    required_text:
+      - "mod attachments;"
+      - "mod content;"
+      - "mod normalization;"
+      - "mod person;"
+      - "pub(crate) use attachments::attachments_for_statement"
+      - "pub(crate) use normalization::{normalize_statement_batch, normalized_statement}"
+  - id: xapi-pure-validation
+    description: xAPI Statement shape validation lives in the pure xAPI crate, outside the HTTP adapter.
+    paths:
+      - crates/kiva-xapi/src/xapi/validation.rs
+      - crates/kiva-xapi/src/xapi/mod.rs
+      - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+    required_text:
+      - "pub fn validate_statement_shape("
+      - "pub use validation::*;"
+      - "validate_statement_shape(&value)"
+  - id: authenticated-principal-identity-boundary
+    description: Authenticated OAuth/OIDC principals and resource-server scope checks are identity-owned, not server-local DTOs.
+    paths:
+      - crates/kiva-identity/src/lib.rs
+      - crates/kiva-policy/src/policy/mod.rs
+      - crates/kiva-server/src/core/auth.rs
+      - crates/kiva-server/src/surfaces/xapi/request/projection.rs
+    required_text:
+      - "pub enum OAuthScope"
+      - "pub enum ResourceServerOperation"
+      - "pub struct AuthenticatedPrincipal"
+      - "pub struct AuthorizedPrincipal"
+      - "pub trait AuthorizedResourceOperation"
+      - "pub enum StatementWritePermission"
+      - "pub fn allows_operation(&self, operation: ResourceServerOperation) -> bool"
+      - "pub use kiva_identity::*;"
+      - "AuthenticatedPrincipal::new("
+      - "authorize_typed_xapi_request"
+      - "authorize_typed_pds_request"
+      - "authorize_typed_confidential_request"
+      - "authority_agent(&principal.subject)"
+  - id: fail-closed-wire-projection
+    description: Fallible DTO projection is converted to backend errors instead of silently returning JSON null.
+    paths:
+      - crates/kiva-server/src/core/response.rs
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire/common.rs
+      - crates/kiva-server/src/surfaces/confidential/wire.rs
+    required_text:
+      - "pub(crate) fn json_projection_response"
+      - "body: Result<Value, serde_json::Error>"
+      - "fn dto_value<T: Serialize>(value: &T) -> Result<Value, serde_json::Error>"
+      - "serde_json::to_value(value)"

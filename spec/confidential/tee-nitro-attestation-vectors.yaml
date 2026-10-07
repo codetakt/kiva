@@ -1,0 +1,27 @@
+---
+schema_version: 1
+description: >
+  Deterministic vectors for Kiva's review-gated AWS Nitro attestation boundary.
+  The digest is a domain-separated SHA-256 projection of verifier-normalized
+  claims, not a raw COSE/CBOR Nitro attestation document digest.
+vectors:
+  - profile: kiva-tee-aws-nitro-review-gated-v1
+    document_domain: kiva-confidential:tee-aws-nitro-attestation-document:v1
+    family: aws-nitro-enclaves
+    format: verified-nitro-attestation-document-v1
+    job_seed: 85
+    pcr0_seed: 10
+    pcr1_seed: 11
+    pcr2_seed: 12
+    pcr3_seed: 13
+    pcr8_seed: 18
+    image_digest_seed: 20
+    policy_binding_seed: 30
+    nonce_digest_seed: 31
+    certificate_chain_digest_seed: 50
+    cose_signing_key_digest_seed: 51
+    not_before_epoch_seconds: 1700000000
+    not_after_epoch_seconds: 1700003600
+    evidence_sequence: 2
+    debug_mode: false
+    expected_document_digest_hex: b8e424dbe9a77beb21e448c7c6fb704831568895b3957f5b346b7ecd6a83a053

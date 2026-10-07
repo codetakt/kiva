@@ -1,0 +1,320 @@
+suite:
+  id: xapi-lrs-statement-result-validation-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Isolated Statement Result and Score admission checks.
+cases:
+  - id: statement-result-accepts-valid-score-and-properties
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.2.4-score-properties
+      - xapi-lrs-4.2.7-duration-format
+      - xapi-lrs-4.2.7-extension-key-iri
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000a01
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000a01
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/scored
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-valid
+        result:
+          success: true
+          completion: false
+          response: accepted
+          duration: PT1H0M0.1S
+          score:
+            scaled: 0.75
+            raw: 75
+            min: 0
+            max: 100
+          extensions:
+            https://example.org/kiva/conformance/extensions/result:
+              retained: true
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-non-boolean-success
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-success-type
+        result:
+          success: 'true'
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-non-boolean-completion
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-completion-type
+        result:
+          completion: 'false'
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-non-string-response
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/answered
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-response-type
+        result:
+          response:
+            invalid: true
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-invalid-duration
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.7-duration-format
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-duration-format
+        result:
+          duration: P4W1D
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-score-not-object
+    requirements:
+      - xapi-lrs-4.2.2.4-score-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/scored
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-score-object
+        result:
+          score: 1
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-score-scaled-out-of-range
+    requirements:
+      - xapi-lrs-4.2.2.4-score-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/scored
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-scaled-range
+        result:
+          score:
+            scaled: 1.01
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-score-raw-outside-bounds
+    requirements:
+      - xapi-lrs-4.2.2.4-score-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/scored
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-raw-bounds
+        result:
+          score:
+            raw: 3
+            min: 4
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-result-rejects-score-min-max-conflict
+    requirements:
+      - xapi-lrs-4.2.2.4-score-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/scored
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/result-min-max
+        result:
+          score:
+            min: 2
+            max: 1
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-substatement-result-rejects-invalid-duration
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.7-duration-format
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-result@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: SubStatement
+          actor:
+            objectType: Agent
+            mbox: mailto:kiva-conformance-substatement@example.org
+          verb:
+            id: https://adlnet.gov/expapi/verbs/experienced
+          object:
+            objectType: Activity
+            id: https://example.org/kiva/conformance/activity/substatement-result
+          result:
+            duration: not-a-duration
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true

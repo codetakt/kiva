@@ -1,0 +1,783 @@
+standard: IEEE/ISO/IEC 39274-1-1-2025
+requirement_catalog: spec/requirements/ieee-39274-1-1-2025.yaml
+status: active-evidence-plan
+incubation:
+  current_repository_role: incubator-and-reference-consumer
+  eventual_repository: ieee-39274-1-1-xapi-lrs-conformance-aid
+  dependency_direction: kiva-depends-on-aid
+  split_boundary:
+    move_to_conformance_aid:
+      - IEEE requirement catalog
+      - Generic xAPI LRS black-box HTTP tests
+      - Generic fixtures and expected results
+      - Test runner and report schemas
+      - Authentication adapters
+      - ADL compatibility mapping
+    keep_in_kiva:
+      - Kiva implementation code
+      - Kiva CI adapter and pinned aid version
+      - Kiva-specific PDS, BI, governance, OAuth/OIDC policy, and confidential-computation tests
+notes:
+  - >
+    This file assigns every cataloged xAPI LRS requirement to at least one
+    discharge mechanism. Planned entries are not conformance evidence yet.
+  - >
+    ADL tests are useful external compatibility checks, but Kiva's conformance
+    claim is based on the pinned public LRS source and source-bound evidence.
+
+external_suites:
+  - id: adl-lrs-conformance-test-suite
+    role: external-compatibility-gate
+    upstream: https://github.com/adlnet/lrs-conformance-test-suite
+    local_path: /home/claude/Codex/github.com/adlnet/lrs-conformance-test-suite
+    observed_commit: 5bc232d349c60faded8240da698f195106091638
+    package_version: 2.0.0-1
+    license: MIT
+    supported_xapi_versions:
+      - 1.0.3
+      - 2.0.0
+    command_template: >
+      node bin/console_runner.js --xapiVersion 2.0.0 --endpoint <endpoint>
+      --basicAuth --authUser <user> --authPass <password>
+    limitations:
+      - The suite is an ADL implementation, not the IEEE standard itself.
+      - It is destructive and should not run against a production LRS endpoint.
+      - It primarily exercises Basic Auth and OAuth 1 runner modes, not Kiva's OAuth/OIDC bearer-token boundary.
+      - It does not cover Kiva PDS, BI, confidential-computation, or public-sector separation-of-authority requirements.
+
+discharge_groups:
+  - id: public-lrs-generated-recursive-response-vectors
+    method: http-test
+    status: active
+    evidence:
+      - tests/conformance/http/generated/behaviors.yaml
+      - scripts/ci/lrs_projection_responses.py
+      - tools/xapi-lrs-conformance
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-format-exact
+      - xapi-lrs-4.1.6.1-statement-format-ids
+      - xapi-lrs-4.1.6.1-statement-format-canonical-agents
+  - id: openapi-contract-static
+    method: openapi
+    status: active
+    evidence:
+      - spec/openapi/kiva-xapi.yaml
+      - scripts/ci/validate_openapi.py
+    requirements:
+      - xapi-lrs-4.1.1-headers
+      - xapi-lrs-4.1.3-json-statement-batches
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.4-if-match
+      - xapi-lrs-4.1.4-precondition-failed
+      - xapi-lrs-4.1.4-put-conflict
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unauthorized
+      - xapi-lrs-4.1.5-forbidden
+      - xapi-lrs-4.1.5-too-large
+      - xapi-lrs-4.1.5-rate-limit
+      - xapi-lrs-4.1.6-support-resources
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-get-attachments-true
+      - xapi-lrs-4.1.6.1-statement-get-attachments-false
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.2-state-post-merge-success
+      - xapi-lrs-4.1.6.2-state-get-last-modified
+      - xapi-lrs-4.1.6.3-person-arrays
+      - xapi-lrs-4.1.6.4-activity-complete
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+      - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-2-0-alias
+      - xapi-lrs-4.1.7-version-reject-400
+      - xapi-lrs-4.2.1-statement-type-validation
+      - xapi-lrs-4.2.1-statement-invalid-iris
+      - xapi-lrs-4.2.1-statement-required-null-case
+      - xapi-lrs-4.2.2.3-object-default-activity
+      - xapi-lrs-4.2.2-statement-version-format
+      - xapi-lrs-4.2.2.2-verb-properties
+      - xapi-lrs-4.2.2.3-activity-properties
+      - xapi-lrs-4.2.2.3-activity-definition-properties
+      - xapi-lrs-4.2.2.3-substatement-properties
+      - xapi-lrs-4.2.2.1-actor-object-type
+      - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+      - xapi-lrs-4.2.2.1-group-identification
+      - xapi-lrs-4.2.2.1-group-member-agent
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+      - xapi-lrs-4.2.2.1-actor-account-shape
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.2.4-score-properties
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.2.5-context-activities
+      - xapi-lrs-4.2.2.5-context-agent-relations
+      - xapi-lrs-4.2.2.5-context-group-relations
+      - xapi-lrs-4.2.2.6-attachment-properties
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+      - xapi-lrs-4.2.4.2-no-group-member-group
+      - xapi-lrs-4.2.4.2-no-nested-substatement
+      - xapi-lrs-4.2.5-voided-verb-rejection
+      - xapi-lrs-4.2.6-signed-statement-attachment
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.2.7-uuid-string
+
+  - id: adl-v2-external-compatibility
+    method: external-adl
+    status: planned
+    external_suite: adl-lrs-conformance-test-suite
+    evidence:
+      - /home/claude/Codex/github.com/adlnet/lrs-conformance-test-suite/test/v2_0
+    adl_test_files:
+      - 4.1.3-Content-Types.js
+      - 4.1.4-Concurrency.js
+      - 4.1.6.1-Statement-Resource.js
+      - 4.1.6.2-State-Resource.js
+      - 4.1.6.3-Agents-Resource.js
+      - 4.1.6.4-Activity-Resource.js
+      - 4.1.6.5-Agent-Profile-Resource.js
+      - 4.1.6.6-Activity-Profile-Resource.js
+      - 4.1.6.7-About-Resource.js
+      - 4.2.2.1-Actor-Requirements.js
+      - 4.2.2.2-Verb-Requirements.js
+      - 4.2.2.3-Object-Requirements.js
+      - 4.2.2.4-Result-Requirements.js
+      - 4.2.2.5-Context-Requirements.js
+      - 4.2.2.6-Attachment-Requirements.js
+      - 4.2.4.2-Authority-Requirements.js
+      - 4.2.4.2-ID-Requirements.js
+      - 4.2.4.2-Stored-Requirements.js
+      - 4.2.4.2-Timestamp-Requirements.js
+      - 4.2.4.3-Version-Requirements.js
+      - 4.2.5-Statement-Voiding.js
+      - 4.2.7-Additional-Requirements-for-Data-Types.js
+      - E.Data2.5-RetrievalofStatements.js
+      - E.Data2.6-SignedStatements.js
+      - H.Communication1.2-Headers.js
+      - H.Communication3.2-ErrorCodes.js
+      - H.Communication3.3-Versioning.js
+    requirements:
+      - xapi-lrs-4.1.1-headers
+      - xapi-lrs-4.1.2-utf8
+      - xapi-lrs-4.1.3-json-statement-batches
+      - xapi-lrs-4.1.3-attachment-sha2-match
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-attachment-headers
+      - xapi-lrs-4.1.3-attachment-header-property-match
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.3-multipart-reject-unmatched
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.4-if-match
+      - xapi-lrs-4.1.4-precondition-failed
+      - xapi-lrs-4.1.4-put-conflict
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unknown-parameters
+      - xapi-lrs-4.1.5-parameter-case
+      - xapi-lrs-4.1.5-batch-rejection
+      - xapi-lrs-4.1.5-unauthorized
+      - xapi-lrs-4.1.5-forbidden
+      - xapi-lrs-4.1.5-too-large
+      - xapi-lrs-4.1.6-support-resources
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+      - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+      - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+      - xapi-lrs-4.1.6.1-statement-get-empty-result
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-get-attachments-true
+      - xapi-lrs-4.1.6.1-statement-get-attachments-false
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.6.1-statement-format-exact
+      - xapi-lrs-4.1.6.1-statementref-filtering
+      - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+      - xapi-lrs-4.1.6.1-canonical-accept-language
+      - xapi-lrs-4.1.6.1-voided-not-returned
+      - xapi-lrs-4.1.6.1-voided-targeting-returned
+      - xapi-lrs-4.1.6.2-state-post-json-merge
+      - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.2-state-post-merge-success
+      - xapi-lrs-4.1.6.2-state-get-last-modified
+      - xapi-lrs-4.1.6.3-agents-person-fallback
+      - xapi-lrs-4.1.6.3-person-arrays
+      - xapi-lrs-4.1.6.4-activity-fallback
+      - xapi-lrs-4.1.6.4-activity-complete
+      - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      - xapi-lrs-4.1.6.6-activity-profile-post-json-merge
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+      - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-2-0-alias
+      - xapi-lrs-4.1.7-version-reject-before-2
+      - xapi-lrs-4.1.7-version-reject-2-1-or-greater
+      - xapi-lrs-4.1.7-version-reject-400
+      - xapi-lrs-4.2.1-statement-type-validation
+      - xapi-lrs-4.2.1-statement-extra-properties
+      - xapi-lrs-4.2.1-statement-invalid-iris
+      - xapi-lrs-4.2.1-statement-duplicate-properties
+      - xapi-lrs-4.2.1-statement-required-null-case
+      - xapi-lrs-4.2.2.3-object-default-activity
+      - xapi-lrs-4.2.2-statement-version-format
+      - xapi-lrs-4.2.2.2-verb-properties
+      - xapi-lrs-4.2.2.3-activity-properties
+      - xapi-lrs-4.2.2.3-activity-definition-properties
+      - xapi-lrs-4.2.2.3-substatement-properties
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.2.4-score-properties
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.2.5-context-activities
+      - xapi-lrs-4.2.2.5-context-agent-relations
+      - xapi-lrs-4.2.2.5-context-group-relations
+      - xapi-lrs-4.2.2.6-attachment-properties
+      - xapi-lrs-4.2.4.1-voided-target-missing-not-rejected
+      - xapi-lrs-4.2.4.1-future-timestamp-not-rejected
+      - xapi-lrs-4.2.4.2-create-statement-id
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+      - xapi-lrs-4.2.4.2-no-group-member-group
+      - xapi-lrs-4.2.4.2-interaction-type
+      - xapi-lrs-4.2.4.2-no-nested-substatement
+      - xapi-lrs-4.2.4.2-timestamp-default
+      - xapi-lrs-4.2.4.2-stored-set-by-lrs
+      - xapi-lrs-4.2.4.2-authority-present
+      - xapi-lrs-4.2.4.2-context-activities-array
+      - xapi-lrs-4.2.4.3-version-retention
+      - xapi-lrs-4.2.5-voided-verb-rejection
+      - xapi-lrs-4.2.5-voided-state
+      - xapi-lrs-4.2.6-signed-statement-attachment
+      - xapi-lrs-4.2.6-jws-compact
+      - xapi-lrs-4.2.6-jws-payload
+      - xapi-lrs-4.2.6-jws-algorithm
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.2.7-extension-key-iri
+      - xapi-lrs-4.2.7-extension-values
+      - xapi-lrs-4.2.7-language-tags
+      - xapi-lrs-4.2.7-uuid-string
+      - xapi-lrs-4.2.7-timestamps-utc
+      - xapi-lrs-4.2.7-duration-format
+
+  - id: kiva-http-conformance
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http
+      - spec/conformance/endpoint-profile.example.yaml
+      - spec/conformance/schemas/endpoint-profile.schema.json
+      - scripts/ci/validate_conformance_fixtures.py
+      - scripts/ci/conformance_lib.sh
+      - scripts/ci/run_memory_conformance.sh
+      - scripts/ci/run_postgres_conformance.sh
+    requirements:
+      - xapi-lrs-4.1.5-rate-limit
+      - xapi-lrs-4.1.6-document-no-prior-knowledge
+      - xapi-lrs-4.1.8-authorization-decisions
+
+  - id: kiva-http-conformance-authz-authority-fixtures
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - spec/conformance/auth-profile.example.yaml
+      - spec/conformance/schemas/auth-profile.schema.json
+      - scripts/ci/validate_conformance_fixtures.py
+      - tests/conformance/http/authentication-errors.yaml
+      - tests/conformance/http/statement-authz-authority-isolated.yaml
+      - docs/architecture/conformance-auth-fixtures.md
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unauthorized
+      - xapi-lrs-4.1.5-forbidden
+      - xapi-lrs-4.1.8-authorization-decisions
+      - xapi-lrs-4.2.4.2-authority-present
+      - xapi-lrs-4.2.4.2-authority-deterministic
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-about-version
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/about-version.yaml
+      - tests/conformance/http/version-negotiation.yaml
+    requirements:
+      - xapi-lrs-4.1.1-headers
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-2-0-alias
+      - xapi-lrs-4.1.7-version-reject-before-2
+      - xapi-lrs-4.1.7-version-reject-2-1-or-greater
+      - xapi-lrs-4.1.7-version-reject-400
+
+  - id: kiva-http-conformance-resource-families
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/support-resources.yaml
+    requirements:
+      - xapi-lrs-4.1.6-support-resources
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statements-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-write-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.3-json-statement-batches
+      - xapi-lrs-4.1.5-batch-rejection
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.2.4.2-create-statement-id
+
+  - id: kiva-http-conformance-statement-format-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-format-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-format-exact
+      - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+      - xapi-lrs-4.1.6.1-canonical-accept-language
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-voiding-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-voiding-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.6.1-voided-not-returned
+      - xapi-lrs-4.1.6.1-voided-targeting-returned
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.2.4.1-voided-target-missing-not-rejected
+      - xapi-lrs-4.2.5-voided-state
+
+  - id: kiva-http-conformance-statement-normalization-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-normalization-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.2.3-object-default-activity
+      - xapi-lrs-4.2.4.2-timestamp-default
+      - xapi-lrs-4.2.4.2-stored-set-by-lrs
+      - xapi-lrs-4.2.4.2-authority-present
+      - xapi-lrs-4.2.4.2-context-activities-array
+      - xapi-lrs-4.2.4.3-version-retention
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-validation-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-validation-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.2.1-statement-type-validation
+      - xapi-lrs-4.2.1-statement-extra-properties
+      - xapi-lrs-4.2.1-statement-invalid-iris
+      - xapi-lrs-4.2.1-statement-duplicate-properties
+      - xapi-lrs-4.2.1-statement-required-null-case
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+      - xapi-lrs-4.2.4.2-no-group-member-group
+      - xapi-lrs-4.2.4.2-interaction-type
+      - xapi-lrs-4.2.4.2-no-nested-substatement
+      - xapi-lrs-4.2.5-voided-verb-rejection
+      - xapi-lrs-4.2.7-extension-key-iri
+      - xapi-lrs-4.2.7-language-tags
+      - xapi-lrs-4.2.7-uuid-string
+      - xapi-lrs-4.2.7-duration-format
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-actor-validation-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-actor-validation-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.1-statement-type-validation
+      - xapi-lrs-4.2.1-statement-required-null-case
+      - xapi-lrs-4.2.2.1-actor-object-type
+      - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+      - xapi-lrs-4.2.2.1-group-identification
+      - xapi-lrs-4.2.2.1-group-member-agent
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+      - xapi-lrs-4.2.2.1-actor-account-shape
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+      - xapi-lrs-4.2.4.2-no-group-member-group
+
+  - id: kiva-http-conformance-statement-object-validation-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-object-validation-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.1-statement-required-null-case
+      - xapi-lrs-4.2.2-statement-version-format
+      - xapi-lrs-4.2.2.2-verb-properties
+      - xapi-lrs-4.2.2.3-activity-properties
+      - xapi-lrs-4.2.2.3-activity-definition-properties
+      - xapi-lrs-4.2.2.3-substatement-properties
+      - xapi-lrs-4.2.2.6-attachment-properties
+      - xapi-lrs-4.2.4.2-interaction-type
+      - xapi-lrs-4.2.4.2-no-nested-substatement
+      - xapi-lrs-4.2.7-timestamps-utc
+
+  - id: kiva-http-conformance-statement-result-validation-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-result-validation-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.2.4-result-properties
+      - xapi-lrs-4.2.2.4-score-properties
+      - xapi-lrs-4.2.7-duration-format
+      - xapi-lrs-4.2.7-extension-key-iri
+      - xapi-lrs-4.2.7-extension-values
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-context-validation-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-context-validation-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.2.5-context-activities
+      - xapi-lrs-4.2.2.5-context-agent-relations
+      - xapi-lrs-4.2.2.5-context-group-relations
+      - xapi-lrs-4.2.7-uuid-string
+      - xapi-lrs-4.2.7-extension-key-iri
+      - xapi-lrs-4.2.7-extension-values
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-datatypes-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-datatypes-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.2.4.1-future-timestamp-not-rejected
+      - xapi-lrs-4.2-statement-immutability-preserve
+      - xapi-lrs-4.2.4.2-return-serialization
+      - xapi-lrs-4.2.4.2-number-precision
+      - xapi-lrs-4.2.7-iri-comparison
+      - xapi-lrs-4.2.7-extension-values
+      - xapi-lrs-4.2.7-timestamps-utc
+      - xapi-lrs-4.2.7-duration-format
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-reference-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-reference-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.6.1-statementref-filtering
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-query-filter-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-query-filter-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-filters
+      - xapi-lrs-4.1.6.1-statement-query-related-agents
+      - xapi-lrs-4.1.6.1-statement-query-related-activities
+      - xapi-lrs-4.1.6.1-statement-query-time-order-limit
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-immutability-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-immutability-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2-statement-immutability-preserve
+      - xapi-lrs-4.2-statement-immutability-ignore-excluded
+      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-utf8-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-utf8-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.2-utf8
+      - xapi-lrs-4.2.4.2-return-serialization
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-attachments-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-attachments-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.3-attachment-sha2-match
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-attachment-headers
+      - xapi-lrs-4.1.3-attachment-header-property-match
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.3-multipart-reject-unmatched
+      - xapi-lrs-4.1.6.1-statement-get-attachments-true
+      - xapi-lrs-4.1.6.1-statement-get-attachments-false
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-signing-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-signing-isolated.yaml
+    requirements:
+      - xapi-lrs-4.2.6-signed-statement-attachment
+      - xapi-lrs-4.2.6-jws-compact
+      - xapi-lrs-4.2.6-jws-payload
+      - xapi-lrs-4.2.6-jws-algorithm
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-statement-query-validation
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/statement-query-validation.yaml
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unknown-parameters
+      - xapi-lrs-4.1.5-parameter-case
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+      - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+      - xapi-lrs-4.1.6.1-statement-get-empty-result
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-state-documents-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/state-document-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.4-if-match
+      - xapi-lrs-4.1.4-precondition-failed
+      - xapi-lrs-4.1.4-put-conflict
+      - xapi-lrs-4.1.6-document-no-prior-knowledge
+      - xapi-lrs-4.1.6.2-state-post-json-merge
+      - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.2-state-post-merge-success
+      - xapi-lrs-4.1.6.2-state-get-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-profile-documents-isolated
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/agent-profile-document-isolated.yaml
+      - tests/conformance/http/activity-profile-document-isolated.yaml
+    requirements:
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.6-document-no-prior-knowledge
+      - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      - xapi-lrs-4.1.6.6-activity-profile-post-json-merge
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+      - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-http-conformance-agent-activity-fallback
+    method: http-test
+    status: active
+    evidence:
+      - tools/xapi-lrs-conformance
+      - tests/conformance/http/agent-activity-fallback.yaml
+    requirements:
+      - xapi-lrs-4.1.6.3-agents-person-fallback
+      - xapi-lrs-4.1.6.3-person-arrays
+      - xapi-lrs-4.1.6.4-activity-fallback
+      - xapi-lrs-4.1.6.4-activity-complete
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+
+  - id: kiva-property-and-kani
+    method: property-kani
+    status: planned
+    evidence:
+      - tests/conformance/property
+      - verification/kani
+    requirements:
+      - xapi-lrs-4.2-statement-immutability-preserve
+      - xapi-lrs-4.2-statement-immutability-ignore-excluded
+      - xapi-lrs-4.2.4.2-return-serialization
+      - xapi-lrs-4.2.4.2-number-precision
+      - xapi-lrs-4.2.4.2-authority-deterministic
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.2.7-iri-comparison
+
+  - id: kiva-tamarin-protocol-models
+    method: tamarin
+    status: planned
+    evidence:
+      - verification/tamarin
+    requirements:
+      - xapi-lrs-4.1.8-authorization-decisions
+      - xapi-lrs-4.2.4.2-authority-deterministic
+
+  - id: kiva-donation-track
+    method: upstream-contribution
+    status: planned
+    evidence:
+      - docs/architecture/conformance-suite-contribution.md
+    requirements:
+      - xapi-lrs-4.1.1-headers
+      - xapi-lrs-4.1.3-json-statement-batches
+      - xapi-lrs-4.1.3-attachment-sha2-match
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-attachment-headers
+      - xapi-lrs-4.1.3-attachment-header-property-match
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.3-multipart-reject-unmatched
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.4-if-match
+      - xapi-lrs-4.1.4-precondition-failed
+      - xapi-lrs-4.1.4-put-conflict
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unknown-parameters
+      - xapi-lrs-4.1.5-parameter-case
+      - xapi-lrs-4.1.5-batch-rejection
+      - xapi-lrs-4.1.5-unauthorized
+      - xapi-lrs-4.1.5-forbidden
+      - xapi-lrs-4.1.5-too-large
+      - xapi-lrs-4.1.5-rate-limit
+      - xapi-lrs-4.1.6-support-resources
+      - xapi-lrs-4.1.6-document-no-prior-knowledge
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+      - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+      - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+      - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+      - xapi-lrs-4.1.6.1-statement-get-empty-result
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-get-attachments-true
+      - xapi-lrs-4.1.6.1-statement-get-attachments-false
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.6.1-statement-format-exact
+      - xapi-lrs-4.1.6.1-statementref-filtering
+      - xapi-lrs-4.1.6.1-statement-query-filters
+      - xapi-lrs-4.1.6.1-statement-query-related-agents
+      - xapi-lrs-4.1.6.1-statement-query-related-activities
+      - xapi-lrs-4.1.6.1-statement-query-time-order-limit
+      - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+      - xapi-lrs-4.1.6.1-canonical-accept-language
+      - xapi-lrs-4.1.6.1-voided-not-returned
+      - xapi-lrs-4.1.6.1-voided-targeting-returned
+      - xapi-lrs-4.1.6.2-state-post-json-merge
+      - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.2-state-post-merge-success
+      - xapi-lrs-4.1.6.2-state-get-last-modified
+      - xapi-lrs-4.1.6.3-agents-person-fallback
+      - xapi-lrs-4.1.6.3-person-arrays
+      - xapi-lrs-4.1.6.4-activity-fallback
+      - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      - xapi-lrs-4.1.6.6-activity-profile-post-json-merge
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+      - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-2-0-alias
+      - xapi-lrs-4.1.7-version-reject-before-2
+      - xapi-lrs-4.1.7-version-reject-2-1-or-greater
+      - xapi-lrs-4.1.7-version-reject-400
+      - xapi-lrs-4.1.8-authorization-decisions

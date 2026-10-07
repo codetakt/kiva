@@ -1,0 +1,14 @@
+description: Confidential-computation assurance source policy.
+confidential_assurance_source_model:
+  package: spec/confidential/confidential-computation-assurance-package.yaml
+  package_role: claim-boundary-package
+  evidence_registry: spec/confidential/assurance-evidence-registry.yaml
+  evidence_registry_role: typed-source-evidence-index
+  verified_kernel_ledger: spec/verification/confidential-verified-kernels.yaml
+  verified_kernel_ledger_role: verification-boundary-index
+  reference_direction:
+    - assurance-package-to-selected-mechanism-profiles
+    - verified-kernel-ledger-to-assurance-evidence-registry
+    - assurance-evidence-registry-to-source-anchors
+  typed_evidence_owner: assurance-evidence-registry
+  verification_boundary_owner: confidential-verified-kernels

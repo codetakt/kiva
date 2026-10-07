@@ -1,0 +1,152 @@
+schema_version: 1
+kind: kiva-design-ledger-rows-source
+status: active
+description: Normalized LedgerCatalog rows owned by DesignUniverse.
+parent_universe: spec/architecture/design-universe.source.yaml
+fragment:
+  id: design-ledger-rows
+  parent_root_type: DesignUniverse
+  authoritative_rows: true
+ledger_catalog_projection:
+  catalog_model:
+    root_type: LedgerCatalog
+    architecture_graph: spec/architecture/architecture-graph.source.yaml
+    schema_registry: spec/architecture/source-ledger-schemas.yaml
+    design_packages: spec/architecture/design-packages.source.yaml
+    source_registry: generated/architecture/source-registry.yaml
+    source_root: spec/architecture/design-universe.source.yaml
+    generated_projection: true
+    lifecycle_rule: 'canonical-source and normal-form-source rows may be source_of_truth.
+      A generated-source-projection or generated-compatibility-artifact row is schema-checked
+      and drift-checked, but it is never a human-edited source of truth.
+
+      '
+  required_generated_compatibility_artifacts:
+  - spec/architecture/projection-specs.source.yaml
+  - spec/ci/evidence-checks.source.yaml
+  ledgers:
+  - id: analytics-milestones
+    architecture_graph_source_id: analytics_milestones
+    path: spec/analytics/publication-milestones.yaml
+    lifecycle: canonical-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/validate_source_ledger_schemas.py
+    review_surface: docs/architecture/analytics-claim-boundary.md
+  - id: analytics-reporting-templates
+    architecture_graph_source_id: analytics_reporting_templates
+    path: spec/analytics/reporting-templates.yaml
+    lifecycle: canonical-source
+    source_of_truth: true
+    schema: spec/analytics/schemas/reporting-template-catalog.schema.json
+    validates_with: scripts/ci/validate_analytics_reporting_templates.py
+    review_surface: docs/architecture/reference-reporting-deployments.md
+  - id: design-universe
+    architecture_graph_source_id: design_universe
+    path: spec/architecture/design-universe.source.yaml
+    lifecycle: canonical-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/generate_design_universe_projections.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: design-source-nodes
+    architecture_graph_source_id: design_source_nodes
+    path: spec/architecture/design-source-nodes.source.yaml
+    lifecycle: supporting-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/generate_design_universe_projections.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: design-package-rows
+    architecture_graph_source_id: design_package_rows
+    path: spec/architecture/design-package-rows.source.yaml
+    lifecycle: supporting-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/generate_design_universe_projections.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: design-ledger-rows
+    architecture_graph_source_id: design_ledger_rows
+    path: spec/architecture/design-ledger-rows.source.yaml
+    lifecycle: supporting-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/generate_design_universe_projections.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: architecture-core-model
+    architecture_graph_source_id: architecture_core_model
+    path: spec/architecture/core-model.source.yaml
+    lifecycle: canonical-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    validates_with: scripts/ci/validate_architecture_core_model.py
+    review_surface: spec/architecture/core-model.source.yaml
+  - id: design-packages
+    architecture_graph_source_id: design_packages
+    path: spec/architecture/design-packages.source.yaml
+    lifecycle: generated-source-projection
+    source_of_truth: false
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    generated_by: scripts/ci/generate_design_universe_projections.py
+    validates_with: scripts/ci/validate_architecture_core_model.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: ledger-catalog
+    architecture_graph_source_id: ledger_catalog
+    path: spec/architecture/ledger-catalog.source.yaml
+    lifecycle: generated-source-projection
+    source_of_truth: false
+    schema: spec/architecture/schemas/generic-source-ledger.schema.json
+    generated_by: scripts/ci/generate_design_universe_projections.py
+    validates_with: scripts/ci/validate_architecture_core_model.py
+    review_surface: spec/architecture/design-universe.source.yaml
+  - id: architecture-graph
+    architecture_graph_source_id: architecture_graph
+    path: spec/architecture/architecture-graph.source.yaml
+    lifecycle: generated-source-projection
+    source_of_truth: false
+    schema: spec/architecture/schemas/architecture-graph.source.schema.json
+    validates_with: scripts/ci/validate_design_backbone.py
+    review_surface: spec/architecture/design-universe.source.yaml
+    generated_by: scripts/ci/generate_design_universe_projections.py
+  - id: source-ledger-schema-registry
+    architecture_graph_source_id: source_ledger_schemas
+    path: spec/architecture/source-ledger-schemas.yaml
+    lifecycle: canonical-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/source-ledger-schemas.schema.json
+    validates_with: scripts/ci/validate_source_ledger_schemas.py
+    review_surface: generated/architecture/source-registry.yaml
+  - id: projection-runtime-policy
+    architecture_graph_source_id: projection_normal_form_policy
+    path: spec/architecture/projection-normal-form-policy.source.yaml
+    lifecycle: normal-form-source
+    source_of_truth: true
+    schema: spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+    validates_with: scripts/ci/validate_projection_normal_form.py
+    review_surface: spec/ci/projection-graph.yaml
+  - id: projection-spec-compatibility-view
+    architecture_graph_source_id: projection_specs
+    path: spec/architecture/projection-specs.source.yaml
+    lifecycle: generated-compatibility-artifact
+    source_of_truth: false
+    schema: spec/architecture/schemas/projection-specs.source.schema.json
+    generated_by: scripts/ci/generate_projection_auxiliary_ledgers.py
+    validates_with: scripts/ci/validate_projection_normal_form.py
+    review_surface: spec/architecture/projection-normal-form-policy.source.yaml
+  - id: ci-evidence-check-normal-form-policy
+    architecture_graph_source_id: ci_check_normal_form_policy
+    path: spec/ci/evidence-check-normal-form-policy.source.yaml
+    lifecycle: normal-form-source
+    source_of_truth: true
+    schema: spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+    validates_with: scripts/ci/validate_evidence_check_normal_form.py
+    review_surface: spec/ci/evidence-checks.yaml
+  - id: ci-evidence-check-compatibility-view
+    architecture_graph_source_id: ci_check_compatibility_view
+    path: spec/ci/evidence-checks.source.yaml
+    lifecycle: generated-compatibility-artifact
+    source_of_truth: false
+    schema: spec/ci/schemas/evidence-checks.source.schema.json
+    generated_by: scripts/ci/generate_evidence_check_catalog.py
+    validates_with: scripts/ci/validate_evidence_check_normal_form.py
+    review_surface: spec/ci/evidence-checks.yaml

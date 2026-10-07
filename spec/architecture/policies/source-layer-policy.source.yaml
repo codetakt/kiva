@@ -1,0 +1,88 @@
+description: Source-layer classification policy.
+source_layers:
+  contract:
+    description: External HTTP contracts and contract-derived publication projections.
+    canonical_sources: [http_contracts]
+    projections: [generated_schema_artifacts, http_operation_catalog, openapi_dto_boundary]
+    evidence_indexes: []
+    compatibility_ledgers: []
+  operation:
+    description: Application operation, surface model, and resource-family ownership ledgers.
+    canonical_sources:
+      - operation_kernel_source
+      - surface_operation_overlay
+      - surface_projection_review_policy
+      - surface_operation_model
+      - surface_generation_policy
+      - surface_implementation_policy
+      - pds_resource_family_sources
+      - surface_family_sources
+      - pds_core_planes
+      - pds_state_machines
+    projections:
+      - surface_catalog
+      - operation_kernel
+      - operation_bindings
+      - pds_resource_families
+      - pds_plane_packages
+      - surface_families
+      - surface_operation_index
+      - route_coverage
+    evidence_indexes: []
+    compatibility_ledgers: []
+  assurance:
+    description: Claim boundaries, milestone status, and confidential-computation evidence indexes.
+    canonical_sources:
+      - assurance_primitive_source
+      - evidence_review_bundle
+      - implementation_claims
+      - analytics_milestones
+      - analytics_reporting_templates
+      - milestone_status
+      - confidential_mechanism_packages
+    projections:
+      - claim_readiness_matrix
+      - claim_graph
+      - assurance_graph
+      - evidence_set
+      - evidence_receipts
+      - executed_receipt_overlay
+      - confidential_capability_bindings
+      - confidential_capability_policy_evidence
+      - confidential_mechanism_catalog
+      - confidential_mechanism_profile_index
+      - verification_obligations
+      - secret_compute_provider_kind_registry
+    evidence_indexes: [confidential_assurance_model]
+    compatibility_ledgers: []
+  governance:
+    description: Architecture metamodel, projection behavior, executable drift guards, compatibility lifecycle overlays, and CI runtime manifests.
+    canonical_sources:
+      - architecture_core_model
+      - design_universe
+      - design_source_nodes
+      - design_package_rows
+      - design_ledger_rows
+      - architecture_policy
+      - projection_normal_form_policy
+      - ci_check_normal_form_policy
+    lifecycle_overlays:
+      - compatibility-retirement-lifecycle
+    projections:
+      - architecture_graph
+      - compiled_architecture
+      - design_packages
+      - ledger_catalog
+      - projection_auxiliary_ledgers
+      - projection_specs
+      - projection_graph
+      - source_ledger_schemas
+      - source_registry
+      - ci_check_normal_form
+      - ci_check_compatibility_view
+      - compatibility_deletion_readiness
+      - compatibility_retirement_plane
+      - compatibility_exit_gates
+    evidence_indexes: [architecture_guards, ci_check_manifest]
+    compatibility_ledgers:
+      - spec/architecture/compatibility-surfaces.yaml

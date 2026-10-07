@@ -1,0 +1,1386 @@
+schema_version: 1
+kind: kiva-ci-projection-graph
+source_model: generated/architecture/compiled-architecture.yaml#/sources
+classification_source: generated/architecture/compiled-architecture.yaml#/source_layers
+description: Machine-readable projection graph for CI-checked Kiva contract, operation, DTO, claim, and architecture evidence artifacts. This graph is derived from the compiled architecture IR, which owns source classification, generated artifact metadata, and source-to-projection relationships.
+artifact_catalog:
+- path: crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: crates/kiva-application/src/operation_catalog/generated/registry.rs
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: crates/kiva-confidential/src/mechanism/registry.rs
+  owner_source: confidential_mechanism_catalog
+  artifact_class: confidential-mechanism
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: crates/kiva-secret-provider-contract/src/kind_registry.rs
+  owner_source: secret_compute_provider_kind_registry
+  artifact_class: generated-ledger
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: crates/kiva-server/src/core/state/generated_surface_profiles.rs
+  owner_source: surface_catalog
+  artifact_class: generated-ledger
+  retention_class: committed-generated-code
+  committed: true
+  publication_surface: rust
+- path: docs/architecture/generated/application-operation-catalog.md
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/assurance-graph.md
+  owner_source: assurance_graph
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/claim-catalog.md
+  owner_source: implementation_claims
+  artifact_class: claim-catalog
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/claim-graph.md
+  owner_source: claim_graph
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/claim-readiness-matrix.md
+  owner_source: claim_readiness_matrix
+  artifact_class: claim-catalog
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/compatibility-retirement-plane.md
+  owner_source: compatibility_retirement_plane
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/confidential-capability-binding-index.md
+  owner_source: confidential_capability_bindings
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/confidential-capability-policy-evidence.md
+  owner_source: confidential_capability_policy_evidence
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/confidential-mechanism-profile-index.md
+  owner_source: confidential_mechanism_profile_index
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/evidence-receipts.md
+  owner_source: evidence_receipts
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/evidence-set.md
+  owner_source: evidence_set
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/executed-receipt-overlay.md
+  owner_source: executed_receipt_overlay
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/http-operation-catalog.md
+  owner_source: http_operation_catalog
+  artifact_class: generated-catalog
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/operation-kernel.md
+  owner_source: operation_kernel
+  artifact_class: generated-ledger
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/route-coverage.md
+  owner_source: route_coverage
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/source-registry.md
+  owner_source: source_registry
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/surface-operation-index.md
+  owner_source: surface_operation_index
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: docs/architecture/generated/verification-obligations.md
+  owner_source: verification_obligations
+  artifact_class: generated-evidence
+  retention_class: committed-review-doc
+  committed: true
+  publication_surface: documentation
+- path: generated/application-operation-catalog.evidence.json
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/assurance-graph.yaml
+  owner_source: assurance_graph
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/claim-graph.yaml
+  owner_source: claim_graph
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/compatibility-deletion-readiness.yaml
+  owner_source: compatibility_deletion_readiness
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/compatibility-retirement-plane.yaml
+  owner_source: compatibility_retirement_plane
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/compiled-architecture.yaml
+  owner_source: compiled_architecture
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/operation-catalog.yaml
+  owner_source: operation_bindings
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/operation-kernel.yaml
+  owner_source: operation_kernel
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/pds-plane-packages.yaml
+  owner_source: pds_plane_packages
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/pds-resource-families.yaml
+  owner_source: pds_resource_families
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/source-registry.yaml
+  owner_source: source_registry
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/surface-catalog.yaml
+  owner_source: surface_catalog
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/architecture/surface-families.yaml
+  owner_source: surface_families
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/claim-catalog.evidence.json
+  owner_source: implementation_claims
+  artifact_class: claim-catalog
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/claim-readiness-matrix.evidence.json
+  owner_source: claim_readiness_matrix
+  artifact_class: claim-catalog
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/claim-readiness-matrix.yaml
+  owner_source: claim_readiness_matrix
+  artifact_class: claim-catalog
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/confidential/capability-binding-index.yaml
+  owner_source: confidential_capability_bindings
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/confidential/capability-policy-evidence.yaml
+  owner_source: confidential_capability_policy_evidence
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/confidential/mechanism-profile-index.yaml
+  owner_source: confidential_mechanism_profile_index
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/evidence/evidence-receipts.yaml
+  owner_source: evidence_receipts
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/evidence/evidence-set.yaml
+  owner_source: evidence_set
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/evidence/executed-receipt-overlay.yaml
+  owner_source: executed_receipt_overlay
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/http-operation-catalog.evidence.json
+  owner_source: http_operation_catalog
+  artifact_class: generated-catalog
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/openapi-dto-map-projection.yaml
+  owner_source: openapi_dto_boundary
+  artifact_class: dto-boundary
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: evidence
+- path: generated/pds-openapi-schemas/components.schemas.json
+  owner_source: generated_schema_artifacts
+  artifact_class: schema-artifact
+  retention_class: committed-schema-artifact
+  committed: true
+  publication_surface: evidence
+- path: generated/pds-openapi-schemas/index.json
+  owner_source: generated_schema_artifacts
+  artifact_class: schema-artifact
+  retention_class: committed-schema-artifact
+  committed: true
+  publication_surface: evidence
+- path: generated/route-coverage.evidence.json
+  owner_source: route_coverage
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/surface-operation-index.evidence.json
+  owner_source: surface_operation_index
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: generated/verification/verification-obligations.yaml
+  owner_source: verification_obligations
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: evidence
+- path: spec/architecture/boundaries.yaml
+  owner_source: architecture_guards
+  artifact_class: architecture-guard
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/compatibility-surfaces.yaml
+  owner_source: compatibility_exit_gates
+  artifact_class: architecture-guard
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/design-backbone.yaml
+  owner_source: architecture_graph+architecture_guards
+  artifact_class: architecture-guard
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/projection-artifacts.source.yaml
+  owner_source: projection_auxiliary_ledgers
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/projection-check-bindings.source.yaml
+  owner_source: projection_auxiliary_ledgers
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/projection-normal-form-policy.source.yaml
+  owner_source: projection_normal_form_policy
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/projection-runtime.source.yaml
+  owner_source: projection_auxiliary_ledgers
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/architecture/source-ledger-schemas.yaml
+  owner_source: source_ledger_schemas
+  artifact_class: architecture-guard
+  retention_class: committed-schema-artifact
+  committed: true
+  publication_surface: specification
+- path: spec/ci/evidence-check-catalog.source.yaml
+  owner_source: ci_check_normal_form
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/ci/evidence-check-normal-form-policy.source.yaml
+  owner_source: ci_check_normal_form_policy
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/ci/evidence-checks.yaml
+  owner_source: ci_check_manifest
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: specification
+- path: spec/ci/evidence-gate-plan.source.yaml
+  owner_source: ci_check_normal_form
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/ci/projection-graph.yaml
+  owner_source: architecture_graph+projection_graph
+  artifact_class: architecture-guard
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/confidential/confidential-computation-assurance-package.yaml
+  owner_source: confidential_assurance_model
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: specification
+- path: spec/confidential/mechanism-catalog.yaml
+  owner_source: confidential_mechanism_catalog
+  artifact_class: confidential-mechanism
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/confidential/mechanism-maturity.yaml
+  owner_source: confidential_assurance_model
+  artifact_class: generated-evidence
+  retention_class: committed-generated-evidence
+  committed: true
+  publication_surface: specification
+- path: spec/confidential/secret-compute-provider-kind-registry.yaml
+  owner_source: secret_compute_provider_kind_registry
+  artifact_class: generated-ledger
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+- path: spec/openapi/generated-contract-dto-map.yaml
+  owner_source: openapi_dto_boundary
+  artifact_class: dto-boundary
+  retention_class: committed-generated-ledger
+  committed: true
+  publication_surface: specification
+projections:
+- id: surface-catalog-to-application-operation-catalog
+  source_layer: operation
+  projection_kind: generated-registry
+  sources:
+  - generated/architecture/surface-catalog.yaml
+  - scripts/ci/generate_application_operation_catalog.py
+  targets:
+  - crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+  - crates/kiva-application/src/operation_catalog/generated/registry.rs
+  - crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+  - docs/architecture/generated/application-operation-catalog.md
+  - generated/application-operation-catalog.evidence.json
+  - generated/architecture/operation-catalog.yaml
+  target_artifacts:
+  - path: crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+    artifact_class: generated-ledger
+    retention_class: committed-generated-code
+  - path: crates/kiva-application/src/operation_catalog/generated/registry.rs
+    artifact_class: generated-ledger
+    retention_class: committed-generated-code
+  - path: crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+    artifact_class: generated-ledger
+    retention_class: committed-generated-code
+  - path: docs/architecture/generated/application-operation-catalog.md
+    artifact_class: generated-ledger
+    retention_class: committed-review-doc
+  - path: generated/application-operation-catalog.evidence.json
+    artifact_class: generated-ledger
+    retention_class: committed-generated-evidence
+  - path: generated/architecture/operation-catalog.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: surface-catalog-projections
+  - group: openapi-contract
+    check_id: application-operation-catalog
+  - group: openapi-contract
+    check_id: architecture-boundaries
+- id: claim-catalog-to-public-claim-evidence
+  source_layer: assurance
+  projection_kind: generated-evidence
+  sources:
+  - scripts/ci/generate_claim_catalog.py
+  - spec/architecture/claim-catalog.yaml
+  - spec/architecture/claim-maturity.yaml
+  targets:
+  - docs/architecture/generated/claim-catalog.md
+  - generated/claim-catalog.evidence.json
+  target_artifacts:
+  - path: docs/architecture/generated/claim-catalog.md
+    artifact_class: claim-catalog
+    retention_class: committed-review-doc
+  - path: generated/claim-catalog.evidence.json
+    artifact_class: claim-catalog
+    retention_class: committed-generated-evidence
+  validators:
+  - group: openapi-contract
+    check_id: claim-catalog
+- id: claim-catalog-and-ci-graph-to-readiness-matrix
+  source_layer: assurance
+  projection_kind: generated-evidence
+  sources:
+  - scripts/ci/generate_claim_readiness_matrix.py
+  - spec/architecture/claim-catalog.yaml
+  - spec/architecture/claim-maturity.yaml
+  - spec/ci/evidence-checks.yaml
+  - spec/ci/projection-graph.yaml
+  targets:
+  - docs/architecture/generated/claim-readiness-matrix.md
+  - generated/claim-readiness-matrix.evidence.json
+  - generated/claim-readiness-matrix.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/claim-readiness-matrix.md
+    artifact_class: claim-catalog
+    retention_class: committed-review-doc
+  - path: generated/claim-readiness-matrix.evidence.json
+    artifact_class: claim-catalog
+    retention_class: committed-generated-evidence
+  - path: generated/claim-readiness-matrix.yaml
+    artifact_class: claim-catalog
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: claim-readiness-matrix
+- id: generated-claim-evidence-and-verification-to-claim-graph
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - docs/architecture/generated/claim-readiness-matrix.md
+  - generated/claim-readiness-matrix.evidence.json
+  - generated/claim-readiness-matrix.yaml
+  - scripts/ci/generate_claim_graph.py
+  - scripts/ci/kiva_ci/ledger.py
+  - spec/architecture/claim-graph.source.yaml
+  - spec/architecture/schemas/claim-graph.schema.json
+  - spec/architecture/schemas/claim-graph.source.schema.json
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/schemas/capability-binding-index.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - spec/evidence/evidence-receipts.source.yaml
+  - spec/evidence/evidence-set.source.yaml
+  - spec/evidence/executed-receipts.source.yaml
+  - spec/evidence/schemas/evidence-receipts.schema.json
+  - spec/evidence/schemas/evidence-set.schema.json
+  - spec/evidence/schemas/executed-receipt-overlay.schema.json
+  - spec/evidence/schemas/executed-receipts.source.schema.json
+  - spec/verification/schemas/verification-obligations.schema.json
+  - spec/verification/verification-obligations.source.yaml
+  targets:
+  - docs/architecture/generated/claim-graph.md
+  - generated/architecture/claim-graph.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/claim-graph.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/architecture/claim-graph.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: claim-graph
+  - group: openapi-contract
+    check_id: claim-graph-integrity
+- id: claim-graph-to-assurance-graph
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - generated/architecture/claim-graph.yaml
+  - scripts/ci/generate_assurance_graph.py
+  - spec/architecture/claim-graph.source.yaml
+  - spec/architecture/schemas/claim-graph.schema.json
+  - spec/architecture/schemas/claim-graph.source.schema.json
+  - spec/evidence/assurance-primitive.source.yaml
+  targets:
+  - docs/architecture/generated/assurance-graph.md
+  - generated/architecture/assurance-graph.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/assurance-graph.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/architecture/assurance-graph.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: assurance-graph
+- id: evidence-sources-to-unified-evidence-set
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - docs/architecture/generated/claim-readiness-matrix.md
+  - generated/claim-readiness-matrix.evidence.json
+  - generated/claim-readiness-matrix.yaml
+  - scripts/ci/generate_evidence_set.py
+  - scripts/ci/kiva_ci/evidence.py
+  - scripts/ci/kiva_ci/projection_graph.py
+  - spec/ci/evidence-checks.yaml
+  - spec/ci/projection-graph.yaml
+  - spec/evidence/evidence-set.source.yaml
+  - spec/evidence/schemas/evidence-set.schema.json
+  targets:
+  - docs/architecture/generated/evidence-set.md
+  - generated/evidence/evidence-set.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/evidence-set.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/evidence/evidence-set.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: evidence-set
+- id: evidence-set-and-verification-obligations-to-receipt-index
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_evidence_receipts.py
+  - scripts/ci/kiva_ci/ledger.py
+  - spec/evidence/evidence-receipts.source.yaml
+  - spec/evidence/evidence-set.source.yaml
+  - spec/evidence/schemas/evidence-receipts.schema.json
+  - spec/evidence/schemas/evidence-set.schema.json
+  - spec/verification/schemas/verification-obligations.schema.json
+  - spec/verification/verification-obligations.source.yaml
+  targets:
+  - docs/architecture/generated/evidence-receipts.md
+  - generated/evidence/evidence-receipts.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/evidence-receipts.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/evidence/evidence-receipts.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: evidence-receipts
+- id: declared-receipts-and-run-reports-to-executed-receipt-overlay
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_executed_receipt_overlay.py
+  - scripts/ci/kiva_ci/ledger.py
+  - spec/ci/evidence-checks.yaml
+  - spec/evidence/evidence-receipts.source.yaml
+  - spec/evidence/executed-receipts.source.yaml
+  - spec/evidence/schemas/evidence-receipts.schema.json
+  - spec/evidence/schemas/executed-receipt-overlay.schema.json
+  - spec/evidence/schemas/executed-receipts.source.schema.json
+  targets:
+  - docs/architecture/generated/executed-receipt-overlay.md
+  - generated/evidence/executed-receipt-overlay.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/executed-receipt-overlay.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/evidence/executed-receipt-overlay.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: executed-receipt-overlay
+  - group: openapi-contract
+    check_id: executed-receipt-release-policy
+- id: source-ledgers-to-schema-validation-registry
+  source_layer: governance
+  projection_kind: validated-evidence-index
+  sources:
+  - scripts/ci/kiva_ci/ledger.py
+  - scripts/ci/validate_source_ledger_schemas.py
+  - spec/architecture/schemas/claim-graph.source.schema.json
+  - spec/architecture/schemas/generic-source-ledger.schema.json
+  - spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+  - spec/architecture/schemas/projection-specs.source.schema.json
+  - spec/architecture/schemas/source-ledger-schemas.schema.json
+  - spec/architecture/source-ledger-schemas.yaml
+  - spec/ci/schemas/evidence-check-groups.source.schema.json
+  - spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+  - spec/ci/schemas/evidence-checks.source.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - spec/evidence/schemas/evidence-receipts.source.schema.json
+  - spec/evidence/schemas/executed-receipt-overlay.schema.json
+  - spec/evidence/schemas/executed-receipts.source.schema.json
+  - spec/verification/schemas/verification-obligations.source.schema.json
+  targets:
+  - spec/architecture/source-ledger-schemas.yaml
+  target_artifacts:
+  - path: spec/architecture/source-ledger-schemas.yaml
+    artifact_class: architecture-guard
+    retention_class: committed-schema-artifact
+  validators:
+  - group: openapi-contract
+    check_id: source-ledger-schemas
+- id: compiled-architecture-to-source-registry
+  source_layer: governance
+  projection_kind: generated-evidence-index
+  sources:
+  - generated/architecture/compiled-architecture.yaml
+  - scripts/ci/generate_source_registry.py
+  - spec/architecture/ledger-catalog.source.yaml
+  - spec/architecture/schemas/generic-source-ledger.schema.json
+  - spec/architecture/schemas/source-ledger-schemas.schema.json
+  - spec/architecture/source-ledger-schemas.yaml
+  targets:
+  - docs/architecture/generated/source-registry.md
+  - generated/architecture/source-registry.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/source-registry.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/architecture/source-registry.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: source-registry
+- id: projection-spec-to-normalized-auxiliary-ledgers
+  source_layer: governance
+  projection_kind: generated-source-normal-form
+  sources:
+  - scripts/ci/generate_projection_auxiliary_ledgers.py
+  - scripts/ci/kiva_ci/ledger.py
+  - scripts/ci/kiva_ci/projection.py
+  - scripts/ci/run_generators.py
+  - spec/architecture/projection-specs.source.yaml
+  targets:
+  - spec/architecture/projection-artifacts.source.yaml
+  - spec/architecture/projection-check-bindings.source.yaml
+  - spec/architecture/projection-runtime.source.yaml
+  target_artifacts:
+  - path: spec/architecture/projection-artifacts.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  - path: spec/architecture/projection-check-bindings.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  - path: spec/architecture/projection-runtime.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: projection-auxiliary-ledgers
+- id: projection-normal-form-policy-to-drift-enforcement
+  source_layer: governance
+  projection_kind: validated-source-normal-form
+  sources:
+  - scripts/ci/generate_projection_auxiliary_ledgers.py
+  - scripts/ci/kiva_ci/projection.py
+  - scripts/ci/validate_projection_normal_form.py
+  - spec/architecture/projection-artifacts.source.yaml
+  - spec/architecture/projection-check-bindings.source.yaml
+  - spec/architecture/projection-normal-form-policy.source.yaml
+  - spec/architecture/projection-runtime.source.yaml
+  - spec/architecture/projection-specs.source.yaml
+  - spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+  targets:
+  - spec/architecture/projection-normal-form-policy.source.yaml
+  target_artifacts:
+  - path: spec/architecture/projection-normal-form-policy.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: projection-normal-form-policy
+- id: architecture-graph-and-policy-to-compiled-architecture
+  source_layer: governance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_compiled_architecture.py
+  - scripts/ci/kiva_ci/architecture.py
+  - scripts/ci/kiva_ci/architecture_compiler.py
+  - spec/architecture/architecture-graph.source.yaml
+  - spec/architecture/architecture-policy.source.yaml
+  - spec/architecture/policies/architecture-domain-model.source.yaml
+  - spec/architecture/policies/architecture-ir-policy.source.yaml
+  - spec/architecture/policies/artifact-class-policy.source.yaml
+  - spec/architecture/policies/confidential-assurance-source-policy.source.yaml
+  - spec/architecture/policies/control-plane-boundary-policy.source.yaml
+  - spec/architecture/policies/http-adapter-boundary-policy.source.yaml
+  - spec/architecture/policies/operation-kernel-policy.source.yaml
+  - spec/architecture/policies/pds-resource-pattern.source.yaml
+  - spec/architecture/policies/source-layer-policy.source.yaml
+  - spec/architecture/policies/workflow-entrypoint-policy.source.yaml
+  - spec/architecture/projection-specs.source.yaml
+  targets:
+  - generated/architecture/compiled-architecture.yaml
+  target_artifacts:
+  - path: generated/architecture/compiled-architecture.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: compiled-architecture
+- id: surface-catalog-to-pds-resource-families
+  source_layer: operation
+  projection_kind: generated-ledger
+  sources:
+  - generated/architecture/surface-catalog.yaml
+  - scripts/ci/generate_surface_catalog_projections.py
+  - scripts/ci/kiva_ci/ledger.py
+  targets:
+  - generated/architecture/pds-resource-families.yaml
+  target_artifacts:
+  - path: generated/architecture/pds-resource-families.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: surface-catalog-projections
+  - group: openapi-contract
+    check_id: pds-resource-families
+- id: surface-catalog-to-surface-families
+  source_layer: operation
+  projection_kind: generated-ledger
+  sources:
+  - generated/architecture/surface-catalog.yaml
+  - scripts/ci/generate_surface_catalog_projections.py
+  - scripts/ci/validate_surface_families.py
+  targets:
+  - generated/architecture/surface-families.yaml
+  target_artifacts:
+  - path: generated/architecture/surface-families.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: surface-catalog-projections
+  - group: openapi-contract
+    check_id: surface-families
+- id: surface-sources-to-generated-surface-catalog
+  source_layer: operation
+  projection_kind: generated-ledger
+  sources:
+  - scripts/ci/generate_surface_catalog_bundle.py
+  - scripts/ci/generate_surface_catalog_projections.py
+  - spec/architecture/operation-ownership.source.yaml
+  - spec/architecture/pds-resource-families.source.yaml
+  - spec/architecture/surface-families.source.yaml
+  - spec/architecture/surface-generation.policy.yaml
+  - spec/architecture/surface-implementation.policy.yaml
+  - spec/architecture/surface-model.source.yaml
+  - spec/architecture/surface-projections.yaml
+  targets:
+  - crates/kiva-server/src/core/state/generated_surface_profiles.rs
+  - generated/architecture/surface-catalog.yaml
+  target_artifacts:
+  - path: crates/kiva-server/src/core/state/generated_surface_profiles.rs
+    artifact_class: generated-ledger
+    retention_class: committed-generated-code
+  - path: generated/architecture/surface-catalog.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: surface-catalog-bundle
+  - group: openapi-contract
+    check_id: surface-catalog-projections
+  - group: openapi-contract
+    check_id: surface-catalog
+- id: surface-sources-to-operation-kernel-ir
+  source_layer: operation
+  projection_kind: generated-ledger
+  sources:
+  - docs/architecture/generated/http-operation-catalog.md
+  - generated/http-operation-catalog.evidence.json
+  - scripts/ci/generate_operation_kernel.py
+  - scripts/ci/surface_catalog.py
+  - scripts/ci/surface_catalog_model.py
+  - scripts/ci/surface_catalog_projections.py
+  - scripts/ci/surface_operation_ownership.py
+  - spec/architecture/operation-ownership.source.yaml
+  - spec/architecture/pds-resource-families.source.yaml
+  - spec/architecture/schemas/operation-kernel.schema.json
+  - spec/architecture/surface-families.source.yaml
+  - spec/architecture/surface-generation.policy.yaml
+  - spec/architecture/surface-implementation.policy.yaml
+  - spec/architecture/surface-model.source.yaml
+  - spec/architecture/surface-projections.yaml
+  targets:
+  - docs/architecture/generated/operation-kernel.md
+  - generated/architecture/operation-kernel.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/operation-kernel.md
+    artifact_class: generated-ledger
+    retention_class: committed-review-doc
+  - path: generated/architecture/operation-kernel.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: operation-kernel
+  - group: openapi-contract
+    check_id: operation-kernel-authority
+  - group: openapi-contract
+    check_id: analytics-reporting-templates
+- id: openapi-contracts-to-rust-dto-map
+  source_layer: contract
+  projection_kind: validated-dto-map
+  sources:
+  - crates/kiva-confidential-contract/src/lib.rs
+  - crates/kiva-pds-openapi-contract/src/lib.rs
+  - crates/kiva-xapi-openapi-contract/src/lib.rs
+  - scripts/ci/generate_generated_contract_dto_map.py
+  - scripts/ci/generate_openapi_dto_map_projection.py
+  - scripts/ci/kiva_ci/dto_boundary_ledger.py
+  - scripts/ci/kiva_ci/ledger.py
+  - scripts/ci/kiva_ci/openapi_dto_map.py
+  - scripts/ci/validate_openapi_dto_boundary_ledger.py
+  - scripts/ci/validate_openapi_rust_dto_map.py
+  - spec/openapi/dto-boundary-ledger.yaml
+  - spec/openapi/dto-boundary-policy.yaml
+  - spec/openapi/kiva-analytics.yaml
+  - spec/openapi/kiva-confidential.yaml
+  - spec/openapi/kiva-pds.yaml
+  - spec/openapi/kiva-xapi.yaml
+  - spec/openapi/semantic-compatibility-map.yaml
+  - spec/openapi/semantic-compatibility-retirement.yaml
+  targets:
+  - generated/openapi-dto-map-projection.yaml
+  - spec/openapi/generated-contract-dto-map.yaml
+  target_artifacts:
+  - path: generated/openapi-dto-map-projection.yaml
+    artifact_class: dto-boundary
+    retention_class: committed-generated-ledger
+  - path: spec/openapi/generated-contract-dto-map.yaml
+    artifact_class: dto-boundary
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+- id: pds-planes-to-plane-package-index
+  source_layer: operation
+  projection_kind: generated-ledger
+  sources:
+  - generated/architecture/pds-resource-families.yaml
+  - scripts/ci/generate_pds_plane_packages.py
+  - spec/pds/core-planes.source.yaml
+  - spec/pds/invariants.source.yaml
+  - spec/pds/state-machines.source.yaml
+  targets:
+  - generated/architecture/pds-plane-packages.yaml
+  target_artifacts:
+  - path: generated/architecture/pds-plane-packages.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: pds-plane-packages
+- id: design-backbone-to-ci-guard-model
+  source_layer: governance
+  projection_kind: validated-evidence-index
+  sources:
+  - generated/architecture/compiled-architecture.yaml
+  - scripts/ci/generate_compiled_architecture.py
+  - scripts/ci/generate_design_backbone.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - scripts/ci/kiva_ci/ledger.py
+  - scripts/ci/validate_architecture_boundaries.py
+  - scripts/ci/validate_design_backbone.py
+  - spec/architecture/architecture-graph.source.yaml
+  - spec/architecture/boundaries.yaml
+  - spec/architecture/design-backbone.yaml
+  - spec/ci/evidence-checks.yaml
+  - tools/kiva-rust-use-scan/Cargo.toml
+  - tools/kiva-rust-use-scan/src/main.rs
+  targets:
+  - spec/architecture/boundaries.yaml
+  - spec/architecture/design-backbone.yaml
+  target_artifacts:
+  - path: spec/architecture/boundaries.yaml
+    artifact_class: architecture-guard
+    retention_class: committed-generated-ledger
+  - path: spec/architecture/design-backbone.yaml
+    artifact_class: architecture-guard
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: design-backbone
+  - group: openapi-contract
+    check_id: architecture-boundaries
+- id: compatibility-surfaces-to-deletion-readiness-report
+  source_layer: governance
+  projection_kind: generated-evidence
+  sources:
+  - scripts/ci/generate_compatibility_deletion_readiness.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - spec/architecture/compatibility-surfaces.yaml
+  - tools/kiva-rust-use-scan/Cargo.toml
+  - tools/kiva-rust-use-scan/src/main.rs
+  targets:
+  - generated/architecture/compatibility-deletion-readiness.yaml
+  target_artifacts:
+  - path: generated/architecture/compatibility-deletion-readiness.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: compatibility-deletion-readiness
+- id: compatibility-ledgers-to-retirement-plane
+  source_layer: governance
+  projection_kind: generated-evidence
+  sources:
+  - generated/architecture/compatibility-deletion-readiness.yaml
+  - generated/openapi-dto-map-projection.yaml
+  - scripts/ci/generate_compatibility_deletion_readiness.py
+  - scripts/ci/generate_compatibility_retirement_plane.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - spec/architecture/compatibility-surfaces.yaml
+  - spec/architecture/schemas/compatibility-retirement-plane.schema.json
+  - spec/openapi/dto-boundary-ledger.yaml
+  - spec/openapi/generated-contract-dto-map.yaml
+  - spec/openapi/semantic-compatibility-retirement.yaml
+  targets:
+  - docs/architecture/generated/compatibility-retirement-plane.md
+  - generated/architecture/compatibility-retirement-plane.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/compatibility-retirement-plane.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/architecture/compatibility-retirement-plane.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: compatibility-retirement-plane
+- id: compatibility-surfaces-to-explicit-exit-gates
+  source_layer: governance
+  projection_kind: validated-evidence-index
+  sources:
+  - scripts/ci/validate_compatibility_exit_gates.py
+  - spec/architecture/compatibility-surfaces.yaml
+  targets:
+  - spec/architecture/compatibility-surfaces.yaml
+  target_artifacts:
+  - path: spec/architecture/compatibility-surfaces.yaml
+    artifact_class: architecture-guard
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: compatibility-exit-gates
+- id: evidence-check-source-to-ci-manifest
+  source_layer: governance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_evidence_checks.py
+  - scripts/ci/kiva-ci
+  - scripts/ci/kiva_ci/cli.py
+  - scripts/ci/kiva_ci/evidence.py
+  - scripts/ci/kiva_ci/manifest.py
+  - spec/ci/evidence-check-groups.source.yaml
+  - spec/ci/evidence-checks.source.yaml
+  targets:
+  - spec/ci/evidence-checks.yaml
+  target_artifacts:
+  - path: spec/ci/evidence-checks.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: evidence-checks
+- id: ci-check-source-to-catalog-and-gate-plan
+  source_layer: governance
+  projection_kind: generated-source-normal-form
+  sources:
+  - scripts/ci/generate_evidence_check_catalog.py
+  - scripts/ci/kiva_ci/projection.py
+  - spec/ci/evidence-check-groups.source.yaml
+  - spec/ci/evidence-checks.source.yaml
+  - spec/ci/evidence-checks.yaml
+  targets:
+  - spec/ci/evidence-check-catalog.source.yaml
+  - spec/ci/evidence-gate-plan.source.yaml
+  target_artifacts:
+  - path: spec/ci/evidence-check-catalog.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  - path: spec/ci/evidence-gate-plan.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: evidence-check-catalog
+- id: evidence-check-normal-form-policy-to-drift-enforcement
+  source_layer: governance
+  projection_kind: validated-source-normal-form
+  sources:
+  - scripts/ci/generate_evidence_check_catalog.py
+  - scripts/ci/kiva_ci/projection.py
+  - scripts/ci/validate_evidence_check_normal_form.py
+  - spec/ci/evidence-check-catalog.source.yaml
+  - spec/ci/evidence-check-normal-form-policy.source.yaml
+  - spec/ci/evidence-checks.yaml
+  - spec/ci/evidence-gate-plan.source.yaml
+  - spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+  targets:
+  - spec/ci/evidence-check-normal-form-policy.source.yaml
+  target_artifacts:
+  - path: spec/ci/evidence-check-normal-form-policy.source.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: evidence-check-normal-form-policy
+- id: architecture-graph-sources-to-projection-graph
+  source_layer: governance
+  projection_kind: generated-evidence-index
+  sources:
+  - generated/architecture/compiled-architecture.yaml
+  - scripts/ci/generate_projection_graph.py
+  - scripts/ci/validate_projection_graph.py
+  - spec/ci/evidence-checks.yaml
+  targets:
+  - spec/ci/projection-graph.yaml
+  target_artifacts:
+  - path: spec/ci/projection-graph.yaml
+    artifact_class: architecture-guard
+    retention_class: committed-generated-ledger
+  validators:
+  - group: openapi-contract
+    check_id: projection-graph
+- id: confidential-assurance-ledgers-to-release-readiness
+  source_layer: assurance
+  projection_kind: validated-evidence-package
+  sources:
+  - spec/confidential/assurance-evidence-registry.yaml
+  - spec/confidential/confidential-computation-assurance-package.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+  targets:
+  - spec/confidential/confidential-computation-assurance-package.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  target_artifacts:
+  - path: spec/confidential/confidential-computation-assurance-package.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  - path: spec/confidential/mechanism-maturity.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: assurance-evidence-registry
+  - group: confidential-computation-assurance
+    check_id: confidential-computation-assurance-package
+- id: confidential-mechanism-source-to-catalog-and-registry
+  source_layer: assurance
+  projection_kind: generated-ledger
+  sources:
+  - scripts/ci/confidential_mechanism_catalog_model.py
+  - scripts/ci/confidential_mechanism_registry_codegen.py
+  - scripts/ci/generate_confidential_mechanism_catalog.py
+  - spec/confidential/mechanism-catalog.source.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/confidential/secret-compute-provider-contract.yaml
+  targets:
+  - crates/kiva-confidential/src/mechanism/registry.rs
+  - spec/confidential/mechanism-catalog.yaml
+  target_artifacts:
+  - path: crates/kiva-confidential/src/mechanism/registry.rs
+    artifact_class: confidential-mechanism
+    retention_class: committed-generated-code
+  - path: spec/confidential/mechanism-catalog.yaml
+    artifact_class: confidential-mechanism
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: confidential-mechanism-catalog
+  - group: confidential-computation-assurance
+    check_id: mechanism-maturity
+- id: confidential-capability-bindings-to-operation-affinity-index
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_confidential_capability_binding_index.py
+  - scripts/ci/kiva_ci/ledger.py
+  - spec/architecture/schemas/operation-kernel.schema.json
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/schemas/capability-binding-index.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  targets:
+  - docs/architecture/generated/confidential-capability-binding-index.md
+  - generated/confidential/capability-binding-index.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/confidential-capability-binding-index.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/confidential/capability-binding-index.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: confidential-capability-bindings
+  - group: confidential-computation-assurance
+    check_id: confidential-capability-taxonomy
+- id: confidential-mechanism-sources-to-mechanism-profile-index
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - crates/kiva-confidential/src/mechanism/registry.rs
+  - generated/architecture/operation-kernel.yaml
+  - generated/confidential/capability-binding-index.yaml
+  - scripts/ci/generate_confidential_mechanism_profile_index.py
+  - spec/architecture/schemas/operation-kernel.schema.json
+  - spec/confidential/assurance-evidence-registry.yaml
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/confidential-computation-assurance-package.yaml
+  - spec/confidential/mechanism-catalog.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/confidential/mechanism-packages.source.yaml
+  - spec/confidential/schemas/capability-binding-index.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - spec/confidential/schemas/mechanism-profile-index.schema.json
+  - spec/confidential/secret-compute-provider-contract.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+  targets:
+  - docs/architecture/generated/confidential-mechanism-profile-index.md
+  - generated/confidential/mechanism-profile-index.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/confidential-mechanism-profile-index.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/confidential/mechanism-profile-index.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: confidential-mechanism-profile-index
+- id: confidential-mechanism-profile-to-capability-policy-evidence
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - generated/confidential/capability-binding-index.yaml
+  - generated/confidential/mechanism-profile-index.yaml
+  - scripts/ci/generate_confidential_capability_policy_evidence.py
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/schemas/capability-binding-index.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - spec/confidential/schemas/mechanism-profile-index.schema.json
+  targets:
+  - docs/architecture/generated/confidential-capability-policy-evidence.md
+  - generated/confidential/capability-policy-evidence.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/confidential-capability-policy-evidence.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/confidential/capability-policy-evidence.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: confidential-capability-policy-evidence
+- id: verified-kernels-to-tool-neutral-verification-obligations
+  source_layer: assurance
+  projection_kind: generated-evidence-index
+  sources:
+  - scripts/ci/generate_verification_obligations.py
+  - spec/confidential/assurance-evidence-registry.yaml
+  - spec/confidential/confidential-computation-assurance-package.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+  - spec/verification/schemas/verification-obligations.schema.json
+  - spec/verification/verification-obligations.source.yaml
+  targets:
+  - docs/architecture/generated/verification-obligations.md
+  - generated/verification/verification-obligations.yaml
+  target_artifacts:
+  - path: docs/architecture/generated/verification-obligations.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/verification/verification-obligations.yaml
+    artifact_class: generated-evidence
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: verification-obligations
+- id: secret-compute-provider-contract-to-kind-registry
+  source_layer: assurance
+  projection_kind: generated-registry
+  sources:
+  - crates/kiva-secret-provider-contract/src/lib.rs
+  - scripts/ci/generate_secret_compute_provider_kind_registry.py
+  - spec/confidential/secret-compute-provider-contract.yaml
+  targets:
+  - crates/kiva-secret-provider-contract/src/kind_registry.rs
+  - spec/confidential/secret-compute-provider-kind-registry.yaml
+  target_artifacts:
+  - path: crates/kiva-secret-provider-contract/src/kind_registry.rs
+    artifact_class: generated-ledger
+    retention_class: committed-generated-code
+  - path: spec/confidential/secret-compute-provider-kind-registry.yaml
+    artifact_class: generated-ledger
+    retention_class: committed-generated-ledger
+  validators:
+  - group: confidential-computation-assurance
+    check_id: secret-compute-provider-kind-registry
+- id: pds-openapi-to-json-schema-artifacts
+  source_layer: contract
+  projection_kind: generated-schema-artifacts
+  sources:
+  - scripts/ci/export_pds_openapi_schemas.py
+  - spec/openapi/kiva-pds.yaml
+  targets:
+  - generated/pds-openapi-schemas/components.schemas.json
+  - generated/pds-openapi-schemas/index.json
+  target_artifacts:
+  - path: generated/pds-openapi-schemas/components.schemas.json
+    artifact_class: schema-artifact
+    retention_class: committed-schema-artifact
+  - path: generated/pds-openapi-schemas/index.json
+    artifact_class: schema-artifact
+    retention_class: committed-schema-artifact
+  validators:
+  - group: openapi-contract
+    check_id: pds-openapi-schema-artifacts
+- id: openapi-contracts-to-http-operation-catalog
+  source_layer: contract
+  projection_kind: generated-catalog
+  sources:
+  - scripts/ci/generate_http_operation_catalog.py
+  - spec/openapi/kiva-analytics.yaml
+  - spec/openapi/kiva-confidential.yaml
+  - spec/openapi/kiva-pds.yaml
+  - spec/openapi/kiva-xapi.yaml
+  targets:
+  - docs/architecture/generated/http-operation-catalog.md
+  - generated/http-operation-catalog.evidence.json
+  target_artifacts:
+  - path: docs/architecture/generated/http-operation-catalog.md
+    artifact_class: generated-catalog
+    retention_class: committed-review-doc
+  - path: generated/http-operation-catalog.evidence.json
+    artifact_class: generated-catalog
+    retention_class: committed-generated-evidence
+  validators:
+  - group: openapi-contract
+    check_id: http-operation-catalog
+- id: surface-catalog-to-surface-operation-index
+  source_layer: operation
+  projection_kind: generated-evidence
+  sources:
+  - generated/architecture/surface-catalog.yaml
+  - scripts/ci/generate_surface_operation_index.py
+  targets:
+  - docs/architecture/generated/surface-operation-index.md
+  - generated/surface-operation-index.evidence.json
+  target_artifacts:
+  - path: docs/architecture/generated/surface-operation-index.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/surface-operation-index.evidence.json
+    artifact_class: generated-evidence
+    retention_class: committed-generated-evidence
+  validators:
+  - group: openapi-contract
+    check_id: surface-operation-index
+- id: surface-catalog-to-route-coverage
+  source_layer: operation
+  projection_kind: generated-evidence
+  sources:
+  - crates/kiva-server/src/surfaces/confidential/routes.rs
+  - crates/kiva-server/src/surfaces/pds/routes.rs
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+  - generated/architecture/surface-catalog.yaml
+  - scripts/ci/generate_route_coverage.py
+  targets:
+  - docs/architecture/generated/route-coverage.md
+  - generated/route-coverage.evidence.json
+  target_artifacts:
+  - path: docs/architecture/generated/route-coverage.md
+    artifact_class: generated-evidence
+    retention_class: committed-review-doc
+  - path: generated/route-coverage.evidence.json
+    artifact_class: generated-evidence
+    retention_class: committed-generated-evidence
+  validators:
+  - group: openapi-contract
+    check_id: route-coverage

@@ -1,0 +1,862 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/kiva/conformance-case.schema.json",
+  "title": "Portable xAPI LRS conformance case format",
+  "type": "object",
+  "properties": {
+    "suite": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "standard": {
+          "const": "IEEE/ISO/IEC 39274-1-1-2025"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "standard",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/case"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "suite",
+    "cases"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "shape": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        },
+        "format": {
+          "enum": [
+            "uuid",
+            "timestamp",
+            "iri",
+            "uri",
+            "mailto-iri",
+            "sha1"
+          ]
+        },
+        "enum": {
+          "type": "array"
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/shape"
+          }
+        },
+        "additional_properties": {
+          "type": "boolean"
+        },
+        "items": {
+          "$ref": "#/$defs/shape"
+        },
+        "min_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_properties": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_properties": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "any_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/shape"
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "auth_profile": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "follow_more": {
+          "type": "string"
+        },
+        "query": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "body": {},
+        "raw_body": {
+          "type": "string"
+        },
+        "raw_body_hex": {
+          "type": "string",
+          "pattern": "^(?:[0-9A-Fa-f]{2})*$"
+        },
+        "raw_body_crlf_lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "repeat": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        "await_retrieval_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        }
+      },
+      "required": [
+        "method",
+        "path"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "body"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "raw_body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_hex"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_crlf_lines"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "raw_body"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_hex"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_crlf_lines"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "raw_body_hex"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_crlf_lines"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "raw_body_crlf_lines"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_body_hex"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "expect": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "status_in": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          }
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "present": {
+                "type": "boolean"
+              },
+              "equals": {
+                "type": "string"
+              },
+              "contains": {
+                "type": "string"
+              },
+              "rfc3339": {
+                "type": "boolean"
+              },
+              "iso8601": {
+                "type": "boolean"
+              }
+            },
+            "required": [],
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "required": [
+                  "present"
+                ]
+              },
+              {
+                "required": [
+                  "equals"
+                ]
+              },
+              {
+                "required": [
+                  "contains"
+                ]
+              },
+              {
+                "required": [
+                  "rfc3339"
+                ]
+              },
+              {
+                "required": [
+                  "iso8601"
+                ]
+              }
+            ]
+          }
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "non_empty": {
+              "type": "boolean"
+            },
+            "contains": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "json": {
+          "type": "object",
+          "properties": {
+            "pointers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "present": {
+                    "type": "boolean"
+                  },
+                  "equals": {},
+                  "not_equals": {},
+                  "contains": {},
+                  "not_contains": {}
+                },
+                "required": [],
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "present"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "equals"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "not_equals"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "contains"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "not_contains"
+                    ]
+                  }
+                ]
+              },
+              "minProperties": 1
+            }
+          },
+          "required": [
+            "pointers"
+          ],
+          "additionalProperties": false
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "pointer": {
+                "type": "string",
+                "pattern": "^(?:/.*)?$"
+              },
+              "header": {
+                "type": "string"
+              },
+              "as_json": {
+                "type": "boolean"
+              }
+            },
+            "required": [],
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "required": [
+                  "pointer"
+                ]
+              },
+              {
+                "required": [
+                  "header"
+                ]
+              }
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": [
+                    "as_json"
+                  ],
+                  "properties": {
+                    "as_json": {
+                      "const": true
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "pointer"
+                  ],
+                  "not": {
+                    "required": [
+                      "header"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "status_classification": {
+          "enum": [
+            "required",
+            "diagnostic"
+          ],
+          "description": "Classifies only the status leaf; diagnostic actual statuses are recorded outside the conformance verdict."
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "when_previous_status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599,
+          "description": "Run only after the immediately preceding unconditional step returns this allowed status."
+        }
+      },
+      "required": [
+        "id",
+        "request",
+        "expect"
+      ],
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "safety": {
+          "type": "object",
+          "properties": {
+            "destructive": {
+              "type": "boolean"
+            },
+            "requires_isolated_lrs": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "destructive",
+            "requires_isolated_lrs"
+          ],
+          "additionalProperties": false
+        },
+        "requires_endpoint_profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "requirements",
+        "safety"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "request",
+            "expect"
+          ],
+          "not": {
+            "required": [
+              "steps"
+            ]
+          }
+        },
+        {
+          "required": [
+            "steps"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "request"
+                ]
+              },
+              {
+                "required": [
+                  "expect"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "check": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "header-time"
+            },
+            "header": {
+              "type": "string"
+            },
+            "equals_pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "max_pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "optional_if_empty": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "header"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "json-shape"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "shape": {
+              "$ref": "#/$defs/shape"
+            },
+            "status": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            }
+          },
+          "required": [
+            "kind",
+            "shape"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "json-order"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "by": {
+              "type": "string"
+            },
+            "descending": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "pointer",
+            "by"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "json-time"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "equals_capture": {
+              "type": "string"
+            },
+            "equals_pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "expected": {
+              "type": "string"
+            },
+            "utc": {
+              "type": "boolean"
+            },
+            "allow_truncation_or_rounding": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "pointer"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "json-capture-equal"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "capture": {
+              "type": "string"
+            },
+            "not_equal": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "pointer",
+            "capture"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "numeric-precision"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            },
+            "expected": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "pointer",
+            "expected"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "language-maps"
+            },
+            "pointer": {
+              "type": "string",
+              "pattern": "^(?:/.*)?$"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "multipart"
+            },
+            "expected_data": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "expected_data_hex": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?:[0-9a-fA-F]{2})*$"
+              }
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "bytes"
+            },
+            "hex": {
+              "type": "string",
+              "pattern": "^(?:[0-9A-Fa-f]{2})*$"
+            }
+          },
+          "required": [
+            "kind",
+            "hex"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "status-body"
+            },
+            "status": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            },
+            "non_empty": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "status",
+            "non_empty"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

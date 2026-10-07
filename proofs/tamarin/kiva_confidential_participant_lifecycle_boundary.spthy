@@ -1,0 +1,133 @@
+theory Kiva_Confidential_Participant_Lifecycle_Boundary
+begin
+
+rule RegisterParticipant:
+  [ Fr(~participant), Fr(~owner) ]
+  --[
+    ParticipantRegistered(~participant, ~owner),
+    ParticipantTransitioned(~participant, 'invited'),
+    ParticipantAuditEvent(~participant, 'invited')
+  ]->
+  [
+    !ParticipantOwner(~participant, ~owner),
+    ParticipantState(~participant, 'invited')
+  ]
+
+rule ActivateInvitedParticipant:
+  [ ParticipantState(participant, 'invited'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'active'),
+    ParticipantActivated(participant),
+    ParticipantAuditEvent(participant, 'active')
+  ]->
+  [ ParticipantState(participant, 'active') ]
+
+rule SuspendActiveParticipant:
+  [ ParticipantState(participant, 'active'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'suspended'),
+    ParticipantSuspended(participant),
+    ParticipantAuditEvent(participant, 'suspended')
+  ]->
+  [ ParticipantState(participant, 'suspended') ]
+
+rule ReactivateSuspendedParticipant:
+  [ ParticipantState(participant, 'suspended'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'active'),
+    ParticipantActivated(participant),
+    ParticipantAuditEvent(participant, 'active')
+  ]->
+  [ ParticipantState(participant, 'active') ]
+
+rule FreezeActiveParticipant:
+  [ ParticipantState(participant, 'active'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'frozen'),
+    ParticipantFrozen(participant),
+    ParticipantAuditEvent(participant, 'frozen')
+  ]->
+  [ ParticipantState(participant, 'frozen') ]
+
+rule RecoverFrozenParticipant:
+  [ ParticipantState(participant, 'frozen'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'active'),
+    ParticipantActivated(participant),
+    ParticipantAuditEvent(participant, 'active')
+  ]->
+  [ ParticipantState(participant, 'active') ]
+
+rule RemoveInvitedParticipant:
+  [ ParticipantState(participant, 'invited'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'removed'),
+    ParticipantRemoved(participant),
+    ParticipantAuditEvent(participant, 'removed')
+  ]->
+  [ ParticipantState(participant, 'removed') ]
+
+rule RemoveActiveParticipant:
+  [ ParticipantState(participant, 'active'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'removed'),
+    ParticipantRemoved(participant),
+    ParticipantAuditEvent(participant, 'removed')
+  ]->
+  [ ParticipantState(participant, 'removed') ]
+
+rule RemoveSuspendedParticipant:
+  [ ParticipantState(participant, 'suspended'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'removed'),
+    ParticipantRemoved(participant),
+    ParticipantAuditEvent(participant, 'removed')
+  ]->
+  [ ParticipantState(participant, 'removed') ]
+
+rule RemoveFrozenParticipant:
+  [ ParticipantState(participant, 'frozen'), !ParticipantOwner(participant, owner) ]
+  --[
+    ParticipantTransitioned(participant, 'removed'),
+    ParticipantRemoved(participant),
+    ParticipantAuditEvent(participant, 'removed')
+  ]->
+  [ ParticipantState(participant, 'removed') ]
+
+rule RegisterAdditiveSigningKey:
+  [ ParticipantState(participant, 'active'), !ParticipantOwner(participant, owner) ]
+  --[
+    ActiveParticipantAdmitted(participant),
+    AdditiveSigningKeyRegistered(participant)
+  ]->
+  [ !ParticipantHasSigningKey(participant) ]
+
+rule AdmitConfidentialJobParticipant:
+  [ ParticipantState(participant, 'active'), !ParticipantOwner(participant, owner) ]
+  --[
+    ActiveParticipantAdmitted(participant),
+    JobParticipantAdmitted(participant)
+  ]->
+  [ !ParticipantAdmissibleForJob(participant) ]
+
+lemma admitted_participant_was_active:
+  "All participant #admit.
+    ActiveParticipantAdmitted(participant) @ #admit
+    ==> (Ex #active.
+      ParticipantActivated(participant) @ #active
+      & #active < #admit)"
+
+lemma transition_has_audit_event:
+  "All participant status #i.
+    ParticipantTransitioned(participant, status) @ #i
+    ==> ParticipantAuditEvent(participant, status) @ #i"
+
+lemma removed_participant_has_audit_event:
+  "All participant #removed.
+    ParticipantRemoved(participant) @ #removed
+    ==> ParticipantAuditEvent(participant, 'removed') @ #removed"
+
+lemma raw_payload_is_never_published:
+  "not(Ex payload #i. RawPayloadPublished(payload) @ #i)"
+
+end

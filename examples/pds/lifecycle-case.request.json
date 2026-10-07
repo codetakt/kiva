@@ -1,0 +1,9 @@
+{
+  "case_id": "00000000-0000-4000-8000-000000000502",
+  "case_type": "correction",
+  "resource_kind": "xapi-statement",
+  "resource_id": "00000000-0000-4000-8000-000000000601",
+  "status": "open",
+  "retention_policy_id": "00000000-0000-4000-8000-000000000501",
+  "summary": "Learner requested correction review for a statement metadata record."
+}

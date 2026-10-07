@@ -1,0 +1,762 @@
+suite:
+  id: xapi-lrs-statement-voiding-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive Statement voiding checks for disposable isolated LRS targets.
+cases:
+- id: statement-voiding-hides-target-but-returns-voiding-statement
+  requirements:
+  - xapi-lrs-4.1.6.1-voided-not-returned
+  - xapi-lrs-4.1.6.1-voided-targeting-returned
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  - xapi-lrs-4.2.5-voided-state
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-target-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000107
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000107
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-voided-target@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-voiding-target
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: put-voiding-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000108
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000108
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-voiding@example.org
+        verb:
+          id: http://adlnet.gov/expapi/verbs/voided
+          display:
+            en-US: voided
+        object:
+          objectType: StatementRef
+          id: 00000000-0000-4000-8000-000000000107
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: query-target-activity-excludes-voided-target-but-returns-voiding-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        activity: https://example.org/kiva/conformance/activity/statement-voiding-target
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /statements:
+            not_contains:
+              id: 00000000-0000-4000-8000-000000000107
+          /statements/0/id:
+            equals: 00000000-0000-4000-8000-000000000108
+          /statements/0/object/id:
+            equals: 00000000-0000-4000-8000-000000000107
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        max_pointer: /statements
+        optional_if_empty: true
+      - kind: json-order
+        pointer: /statements
+        by: stored
+        descending: true
+  - id: get-voided-target-by-normal-id
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        statementId: 00000000-0000-4000-8000-000000000107
+      await_retrieval_ms: 5000
+    expect:
+      status: 404
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-target-through-voided-statement-id
+    request:
+      method: GET
+      path: /statements
+      query:
+        voidedStatementId: 00000000-0000-4000-8000-000000000107
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000107
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-voiding-target
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+  - id: query-voiding-statement-remains-returnable
+    request:
+      method: GET
+      path: /statements
+      query:
+        agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-voiding@example.org"}'
+        verb: http://adlnet.gov/expapi/verbs/voided
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /statements/0/id:
+            equals: 00000000-0000-4000-8000-000000000108
+          /statements/0/object/id:
+            equals: 00000000-0000-4000-8000-000000000107
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        max_pointer: /statements
+        optional_if_empty: true
+      - kind: json-order
+        pointer: /statements
+        by: stored
+        descending: true
+- id: statement-voiding-missing-target-is-accepted
+  requirements:
+  - xapi-lrs-4.2.4.1-voided-target-missing-not-rejected
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-voiding-statement-with-missing-target
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000109
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000109
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-voiding-missing@example.org
+        verb:
+          id: http://adlnet.gov/expapi/verbs/voided
+          display:
+            en-US: voided
+        object:
+          objectType: StatementRef
+          id: 00000000-0000-4000-8000-000000000110
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-voiding-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000109
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000109
+          /object/id:
+            equals: 00000000-0000-4000-8000-000000000110
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+- id: voiding-statement-cannot-be-voided
+  requirements:
+  - xapi-lrs-4.2.5-voided-state
+  - xapi-lrs-4.1.6.1-voided-not-returned
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: store-a
+    request:
+      method: PUT
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+        Content-Type: application/json
+      query:
+        statementId: 8902dc1f-f682-4399-81d7-23e2811ccd3e
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:projection@example.org
+        verb:
+          id: https://example.org/lrs-conformance/value/verb
+        object:
+          id: https://example.org/lrs-conformance/value/activity
+        id: 8902dc1f-f682-4399-81d7-23e2811ccd3e
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: store-b-voids-a
+    request:
+      method: PUT
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+        Content-Type: application/json
+      query:
+        statementId: a8efcde1-c730-4171-8da0-84bf0c41c532
+      body:
+        actor:
+          mbox: mailto:cannot-void-b@example.org
+        verb:
+          id: http://adlnet.gov/expapi/verbs/voided
+        object:
+          objectType: StatementRef
+          id: 8902dc1f-f682-4399-81d7-23e2811ccd3e
+        id: a8efcde1-c730-4171-8da0-84bf0c41c532
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: attempt-c-voids-b
+    request:
+      method: PUT
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+        Content-Type: application/json
+      query:
+        statementId: bbcd990e-becd-4a39-8561-b48fb148e53b
+      body:
+        actor:
+          mbox: mailto:cannot-void-c@example.org
+        verb:
+          id: http://adlnet.gov/expapi/verbs/voided
+        object:
+          objectType: StatementRef
+          id: a8efcde1-c730-4171-8da0-84bf0c41c532
+        id: bbcd990e-becd-4a39-8561-b48fb148e53b
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 400
+  - id: a-remains-voided
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        statementId: 8902dc1f-f682-4399-81d7-23e2811ccd3e
+      await_retrieval_ms: 5000
+    expect:
+      status: 404
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: read
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        statementId: a8efcde1-c730-4171-8da0-84bf0c41c532
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /id:
+            equals: a8efcde1-c730-4171-8da0-84bf0c41c532
+          /object/id:
+            equals: 8902dc1f-f682-4399-81d7-23e2811ccd3e
+      checks:
+      - kind: json-shape
+        shape:
+          type: object
+          required:
+          - id
+          - actor
+          - verb
+          - object
+          - timestamp
+          - stored
+          - authority
+          - version
+          properties:
+            id:
+              type: string
+              format: uuid
+            actor:
+              any_of:
+              - &id001
+                type: object
+                required:
+                - mbox
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  mbox:
+                    type: string
+              - &id002
+                type: object
+                required:
+                - mbox_sha1sum
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  mbox_sha1sum:
+                    type: string
+              - &id003
+                type: object
+                required:
+                - openid
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  openid:
+                    type: string
+              - &id004
+                type: object
+                required:
+                - account
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  account: &id006
+                    type: object
+                    required:
+                    - homePage
+                    - name
+                    properties:
+                      homePage:
+                        type: string
+                      name:
+                        type: string
+                    additional_properties: false
+              - type: object
+                required:
+                - objectType
+                - mbox
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: &id005
+                    type: array
+                    items:
+                      any_of:
+                      - *id001
+                      - *id002
+                      - *id003
+                      - *id004
+                  mbox:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - mbox_sha1sum
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id005
+                  mbox_sha1sum:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - openid
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id005
+                  openid:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - account
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id005
+                  account: *id006
+              - type: object
+                required:
+                - objectType
+                - member
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id005
+            authority:
+              any_of:
+              - &id007
+                type: object
+                required:
+                - mbox
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  mbox:
+                    type: string
+              - &id008
+                type: object
+                required:
+                - mbox_sha1sum
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  mbox_sha1sum:
+                    type: string
+              - &id009
+                type: object
+                required:
+                - openid
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  openid:
+                    type: string
+              - &id010
+                type: object
+                required:
+                - account
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Agent
+                  name:
+                    type: string
+                  account: &id012
+                    type: object
+                    required:
+                    - homePage
+                    - name
+                    properties:
+                      homePage:
+                        type: string
+                      name:
+                        type: string
+                    additional_properties: false
+              - type: object
+                required:
+                - objectType
+                - mbox
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: &id011
+                    type: array
+                    items:
+                      any_of:
+                      - *id007
+                      - *id008
+                      - *id009
+                      - *id010
+                  mbox:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - mbox_sha1sum
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id011
+                  mbox_sha1sum:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - openid
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id011
+                  openid:
+                    type: string
+              - type: object
+                required:
+                - objectType
+                - account
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id011
+                  account: *id012
+              - type: object
+                required:
+                - objectType
+                - member
+                additional_properties: false
+                properties:
+                  objectType:
+                    enum:
+                    - Group
+                  name:
+                    type: string
+                  member: *id011
+            verb:
+              type: object
+              required:
+              - id
+              properties:
+                id:
+                  type: string
+            object:
+              type: object
+            timestamp:
+              type: string
+              format: timestamp
+            stored:
+              type: string
+              format: timestamp
+            version:
+              type: string
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      - kind: json-time
+        pointer: /stored
+        utc: true
+  - id: b-remains-in-query
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        agent: '{"mbox":"mailto:cannot-void-b@example.org"}'
+        verb: http://adlnet.gov/expapi/verbs/voided
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /statements:
+            contains:
+              id: a8efcde1-c730-4171-8da0-84bf0c41c532
+  - id: read-c-if-accepted
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        statementId: bbcd990e-becd-4a39-8561-b48fb148e53b
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      checks:
+      - kind: json-shape
+        status: 200
+        shape:
+          type: object
+          required:
+          - id
+          - verb
+          - object
+          properties:
+            id:
+              enum:
+              - bbcd990e-becd-4a39-8561-b48fb148e53b
+            verb:
+              type: object
+              required:
+              - id
+              properties:
+                id:
+                  enum:
+                  - http://adlnet.gov/expapi/verbs/voided
+            object:
+              type: object
+              required:
+              - id
+              properties:
+                id:
+                  enum:
+                  - a8efcde1-c730-4171-8da0-84bf0c41c532
+      status_in:
+      - 404

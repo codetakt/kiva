@@ -1,0 +1,175 @@
+suite:
+  id: xapi-lrs-statement-format-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive Statement format checks for disposable isolated LRS targets.
+cases:
+- id: statement-get-format-exact-preserves-language-maps
+  requirements:
+  - xapi-lrs-4.1.6.1-statement-format-exact
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000105
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000105
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-format@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+            ja-JP: experienced-ja
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-format-exact
+          definition:
+            name:
+              en-US: exact format activity
+              ja-JP: exact format activity-ja
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-exact-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000105
+        format: exact
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /verb/display:
+            equals:
+              en-US: experienced
+              ja-JP: experienced-ja
+          /object/definition/name:
+            equals:
+              en-US: exact format activity
+              ja-JP: exact format activity-ja
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+- id: statement-get-format-canonical-selects-accept-language
+  requirements:
+  - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+  - xapi-lrs-4.1.6.1-canonical-accept-language
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000106
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000106
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-format@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+            ja-JP: experienced-ja
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-format-canonical
+          definition:
+            name:
+              en-US: canonical format activity
+              ja-JP: canonical format activity-ja
+        context:
+          contextActivities:
+            category:
+              id: https://example.org/kiva/conformance/category/statement-format-canonical
+              definition:
+                name:
+                  en-US: canonical category
+                  ja-JP: canonical category-ja
+                description:
+                  en-US: canonical category description
+                  ja-JP: canonical category description-ja
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-canonical-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000106
+        format: canonical
+      headers:
+        Accept: application/json
+        Accept-Language: ja-JP, en-US;q=0.1
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000106
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-format-canonical
+          /context/contextActivities/category/0/id:
+            equals: https://example.org/kiva/conformance/category/statement-format-canonical
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      - kind: language-maps

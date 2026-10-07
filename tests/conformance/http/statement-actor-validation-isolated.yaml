@@ -1,0 +1,340 @@
+suite:
+  id: xapi-lrs-statement-actor-validation-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Isolated Statement Actor, Group, IFI, and Account admission checks.
+cases:
+  - id: statement-actor-rejects-invalid-object-type-and-name
+    requirements:
+      - xapi-lrs-4.2.1-statement-type-validation
+      - xapi-lrs-4.2.1-statement-required-null-case
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: 7
+          name: {}
+          mbox: mailto:learner@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-invalid-type
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-missing-ifi
+    requirements:
+      - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          name: Learner
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-missing-ifi
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-multiple-ifis
+    requirements:
+      - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          mbox: mailto:learner@example.org
+          openid: https://example.org/learners/1
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-multiple-ifis
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-identified-group-rejects-multiple-ifis
+    requirements:
+      - xapi-lrs-4.2.2.1-group-identification
+      - xapi-lrs-4.2.4.2-actor-single-ifi
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Group
+          mbox: mailto:group@example.org
+          openid: https://example.org/groups/1
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/group-multiple-ifis
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-invalid-mbox
+    requirements:
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          mbox: learner@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-invalid-mbox
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-invalid-ifi-formats
+    requirements:
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          mbox_sha1sum: not-a-forty-character-hexadecimal-sha1
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-invalid-ifi
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-invalid-openid
+    requirements:
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          openid: relative/openid
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-invalid-openid
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-invalid-account
+    requirements:
+      - xapi-lrs-4.2.2.1-actor-account-shape
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          account:
+            homePage: relative/home
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/actor-invalid-account
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-anonymous-group-without-members
+    requirements:
+      - xapi-lrs-4.2.2.1-group-identification
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Group
+          name: Empty anonymous group
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/anonymous-group-missing-member
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-rejects-group-member-group
+    requirements:
+      - xapi-lrs-4.2.2.1-group-member-agent
+      - xapi-lrs-4.2.4.2-no-group-member-group
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Group
+          member:
+            - objectType: Group
+              openid: https://example.org/groups/nested
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/group-member-group
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-substatement-context-team-must-be-group
+    requirements:
+      - xapi-lrs-4.2.2.1-actor-object-type
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          mbox: mailto:learner@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: SubStatement
+          actor:
+            mbox: mailto:nested@example.org
+          verb:
+            id: https://example.org/verbs/experienced
+          object:
+            objectType: Activity
+            id: https://example.org/activities/nested
+          context:
+            team:
+              objectType: Agent
+              mbox: mailto:not-a-group@example.org
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-actor-accepts-valid-anonymous-group
+    requirements:
+      - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+      - xapi-lrs-4.2.2.1-group-identification
+      - xapi-lrs-4.2.2.1-group-member-agent
+      - xapi-lrs-4.2.2.1-actor-ifi-formats
+      - xapi-lrs-4.2.2.1-actor-account-shape
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Group
+          member:
+            - objectType: Agent
+              mbox: mailto:learner@example.org
+            - account:
+                homePage: https://example.org/accounts
+                name: learner-2
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/activities/valid-anonymous-group
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true

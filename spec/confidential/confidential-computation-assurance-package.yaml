@@ -1,0 +1,562 @@
+---
+schema_version: 1
+kind: confidential-computation-assurance-package
+standard: Kiva Architecture
+status: published
+package_id: kiva-confidential-computation-assurance-cc7-v1
+scope: >
+  External-review package for Kiva's selected confidential computation
+  boundaries. The package bundles implemented mechanisms, machine-readable
+  contracts, deterministic vectors, formal-boundary evidence, operational
+  runbooks, deployment guidance, and claim language without expanding Kiva's
+  IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance surface.
+claim_boundary:
+  external_review_package: true
+  selected_mechanism_engineering_assurance: true
+  deployment_readiness_package: true
+  external_production_assurance_readiness: true
+  secret_compute_provider_contract: true
+  legal_certification: false
+  ieee_xapi_conformance_expansion: false
+  complete_formal_verification: false
+  external_production_security_certification: false
+  production_claim_without_external_review: false
+  reference_primitive_provider_production_claim: false
+  production_mpc: false
+  malicious_secure_psi: false
+  production_oprf_psi_before_external_review: false
+  production_fhe: false
+  production_fhe_runtime_before_external_review: false
+  vendor_tee_quote_verification: false
+  production_nitro_tee_before_external_review: false
+  production_hardware_backed_tee_before_external_review: false
+  production_threshold_cryptography_before_external_review: false
+  malicious_robust_threshold_cryptography_before_external_review: false
+  malicious_dealer_vss: false
+  broad_bi_privacy_certification: false
+validation_policy:
+  required_claim_true:
+    - external_review_package
+    - selected_mechanism_engineering_assurance
+    - deployment_readiness_package
+    - external_production_assurance_readiness
+    - secret_compute_provider_contract
+  required_claim_false:
+    - legal_certification
+    - ieee_xapi_conformance_expansion
+    - complete_formal_verification
+    - external_production_security_certification
+    - production_claim_without_external_review
+    - reference_primitive_provider_production_claim
+    - production_mpc
+    - malicious_secure_psi
+    - production_oprf_psi_before_external_review
+    - production_fhe
+    - production_fhe_runtime_before_external_review
+    - vendor_tee_quote_verification
+    - production_nitro_tee_before_external_review
+    - production_hardware_backed_tee_before_external_review
+    - production_threshold_cryptography_before_external_review
+    - malicious_robust_threshold_cryptography_before_external_review
+    - malicious_dealer_vss
+    - broad_bi_privacy_certification
+  expected_mechanism_statuses:
+    additive-secure-aggregation: implemented-http-persistence-boundary
+    differential-privacy-release: implemented-http-persistence-boundary
+    shamir-vss-admission: implemented-http-persistence-boundary
+    threshold-frost-signing: review-gated-threshold-signing-boundary
+    psi-cohort-hash-token: bounded-job-contract-boundary
+    psi-oprf-dh-voprf: review-gated-psi-runtime-boundary
+    tee-portable-attestation: portable-evidence-gate-boundary
+    tee-aws-nitro-attestation: review-gated-nitro-verifier-boundary
+    fhe-sum-feasibility: deterministic-feasibility-boundary
+    fhe-sum-runtime: review-gated-fhe-runtime-boundary
+  required_operator_coverage:
+    - key_lifecycle
+    - participant_lifecycle
+    - incident_handling
+    - emergency_access
+    - audit_export
+    - retirement
+  operator_runbook_headings:
+    key_lifecycle: "## Key Lifecycle"
+    participant_lifecycle: "## Participant Lifecycle"
+    incident_handling: "## Incident Handling"
+    emergency_access: "## Emergency Access"
+    audit_export: "## Audit Export"
+    retirement: "## Retirement"
+  required_nix_checks:
+    - checks.x86_64-linux.fmt
+    - checks.x86_64-linux.clippy
+    - checks.x86_64-linux.tests
+    - checks.x86_64-linux.database-migrations
+    - checks.x86_64-linux.openapi-contract
+    - checks.x86_64-linux.confidential-computation-assurance
+    - checks.x86_64-linux.pds-publication-readiness
+    - checks.x86_64-linux.postgres-verification
+    - checks.x86_64-linux.fstar-boundary
+    - checks.x86_64-linux.kani-boundary
+    - checks.x86_64-linux.tamarin-boundary
+  required_evidence_bundles:
+    - conformance-evidence-static
+    - formal-verification-evidence-smoke
+    - pds-evidence-static
+  required_validators:
+    - scripts/ci/validate_assurance_evidence_registry.py
+    - scripts/ci/validate_confidential_computation_assurance_package.py
+    - scripts/ci/validate_confidential_verified_kernels.py
+    - scripts/ci/validate_confidential_job_lifecycle_assurance.py
+    - scripts/ci/validate_confidential_key_participant_lifecycle_assurance.py
+    - scripts/ci/validate_differential_privacy_assurance.py
+    - scripts/ci/validate_external_production_assurance_readiness.py
+    - scripts/ci/validate_fhe_feasibility_assurance.py
+    - scripts/ci/validate_fhe_runtime_assurance.py
+    - scripts/ci/validate_production_psi_upgrade_assurance.py
+    - scripts/ci/validate_psi_cohort_assurance.py
+    - scripts/ci/validate_secret_compute_provider_contract.py
+    - scripts/ci/validate_shamir_vss_assurance.py
+    - scripts/ci/validate_tee_attestation_assurance.py
+    - scripts/ci/validate_tee_nitro_attestation_assurance.py
+    - scripts/ci/validate_threshold_frost_assurance.py
+assurance_source_model_ref: spec/architecture/design-backbone.yaml#/confidential_assurance_source_model
+selected_mechanisms:
+  - id: additive-secure-aggregation
+    milestone: CC1
+    claim_status: implemented-http-persistence-boundary
+    profile: kiva-additive-n-of-n-field-v1
+    claim_summary: >
+      Structural n-of-n additive aggregation over Kiva's fixed field with
+      signed share transport, replay persistence, metadata-only audit, and
+      two-authority governance release for already-computed aggregates.
+    non_claims:
+      - production MPC
+      - malicious participant robustness
+      - collusion resistance beyond the n-of-n workflow assumption
+    evidence:
+      rust_core: crates/kiva-confidential/src/lib.rs
+      server: crates/kiva-server/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      design_note: docs/architecture/additive-secure-aggregate-mechanism.md
+      threat_model: docs/architecture/confidential-aggregate-threat-model.md
+      vectors: spec/confidential/additive-secure-aggregate-vectors.yaml
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_transport: proofs/tamarin/kiva_additive_share_transport_boundary.spthy
+      tamarin_collusion: proofs/tamarin/kiva_additive_collusion_boundary.spthy
+      migration_replay: db/migrations/20260619090000_confidential_additive_share_replay_records.sql
+      migration_signing_keys: db/migrations/20260619100000_confidential_additive_share_signing_keys.sql
+      migration_submissions: db/migrations/20260619110000_confidential_additive_share_submissions.sql
+      migration_threshold_release: db/migrations/20260619120000_confidential_threshold_releases.sql
+      migration_aggregate_results: db/migrations/20260619130000_confidential_additive_aggregate_results.sql
+  - id: differential-privacy-release
+    milestone: CC2
+    claim_status: implemented-http-persistence-boundary
+    profile: kiva-discrete-laplace-add-remove-v1
+    assurance_profile: spec/confidential/differential-privacy-assurance.yaml
+    claim_summary: >
+      Bounded differential privacy release profile for persisted aggregate
+      results with subject-owned budget accounting, server-side sampled integer
+      noise, metadata-only release audit, lifecycle rules, and deterministic
+      sampler evidence.
+    non_claims:
+      - legal privacy certification
+      - proof of every possible analytical query
+      - cross-system privacy accounting
+    evidence:
+      validator: scripts/ci/validate_differential_privacy_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      rust_budget: crates/kiva-confidential/src/mechanism/differential_privacy/budget.rs
+      rust_errors: crates/kiva-confidential/src/mechanism/differential_privacy/errors.rs
+      rust_noise: crates/kiva-confidential/src/mechanism/differential_privacy/noise.rs
+      rust_policy: crates/kiva-confidential/src/mechanism/differential_privacy/policy.rs
+      rust_release: crates/kiva-confidential/src/mechanism/differential_privacy/release.rs
+      server: crates/kiva-server/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      design_note: docs/architecture/differential-privacy-assurance.md
+      tamarin_model: proofs/tamarin/kiva_differential_privacy_budget_boundary.spthy
+      fstar_budget: fstar/Kiva.Confidential.PrivacyBudget.fst
+      fstar_noise: fstar/Kiva.Confidential.PrivacyNoise.fst
+      fstar_gate: fstar/Kiva.Confidential.PrivacyGate.fst
+      migration_budgets: db/migrations/20260619140000_confidential_differential_privacy_budgets.sql
+      migration_releases: db/migrations/20260619150000_confidential_differential_privacy_releases.sql
+  - id: shamir-vss-admission
+    milestone: CC3
+    claim_status: implemented-http-persistence-boundary
+    profile: kiva-shamir-hash-vss-v1
+    assurance_profile: spec/confidential/shamir-vss-assurance.yaml
+    claim_summary: >
+      Hash-committed Shamir share-opening admission and threshold
+      reconstruction metadata over Kiva's fixed field, with complaint outcomes
+      and metadata-only PDS data-product integration.
+    non_claims:
+      - distributed key generation
+      - proactive share refresh
+      - malicious-dealer robust VSS proof
+      - threshold signatures or threshold decryption
+    evidence:
+      validator: scripts/ci/validate_shamir_vss_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      server: crates/kiva-server/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      vectors: spec/confidential/shamir-threshold-vectors.yaml
+      design_note: docs/architecture/shamir-threshold-cryptography.md
+      operator_runbook: docs/operations/shamir-vss-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_shamir_threshold_boundary.spthy
+      fstar_gate: fstar/Kiva.Confidential.ShamirGate.fst
+      migration_reconstructions: db/migrations/20260619210000_confidential_shamir_threshold_reconstructions.sql
+      migration_pds_products: db/migrations/20260619220000_pds_shamir_reconstruction_data_products.sql
+      migration_vss_metadata: db/migrations/20260619240000_confidential_shamir_vss_metadata.sql
+  - id: psi-cohort-hash-token
+    milestone: CC4
+    claim_status: bounded-job-contract-boundary
+    profile: kiva-psi-cohort-hash-v1
+    assurance_profile: spec/confidential/psi-cohort-assurance.yaml
+    job_contract: spec/confidential/psi-cohort-job-contract.yaml
+    claim_summary: >
+      Bounded cross-school cohort matching over pre-tokenized identifier
+      digests, releasing only n-of-n intersection digests under an explicit
+      leakage profile. Dedicated PDS source-kind publication is explicitly
+      outside the current boundary.
+    non_claims:
+      - malicious-secure PSI
+      - OPRF PSI
+      - Diffie-Hellman PSI
+      - broad record-linkage service
+    evidence:
+      validator: scripts/ci/validate_psi_cohort_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      policy: crates/kiva-policy/src/lib.rs
+      vectors: spec/confidential/psi-cohort-vectors.yaml
+      design_note: docs/architecture/private-set-intersection.md
+      operator_runbook: docs/operations/psi-cohort-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_psi_cohort_boundary.spthy
+  - id: psi-oprf-dh-voprf
+    milestone: CC11
+    claim_status: review-gated-psi-runtime-boundary
+    profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+    assurance_profile: spec/confidential/production-psi-upgrade-assurance.yaml
+    job_contract: spec/confidential/psi-oprf-dh-voprf-job-contract.yaml
+    claim_summary: >
+      Review-gated DH-OPRF PSI runtime boundary for opaque evaluated element
+      admission, n-of-n participant handling, abort/replay rejection,
+      metadata-only result shaping, governed release-gate evidence, vectors,
+      benchmark and interop plans. A dedicated PDS source kind, PSI HTTP API,
+      and PSI PostgreSQL transcript/result store are not implemented.
+    non_claims:
+      - production OPRF PSI before external review
+      - malicious-secure PSI
+      - raw identifier processing inside Kiva
+      - dedicated PSI PDS data-product source kind
+    evidence:
+      validator: scripts/ci/validate_production_psi_upgrade_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      vectors: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+      benchmarks: spec/confidential/psi-oprf-dh-voprf-benchmarks.yaml
+      interop: spec/confidential/psi-oprf-dh-voprf-interop.yaml
+      design_note: docs/architecture/production-psi-upgrade.md
+      operator_runbook: docs/operations/psi-oprf-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_psi_oprf_boundary.spthy
+  - id: tee-portable-attestation
+    milestone: CC5
+    claim_status: portable-evidence-gate-boundary
+    profile: kiva-tee-portable-attestation-v1
+    assurance_profile: spec/confidential/tee-attestation-assurance.yaml
+    job_contract: spec/confidential/tee-attestation-job-contract.yaml
+    claim_summary: >
+      Portable deployment-bound TEE evidence gate for policy-approved secret
+      provisioning and result release after a deployment-specific verifier maps
+      vendor evidence into Kiva's boundary fields.
+    non_claims:
+      - Nitro quote verification
+      - SGX quote verification
+      - SEV-SNP quote verification
+      - side-channel resistance proof
+      - cloud-operator isolation proof
+    evidence:
+      validator: scripts/ci/validate_tee_attestation_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      vectors: spec/confidential/tee-attestation-vectors.yaml
+      design_note: docs/architecture/tee-attestation-boundary.md
+      operator_runbook: docs/operations/tee-attestation-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_tee_attestation_boundary.spthy
+  - id: tee-aws-nitro-attestation
+    milestone: CC12
+    claim_status: review-gated-nitro-verifier-boundary
+    profile: kiva-tee-aws-nitro-review-gated-v1
+    assurance_profile: spec/confidential/tee-nitro-attestation-assurance.yaml
+    job_contract: spec/confidential/tee-nitro-attestation-job-contract.yaml
+    claim_summary: >
+      Review-gated AWS Nitro Enclaves attestation verifier-adapter boundary
+      for policy-approved key release and result release after normalized
+      claims satisfy PCR policy, image provenance, nonce, freshness,
+      rollback/replay, verifier provenance, key-epoch, and external-review
+      gates.
+    non_claims:
+      - production hardware-backed confidential execution before external review
+      - in-process raw Nitro COSE/CBOR parsing
+      - cloud-operator isolation proof
+      - side-channel resistance proof
+      - enclave runtime correctness proof
+    evidence:
+      validator: scripts/ci/validate_tee_nitro_attestation_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      vectors: spec/confidential/tee-nitro-attestation-vectors.yaml
+      design_note: docs/architecture/tee-nitro-attestation-integration.md
+      operator_runbook: docs/operations/tee-nitro-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_tee_nitro_boundary.spthy
+  - id: threshold-frost-signing
+    milestone: CC13
+    claim_status: review-gated-threshold-signing-boundary
+    profile: kiva-threshold-frost-ed25519-review-gated-v1
+    assurance_profile: spec/confidential/threshold-frost-assurance.yaml
+    job_contract: spec/confidential/threshold-frost-job-contract.yaml
+    claim_summary: >
+      Review-gated FROST threshold-signing runtime boundary for metadata-only
+      key-ceremony and signing transcript admission, share-custody evidence,
+      complaint/equivocation rejection, replay prevention, active key epochs,
+      governed key use, policy approval, and external cryptographic review.
+    non_claims:
+      - in-process FROST implementation
+      - distributed key generation cryptographic proof
+      - proactive refresh cryptographic proof
+      - production threshold cryptography before external review
+      - malicious participant robustness before external review
+    evidence:
+      validator: scripts/ci/validate_threshold_frost_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      vectors: spec/confidential/threshold-frost-vectors.yaml
+      design_note: docs/architecture/threshold-frost-signing.md
+      operator_runbook: docs/operations/threshold-frost-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_threshold_frost_boundary.spthy
+  - id: fhe-sum-feasibility
+    milestone: CC6
+    claim_status: deterministic-feasibility-boundary
+    profile: kiva-fhe-sum-bfv-feasibility-v1
+    assurance_profile: spec/confidential/fhe-sum-feasibility-assurance.yaml
+    job_contract: spec/confidential/fhe-sum-feasibility-job-contract.yaml
+    claim_summary: >
+      Deterministic BFV-style small-sum feasibility fixture for strict
+      parameter admission, non-wrapping evaluation, benchmark planning, and
+      governed release checks.
+    non_claims:
+      - production FHE encryption
+      - FHE key management
+      - ciphertext persistence or wire-format stability
+      - cryptographic confidentiality
+    evidence:
+      validator: scripts/ci/validate_fhe_feasibility_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      vectors: spec/confidential/fhe-sum-feasibility-vectors.yaml
+      benchmarks: spec/confidential/fhe-sum-feasibility-benchmarks.yaml
+      design_note: docs/architecture/fhe-feasibility-boundary.md
+      operator_runbook: docs/operations/fhe-feasibility-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_fhe_feasibility_boundary.spthy
+  - id: fhe-sum-runtime
+    milestone: CC14
+    claim_status: review-gated-fhe-runtime-boundary
+    profile: kiva-fhe-sum-runtime-review-gated-v1
+    assurance_profile: spec/confidential/fhe-runtime-assurance.yaml
+    job_contract: spec/confidential/fhe-runtime-job-contract.yaml
+    claim_summary: >
+      Review-gated FHE sum runtime boundary for metadata-only ciphertext
+      transcript admission, runtime artifact and parameter-set binding,
+      key-custody evidence, evaluation proof digest binding, replay
+      prevention, active key epochs, governed release treatment, policy
+      approval, and external cryptographic review. Dedicated FHE PDS
+      source-kind publication is explicitly outside the current boundary.
+    non_claims:
+      - in-process FHE implementation
+      - FHE key management by Kiva
+      - ciphertext wire-format standardization
+      - dedicated FHE PDS data-product source kind
+      - production FHE before external review
+      - malicious participant robustness before external review
+    evidence:
+      validator: scripts/ci/validate_fhe_runtime_assurance.py
+      rust_core: crates/kiva-confidential/src/lib.rs
+      openapi: spec/openapi/kiva-confidential.yaml
+      vectors: spec/confidential/fhe-runtime-vectors.yaml
+      design_note: docs/architecture/fhe-runtime-integration.md
+      operator_runbook: docs/operations/fhe-runtime-runbook.md
+      kani_runner: scripts/ci/run_kani_verification.sh
+      tamarin_model: proofs/tamarin/kiva_fhe_runtime_boundary.spthy
+openapi_and_persistence:
+  confidential_openapi: spec/openapi/kiva-confidential.yaml
+  pds_openapi: spec/openapi/kiva-pds.yaml
+  xapi_openapi: spec/openapi/kiva-xapi.yaml
+  pds_generated_schema_index: generated/pds-openapi-schemas/index.json
+  pds_examples_index: examples/pds/index.yaml
+  database_schema: db/schema.sql
+  atlas_sum: db/migrations/atlas.sum
+verification_ci:
+  workflows:
+    - .github/workflows/ci.yml
+    - .github/workflows/conformance.yml
+    - .github/workflows/verification.yml
+    - .github/workflows/release-evidence.yml
+  nix_checks:
+    - checks.x86_64-linux.fmt
+    - checks.x86_64-linux.clippy
+    - checks.x86_64-linux.tests
+    - checks.x86_64-linux.database-migrations
+    - checks.x86_64-linux.openapi-contract
+    - checks.x86_64-linux.confidential-computation-assurance
+    - checks.x86_64-linux.pds-publication-readiness
+    - checks.x86_64-linux.postgres-verification
+    - checks.x86_64-linux.fstar-boundary
+    - checks.x86_64-linux.kani-boundary
+    - checks.x86_64-linux.tamarin-boundary
+  validators:
+    - scripts/ci/validate_assurance_evidence_registry.py
+    - scripts/ci/validate_confidential_computation_assurance_package.py
+    - scripts/ci/validate_confidential_verified_kernels.py
+    - scripts/ci/validate_practical_deployment_selection.py
+    - scripts/ci/validate_confidential_openapi.py
+    - scripts/ci/validate_pds_openapi.py
+    - scripts/ci/validate_differential_privacy_assurance.py
+    - scripts/ci/validate_shamir_vss_assurance.py
+    - scripts/ci/validate_psi_cohort_assurance.py
+    - scripts/ci/validate_tee_attestation_assurance.py
+    - scripts/ci/validate_tee_nitro_attestation_assurance.py
+    - scripts/ci/validate_fhe_feasibility_assurance.py
+    - scripts/ci/validate_confidential_job_lifecycle_assurance.py
+    - scripts/ci/validate_confidential_key_participant_lifecycle_assurance.py
+    - scripts/ci/validate_production_psi_upgrade_assurance.py
+    - scripts/ci/validate_threshold_frost_assurance.py
+    - scripts/ci/validate_fhe_runtime_assurance.py
+    - scripts/ci/validate_external_production_assurance_readiness.py
+    - scripts/ci/validate_secret_compute_provider_contract.py
+  evidence_bundles:
+    - conformance-evidence-static
+    - formal-verification-evidence-smoke
+    - pds-evidence-static
+operator_readiness:
+  runbook: docs/operations/confidential-computation-assurance-runbook.md
+  coverage:
+    key_lifecycle: true
+    participant_lifecycle: true
+    incident_handling: true
+    emergency_access: true
+    audit_export: true
+    retirement: true
+deployment_templates:
+  catalog: spec/pds/deployment-templates.yaml
+  schema: spec/pds/schemas/pds-deployment-template-catalog.schema.json
+  required_mechanism_field: confidential_mechanisms
+practical_deployment_selection:
+  milestone: CC8
+  profile: spec/confidential/practical-deployment-workload-selection.yaml
+  selected_template: multi-agency-research-aggregate-v1
+  validator: scripts/ci/validate_practical_deployment_selection.py
+production_job_lifecycle:
+  milestone: CC9
+  profile: spec/confidential/confidential-job-lifecycle-assurance.yaml
+  validator: scripts/ci/validate_confidential_job_lifecycle_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  migration: db/migrations/20260619250000_confidential_job_lifecycle.sql
+production_key_participant_lifecycle:
+  milestone: CC10
+  profile: spec/confidential/confidential-key-participant-lifecycle-assurance.yaml
+  validator: scripts/ci/validate_confidential_key_participant_lifecycle_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  migration: db/migrations/20260619260000_confidential_participant_lifecycle.sql
+production_psi_upgrade:
+  milestone: CC11
+  profile: spec/confidential/production-psi-upgrade-assurance.yaml
+  job_contract: spec/confidential/psi-oprf-dh-voprf-job-contract.yaml
+  vectors: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+  benchmarks: spec/confidential/psi-oprf-dh-voprf-benchmarks.yaml
+  interop: spec/confidential/psi-oprf-dh-voprf-interop.yaml
+  validator: scripts/ci/validate_production_psi_upgrade_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  tamarin_model: proofs/tamarin/kiva_psi_oprf_boundary.spthy
+production_tee_attestation:
+  milestone: CC12
+  profile: spec/confidential/tee-nitro-attestation-assurance.yaml
+  job_contract: spec/confidential/tee-nitro-attestation-job-contract.yaml
+  vectors: spec/confidential/tee-nitro-attestation-vectors.yaml
+  validator: scripts/ci/validate_tee_nitro_attestation_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  tamarin_model: proofs/tamarin/kiva_tee_nitro_boundary.spthy
+production_threshold_cryptography:
+  milestone: CC13
+  profile: spec/confidential/threshold-frost-assurance.yaml
+  job_contract: spec/confidential/threshold-frost-job-contract.yaml
+  vectors: spec/confidential/threshold-frost-vectors.yaml
+  validator: scripts/ci/validate_threshold_frost_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  tamarin_model: proofs/tamarin/kiva_threshold_frost_boundary.spthy
+production_fhe_integration:
+  milestone: CC14
+  profile: spec/confidential/fhe-runtime-assurance.yaml
+  job_contract: spec/confidential/fhe-runtime-job-contract.yaml
+  vectors: spec/confidential/fhe-runtime-vectors.yaml
+  validator: scripts/ci/validate_fhe_runtime_assurance.py
+  openapi: spec/openapi/kiva-confidential.yaml
+  tamarin_model: proofs/tamarin/kiva_fhe_runtime_boundary.spthy
+external_production_assurance:
+  milestone: CC15
+  profile: spec/confidential/external-production-assurance-readiness.yaml
+  validator: scripts/ci/validate_external_production_assurance_readiness.py
+  release_evidence_validator: scripts/ci/validate_release_evidence_set.py
+  architecture_note: docs/architecture/external-production-assurance-readiness.md
+  operator_runbook: docs/operations/external-production-assurance-runbook.md
+  release_workflow: .github/workflows/release-evidence.yml
+  deployment_profile: spec/confidential/practical-deployment-workload-selection.yaml
+  selected_template: multi-agency-research-aggregate-v1
+  production_claim_allowed_before_external_review: false
+secret_compute_provider_contract:
+  milestone: CC16
+  profile: spec/confidential/secret-compute-provider-contract.yaml
+  validator: scripts/ci/validate_secret_compute_provider_contract.py
+  architecture_note: docs/architecture/secret-compute-provider-integration.md
+  contract_vocabulary: crates/kiva-secret-provider-contract/src/lib.rs
+  rust_core: crates/kiva-confidential/src/lib.rs
+  reference_provider_profile: kiva-reference-primitives-v1
+  production_claim_allowed_for_reference_provider: false
+traceability:
+  compliance_matrix: spec/compliance-matrix.yaml
+  milestone_ledger: docs/architecture/confidential-computation-milestones.md
+  architecture_note: docs/architecture/confidential-computation-assurance-package.md
+  required_requirement_ids:
+    - confidential-computation-assurance-package-001
+    - confidential-practical-deployment-selection-001
+    - confidential-job-lifecycle-001
+    - confidential-key-participant-lifecycle-001
+    - confidential-production-psi-upgrade-001
+    - confidential-vendor-tee-attestation-integration-001
+    - confidential-strong-threshold-cryptography-001
+    - confidential-production-fhe-integration-001
+    - confidential-external-production-assurance-readiness-001
+    - confidential-secret-compute-provider-contract-001
+public_claim_language:
+  allowed_claims:
+    - Kiva packages selected implemented confidential computation boundaries for external engineering review.
+    - Kiva CI validates OpenAPI, persistence, Rust tests, Kani, Tamarin, F*, and evidence-bundle contracts for the selected boundary set.
+    - Kiva separates confidential computation assurance from IEEE xAPI LRS conformance and legal certification.
+    - Kiva defines a CC15 release-candidate assurance gate for the exact multi-agency deployment profile and selected mechanism set.
+    - Kiva defines a secret/confidential-compute provider contract and a fixed reference primitive provider for tests and verification.
+  prohibited_claims:
+    - Kiva is certified as IEEE xAPI by this package.
+    - Kiva has completed external production security review by this package.
+    - Kiva may make a production confidential-computation claim before external review is bound to the release candidate.
+    - Kiva may use the reference primitive provider as production cryptographic security evidence.
+    - Kiva provides production MPC.
+    - Kiva provides malicious-secure PSI.
+    - Kiva provides production OPRF PSI before external cryptographic review is complete.
+    - Kiva provides production FHE.
+    - Kiva provides production FHE runtime integration before external cryptographic review is complete.
+    - Kiva verifies vendor TEE quotes.
+    - Kiva provides production hardware-backed Nitro confidential execution before external security review is complete.
+    - Kiva provides production threshold cryptography before external cryptographic review is complete.
+    - Kiva provides malicious-robust threshold cryptography before external cryptographic review is complete.
+    - Kiva is fully formally verified.

@@ -1,0 +1,8 @@
+{
+  "grant_id": "00000000-0000-4000-8000-000000000101",
+  "grantee_subject": "district-analyst",
+  "scope": "aggregate-insights",
+  "purpose": "district-level attendance dashboard",
+  "legal_basis": "public-task",
+  "expires_at": "2027-03-31T23:59:59Z"
+}

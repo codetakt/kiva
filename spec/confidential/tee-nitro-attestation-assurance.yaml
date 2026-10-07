@@ -1,0 +1,101 @@
+---
+schema_version: 1
+kind: tee-nitro-attestation-assurance-profile
+standard: Kiva Architecture
+status: review-gated
+profile: kiva-tee-aws-nitro-review-gated-v1
+milestone: CC12
+claim_boundary: >
+  Kiva has a review-gated AWS Nitro Enclaves attestation integration boundary.
+  A deployment-specific verifier adapter must perform raw Nitro document,
+  certificate-chain, COSE-signature, trust-anchor, nonce, and PCR verification.
+  Kiva admits only the adapter's normalized verified claims and then enforces
+  strict job binding, measurement policy, image provenance, policy binding,
+  freshness, rollback/replay storage, verifier provenance, key-epoch rotation,
+  secret provisioning, result release, and policy approval. Hardware-backed
+  production confidential execution remains a prohibited claim until external
+  security review is complete.
+target_tee:
+  family: aws-nitro-enclaves
+  attestation_format: cose-signed-cbor-document
+  normalized_format: verified-nitro-attestation-document-v1
+  vendor_quote_verification: review-gated-external-adapter
+  production_claim_allowed: false
+attestation:
+  digest: sha256
+  document_domain: kiva-confidential:tee-aws-nitro-attestation-document:v1
+  profile: kiva-tee-aws-nitro-review-gated-v1
+  records_pcr0: true
+  records_pcr1: true
+  records_pcr2: true
+  records_pcr3: true
+  records_pcr8: true
+  records_image_digest: true
+  records_policy_binding: true
+  records_nonce_digest: true
+  records_certificate_chain_digest: true
+  records_cose_signing_key_digest: true
+  records_document_digest: true
+  records_evidence_sequence: true
+admission:
+  requires_policy_approval: true
+  requires_supported_format: true
+  requires_job_binding: true
+  requires_pcr_policy_match: true
+  requires_non_debug_mode: true
+  rejects_all_zero_debug_pcrs: true
+  requires_image_digest_match: true
+  requires_policy_binding_match: true
+  requires_nonce_match: true
+  requires_fresh_evidence_window: true
+  requires_certificate_chain_validation: true
+  requires_cose_signature_validation: true
+  requires_trust_anchor_match: true
+  requires_verifier_artifact_match: true
+  requires_external_security_review: true
+  requires_current_verifier_key_epoch: true
+  rejects_rollback_sequence: true
+  rejects_replay: true
+  rejects_digest_mismatch: true
+provisioning:
+  key_release_requires_accepted_attestation: true
+  key_release_requires_policy_approval: true
+  key_release_requires_external_security_review: true
+  key_release_requires_current_verifier_key_epoch: true
+result_release:
+  requires_accepted_attestation: true
+  requires_prior_secret_provisioning: true
+  requires_job_binding: true
+  requires_policy_approval: true
+  requires_external_security_review: true
+  requires_current_verifier_key_epoch: true
+rollout_and_rollback:
+  image_rollout_requires_new_pcr_policy: true
+  image_rollout_requires_verifier_policy_update: true
+  rollback_requires_retired_sequence_floor_update: true
+  rollback_records_previous_image_digest: true
+  verifier_key_rotation_requires_epoch_increment: true
+external_security_review:
+  required_before_production_claim: true
+  production_claim_allowed: false
+  review_evidence_digest_required: true
+vectors:
+  path: spec/confidential/tee-nitro-attestation-vectors.yaml
+  required_profile: kiva-tee-aws-nitro-review-gated-v1
+job_contract:
+  path: spec/confidential/tee-nitro-attestation-job-contract.yaml
+evidence:
+  rust_core: crates/kiva-confidential/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  vectors: spec/confidential/tee-nitro-attestation-vectors.yaml
+  job_contract: spec/confidential/tee-nitro-attestation-job-contract.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_tee_nitro_boundary.spthy
+  design_note: docs/architecture/tee-nitro-attestation-integration.md
+  operator_runbook: docs/operations/tee-nitro-runbook.md
+non_goals:
+  kiva_parses_raw_cose_cbor_attestation_documents: false
+  production_hardware_backed_confidential_execution_claim_before_review: false
+  proves_cloud_operator_isolation: false
+  proves_side_channel_resistance: false
+  proves_enclave_runtime_correctness: false

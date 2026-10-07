@@ -1,0 +1,158 @@
+theory Kiva_Public_Sector_Separation_Boundary
+begin
+
+rule OpenPublicSectorWorkflow:
+  [
+    Fr(~workflow),
+    Fr(~custodian),
+    Fr(~operator),
+    Fr(~analyst),
+    Fr(~authority),
+    Fr(~auditor)
+  ]
+  --[
+    PublicSectorWorkflowOpened(~workflow),
+    DataCustodianRegistered(~custodian),
+    PlatformOperatorRegistered(~operator),
+    AnalystRegistered(~analyst),
+    PolicyAuthorityRegistered(~authority),
+    AuditorRegistered(~auditor),
+    PublicSectorDutiesSeparated(
+      ~workflow, ~custodian, ~operator, ~analyst, ~authority, ~auditor
+    )
+  ]->
+  [
+    !PublicSectorWorkflow(~workflow),
+    !DataCustodian(~workflow, ~custodian),
+    !PlatformOperator(~workflow, ~operator),
+    !Analyst(~workflow, ~analyst),
+    !PolicyAuthority(~workflow, ~authority),
+    !Auditor(~workflow, ~auditor),
+    CustodianMayAdmitRawRecord(~workflow, ~custodian),
+    OperatorMayOperatePlatform(~workflow, ~operator),
+    AuditorMayReadAuditEvidence(~workflow, ~auditor)
+  ]
+
+rule CustodianAdmitsRawRecord:
+  [
+    CustodianMayAdmitRawRecord(workflow, custodian),
+    !DataCustodian(workflow, custodian)
+  ]
+  --[
+    PublicRawRecordAdmitted(workflow, custodian),
+    PublicAuditEvent(workflow, 'raw_admission', custodian)
+  ]->
+  [ !PublicRawRecordAvailable(workflow) ]
+
+rule OperatorOperatesPlatform:
+  [
+    OperatorMayOperatePlatform(workflow, operator),
+    !PlatformOperator(workflow, operator)
+  ]
+  --[ PublicPlatformOperated(workflow, operator) ]->
+  []
+
+rule PolicyAuthorityApprovesRelease:
+  [
+    !PublicRawRecordAvailable(workflow),
+    !PolicyAuthority(workflow, authority)
+  ]
+  --[
+    PublicAggregateReleaseApproved(workflow, authority),
+    PublicAuditEvent(workflow, 'release_approval', authority)
+  ]->
+  [ PublicAggregateReleaseApproval(workflow, authority) ]
+
+rule ReleasePublicAggregate:
+  [ PublicAggregateReleaseApproval(workflow, authority) ]
+  --[
+    PublicAggregateReleased(workflow, authority),
+    PublicAuditEvent(workflow, 'aggregate_release', authority)
+  ]->
+  [ !PublicReleasedAggregate(workflow) ]
+
+rule AnalystReadsReleasedAggregate:
+  [
+    !PublicReleasedAggregate(workflow),
+    !Analyst(workflow, analyst)
+  ]
+  --[ PublicAggregateRead(workflow, analyst) ]->
+  []
+
+rule AuditorReadsAuditEvidence:
+  [
+    AuditorMayReadAuditEvidence(workflow, auditor),
+    !Auditor(workflow, auditor)
+  ]
+  --[ PublicAuditEvidenceRead(workflow, auditor) ]->
+  []
+
+lemma separated_operator_is_not_policy_authority:
+  "All workflow custodian operator analyst authority auditor #i.
+    PublicSectorDutiesSeparated(
+      workflow, custodian, operator, analyst, authority, auditor
+    ) @ #i
+    & operator = authority
+    ==>
+    F"
+
+lemma operator_cannot_admit_raw_records:
+  "All workflow principal #i #j.
+    PlatformOperatorRegistered(principal) @ #i
+    & PublicRawRecordAdmitted(workflow, principal) @ #j
+    ==>
+    F"
+
+lemma analyst_cannot_admit_raw_records:
+  "All workflow principal #i #j.
+    AnalystRegistered(principal) @ #i
+    & PublicRawRecordAdmitted(workflow, principal) @ #j
+    ==>
+    F"
+
+lemma operator_cannot_approve_public_release:
+  "All workflow principal #i #j.
+    PlatformOperatorRegistered(principal) @ #i
+    & PublicAggregateReleaseApproved(workflow, principal) @ #j
+    ==>
+    F"
+
+lemma release_approval_requires_policy_authority:
+  "All workflow authority #i.
+    PublicAggregateReleaseApproved(workflow, authority) @ #i
+    ==>
+    Ex #j.
+      PolicyAuthorityRegistered(authority) @ #j
+      & #j < #i"
+
+lemma aggregate_release_requires_prior_approval:
+  "All workflow authority #i.
+    PublicAggregateReleased(workflow, authority) @ #i
+    ==>
+    Ex #j.
+      PublicAggregateReleaseApproved(workflow, authority) @ #j
+      & #j < #i"
+
+lemma aggregate_release_produces_audit_event:
+  "All workflow authority #i.
+    PublicAggregateReleased(workflow, authority) @ #i
+    ==>
+    PublicAuditEvent(workflow, 'aggregate_release', authority) @ #i"
+
+lemma aggregate_read_requires_release:
+  "All workflow analyst #i.
+    PublicAggregateRead(workflow, analyst) @ #i
+    ==>
+    Ex authority #j.
+      PublicAggregateReleased(workflow, authority) @ #j
+      & #j < #i"
+
+lemma audit_evidence_access_does_not_grant_raw_admission:
+  "All workflow auditor #i #j #k.
+    AuditorRegistered(auditor) @ #i
+    & PublicAuditEvidenceRead(workflow, auditor) @ #j
+    & PublicRawRecordAdmitted(workflow, auditor) @ #k
+    ==>
+    F"
+
+end

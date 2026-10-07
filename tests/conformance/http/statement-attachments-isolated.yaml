@@ -1,0 +1,206 @@
+suite:
+  id: xapi-lrs-statement-attachments-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive multipart Statement attachment checks for disposable isolated LRS targets.
+cases:
+  - id: multipart-statement-with-json-first-part-is-accepted
+    requirements:
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-json-only
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-json-only
+        - 'Content-Type: application/json'
+        - ''
+        - '{"actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-attachments@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/multipart-json-first"},"version":"2.0.0"}'
+        - --kiva-conformance-json-only--
+        - ''
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /0:
+            present: true
+  - id: multipart-statement-with-matching-attachment-part-is-accepted
+    requirements:
+      - xapi-lrs-4.1.3-attachment-sha2-match
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-attachment-headers
+      - xapi-lrs-4.1.3-attachment-header-property-match
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-matching-attachment
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-matching-attachment
+        - 'Content-Type: application/json'
+        - ''
+        - '{"actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-attachments@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/multipart-matching-attachment"},"attachments":[{"usageType":"https://example.org/kiva/conformance/attachment/usage","display":{"en-US":"attachment"},"contentType":"text/plain","length":5,"sha2":"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}],"version":"2.0.0"}'
+        - --kiva-conformance-matching-attachment
+        - 'Content-Type: text/plain'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
+        - ''
+        - hello
+        - --kiva-conformance-matching-attachment--
+        - ''
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /0:
+            present: true
+  - id: multipart-statement-rejects-unmatched-attachment-metadata
+    requirements:
+      - xapi-lrs-4.1.3-multipart-reject-unmatched
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-unmatched-attachment
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-unmatched-attachment
+        - 'Content-Type: application/json'
+        - ''
+        - '{"actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-attachments@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/multipart-unmatched-attachment"},"attachments":[{"usageType":"https://example.org/kiva/conformance/attachment/usage","display":{"en-US":"missing
+          attachment"},"contentType":"text/plain","length":5,"sha2":"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}],"version":"2.0.0"}'
+        - --kiva-conformance-unmatched-attachment--
+        - ''
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-get-attachment-flags-control-response-format
+    requirements:
+      - xapi-lrs-4.1.3-attachment-sha2-match
+      - xapi-lrs-4.1.3-attachment-transmission-criteria
+      - xapi-lrs-4.1.3-multipart-first-json
+      - xapi-lrs-4.1.3-multipart-attachment-headers
+      - xapi-lrs-4.1.3-attachment-header-property-match
+      - xapi-lrs-4.1.3-multipart-accept-valid
+      - xapi-lrs-4.1.6.1-statement-get-attachments-true
+      - xapi-lrs-4.1.6.1-statement-get-attachments-false
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-statement-with-attachment
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000501
+          headers:
+            Content-Type: multipart/mixed; boundary=kiva-conformance-get-attachment
+            X-Experience-API-Version: 2.0.0
+          raw_body_crlf_lines:
+            - --kiva-conformance-get-attachment
+            - 'Content-Type: application/json'
+            - ''
+            - '{"id":"00000000-0000-4000-8000-000000000501","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-attachments@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/get-attachment-flags"},"attachments":[{"usageType":"https://example.org/kiva/conformance/attachment/usage","display":{"en-US":"attachment
+              flags"},"contentType":"text/plain","length":5,"sha2":"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"}],"version":"2.0.0"}'
+            - --kiva-conformance-get-attachment
+            - 'Content-Type: text/plain'
+            - 'Content-Transfer-Encoding: binary'
+            - 'X-Experience-API-Hash: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
+            - ''
+            - hello
+            - --kiva-conformance-get-attachment--
+            - ''
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: get-statement-with-attachments-true
+        request:
+          method: GET
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000501
+            attachments: 'true'
+          headers:
+            Accept: multipart/mixed
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            Content-Type:
+              contains: multipart/mixed
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          body:
+            contains: hello
+      - id: get-statement-with-attachments-false
+        request:
+          method: GET
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000501
+            attachments: 'false'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            Content-Type:
+              contains: application/json
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /attachments/0/sha2:
+                equals: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              equals_pointer: /stored

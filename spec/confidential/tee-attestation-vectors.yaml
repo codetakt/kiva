@@ -1,0 +1,18 @@
+---
+schema_version: 1
+description: >
+  Deterministic vectors for Kiva's portable TEE attestation evidence gate.
+  The digest is a domain-separated SHA-256 projection of the evidence claims.
+vectors:
+  - profile: kiva-tee-portable-attestation-v1
+    domain: kiva-confidential:tee-attestation-evidence:v1
+    family: deployment-bound-portable
+    format: portable-evidence-v1
+    job_seed: 85
+    measurement_seed: 10
+    image_digest_seed: 20
+    policy_binding_seed: 30
+    not_before_epoch_seconds: 1700000000
+    not_after_epoch_seconds: 1700003600
+    evidence_sequence: 2
+    expected_evidence_digest_hex: 26bdcedeeb6d031ad39b4f7580c0cf4e2db02e53d6f4583a19743dcdf032e9ea

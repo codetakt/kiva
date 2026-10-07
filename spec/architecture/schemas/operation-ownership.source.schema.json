@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:operation-ownership-source:1",
+  "title": "Kiva operation ownership source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "entries"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-operation-ownership-source" },
+    "status": { "const": "active" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["openapi_contract", "operation_id", "application_operation_id", "application_surface", "workflow_label", "rust_workflow_kind"],
+        "properties": {
+          "openapi_contract": { "type": "string", "minLength": 1 },
+          "operation_id": { "type": "string", "minLength": 1 },
+          "application_operation_id": { "type": "string", "minLength": 1 },
+          "application_surface": { "type": "string", "minLength": 1 },
+          "workflow_label": { "type": "string", "minLength": 1 },
+          "rust_workflow_kind": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

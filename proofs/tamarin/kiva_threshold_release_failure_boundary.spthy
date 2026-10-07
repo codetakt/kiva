@@ -1,0 +1,190 @@
+theory Kiva_Threshold_Release_Failure_Boundary
+begin
+
+rule PersistComputedThresholdReleaseRequest:
+  [
+    Fr(~workflow),
+    Fr(~release_request),
+    Fr(~left_authority),
+    Fr(~right_authority)
+  ]
+  --[
+    PolicyAuthorityRegistered(~left_authority),
+    PolicyAuthorityRegistered(~right_authority),
+    ThresholdComputedAggregatePersisted(~workflow),
+    ThresholdReleaseRequestPersistedById(
+      ~workflow, ~release_request, ~left_authority, ~right_authority
+    )
+  ]->
+  [
+    !PolicyAuthority(~left_authority),
+    !PolicyAuthority(~right_authority),
+    !PersistedThresholdReleaseRequest(
+      ~workflow, ~release_request, ~left_authority, ~right_authority
+    ),
+    AwaitingLeftApproval(
+      ~workflow, ~release_request, ~left_authority, ~right_authority
+    )
+  ]
+
+rule RejectReleaseRequestWithoutComputedAggregate:
+  [
+    Fr(~workflow),
+    Fr(~release_request)
+  ]
+  --[
+    ThresholdReleaseRequestRejectedMissingComputedAggregate(
+      ~workflow, ~release_request
+    )
+  ]->
+  []
+
+rule RejectNonAuthorityBeforeLeftApproval:
+  [
+    AwaitingLeftApproval(
+      workflow, release_request, left_authority, right_authority
+    ),
+    Fr(~actor)
+  ]
+  --[
+    ThresholdReleaseApprovalRejectedNonAuthority(
+      workflow, release_request, ~actor
+    )
+  ]->
+  []
+
+rule RecordLeftApproval:
+  [
+    AwaitingLeftApproval(
+      workflow, release_request, left_authority, right_authority
+    ),
+    !PolicyAuthority(left_authority)
+  ]
+  --[ ThresholdReleaseApproved(workflow, release_request, left_authority) ]->
+  [
+    AwaitingRightApproval(
+      workflow, release_request, left_authority, right_authority
+    )
+  ]
+
+rule RejectNonAuthorityBeforeRightApproval:
+  [
+    AwaitingRightApproval(
+      workflow, release_request, left_authority, right_authority
+    ),
+    Fr(~actor)
+  ]
+  --[
+    ThresholdReleaseApprovalRejectedNonAuthority(
+      workflow, release_request, ~actor
+    )
+  ]->
+  []
+
+rule IgnoreDuplicateLeftApproval:
+  [
+    AwaitingRightApproval(
+      workflow, release_request, left_authority, right_authority
+    ),
+    !PolicyAuthority(left_authority)
+  ]
+  --[ ThresholdDuplicateApprovalIgnored(workflow, release_request, left_authority) ]->
+  [
+    AwaitingRightApprovalAfterDuplicate(
+      workflow, release_request, left_authority, right_authority
+    )
+  ]
+
+rule RecordRightApproval:
+  [
+    AwaitingRightApproval(
+      workflow, release_request, left_authority, right_authority
+    ),
+    !PolicyAuthority(right_authority)
+  ]
+  --[ ThresholdReleaseApproved(workflow, release_request, right_authority) ]->
+  [ ApprovedThresholdRelease(workflow, release_request, left_authority, right_authority) ]
+
+rule RecordRightApprovalAfterDuplicate:
+  [
+    AwaitingRightApprovalAfterDuplicate(
+      workflow, release_request, left_authority, right_authority
+    ),
+    !PolicyAuthority(right_authority)
+  ]
+  --[ ThresholdReleaseApproved(workflow, release_request, right_authority) ]->
+  [ ApprovedThresholdRelease(workflow, release_request, left_authority, right_authority) ]
+
+rule ReleaseThresholdAggregate:
+  [
+    ApprovedThresholdRelease(workflow, release_request, left_authority, right_authority),
+    !PersistedThresholdReleaseRequest(
+      workflow, release_request, left_authority, right_authority
+    )
+  ]
+  --[ ThresholdAggregateReleased(workflow, release_request) ]->
+  [ !ThresholdReleasedAggregate(workflow, release_request) ]
+
+lemma persisted_threshold_release_request_requires_computed_aggregate:
+  "All workflow release_request left_authority right_authority #i.
+    ThresholdReleaseRequestPersistedById(
+      workflow, release_request, left_authority, right_authority
+    ) @ #i
+    ==>
+    ThresholdComputedAggregatePersisted(workflow) @ #i"
+
+lemma rejected_missing_computed_request_is_not_persisted:
+  "All workflow release_request left_authority right_authority #i #j.
+    ThresholdReleaseRequestRejectedMissingComputedAggregate(
+      workflow, release_request
+    ) @ #i
+    & ThresholdReleaseRequestPersistedById(
+      workflow, release_request, left_authority, right_authority
+    ) @ #j
+    ==>
+    F"
+
+lemma rejected_non_authority_approval_is_not_accepted:
+  "All workflow release_request actor #i #j.
+    ThresholdReleaseApprovalRejectedNonAuthority(
+      workflow, release_request, actor
+    ) @ #i
+    & ThresholdReleaseApproved(workflow, release_request, actor) @ #j
+    ==>
+    F"
+
+lemma duplicate_left_approval_does_not_release_without_right_approval:
+  "All workflow release_request left_authority #i #j.
+    ThresholdDuplicateApprovalIgnored(
+      workflow, release_request, left_authority
+    ) @ #i
+    & ThresholdAggregateReleased(workflow, release_request) @ #j
+    ==>
+    Ex right_authority #k.
+      ThresholdReleaseApproved(workflow, release_request, right_authority) @ #k
+      & #i < #k
+      & #k < #j"
+
+lemma release_requires_left_approval:
+  "All workflow release_request left_authority right_authority #i #j.
+    ThresholdAggregateReleased(workflow, release_request) @ #i
+    & ThresholdReleaseRequestPersistedById(
+      workflow, release_request, left_authority, right_authority
+    ) @ #j
+    ==>
+    Ex #k.
+      ThresholdReleaseApproved(workflow, release_request, left_authority) @ #k
+      & #k < #i"
+
+lemma release_requires_right_approval:
+  "All workflow release_request left_authority right_authority #i #j.
+    ThresholdAggregateReleased(workflow, release_request) @ #i
+    & ThresholdReleaseRequestPersistedById(
+      workflow, release_request, left_authority, right_authority
+    ) @ #j
+    ==>
+    Ex #k.
+      ThresholdReleaseApproved(workflow, release_request, right_authority) @ #k
+      & #k < #i"
+
+end

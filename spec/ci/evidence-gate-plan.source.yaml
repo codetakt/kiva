@@ -1,0 +1,96 @@
+schema_version: 1
+kind: kiva-ci-evidence-gate-plan-source
+status: active
+description: Primary CI GatePlan rows for evidence group order, Nix gates, and claim boundaries.
+compatibility_view: spec/ci/evidence-checks.source.yaml
+group_source: spec/ci/evidence-check-groups.source.yaml
+synchronization_policy: normal-form-primary-with-evidence-check-compatibility-view
+groups:
+- id: openapi-contract
+  description: OpenAPI, generated projection, DTO boundary, claim, and architecture boundary validators run by the Nix OpenAPI contract gate.
+  nix_gate: checks.x86_64-linux.openapi-contract
+  claim_boundary: openapi-contract
+  check_order:
+  - xapi-openapi-contract
+  - confidential-openapi-contract
+  - pds-openapi-contract
+  - analytics-openapi-contract
+  - analytics-reporting-templates
+  - http-operation-catalog
+  - surface-catalog-bundle
+  - surface-catalog-projections
+  - operation-kernel
+  - operation-kernel-authority
+  - application-operation-catalog
+  - surface-operation-index
+  - route-coverage
+  - surface-catalog
+  - surface-families
+  - pds-resource-families
+  - pds-openapi-schema-artifacts
+  - openapi-semantic-compatibility-map
+  - openapi-generated-contract-dto-map
+  - openapi-dto-boundary-ledger
+  - openapi-dto-map-projection
+  - evidence-checks
+  - projection-auxiliary-ledgers
+  - projection-normal-form-policy
+  - projection-transition-cleanup
+  - evidence-check-catalog
+  - evidence-check-normal-form-policy
+  - design-universe-projections
+  - compiled-architecture
+  - projection-graph
+  - claim-catalog
+  - claim-readiness-matrix
+  - evidence-set
+  - evidence-receipts
+  - executed-receipt-overlay
+  - executed-receipt-release-policy
+  - claim-graph
+  - claim-graph-integrity
+  - assurance-graph
+  - design-backbone
+  - architecture-boundaries
+  - source-ledger-schemas
+  - source-registry
+  - architecture-core-model
+  - ci-command-registry
+  - pds-core-planes
+  - pds-invariants
+  - pds-state-machines
+  - pds-plane-packages
+  - compatibility-deletion-readiness
+  - compatibility-retirement-plane
+  - compatibility-exit-gates
+- id: confidential-computation-assurance
+  description: Confidential-computation assurance validators run by the Nix CI gate.
+  nix_gate: checks.x86_64-linux.confidential-computation-assurance
+  claim_boundary: confidential-computation-assurance
+  check_order:
+  - assurance-evidence-registry
+  - confidential-verified-kernels
+  - differential-privacy-assurance
+  - shamir-vss-assurance
+  - psi-cohort-assurance
+  - tee-attestation-assurance
+  - tee-nitro-attestation-assurance
+  - fhe-feasibility-assurance
+  - practical-deployment-selection
+  - confidential-job-lifecycle-assurance
+  - confidential-key-participant-lifecycle-assurance
+  - production-psi-upgrade-assurance
+  - threshold-frost-assurance
+  - fhe-runtime-assurance
+  - external-production-assurance-readiness
+  - secret-compute-provider-contract
+  - secret-compute-provider-tck
+  - secret-compute-provider-kind-registry
+  - confidential-capability-taxonomy
+  - confidential-mechanism-catalog
+  - confidential-capability-bindings
+  - confidential-mechanism-profile-index
+  - confidential-capability-policy-evidence
+  - verification-obligations
+  - mechanism-maturity
+  - confidential-computation-assurance-package

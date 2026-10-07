@@ -1,0 +1,679 @@
+schema_version: 1
+kind: kiva-confidential-capability-binding-index
+status: active
+description: 'Human-owned CapabilityBinding ledger for confidential-computation mechanisms. A binding connects one maturity mechanism to the HTTP workflow families that expose or orchestrate that capability. Dedicated cryptographic APIs and generic confidential job/participant APIs are represented explicitly so MechanismProfile generation does not hard-code workflow-family knowledge.
+
+  '
+generated_from:
+- spec/confidential/capability-bindings.source.yaml
+- spec/confidential/capability-taxonomy.source.yaml
+- generated/architecture/operation-kernel.yaml
+generated_artifacts:
+  binding_index: generated/confidential/capability-binding-index.yaml
+  markdown: docs/architecture/generated/confidential-capability-binding-index.md
+binding_model:
+  root_type: CapabilityBinding
+  operation_ref_source: OperationKernel
+  mechanism_ref_source: spec/confidential/mechanism-maturity.yaml
+  capability_taxonomy_source: spec/confidential/capability-taxonomy.source.yaml
+  rule: 'CapabilityBinding owns mechanism-to-operation affinity. MechanismProfile joins through this index; CapabilityTaxonomy owns default workflow-family affinity, and generator-local workflow maps are not sources of truth.
+
+    '
+summary:
+  binding_count: 13
+  operation_ref_count: 97
+bindings:
+- id: additive-secure-aggregation-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: additive-secure-aggregation
+  capability: additive-secure-aggregation
+  binding_kind: dedicated-workflow
+  operation_selector:
+    workflow_families:
+    - additive
+    - threshold
+  operation_count: 12
+  operation_refs:
+  - id: confidential.postConfidentialAdditiveAggregate
+    operation_id: postConfidentialAdditiveAggregate
+    method: post
+    path: /confidential/additive-aggregates
+    workflow_family: additive
+  - id: confidential.getConfidentialAdditiveShareReplayRecords
+    operation_id: getConfidentialAdditiveShareReplayRecords
+    method: get
+    path: /confidential/additive-share-replay-records
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKeyRevocation
+    operation_id: postConfidentialShareSigningKeyRevocation
+    method: post
+    path: /confidential/additive-share-signing-key-revocations
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKeyRotation
+    operation_id: postConfidentialShareSigningKeyRotation
+    method: post
+    path: /confidential/additive-share-signing-key-rotations
+    workflow_family: additive
+  - id: confidential.getConfidentialShareSigningKeys
+    operation_id: getConfidentialShareSigningKeys
+    method: get
+    path: /confidential/additive-share-signing-keys
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKey
+    operation_id: postConfidentialShareSigningKey
+    method: post
+    path: /confidential/additive-share-signing-keys
+    workflow_family: additive
+  - id: confidential.getConfidentialAdditiveShareSubmissions
+    operation_id: getConfidentialAdditiveShareSubmissions
+    method: get
+    path: /confidential/additive-share-submissions
+    workflow_family: additive
+  - id: confidential.postConfidentialAdditiveShareSubmission
+    operation_id: postConfidentialAdditiveShareSubmission
+    method: post
+    path: /confidential/additive-share-submissions
+    workflow_family: additive
+  - id: confidential.postConfidentialThresholdReleaseApproval
+    operation_id: postConfidentialThresholdReleaseApproval
+    method: post
+    path: /confidential/threshold-release-approvals
+    workflow_family: threshold
+  - id: confidential.getConfidentialThresholdReleaseRequests
+    operation_id: getConfidentialThresholdReleaseRequests
+    method: get
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdReleaseRequest
+    operation_id: postConfidentialThresholdReleaseRequest
+    method: post
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdRelease
+    operation_id: postConfidentialThresholdRelease
+    method: post
+    path: /confidential/threshold-releases
+    workflow_family: threshold
+  boundary_note: 'Additive releases use dedicated additive endpoints plus the shared threshold-release approval path.
+
+    '
+- id: differential-privacy-release-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: differential-privacy-release
+  capability: differential-privacy-release
+  binding_kind: dedicated-workflow
+  operation_selector:
+    workflow_families:
+    - differential_privacy
+  operation_count: 7
+  operation_refs:
+  - id: confidential.postConfidentialDifferentialPrivacyBudgetSpend
+    operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+    method: post
+    path: /confidential/differential-privacy-budget-spends
+    workflow_family: differential_privacy
+  - id: confidential.getConfidentialDifferentialPrivacyBudgets
+    operation_id: getConfidentialDifferentialPrivacyBudgets
+    method: get
+    path: /confidential/differential-privacy-budgets
+    workflow_family: differential_privacy
+  - id: confidential.postConfidentialDifferentialPrivacyBudget
+    operation_id: postConfidentialDifferentialPrivacyBudget
+    method: post
+    path: /confidential/differential-privacy-budgets
+    workflow_family: differential_privacy
+  - id: confidential.getConfidentialDifferentialPrivacyCompositionSummaries
+    operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+    method: get
+    path: /confidential/differential-privacy-composition-summaries
+    workflow_family: differential_privacy
+  - id: confidential.getConfidentialDifferentialPrivacyReleases
+    operation_id: getConfidentialDifferentialPrivacyReleases
+    method: get
+    path: /confidential/differential-privacy-releases
+    workflow_family: differential_privacy
+  - id: confidential.postConfidentialDifferentialPrivacyRelease
+    operation_id: postConfidentialDifferentialPrivacyRelease
+    method: post
+    path: /confidential/differential-privacy-releases
+    workflow_family: differential_privacy
+  - id: confidential.postConfidentialDifferentialPrivacySampledRelease
+    operation_id: postConfidentialDifferentialPrivacySampledRelease
+    method: post
+    path: /confidential/differential-privacy-sampled-releases
+    workflow_family: differential_privacy
+  boundary_note: Dedicated DP budget, composition, and release endpoints.
+- id: shamir-vss-admission-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: shamir-vss-admission
+  capability: threshold-reconstruction
+  binding_kind: dedicated-workflow
+  operation_selector:
+    workflow_families:
+    - shamir
+  operation_count: 2
+  operation_refs:
+  - id: confidential.getConfidentialShamirThresholdReconstructions
+    operation_id: getConfidentialShamirThresholdReconstructions
+    method: get
+    path: /confidential/shamir-threshold-reconstructions
+    workflow_family: shamir
+  - id: confidential.postConfidentialShamirThresholdReconstruction
+    operation_id: postConfidentialShamirThresholdReconstruction
+    method: post
+    path: /confidential/shamir-threshold-reconstructions
+    workflow_family: shamir
+  boundary_note: Dedicated Shamir threshold reconstruction endpoints.
+- id: psi-cohort-hash-token-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: psi-cohort-hash-token
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Hash-token PSI is orchestrated through confidential job and participant lifecycle endpoints rather than a dedicated public PSI route.
+
+    '
+- id: psi-oprf-dh-voprf-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: psi-oprf-dh-voprf
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Review-gated OPRF PSI runtimes bind to generic job and participant lifecycle operations.
+
+    '
+- id: tee-portable-attestation-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: tee-portable-attestation
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Portable TEE attestation is admitted as job evidence and participant metadata, with hardware verification supplied by deployment.
+
+    '
+- id: tee-aws-nitro-attestation-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: tee-aws-nitro-attestation
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Nitro attestation support is review-gated and uses the generic confidential job/participant lifecycle boundary.
+
+    '
+- id: threshold-frost-signing-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: threshold-frost-signing
+  capability: threshold-signing
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+    - threshold
+  operation_count: 12
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialThresholdReleaseApproval
+    operation_id: postConfidentialThresholdReleaseApproval
+    method: post
+    path: /confidential/threshold-release-approvals
+    workflow_family: threshold
+  - id: confidential.getConfidentialThresholdReleaseRequests
+    operation_id: getConfidentialThresholdReleaseRequests
+    method: get
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdReleaseRequest
+    operation_id: postConfidentialThresholdReleaseRequest
+    method: post
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdRelease
+    operation_id: postConfidentialThresholdRelease
+    method: post
+    path: /confidential/threshold-releases
+    workflow_family: threshold
+  boundary_note: 'FROST signing requires external review, generic lifecycle orchestration, and the shared threshold-release approval path.
+
+    '
+- id: fhe-sum-feasibility-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: fhe-sum-feasibility
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Feasibility FHE jobs use generic confidential job and participant lifecycle operations.
+
+    '
+- id: fhe-sum-runtime-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: fhe-sum-runtime
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: 'Production FHE runtime bindings stay review-gated while using the generic confidential job/participant lifecycle boundary.
+
+    '
+- id: confidential-job-lifecycle-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: confidential-job-lifecycle
+  capability: confidential-job-lifecycle
+  binding_kind: lifecycle-substrate
+  operation_selector:
+    workflow_families:
+    - job
+  operation_count: 4
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  boundary_note: Job lifecycle substrate endpoints.
+- id: confidential-participant-key-lifecycle-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: confidential-participant-key-lifecycle
+  capability: confidential-participant-key-lifecycle
+  binding_kind: lifecycle-substrate
+  operation_selector:
+    workflow_families:
+    - participant
+  operation_count: 4
+  operation_refs:
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: Participant and key lifecycle substrate endpoints.
+- id: secret-compute-provider-contract-capability
+  root_type: CapabilityBinding
+  maturity_mechanism: secret-compute-provider-contract
+  capability: provider-contract
+  binding_kind: lifecycle-substrate
+  operation_selector:
+    workflow_families:
+    - job
+    - participant
+  operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  boundary_note: Provider contract evidence is bound through generic runtime metadata.

@@ -1,0 +1,60 @@
+name: Formal Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: verification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NIX_CONFIG: experimental-features = nix-command flakes
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  verification:
+    name: F*, Kani, and Tamarin
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          free-disk: "true"
+          enable-flakehub-cache: "true"
+
+      - name: Build formal verification checks
+        run: |
+          nix build \
+            .#checks.x86_64-linux.formal-verification-contract \
+            .#checks.x86_64-linux.fstar-boundary \
+            .#checks.x86_64-linux.kani-boundary \
+            .#checks.x86_64-linux.tamarin-boundary \
+            --print-build-logs
+
+      - name: Build formal verification smoke evidence bundle
+        run: |
+          nix build .#formal-verification-evidence-smoke \
+            --print-build-logs \
+            --out-link result-formal-verification-evidence-smoke
+          mkdir -p artifacts/formal-verification-evidence-smoke
+          cp -R --dereference result-formal-verification-evidence-smoke/. artifacts/formal-verification-evidence-smoke/
+
+      - name: Upload formal verification smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-verification-evidence-smoke
+          path: artifacts/formal-verification-evidence-smoke/
+          retention-days: 14

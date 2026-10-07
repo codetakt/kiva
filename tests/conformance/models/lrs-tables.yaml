@@ -1,0 +1,1978 @@
+schema_version: 1
+source_revision: fb8ecb2c1a258e6d3d397805243fd793d47cec5d
+scope: LRS table acceptance and rejection vectors; optional interaction validation is observational
+models:
+  statement:
+    source_anchor: '### 4.2.2 Statement'
+    fixture:
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+    fields:
+      id:
+        type: string
+        valid: 01000000-0000-4000-8000-000000000001
+        required: false
+        format: uuid
+      actor:
+        type: object
+        valid: &id001
+          objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+        required: true
+      verb:
+        type: object
+        valid: &id006
+          id: https://example.org/lrs-conformance/value
+        required: true
+      object:
+        type: object
+        valid: &id007
+          id: https://example.org/lrs-conformance/value
+        required: true
+      result:
+        type: object
+        valid: {}
+        required: false
+      context:
+        type: object
+        valid: {}
+        required: false
+      timestamp:
+        type: string
+        valid: '2025-01-02T03:04:05.678+09:00'
+        required: false
+        format: timestamp
+      stored:
+        type: string
+        valid: '2000-01-01T00:00:00.000Z'
+        required: false
+        format: timestamp
+        format_rejection_optional: true
+      authority:
+        type: object
+        valid: *id001
+        required: false
+      version:
+        type: string
+        valid: 2.0.0
+        required: false
+        format: version
+        format_rejection_optional: true
+      attachments:
+        type: array
+        valid:
+        - &id008
+          usageType: https://example.org/lrs-conformance/value
+          display:
+            en: attachment
+          contentType: text/plain
+          length: 0
+          sha2: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+          fileUrl: https://example.org/lrs-conformance/value
+        required: false
+        items: object
+  agent:
+    source_anchor: '**Actor as Agent Table:**'
+    fixture:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    fields:
+      objectType:
+        type: string
+        valid: Agent
+        required: false
+        enum:
+        - Agent
+        invalid:
+        - Activity
+        - StatementRef
+        - SubStatement
+      name:
+        type: string
+        valid: 受講者
+        required: false
+      mbox: &id002
+        type: string
+        valid: mailto:lrs-conformance@example.org
+        required: false
+        format: mailto
+      mbox_sha1sum: &id003
+        type: string
+        valid: 0123456789abcdef0123456789abcdef01234567
+        required: false
+        format: sha1
+      openid: &id004
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: false
+        format: uri
+      account: &id005
+        type: object
+        valid:
+          homePage: https://example.org/lrs-conformance/value
+          name: account
+        required: false
+    exclusive_one:
+    - mbox
+    - mbox_sha1sum
+    - openid
+    - account
+  identified-group:
+    source_anchor: '**Actor as Identified Group Table:**'
+    fixture:
+      objectType: Group
+      mbox: mailto:group@example.org
+      member:
+      - objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+    fields:
+      objectType:
+        type: string
+        valid: Group
+        required: true
+        enum:
+        - Group
+        invalid:
+        - Agent
+        - Activity
+      name:
+        type: string
+        valid: team
+        required: false
+      member:
+        type: array
+        valid:
+        - *id001
+        required: false
+        items: object
+      mbox: *id002
+      mbox_sha1sum: *id003
+      openid: *id004
+      account: *id005
+    exclusive_one:
+    - mbox
+    - mbox_sha1sum
+    - openid
+    - account
+  anonymous-group:
+    source_anchor: '**Actor as Anonymous Group Table:**'
+    fixture:
+      objectType: Group
+      member:
+      - objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+    fields:
+      objectType:
+        type: string
+        valid: Group
+        required: true
+        enum:
+        - Group
+        invalid:
+        - Agent
+        - Activity
+      name:
+        type: string
+        valid: anonymous
+        required: false
+      member:
+        type: array
+        valid:
+        - *id001
+        required: true
+        items: object
+  account:
+    source_anchor: '**Account Table:**'
+    fixture:
+      homePage: https://example.org/lrs-conformance/value
+      name: account
+    fields:
+      homePage:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: true
+        format: irl
+      name:
+        type: string
+        valid: account
+        required: true
+  verb:
+    source_anchor: '#### 4.2.2.2 Verb'
+    fixture:
+      id: https://example.org/lrs-conformance/value
+    fields:
+      id:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: true
+        format: iri
+      display:
+        type: object
+        valid:
+          en: verb
+          ja: 動詞
+        required: false
+        format: language-map
+  activity:
+    source_anchor: '**Object As Activity Table:**'
+    fixture:
+      id: https://example.org/lrs-conformance/value
+    fields:
+      objectType:
+        type: string
+        valid: Activity
+        required: false
+        enum:
+        - Activity
+      id:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: true
+        format: iri
+      definition:
+        type: object
+        valid: {}
+        required: false
+  definition:
+    source_anchor: '**Activity Definition ('
+    fixture: {}
+    fields:
+      name:
+        type: object
+        valid:
+          en: name
+          ja: 名称
+        required: false
+        format: language-map
+      description:
+        type: object
+        valid:
+          en: description
+          ja: 説明
+        required: false
+        format: language-map
+      type:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: false
+        format: iri
+      moreInfo:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: false
+        format: irl
+      extensions:
+        type: object
+        valid:
+          https://example.org/lrs-conformance/value: null
+        required: false
+        format: extensions
+  interaction:
+    source_anchor: '**Interaction Activities ('
+    fixture:
+      interactionType: choice
+      choices:
+      - id: a
+    fields:
+      interactionType:
+        type: string
+        valid: choice
+        required: true
+        enum:
+        - true-false
+        - choice
+        - fill-in
+        - long-fill-in
+        - matching
+        - performance
+        - sequencing
+        - likert
+        - numeric
+        - other
+      correctResponsesPattern:
+        type: array
+        valid:
+        - a
+        required: false
+        items: string
+        rejection_optional: true
+      choices:
+        type: array
+        valid:
+        - id: a
+          description:
+            en: A
+        required: false
+        items: object
+        rejection_optional: true
+      scale:
+        type: array
+        valid:
+        - id: a
+        required: false
+        items: object
+        rejection_optional: true
+      source:
+        type: array
+        valid:
+        - id: a
+        required: false
+        items: object
+        rejection_optional: true
+      target:
+        type: array
+        valid:
+        - id: a
+        required: false
+        items: object
+        rejection_optional: true
+      steps:
+        type: array
+        valid:
+        - id: a
+        required: false
+        items: object
+        rejection_optional: true
+    allow_additional: true
+  component:
+    source_anchor: Regardless of interactionType
+    fixture:
+      id: a
+    fields:
+      id:
+        type: string
+        valid: a
+        required: true
+      description:
+        type: object
+        valid:
+          en: A
+          ja: 選択肢
+        required: false
+        format: language-map
+    rejection_optional: true
+  statement-ref:
+    source_anchor: '**Object As Statement Table:**'
+    fixture:
+      objectType: StatementRef
+      id: 01000000-0000-4000-8000-000000000001
+    fields:
+      objectType:
+        type: string
+        valid: StatementRef
+        required: true
+        enum:
+        - StatementRef
+      id:
+        type: string
+        valid: 01000000-0000-4000-8000-000000000001
+        required: true
+        format: uuid
+  substatement:
+    source_anchor: '**Object As Sub-Statement Table:**'
+    fixture:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+    fields:
+      objectType:
+        type: string
+        valid: SubStatement
+        required: true
+        enum:
+        - SubStatement
+      actor:
+        type: object
+        valid: *id001
+        required: true
+      verb:
+        type: object
+        valid: *id006
+        required: true
+      object:
+        type: object
+        valid: *id007
+        required: true
+      result:
+        type: object
+        valid: {}
+        required: false
+      context:
+        type: object
+        valid: {}
+        required: false
+      timestamp:
+        type: string
+        valid: '2025-01-02T03:04:05.678Z'
+        required: false
+        format: timestamp
+      attachments:
+        type: array
+        valid:
+        - *id008
+        required: false
+        items: object
+  result:
+    source_anchor: '**Result Table:**'
+    fixture: {}
+    fields:
+      score:
+        type: object
+        valid: {}
+        required: false
+      success:
+        type: boolean
+        valid: true
+        required: false
+      completion:
+        type: boolean
+        valid: false
+        required: false
+      response:
+        type: string
+        valid: 回答
+        required: false
+      duration:
+        type: string
+        valid: PT1.234S
+        required: false
+        format: duration
+      extensions:
+        type: object
+        valid:
+          https://example.org/lrs-conformance/value: null
+        required: false
+        format: extensions
+  score:
+    source_anchor: '**Score Table:**'
+    fixture: {}
+    fields:
+      scaled:
+        type: number
+        valid: 0.5
+        required: false
+        invalid:
+        - -1.001
+        - 1.001
+      raw:
+        type: number
+        valid: 12.125
+        required: false
+      min:
+        type: number
+        valid: -1
+        required: false
+      max:
+        type: number
+        valid: 100
+        required: false
+  context:
+    source_anchor: '**Context Table:**'
+    fixture: {}
+    fields:
+      registration:
+        type: string
+        valid: 01000000-0000-4000-8000-000000000001
+        required: false
+        format: uuid
+      instructor:
+        type: object
+        valid: *id001
+        required: false
+      team:
+        type: object
+        valid: &id009
+          objectType: Group
+          mbox: mailto:group@example.org
+          member:
+          - *id001
+        required: false
+      contextActivities:
+        type: object
+        valid: {}
+        required: false
+      contextAgents:
+        type: array
+        valid:
+        - objectType: contextAgent
+          agent: *id001
+        required: false
+        items: object
+      contextGroups:
+        type: array
+        valid:
+        - objectType: contextGroup
+          group: *id009
+        required: false
+        items: object
+      revision:
+        type: string
+        valid: v1
+        required: false
+      platform:
+        type: string
+        valid: platform
+        required: false
+      language:
+        type: string
+        valid: ja-JP
+        required: false
+        format: language-tag
+      statement:
+        type: object
+        valid:
+          objectType: StatementRef
+          id: 01000000-0000-4000-8000-000000000001
+        required: false
+      extensions:
+        type: object
+        valid:
+          https://example.org/lrs-conformance/value: null
+        required: false
+        format: extensions
+  context-activities:
+    source_anchor: '| contextActivities |'
+    fixture: {}
+    fields:
+      parent:
+        type: activity-or-array
+        valid: *id007
+        required: false
+        items: object
+      grouping:
+        type: activity-or-array
+        valid: *id007
+        required: false
+        items: object
+      category:
+        type: activity-or-array
+        valid: *id007
+        required: false
+        items: object
+      other:
+        type: activity-or-array
+        valid: *id007
+        required: false
+        items: object
+  context-agent:
+    source_anchor: '**Context Agents Table:**'
+    fixture:
+      objectType: contextAgent
+      agent:
+        objectType: Agent
+        mbox: mailto:context-only-agent@example.org
+    fields:
+      objectType:
+        type: string
+        valid: contextAgent
+        required: true
+        enum:
+        - contextAgent
+      agent:
+        type: object
+        valid: *id001
+        required: true
+      relevantTypes:
+        type: array
+        valid:
+        - https://example.org/lrs-conformance/context-only-relationship
+        required: false
+        items: string
+        format: iri-array
+        invalid:
+        - []
+        cardinality_judgment: relevant-types-empty
+  context-group:
+    source_anchor: '**Context Group Table:**'
+    fixture:
+      objectType: contextGroup
+      group:
+        objectType: Group
+        mbox: mailto:group@example.org
+        member:
+        - objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+    fields:
+      objectType:
+        type: string
+        valid: contextGroup
+        required: true
+        enum:
+        - contextGroup
+      group:
+        type: object
+        valid: *id009
+        required: true
+      relevantTypes:
+        type: array
+        valid:
+        - https://example.org/lrs-conformance/context-only-relationship
+        required: false
+        items: string
+        format: iri-array
+        invalid:
+        - []
+        cardinality_judgment: relevant-types-empty
+  attachment:
+    source_anchor: '**Attachments Table:**'
+    fixture:
+      usageType: https://example.org/lrs-conformance/value
+      display:
+        en: attachment
+      contentType: text/plain
+      length: 0
+      sha2: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      fileUrl: https://example.org/lrs-conformance/value
+    fields:
+      usageType:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: true
+        format: iri
+      display:
+        type: object
+        valid:
+          en: attachment
+        required: true
+        format: language-map
+      description:
+        type: object
+        valid:
+          en: description
+        required: false
+        format: language-map
+      contentType:
+        type: string
+        valid: text/plain
+        required: true
+        format: media-type
+      length:
+        type: integer
+        valid: 0
+        required: true
+        invalid:
+        - -1
+        - 0.5
+      sha2:
+        type: string
+        valid: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        required: true
+        invalid:
+        - ''
+        - not-a-hash
+        - '000000000000000000000000000000000000000000000000000000000000000'
+      fileUrl:
+        type: string
+        valid: https://example.org/lrs-conformance/value
+        required: false
+        format: irl
+placements:
+- model: statement
+  pointer: ''
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /authority
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /authority
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /authority
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /context/team
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /context/team
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /context/contextGroups/0/group
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      contextGroups:
+      - objectType: contextGroup
+        group: *id009
+- model: anonymous-group
+  pointer: /context/contextGroups/0/group
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      contextGroups:
+      - objectType: contextGroup
+        group: *id009
+- model: agent
+  pointer: /actor/member/0
+  statement:
+    actor:
+      objectType: Group
+      mbox: mailto:group@example.org
+      member:
+      - objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: Group
+      mbox: mailto:group@example.org
+      member:
+      - objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+- model: agent
+  pointer: /context/team/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      team:
+        objectType: Group
+        mbox: mailto:group@example.org
+        member:
+        - objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+      contextGroups:
+      - objectType: contextGroup
+        group:
+          objectType: Group
+          mbox: mailto:group@example.org
+          member:
+          - objectType: Agent
+            mbox: mailto:lrs-conformance@example.org
+- model: agent
+  pointer: /context/contextGroups/0/group/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      team:
+        objectType: Group
+        mbox: mailto:group@example.org
+        member:
+        - objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+      contextGroups:
+      - objectType: contextGroup
+        group:
+          objectType: Group
+          mbox: mailto:group@example.org
+          member:
+          - objectType: Agent
+            mbox: mailto:lrs-conformance@example.org
+- model: account
+  pointer: /actor/account
+  statement:
+    actor:
+      objectType: Agent
+      account:
+        homePage: https://example.org/lrs-conformance/value
+        name: account
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: account
+  pointer: /object/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: Agent
+      account:
+        homePage: https://example.org/lrs-conformance/value
+        name: account
+- model: account
+  pointer: /authority/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    authority:
+      objectType: Agent
+      account:
+        homePage: https://example.org/lrs-conformance/value
+        name: account
+- model: account
+  pointer: /context/instructor/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      instructor:
+        objectType: Agent
+        account:
+          homePage: https://example.org/lrs-conformance/value
+          name: account
+- model: account
+  pointer: /context/contextAgents/0/agent/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      contextAgents:
+      - objectType: contextAgent
+        agent:
+          objectType: Agent
+          account:
+            homePage: https://example.org/lrs-conformance/value
+            name: account
+- model: verb
+  pointer: /verb
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /context/contextActivities/parent/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /context/contextActivities/grouping/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /context/contextActivities/category/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /context/contextActivities/other/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: definition
+  pointer: /object/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: definition
+  pointer: /context/contextActivities/parent/0/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+    context:
+      contextActivities:
+        parent:
+        - id: https://example.org/lrs-conformance/value
+- model: interaction
+  pointer: /object/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: component
+  pointer: /object/definition/choices/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+      definition:
+        interactionType: choice
+        choices:
+        - id: a
+- model: statement-ref
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: statement-ref
+  pointer: /context/statement
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: substatement
+  pointer: /object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: result
+  pointer: /result
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: score
+  pointer: /result/score
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: context
+  pointer: /context
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: context-activities
+  pointer: /context/contextActivities
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: context-agent
+  pointer: /context/contextAgents/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: context-group
+  pointer: /context/contextGroups/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: attachment
+  pointer: /attachments/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object/actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: verb
+  pointer: /object/verb
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /object/object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: definition
+  pointer: /object/object/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: result
+  pointer: /object/result
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: score
+  pointer: /object/result/score
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: context
+  pointer: /object/context
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: context-agent
+  pointer: /object/context/contextAgents/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: context-group
+  pointer: /object/context/contextGroups/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: attachment
+  pointer: /object/attachments/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object/actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /object/actor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object/object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object/object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /object/object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object/context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object/context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /object/context/instructor
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object/context/team
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: anonymous-group
+  pointer: /object/context/team
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: identified-group
+  pointer: /object/context/contextGroups/0/group
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        contextGroups:
+        - objectType: contextGroup
+          group:
+            objectType: Group
+            mbox: mailto:group@example.org
+            member:
+            - objectType: Agent
+              mbox: mailto:lrs-conformance@example.org
+- model: anonymous-group
+  pointer: /object/context/contextGroups/0/group
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        contextGroups:
+        - objectType: contextGroup
+          group:
+            objectType: Group
+            mbox: mailto:group@example.org
+            member:
+            - objectType: Agent
+              mbox: mailto:lrs-conformance@example.org
+- model: agent
+  pointer: /object/actor/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Group
+        mbox: mailto:group@example.org
+        member:
+        - objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: agent
+  pointer: /object/object/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        objectType: Group
+        mbox: mailto:group@example.org
+        member:
+        - objectType: Agent
+          mbox: mailto:lrs-conformance@example.org
+- model: agent
+  pointer: /object/context/team/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        team:
+          objectType: Group
+          mbox: mailto:group@example.org
+          member:
+          - objectType: Agent
+            mbox: mailto:lrs-conformance@example.org
+        contextGroups:
+        - objectType: contextGroup
+          group:
+            objectType: Group
+            mbox: mailto:group@example.org
+            member:
+            - objectType: Agent
+              mbox: mailto:lrs-conformance@example.org
+- model: agent
+  pointer: /object/context/contextGroups/0/group/member/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        team:
+          objectType: Group
+          mbox: mailto:group@example.org
+          member:
+          - objectType: Agent
+            mbox: mailto:lrs-conformance@example.org
+        contextGroups:
+        - objectType: contextGroup
+          group:
+            objectType: Group
+            mbox: mailto:group@example.org
+            member:
+            - objectType: Agent
+              mbox: mailto:lrs-conformance@example.org
+- model: account
+  pointer: /object/actor/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        account:
+          homePage: https://example.org/lrs-conformance/value
+          name: account
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: account
+  pointer: /object/object/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        objectType: Agent
+        account:
+          homePage: https://example.org/lrs-conformance/value
+          name: account
+- model: account
+  pointer: /object/context/instructor/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        instructor:
+          objectType: Agent
+          account:
+            homePage: https://example.org/lrs-conformance/value
+            name: account
+- model: account
+  pointer: /object/context/contextAgents/0/agent/account
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        contextAgents:
+        - objectType: contextAgent
+          agent:
+            objectType: Agent
+            account:
+              homePage: https://example.org/lrs-conformance/value
+              name: account
+- model: activity
+  pointer: /object/context/contextActivities/parent/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /object/context/contextActivities/grouping/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /object/context/contextActivities/category/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: activity
+  pointer: /object/context/contextActivities/other/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: definition
+  pointer: /object/context/contextActivities/parent/0/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+      context:
+        contextActivities:
+          parent:
+          - id: https://example.org/lrs-conformance/value
+- model: interaction
+  pointer: /object/object/definition
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: component
+  pointer: /object/object/definition/choices/0
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+        definition:
+          interactionType: choice
+          choices:
+          - id: a
+- model: statement-ref
+  pointer: /object/object
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: statement-ref
+  pointer: /object/context/statement
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value
+- model: context-activities
+  pointer: /object/context/contextActivities
+  statement:
+    actor:
+      objectType: Agent
+      mbox: mailto:lrs-conformance@example.org
+    verb:
+      id: https://example.org/lrs-conformance/value
+    object:
+      objectType: SubStatement
+      actor:
+        objectType: Agent
+        mbox: mailto:lrs-conformance@example.org
+      verb:
+        id: https://example.org/lrs-conformance/value
+      object:
+        id: https://example.org/lrs-conformance/value

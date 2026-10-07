@@ -1,0 +1,372 @@
+description: >
+  Source-group boundary anchors split by architectural area.
+
+source_groups:
+  - id: pds-release-artifact-normalization
+    description: PDS data products store normalized PDS release-artifact references instead of confidential transcript IDs.
+    paths:
+      - crates/kiva-pds/src/pds/release_artifacts.rs
+      - crates/kiva-release-artifacts/src/lib.rs
+      - crates/kiva-pds/src/pds/events/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/model/state.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/model/construction.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/release_artifacts.rs
+    required_text:
+      - "pub struct ReleaseArtifactRef"
+      - "pub fn release_artifact_ref_from_data_product_request("
+      - "pub(crate) release_artifact: PdsReleaseArtifactRef"
+      - "release_artifact_ref_from_data_product_request(request)"
+      - "event.release_artifact()"
+      - "ReleaseArtifactRef::from_data_product_source_bytes"
+      - "release_artifact.artifact_id_hex()"
+      - "pds_release_artifact_transcript_id(artifact)"
+  - id: pds-command-event-core
+    description: PDS cross-surface writes enter through server-independent command/event projection before persistence adapters.
+    paths:
+      - crates/kiva-pds/src/pds/mod.rs
+      - crates/kiva-pds/src/pds/commands.rs
+      - crates/kiva-pds/src/pds/commands/consent.rs
+      - crates/kiva-pds/src/pds/commands/data_products.rs
+      - crates/kiva-pds/src/pds/commands/governance.rs
+      - crates/kiva-pds/src/pds/commands/lifecycle.rs
+      - crates/kiva-pds/src/pds/events.rs
+      - crates/kiva-pds/src/pds/events/consent.rs
+      - crates/kiva-pds/src/pds/events/data_products.rs
+      - crates/kiva-pds/src/pds/events/governance.rs
+      - crates/kiva-pds/src/pds/events/lifecycle.rs
+      - crates/kiva-server/src/app/pds.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/consent.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/data_products.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/governance.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/lifecycle.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities/records.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/model/errors.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/commands/consent.rs
+      - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+      - crates/kiva-application/src/pds/workflow/commands/governance.rs
+      - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+      - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+      - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/model/construction.rs
+      - crates/kiva-server/src/surfaces/pds/model/projection.rs
+    required_text:
+      - "mod commands;"
+      - "mod events;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod lifecycle;"
+      - "mod governance;"
+      - "pub enum PdsCommand"
+      - "pub struct RegisterConsentGrantCommand"
+      - "pub struct RegisterDataProductCommand"
+      - "pub struct RegisterGovernanceProfileCommand"
+      - "pub enum PdsDomainEvent"
+      - "pub fn controlling_subject(&self) -> &str"
+      - "pub enum ApplicationWriteOutcome"
+      - "fn append_domain_event<'a>"
+      - "admit_domain_event_for_principal("
+      - "execute_principal_bound_domain_event("
+      - "ApplicationOperationPlan::with_admission_policy"
+      - "event.controlling_subject()"
+      - "context.admit_principal(self.principal.subject.clone(), event)"
+      - "Admitted<PdsDomainEvent, PrincipalBound>"
+      - "trait PdsDomainEventProjector"
+      - "fn project_domain_event<'a>"
+      - "pub struct ConsentGrantRegistrationRequested"
+      - "pub struct DataProductRegistrationRequested"
+      - "pub struct GovernanceProfileRegistrationRequested"
+      - "consent_grant_registration_requested("
+      - "data_product_registration_requested("
+      - "governance_profile_registration_requested("
+      - "lifecycle_event_recording_requested("
+      - "retention_policy_registration_requested("
+      - "lifecycle_case_upsert_requested("
+      - "event.release_artifact()"
+      - "impl PdsDataProductState"
+      - "from_admitted_event("
+      - "fn from_registration_event(event: &DataProductRegistrationRequested)"
+      - "PdsRegisterConsentGrantCommand::new("
+      - "PdsRegisterGovernanceProfileCommand::new("
+      - "register_consent_grant(event)"
+      - "register_lifecycle_event(event)"
+      - "register_retention_policy(event)"
+      - "register_lifecycle_case(event)"
+      - "register_governance_profile(event)"
+  - id: pds-wire-application-record-projection
+    description: PDS HTTP wire projection shares DTO construction between server state and application read records.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire/consent.rs
+      - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/wire/governance.rs
+      - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/cases.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/events.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/retention.rs
+      - crates/kiva-server/src/app/pds/server_adapters/records.rs
+      - crates/kiva-application/src/pds/model.rs
+    required_text:
+      - "trait ConsentGrantProjection"
+      - "trait DataProductProjection"
+      - "trait LifecycleEventProjection"
+      - "trait RetentionPolicyProjection"
+      - "trait LifecycleCaseProjection"
+      - "trait GovernanceProfileProjection"
+      - "impl DataProductProjection for pds_app::DataProductRecord"
+      - "pub(crate) struct RecordInventoryView"
+      - "pub(crate) struct MetadataExportView"
+  - id: pds-route-contexts
+    description: PDS routes keep pure PDS resources separate from cross-surface application workflows.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+    required_text:
+      - "let pds_router = Router::new()"
+      - "let application_router = Router::new()"
+      - "PdsApplicationHttpContext"
+      - ".with_state(pds_state)"
+      - ".with_state(application_state)"
+      - "PDS_CONSENT_GRANTS_PATH, post(post_pds_consent_grant)"
+      - "PDS_PROVIDER_BINDINGS_PATH"
+      - "PDS_GOVERNANCE_PROFILES_PATH,"
+  - id: pds-provider-binding-registry
+    description: PDS exposes metadata-only secret/confidential-compute provider-binding registry entries admitted by the confidential provider contract.
+    paths:
+      - crates/kiva-pds/src/pds/mod.rs
+      - crates/kiva-pds/src/pds/requests.rs
+      - crates/kiva-pds/src/pds/responses.rs
+      - crates/kiva-pds-openapi-contract/src/lib.rs
+      - crates/kiva-server/src/core/paths.rs
+      - crates/kiva-server/src/core/state/authorization.rs
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/service.rs
+      - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/model/filters.rs
+      - crates/kiva-server/src/surfaces/pds/model/state.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/keys.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+      - crates/kiva-server/src/tests/pds_memory/provider_bindings.rs
+      - db/migrations/20260619280000_pds_provider_bindings.sql
+      - db/schema.sql
+      - spec/openapi/kiva-pds.yaml
+    required_text:
+      - "ProviderBindingRegistrationCommandInput"
+      - "ProviderBindingList"
+      - "PdsOpenApiProviderBindingRequest"
+      - "PDS_PROVIDER_BINDINGS_PATH"
+      - "authorize_pds_write_request"
+      - "get_pds_provider_bindings"
+      - "post_pds_provider_binding"
+      - "admit_provider_binding_registration"
+      - "admit_secret_compute_provider_runtime_boundary"
+      - "SecretComputeProviderBinding::new"
+      - "PdsProviderBindingState"
+      - "PdsProviderBindingKey"
+      - "PdsProviderBindingFilter"
+      - "MemoryPdsProviderBindingStore"
+      - "list_provider_bindings"
+      - "register_provider_binding"
+      - "provider_binding_list_response"
+      - "provider_binding_registration_command_input_from_openapi"
+      - "CREATE TABLE kiva.pds_provider_bindings"
+      - "/pds/provider-bindings"
+      - "provider_id_digest"
+      - "artifact_digest"
+      - "binding_digest"
+      - "evidence_gate"
+      - "runtime_class"
+  - id: pds-read-service-boundary
+    description: PDS surface services are read/direct-access adapters; command writes enter through the application layer.
+    paths:
+      - crates/kiva-server/src/core/state/http_context.rs
+      - crates/kiva-server/src/surfaces/pds/service.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/reads.rs
+    required_text:
+      - "pub(crate) struct PdsQueryGateway"
+      - "pub(crate) fn pds_query_gateway(&self) -> PdsQueryGateway"
+      - "pub(crate) async fn run_pds_operation"
+      - "pub(crate) async fn read_data_product("
+      - "pub(crate) async fn evaluate_access_check("
+      - "pub(super) fn query_gateway(&self) -> PdsQueryGateway"
+  - id: pds-state-resource-families
+    description: PDS server-local state is split by resource family behind the state module owner.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/model/state.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/access.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/consent.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/governance.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/keys.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+    required_text:
+      - "mod access;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod governance;"
+      - "mod keys;"
+      - "mod ledger;"
+      - "mod lifecycle;"
+      - "mod provider_bindings;"
+      - "pub(crate) struct PdsAccessAuditEventState"
+      - "pub(crate) struct PdsConsentGrantState"
+      - "pub(crate) struct PdsDataProductState"
+      - "pub(crate) struct PdsProviderBindingState"
+      - "pub(crate) struct PdsGovernanceProfileState"
+      - "pub(crate) struct PdsLedgerEventState"
+      - "pub(crate) struct PdsLifecycleCaseState"
+      - "pub(crate) struct PdsLifecycleEventState"
+      - "pub(crate) struct PdsRetentionPolicyState"
+  - id: pds-memory-resource-family-stores
+    description: PDS memory persistence stores resource-family state behind explicit store structs instead of one flat map set.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/storage.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+    required_text:
+      - "mod access;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod governance;"
+      - "mod lifecycle;"
+      - "mod provider_bindings;"
+      - "struct MemoryPdsConsentStore"
+      - "struct MemoryPdsDataProductStore"
+      - "struct MemoryPdsProviderBindingStore"
+      - "struct MemoryPdsAccessStore"
+      - "struct MemoryPdsLifecycleStore"
+      - "struct MemoryPdsGovernanceStore"
+      - "self.consent.grants"
+      - "self.data_products.products"
+      - "self.provider_bindings.bindings"
+      - "self.access.audit_events"
+      - "self.lifecycle.events"
+      - "self.governance.profiles"
+  - id: pds-row-mapping-resource-families
+    description: PDS PostgreSQL row mapping stays split by resource family behind a small mapping owner.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/storage/mapping.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/mapping/provider_bindings.rs
+    required_text:
+      - "mod access;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod governance;"
+      - "mod lifecycle;"
+      - "mod provider_bindings;"
+      - "pub(in crate::surfaces::pds::storage) fn pds_consent_grant_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_data_product_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_provider_binding_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_access_audit_event_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_lifecycle_event_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_retention_policy_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_lifecycle_case_from_row"
+      - "pub(in crate::surfaces::pds::storage) fn pds_governance_profile_from_row"
+  - id: pds-ledger-projection
+    description: PDS state changes are mirrored into an append-only lifecycle ledger projection.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/model/state.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+      - crates/kiva-server/src/surfaces/pds/storage.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/ledger.rs
+      - db/migrations/20260619270000_pds_ledger_events.sql
+      - db/schema.sql
+    required_text:
+      - "pub(crate) enum PdsLedgerEventKind"
+      - "pub(crate) struct PdsLedgerEventState"
+      - "ledger_events: Arc<RwLock<BTreeMap<PdsLedgerEventKey, PdsLedgerEventState>>>"
+      - "insert_pds_ledger_event_in_transaction"
+      - "CREATE TABLE kiva.pds_ledger_events"
+  - id: pds-repository-review-units
+    description: PDS repository facade dispatch is split by resource family behind a small owner.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/repository.rs
+      - crates/kiva-server/src/surfaces/pds/repository/access.rs
+      - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+      - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+      - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+    required_text:
+      - "mod access;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod provider_bindings;"
+      - "mod governance;"
+      - "mod lifecycle;"
+      - "dispatch_repository!"
+  - id: pds-postgres-storage-review-units
+    description: PDS PostgreSQL persistence is split by resource family behind a small backend owner.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres.rs
+      - crates/kiva-server/src/surfaces/pds/storage/rows.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/ledger.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+    required_text:
+      - "mod access;"
+      - "mod consent;"
+      - "mod data_products;"
+      - "mod provider_bindings;"
+      - "mod governance;"
+      - "mod ledger;"
+      - "mod lifecycle;"
+      - "pub(super) type PdsConsentGrantRow"
+      - "pub(super) type PdsGovernanceProfileRow"
+      - "kiva.pds_provider_bindings"
+      - "INSERT INTO kiva.pds_ledger_events"

@@ -1,0 +1,206 @@
+theory Kiva_Threshold_Frost_Boundary
+begin
+
+rule ConfigureThresholdFrostJob:
+  [ Fr(~job) ]
+  --[
+    ThresholdFrostJobConfigured(
+      ~job,
+      'kiva_threshold_frost_ed25519_review_gated_v1',
+      'ed25519_sha512_frost'
+    ),
+    ThresholdFrostRuntimeBound(~job),
+    ThresholdFrostExternalReviewCompleted(~job)
+  ]->
+  [
+    !ThresholdFrostJob(
+      ~job,
+      'kiva_threshold_frost_ed25519_review_gated_v1',
+      'ed25519_sha512_frost'
+    )
+  ]
+
+rule AcceptThresholdFrostKeyCeremony:
+  [ !ThresholdFrostJob(job, profile, suite), Fr(~ceremony) ]
+  --[
+    ThresholdFrostThresholdAtLeastTwo(job),
+    ThresholdFrostParticipantCountMatched(job),
+    ThresholdFrostParticipantsActive(job),
+    ThresholdFrostShareCustodyRecorded(job),
+    ThresholdFrostComplaintsResolved(job),
+    ThresholdFrostNoEquivocationDetected(job),
+    ThresholdFrostReplayRecordWritten(job, ~ceremony),
+    ThresholdFrostKeyCeremonyAccepted(job, ~ceremony)
+  ]->
+  [ !AcceptedThresholdFrostKeyCeremony(job, ~ceremony) ]
+
+rule AcceptThresholdFrostSignature:
+  [ !AcceptedThresholdFrostKeyCeremony(job, ceremony), Fr(~signature) ]
+  --[
+    ThresholdFrostAcceptedKeyCeremonyUsed(job, ceremony),
+    ThresholdFrostThresholdSignatureSharesPresent(job, ceremony),
+    ThresholdFrostDuplicateSignatureParticipantsRejected(job, ceremony),
+    ThresholdFrostSignatureTranscriptDigestMatched(job, ceremony, ~signature),
+    ThresholdFrostSigningReplayRecordWritten(job, ceremony, ~signature),
+    ThresholdFrostSignatureAccepted(job, ceremony, ~signature)
+  ]->
+  [ !AcceptedThresholdFrostSignature(job, ceremony, ~signature) ]
+
+rule ReleaseThresholdFrostSignature:
+  [
+    !AcceptedThresholdFrostKeyCeremony(job, ceremony),
+    !AcceptedThresholdFrostSignature(job, ceremony, signature),
+    Fr(~authority)
+  ]
+  --[
+    ThresholdFrostActiveKeyEpoch(job, ceremony),
+    ThresholdFrostPolicyApproved(job, ceremony, ~authority),
+    ThresholdFrostGovernedKeyUse(job, ceremony),
+    ThresholdFrostSignatureReleased(job, ceremony, signature, ~authority)
+  ]->
+  [ !ReleasedThresholdFrostSignature(job, ceremony, signature) ]
+
+rule RejectThresholdFrostComplaint:
+  [ !ThresholdFrostJob(job, profile, suite) ]
+  --[ ThresholdFrostUnresolvedComplaintRejected(job, 'complaint') ]->
+  []
+
+rule RejectThresholdFrostEquivocation:
+  [ !ThresholdFrostJob(job, profile, suite) ]
+  --[ ThresholdFrostEquivocationRejected(job, 'equivocation') ]->
+  []
+
+rule RejectThresholdFrostReplay:
+  [ !ThresholdFrostJob(job, profile, suite) ]
+  --[ ThresholdFrostReplayRejected(job, 'replay') ]->
+  []
+
+lemma accepted_key_ceremony_requires_configured_job:
+  "All job ceremony #i.
+    ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #i
+    ==>
+    Ex profile suite #j.
+      ThresholdFrostJobConfigured(job, profile, suite) @ #j
+      & #j < #i"
+
+lemma accepted_key_ceremony_requires_reviewed_runtime:
+  "All job ceremony #i.
+    ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #i
+    ==>
+    Ex #j #k.
+      ThresholdFrostRuntimeBound(job) @ #j
+      & ThresholdFrostExternalReviewCompleted(job) @ #k
+      & #j < #i
+      & #k < #i"
+
+lemma accepted_key_ceremony_requires_custody_and_resolved_complaints:
+  "All job ceremony #i.
+    ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #i
+    ==>
+    Ex #j #k #l.
+      ThresholdFrostShareCustodyRecorded(job) @ #j
+      & ThresholdFrostComplaintsResolved(job) @ #k
+      & ThresholdFrostNoEquivocationDetected(job) @ #l
+      & #j = #i
+      & #k = #i
+      & #l = #i"
+
+lemma accepted_key_ceremony_requires_threshold_and_active_participants:
+  "All job ceremony #i.
+    ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #i
+    ==>
+    Ex #j #k #l.
+      ThresholdFrostThresholdAtLeastTwo(job) @ #j
+      & ThresholdFrostParticipantCountMatched(job) @ #k
+      & ThresholdFrostParticipantsActive(job) @ #l
+      & #j = #i
+      & #k = #i
+      & #l = #i"
+
+lemma accepted_key_ceremony_requires_replay_record:
+  "All job ceremony #i.
+    ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #i
+    ==>
+    Ex #j.
+      ThresholdFrostReplayRecordWritten(job, ceremony) @ #j
+      & #j = #i"
+
+lemma accepted_signature_requires_key_ceremony:
+  "All job ceremony signature #i.
+    ThresholdFrostSignatureAccepted(job, ceremony, signature) @ #i
+    ==>
+    Ex #j.
+      ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #j
+      & #j < #i"
+
+lemma accepted_signature_requires_threshold_shares_and_digest:
+  "All job ceremony signature #i.
+    ThresholdFrostSignatureAccepted(job, ceremony, signature) @ #i
+    ==>
+    Ex #j #k.
+      ThresholdFrostThresholdSignatureSharesPresent(job, ceremony) @ #j
+      & ThresholdFrostSignatureTranscriptDigestMatched(job, ceremony, signature) @ #k
+      & #j = #i
+      & #k = #i"
+
+lemma accepted_signature_requires_signing_replay_record:
+  "All job ceremony signature #i.
+    ThresholdFrostSignatureAccepted(job, ceremony, signature) @ #i
+    ==>
+    Ex #j.
+      ThresholdFrostSigningReplayRecordWritten(job, ceremony, signature) @ #j
+      & #j = #i"
+
+lemma release_requires_accepted_key_ceremony:
+  "All job ceremony signature authority #i.
+    ThresholdFrostSignatureReleased(job, ceremony, signature, authority) @ #i
+    ==>
+    Ex #j.
+      ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #j
+      & #j < #i"
+
+lemma release_requires_accepted_signature:
+  "All job ceremony signature authority #i.
+    ThresholdFrostSignatureReleased(job, ceremony, signature, authority) @ #i
+    ==>
+    Ex #j.
+      ThresholdFrostSignatureAccepted(job, ceremony, signature) @ #j
+      & #j < #i"
+
+lemma release_requires_policy_active_epoch_and_governed_key_use:
+  "All job ceremony signature authority #i.
+    ThresholdFrostSignatureReleased(job, ceremony, signature, authority) @ #i
+    ==>
+    Ex #j #k #l.
+      ThresholdFrostPolicyApproved(job, ceremony, authority) @ #j
+      & ThresholdFrostActiveKeyEpoch(job, ceremony) @ #k
+      & ThresholdFrostGovernedKeyUse(job, ceremony) @ #l
+      & #j = #i
+      & #k = #i
+      & #l = #i"
+
+lemma unresolved_complaint_rejection_does_not_accept:
+  "All job complaint #i.
+    ThresholdFrostUnresolvedComplaintRejected(job, complaint) @ #i
+    ==>
+    not(Ex ceremony #j.
+      ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #j
+      & #j = #i)"
+
+lemma equivocation_rejection_does_not_accept:
+  "All job equivocation #i.
+    ThresholdFrostEquivocationRejected(job, equivocation) @ #i
+    ==>
+    not(Ex ceremony #j.
+      ThresholdFrostKeyCeremonyAccepted(job, ceremony) @ #j
+      & #j = #i)"
+
+lemma replay_rejection_does_not_release:
+  "All job replay #i.
+    ThresholdFrostReplayRejected(job, replay) @ #i
+    ==>
+    not(Ex ceremony signature authority #j.
+      ThresholdFrostSignatureReleased(job, ceremony, signature, authority) @ #j
+      & #j = #i)"
+
+end

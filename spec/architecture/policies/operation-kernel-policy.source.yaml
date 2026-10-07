@@ -1,0 +1,28 @@
+description: OperationKernel projection policy.
+operation_kernel_policy:
+  root_model: OperationKernel
+  source_root_model: SurfaceOperation
+  source_model: spec/architecture/surface-model.source.yaml
+  source_overlay: spec/architecture/operation-ownership.source.yaml
+  generated_catalog: generated/architecture/surface-catalog.yaml
+  generated_kernel: generated/architecture/operation-kernel.yaml
+  rule: >
+    Public HTTP operation identity, application workflow binding, resource-family
+    ownership, route coverage, server surface profiles, and operation evidence
+    must be projections of the OperationKernel IR. OperationKernel itself is
+    generated from the SurfaceOperation model plus generated HTTP and family
+    assignment evidence.
+  projection_targets:
+    - generated/architecture/operation-kernel.yaml
+    - docs/architecture/generated/operation-kernel.md
+    - generated/architecture/operation-catalog.yaml
+    - generated/architecture/pds-resource-families.yaml
+    - generated/architecture/surface-families.yaml
+    - docs/architecture/generated/surface-operation-index.md
+    - generated/surface-operation-index.evidence.json
+    - docs/architecture/generated/route-coverage.md
+    - generated/route-coverage.evidence.json
+    - crates/kiva-server/src/core/state/generated_surface_profiles.rs
+  runtime_bindings:
+    application_registry: crates/kiva-application/src/operation_catalog/generated/registry.rs
+    server_surface_profile_registry: crates/kiva-server/src/core/state/generated_surface_profiles.rs

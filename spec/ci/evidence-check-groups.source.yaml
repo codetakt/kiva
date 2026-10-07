@@ -1,0 +1,15 @@
+schema_version: 1
+kind: kiva-ci-evidence-check-groups-source
+status: active
+description: >
+  Human-owned CI evidence-check group ledger. This file owns group order, Nix
+  gate names, and public claim-boundary labels. Per-check execution rows remain
+  in spec/ci/evidence-checks.source.yaml; required check lists are generated
+  from those execution rows and ProjectionSpec references.
+groups:
+  - id: openapi-contract
+    nix_gate: checks.x86_64-linux.openapi-contract
+    claim_boundary: openapi-contract
+  - id: confidential-computation-assurance
+    nix_gate: checks.x86_64-linux.confidential-computation-assurance
+    claim_boundary: confidential-computation-assurance

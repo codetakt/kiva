@@ -1,0 +1,231 @@
+schema_version: 1
+kind: kiva-architecture-compatibility-surface-ledger
+status: active
+description: >
+  Compatibility surfaces that Kiva tracked while migrating toward narrower
+  mechanism, policy, and test boundaries. Removed rows remain as retirement
+  history; new compatibility exports require an explicit ledger entry and a
+  migration target.
+rules:
+  new_root_reexports_require_entry: true
+  compatibility_entries_require_migration_target: true
+  compatibility_entries_require_expansion_policy: true
+  compatibility_entries_require_retirement_milestone: true
+  compatibility_entries_require_retirement_condition: true
+  compatibility_entries_require_retirement_check: true
+  compatibility_entries_require_allowed_owner_exports: true
+  compatibility_entries_require_forbidden_call_site_check: true
+  compatibility_entries_require_lifecycle_status: true
+entries:
+  - id: confidential-root-primitive-reexports
+    owner: crates/kiva-confidential/src/lib.rs
+    status: removed
+    reason: Existing callers import fixed-width primitive wrappers from the
+      crate root.
+    retained_surface:
+      - pub use primitive::*
+      - pub use mechanism::additive::SecureAggregateError
+    migration_target: kiva_confidential::{primitive,mechanism}
+    expansion_policy: no-new-root-mechanism-reexports
+    retirement_milestone: compat-cc-root-reexports
+    retirement_condition: All callers import primitive wrappers from
+      kiva_confidential::primitive and mechanism errors from their owning
+      mechanism modules.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - pub use primitive::*
+        - pub use mechanism::additive::SecureAggregateError
+    allowed_owner_exports:
+      - pub use mechanism::additive::SecureAggregateError;
+      - pub use primitive::*;
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates
+      forbidden_patterns:
+        - "use kiva_confidential::*;"
+  - id: confidential-integrated-namespace
+    owner: crates/kiva-confidential/src/mechanism/mod.rs
+    status: removed
+    reason: The deprecated integrated namespace has been removed; mechanism
+      ownership now lives in mechanism::core and family-specific public facades.
+    retained_surface:
+      - pub use super::core::*
+    migration_target: kiva_confidential::mechanism::{additive,shamir,threshold,workflow,psi,tee,frost,fhe,provider,registry}
+    replacement_paths:
+      - crates/kiva-confidential/src/mechanism/additive.rs
+      - crates/kiva-confidential/src/mechanism/shamir.rs
+      - crates/kiva-confidential/src/mechanism/threshold.rs
+      - crates/kiva-confidential/src/mechanism/workflow.rs
+      - crates/kiva-confidential/src/mechanism/psi.rs
+      - crates/kiva-confidential/src/mechanism/tee.rs
+      - crates/kiva-confidential/src/mechanism/frost.rs
+      - crates/kiva-confidential/src/mechanism/fhe.rs
+      - crates/kiva-confidential/src/mechanism/provider.rs
+      - crates/kiva-confidential/src/mechanism/registry.rs
+    expansion_policy: no-new-public-integrated-entrypoints; new review metadata must flow through spec/confidential/mechanism-catalog.source.yaml and provider runtime contracts
+    retirement_milestone: compat-cc-integrated-namespace
+    retirement_condition: Mechanism callers and evidence references use
+      family-specific mechanism namespaces, the generated mechanism catalog,
+      and SecretComputeProviderRuntimeContract directly.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - pub use super::core::*
+    allowed_owner_exports:
+      - pub use super::core::*;
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates
+      forbidden_patterns:
+        - "use kiva_confidential::mechanism::integrated::*;"
+        - "use crate::mechanism::integrated::*;"
+  - id: policy-root-reexports
+    owner: crates/kiva-policy/src/lib.rs
+    status: removed
+    reason: Existing callers import pure policy decisions and compatibility
+      identity re-exports from the crate root.
+    retained_surface:
+      - pub use policy::*
+    migration_target: kiva_policy::policy
+    expansion_policy: explicit-policy-module-exports-only
+    retirement_milestone: compat-policy-root-reexports
+    retirement_condition: Policy callers import decisions and compatibility
+      identity types through explicit owning modules.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - pub use policy::*
+    allowed_owner_exports:
+      - pub use policy::*;
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates
+      forbidden_patterns:
+        - "use kiva_policy::*;"
+  - id: pds-request-aliases
+    owner: crates/kiva-pds/src/pds/requests.rs
+    status: removed
+    reason: PDS internal command and intent types have semantic names, while
+      legacy `*Request` aliases are retained for downstream source
+      compatibility during the OpenAPI generated-contract migration.
+    retained_surface:
+      - deprecated PDS request type aliases
+    migration_target: kiva_pds::pds::{ConsentGrantCommandInput,ConsentRevocationCommandInput,DataProductRegistrationCommandInput,DataProductReadIntent,ProviderBindingRegistrationCommandInput,AccessCheckIntent,LifecycleEventCommandInput,RetentionPolicyCommandInput,LifecycleCaseCommandInput,GovernanceProfileCommandInput}
+    expansion_policy: no-new-pds-request-aliases
+    retirement_milestone: compat-pds-request-aliases
+    retirement_condition: All internal callers import semantically named PDS
+      command-input and intent types; generated OpenAPI request DTOs remain in
+      kiva-pds-openapi-contract.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - pub type ConsentGrantRequest = ConsentGrantCommandInput;
+        - pub type ConsentRevocationRequest = ConsentRevocationCommandInput;
+        - pub type DataProductRequest = DataProductRegistrationCommandInput;
+        - pub type DataProductReadRequest = DataProductReadIntent;
+        - pub type ProviderBindingRequest = ProviderBindingRegistrationCommandInput;
+        - pub type AccessCheckRequest = AccessCheckIntent;
+        - pub type LifecycleEventRequest = LifecycleEventCommandInput;
+        - pub type RetentionPolicyRequest = RetentionPolicyCommandInput;
+        - pub type LifecycleCaseRequest = LifecycleCaseCommandInput;
+        - pub type GovernanceProfileRequest = GovernanceProfileCommandInput;
+    allowed_owner_exports: []
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates/kiva-server/src
+        - crates/kiva-application/src
+      forbidden_patterns:
+        - "use kiva_pds::pds::ConsentGrantRequest"
+        - "use kiva_pds::pds::ConsentRevocationRequest"
+        - "use kiva_pds::pds::DataProductRequest"
+        - "use kiva_pds::pds::DataProductReadRequest"
+        - "use kiva_pds::pds::ProviderBindingRequest"
+        - "use kiva_pds::pds::AccessCheckRequest"
+        - "use kiva_pds::pds::LifecycleEventRequest"
+        - "use kiva_pds::pds::RetentionPolicyRequest"
+        - "use kiva_pds::pds::LifecycleCaseRequest"
+        - "use kiva_pds::pds::GovernanceProfileRequest"
+  - id: secret-provider-compat-reexports
+    owner: crates/kiva-confidential/src/mechanism/provider.rs
+    status: removed
+    reason: Provider vocabulary has moved to kiva-secret-provider-contract, but
+      the confidential mechanism provider namespace retains compatibility
+      re-exports until downstream callers import the contract crate directly.
+    retained_surface:
+      - secret provider contract vocabulary re-export
+    migration_target: kiva_secret_provider_contract
+    expansion_policy: no-new-provider-vocabulary-reexports
+    retirement_milestone: compat-secret-provider-reexports
+    retirement_condition: Callers import provider-kind, provider-profile, and
+      provider-capability vocabulary from kiva-secret-provider-contract.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - pub use kiva_secret_provider_contract::{
+        - SecretComputeProviderKind
+        - SecretComputeProviderCapability
+        - SecretComputeProviderProfile
+    owner_export_policy: retained-surface-only
+    allowed_owner_exports:
+      - pub use kiva_secret_provider_contract::ComputeMechanismProvider;
+      - pub use kiva_secret_provider_contract::ComputeMechanismProviderKind;
+      - pub use kiva_secret_provider_contract::REFERENCE_PRIMITIVE_PROVIDER_PROFILE;
+      - pub use kiva_secret_provider_contract::ReferencePrimitiveProvider;
+      - pub use kiva_secret_provider_contract::ReferenceProviderKind;
+      - pub use kiva_secret_provider_contract::SECRET_COMPUTE_PROVIDER_CONTRACT_PROFILE;
+      - pub use kiva_secret_provider_contract::SECRET_COMPUTE_PROVIDER_KIND_REGISTRY;
+      - pub use kiva_secret_provider_contract::SecretComputeProviderCapability;
+      - pub use kiva_secret_provider_contract::SecretComputeProviderKind;
+      - pub use kiva_secret_provider_contract::SecretComputeProviderKindContract;
+      - pub use kiva_secret_provider_contract::SecretComputeProviderKindRegistryEntry;
+      - pub use kiva_secret_provider_contract::SecretComputeProviderProfile;
+      - pub use kiva_secret_provider_contract::SecretCustodyProvider;
+      - pub use kiva_secret_provider_contract::SecretCustodyProviderKind;
+      - pub use kiva_secret_provider_contract::registry_entry_for_provider_kind;
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates
+      forbidden_patterns:
+        - "use kiva_confidential::mechanism::provider::SecretComputeProviderKind"
+        - "use kiva_confidential::mechanism::provider::SecretComputeProviderCapability"
+        - "use kiva_confidential::mechanism::provider::SecretComputeProviderProfile"
+        - "use kiva_confidential::mechanism::provider::ReferencePrimitiveProvider"
+        - "use kiva_confidential::mechanism::provider::ComputeMechanismProvider"
+        - "use kiva_confidential::mechanism::provider::SecretCustodyProvider"
+  - id: server-test-helper-owner
+    owner: crates/kiva-server/src/tests.rs
+    status: removed
+    reason: The former tests/helpers.rs module owner has been removed; in-crate
+      tests now bind helper modules directly from tests.rs.
+    retained_surface:
+      - tests/helpers.rs module owner
+    migration_target: crates/kiva-server/src/tests/helpers/
+    expansion_policy: no-new-helper-bodies-in-owner
+    retirement_milestone: compat-server-test-helper-owner
+    retirement_condition: In-crate tests import helper functions from
+      resource-family helper modules without depending on the compatibility
+      module owner.
+    retirement_check:
+      type: owner-anchor-present
+      anchors:
+        - '#[path = "helpers/confidential.rs"]'
+        - pub(super) use confidential::*
+    allowed_owner_exports:
+      - pub(super) use confidential::*;
+      - pub(super) use confidential_openapi::*;
+      - pub(super) use fixtures::*;
+      - pub(super) use pds::*;
+      - pub(super) use request_dsl::*;
+      - pub(super) use state::*;
+    forbidden_call_site_check:
+      type: rust-use-absent
+      search_roots:
+        - crates/kiva-server/src/tests
+      forbidden_patterns:
+        - "use crate::tests::helpers::*;"

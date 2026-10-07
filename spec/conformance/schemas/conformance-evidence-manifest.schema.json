@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:evidence-manifest:1",
+  "title": "Kiva xAPI LRS conformance evidence manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "kind",
+    "generated_at_utc",
+    "git",
+    "release_requirements",
+    "reference_inputs",
+    "live_http",
+    "verification",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "kind": {
+      "const": "conformance-evidence"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "git": {
+      "$ref": "#/$defs/git"
+    },
+    "release_requirements": {
+      "$ref": "#/$defs/releaseRequirements"
+    },
+    "reference_inputs": {
+      "$ref": "#/$defs/referenceInputs"
+    },
+    "live_http": {
+      "$ref": "#/$defs/liveHttp"
+    },
+    "verification": {
+      "$ref": "#/$defs/verification"
+    },
+    "artifacts": {
+      "$ref": "#/$defs/artifacts"
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "dirty"
+      ],
+      "properties": {
+        "commit": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "releaseRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_clean_git",
+        "met_clean_git"
+      ],
+      "properties": {
+        "require_clean_git": {
+          "type": "boolean"
+        },
+        "met_clean_git": {
+          "type": "boolean"
+        }
+      }
+    },
+    "referenceInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ieee_reference_root",
+        "ieee_reference_root_exists",
+        "adl_root",
+        "adl_root_exists"
+      ],
+      "properties": {
+        "ieee_reference_root": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "ieee_reference_root_exists": {
+          "type": "boolean"
+        },
+        "adl_root": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "adl_root_exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "liveHttp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory",
+        "postgres"
+      ],
+      "properties": {
+        "memory": {
+          "type": "boolean"
+        },
+        "postgres": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "postgres"
+      ],
+      "properties": {
+        "postgres": {
+          "type": "boolean"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reports",
+        "junit",
+        "logs",
+        "metadata"
+      ],
+      "properties": {
+        "reports": {
+          "$ref": "#/$defs/stringList"
+        },
+        "junit": {
+          "$ref": "#/$defs/stringList"
+        },
+        "logs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "metadata": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    }
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:confidential:mechanism-profile-index:1",
+  "title": "Kiva confidential MechanismProfile index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "description",
+    "generated_from",
+    "generated_artifacts",
+    "profile_count",
+    "profiles",
+    "package_count",
+    "package_profiles"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-confidential-mechanism-profile-index" },
+    "status": { "const": "active" },
+    "description": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_index", "markdown"],
+      "properties": {
+        "profile_index": { "$ref": "#/$defs/nonEmptyString" },
+        "markdown": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "profile_count": { "type": "integer", "minimum": 1 },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/profile" }
+    },
+    "package_count": { "type": "integer", "minimum": 1 },
+    "package_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/packageProfile" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "boundary_type", "sealed_boundary", "gate_sequence", "required_capability", "production_review_required"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/nonEmptyString" },
+        "boundary_type": { "$ref": "#/$defs/nonEmptyString" },
+        "sealed_boundary": { "const": true },
+        "gate_sequence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "required_capability": { "$ref": "#/$defs/nonEmptyString" },
+        "production_review_required": { "type": "boolean" }
+      }
+    },
+    "participantModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires_all_participants"],
+      "properties": {
+        "requires_all_participants": { "type": "boolean" }
+      }
+    },
+    "maturity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["milestone", "level", "production_claim", "claim_boundary"],
+      "properties": {
+        "milestone": { "$ref": "#/$defs/nonEmptyString" },
+        "level": { "$ref": "#/$defs/nonEmptyString" },
+        "production_claim": { "type": "boolean" },
+        "claim_boundary": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "operationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "operation_id", "method", "path", "workflow_family"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "operation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "method": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "workflow_family": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "capabilityBindingRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "capability", "binding_kind", "operation_count"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "capability": { "$ref": "#/$defs/nonEmptyString" },
+        "binding_kind": { "$ref": "#/$defs/nonEmptyString" },
+        "operation_count": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "assuranceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "profile", "evidence_count"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "profile": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "verificationKernelRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mechanism", "required_evidence_kinds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "required_evidence_kinds": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "profile_type",
+        "maturity_mechanism",
+        "technique",
+        "provider",
+        "participant_model",
+        "maturity",
+        "capability_binding",
+        "operation_refs",
+        "assurance_registry_entries",
+        "verification_kernel_refs"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "profile_type": { "const": "MechanismProfile" },
+        "maturity_mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "technique": { "$ref": "#/$defs/nonEmptyString" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "participant_model": { "$ref": "#/$defs/participantModel" },
+        "maturity": { "$ref": "#/$defs/maturity" },
+        "capability_binding": { "$ref": "#/$defs/capabilityBindingRef" },
+        "operation_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/operationRef" }
+        },
+        "assurance_registry_entries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assuranceEntry" }
+        },
+        "verification_kernel_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verificationKernelRef" }
+        }
+      }
+    },
+    "packageProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "profile_type",
+        "maturity_mechanism",
+        "capability",
+        "provider_kind",
+        "mechanism_catalog_id",
+        "capability_binding",
+        "maturity",
+        "assurance_registry_entry",
+        "verification_family",
+        "verification_kernel_refs"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "profile_type": { "const": "PackageProfile" },
+        "maturity_mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "capability": { "$ref": "#/$defs/nonEmptyString" },
+        "provider_kind": { "$ref": "#/$defs/nonEmptyString" },
+        "mechanism_catalog_id": {
+          "anyOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "capability_binding": { "$ref": "#/$defs/capabilityBindingRef" },
+        "maturity": { "$ref": "#/$defs/maturity" },
+        "assurance_registry_entry": {
+          "anyOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "verification_family": { "$ref": "#/$defs/nonEmptyString" },
+        "verification_kernel_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verificationKernelRef" }
+        }
+      }
+    }
+  }
+}

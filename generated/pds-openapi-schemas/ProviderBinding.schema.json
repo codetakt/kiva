@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:ProviderBinding",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/ProviderBinding",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

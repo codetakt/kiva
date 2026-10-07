@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "source_basis": "PDF 4.1.4 conflict instructions; 4.1.6 document update/Person/canonical inventories/visibility guarantee. Expected failures declared from defect operations and intended subconditions, independent of run outcomes.",
+  "procedures": [
+    "conflict-resolution-explanation",
+    "consistent-through-visibility",
+    "document-updated-time-boundary",
+    "person-semantic-identifiers",
+    "canonical-activity-available-information",
+    "canonical-language-negotiation"
+  ],
+  "unexecuted_checks": [
+    "person-semantic-identifiers/full-external-grammar"
+  ],
+  "models": {
+    "none": {
+      "expected_failed_checks": []
+    },
+    "doc-last-modified-constant": {
+      "expected_failed_checks": [
+        "document-updated-time-boundary/activity-profile-last-modified",
+        "document-updated-time-boundary/activity-profile-modified-moves",
+        "document-updated-time-boundary/agent-profile-last-modified",
+        "document-updated-time-boundary/agent-profile-modified-moves",
+        "document-updated-time-boundary/state-last-modified",
+        "document-updated-time-boundary/state-modified-moves"
+      ]
+    },
+    "conflict-body-generic": {
+      "expected_failed_checks": [
+        "conflict-resolution-explanation/activity-profile-explanation",
+        "conflict-resolution-explanation/agent-profile-explanation",
+        "conflict-resolution-explanation/state-explanation"
+      ]
+    },
+    "canonical-strip-definitions": {
+      "expected_failed_checks": [
+        "canonical-language-negotiation/absent/context/contextActivities/category/0/definition/name",
+        "canonical-language-negotiation/absent/object/definition/choices/0/description",
+        "canonical-language-negotiation/absent/object/definition/description",
+        "canonical-language-negotiation/absent/object/definition/name",
+        "canonical-language-negotiation/range/context/contextActivities/category/0/definition/name",
+        "canonical-language-negotiation/range/object/definition/choices/0/description",
+        "canonical-language-negotiation/range/object/definition/description",
+        "canonical-language-negotiation/range/object/definition/name",
+        "canonical-language-negotiation/unavailable/context/contextActivities/category/0/definition/name",
+        "canonical-language-negotiation/unavailable/object/definition/choices/0/description",
+        "canonical-language-negotiation/unavailable/object/definition/description",
+        "canonical-language-negotiation/unavailable/object/definition/name",
+        "canonical-language-negotiation/weighted/context/contextActivities/category/0/definition/name",
+        "canonical-language-negotiation/weighted/object/definition/choices/0/description",
+        "canonical-language-negotiation/weighted/object/definition/description",
+        "canonical-language-negotiation/weighted/object/definition/name",
+        "canonical-language-negotiation/wildcard/context/contextActivities/category/0/definition/name",
+        "canonical-language-negotiation/wildcard/object/definition/choices/0/description",
+        "canonical-language-negotiation/wildcard/object/definition/description",
+        "canonical-language-negotiation/wildcard/object/definition/name"
+      ]
+    },
+    "activities-strip-definition": {
+      "expected_failed_checks": [
+        "canonical-activity-available-information/available-definition"
+      ]
+    },
+    "person-extra-invalid-member": {
+      "expected_failed_checks": [
+        "person-semantic-identifiers/account-mbox-0",
+        "person-semantic-identifiers/mbox-mbox-1",
+        "person-semantic-identifiers/mbox_sha1sum-mbox-0",
+        "person-semantic-identifiers/openid-mbox-0"
+      ]
+    },
+    "person-openid-unclosed-literal": {
+      "transport": "reference",
+      "expected_failed_checks": [
+        "person-semantic-identifiers/account-openid-0",
+        "person-semantic-identifiers/mbox-openid-0",
+        "person-semantic-identifiers/mbox_sha1sum-openid-0",
+        "person-semantic-identifiers/openid-openid-1"
+      ]
+    },
+    "person-homepage-unclosed-literal": {
+      "transport": "reference",
+      "expected_failed_checks": [
+        "person-semantic-identifiers/account-account-1",
+        "person-semantic-identifiers/mbox-account-0",
+        "person-semantic-identifiers/mbox_sha1sum-account-0",
+        "person-semantic-identifiers/openid-account-0"
+      ]
+    },
+    "person-mbox-malformed-percent": {
+      "transport": "reference",
+      "expected_failed_checks": [
+        "person-semantic-identifiers/account-mbox-0",
+        "person-semantic-identifiers/mbox-mbox-1",
+        "person-semantic-identifiers/mbox_sha1sum-mbox-0",
+        "person-semantic-identifiers/openid-mbox-0"
+      ]
+    },
+    "consistent-through-constant": {
+      "expected_failed_checks": [
+        "consistent-through-visibility/hidden-record-error",
+        "consistent-through-visibility/hidden-record-head",
+        "consistent-through-visibility/hidden-record-success"
+      ]
+    }
+  }
+}

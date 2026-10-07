@@ -1,0 +1,76 @@
+suite:
+  id: xapi-lrs-about-version
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Low-side-effect checks for xAPI About metadata and version headers.
+cases:
+  - id: about-get-advertises-latest-version
+    requirements:
+      - xapi-lrs-4.1.1-headers
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /about
+      headers:
+        Accept: application/json
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: "2.0.0"
+        Content-Type:
+          contains: application/json
+      json:
+        pointers:
+          /version:
+            contains: "2.0.0"
+
+  - id: about-get-accepts-version-2-0-alias
+    requirements:
+      - xapi-lrs-4.1.6.7-about-version
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-2-0-alias
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /about
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: "2.0"
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: "2.0.0"
+      json:
+        pointers:
+          /version:
+            contains: "2.0.0"
+
+  - id: about-head-does-not-reject-version-header
+    requirements:
+      - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: HEAD
+      path: /about
+      headers:
+        X-Experience-API-Version: "2.1.0"
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: "2.0.0"
+      body:
+        non_empty: false

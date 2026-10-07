@@ -1,0 +1,69 @@
+schema_version: 1
+kind: kiva-confidential-capability-taxonomy-source
+status: active
+description: >
+  Human-owned capability taxonomy for confidential-computation mechanism
+  bindings. CapabilityBinding rows reference these capabilities; the taxonomy
+  owns default workflow-family affinity and binding kind.
+capability_port_model:
+  root_type: CapabilityPort
+  port_fields:
+    - capability
+    - binding_kind
+    - workflow_families
+    - provider_policy
+    - sealed_provider_boundary
+    - release_gate
+    - evidence
+  pds_visibility_rule: >
+    PDS surfaces bind to capabilities and release artifacts. Concrete
+    cryptographic mechanisms and external runtime providers stay behind the
+    confidential-computation provider boundary.
+capabilities:
+  - id: additive-secure-aggregation
+    binding_kind: dedicated-workflow
+    workflow_families:
+      - additive
+      - threshold
+  - id: differential-privacy-release
+    binding_kind: dedicated-workflow
+    workflow_families:
+      - differential_privacy
+  - id: threshold-reconstruction
+    binding_kind: dedicated-workflow
+    workflow_families:
+      - shamir
+  - id: psi-evaluation
+    binding_kind: generic-runtime-orchestration
+    workflow_families:
+      - job
+      - participant
+  - id: tee-attestation
+    binding_kind: generic-runtime-orchestration
+    workflow_families:
+      - job
+      - participant
+  - id: threshold-signing
+    binding_kind: generic-runtime-orchestration
+    workflow_families:
+      - job
+      - participant
+      - threshold
+  - id: fhe-evaluation
+    binding_kind: generic-runtime-orchestration
+    workflow_families:
+      - job
+      - participant
+  - id: confidential-job-lifecycle
+    binding_kind: lifecycle-substrate
+    workflow_families:
+      - job
+  - id: confidential-participant-key-lifecycle
+    binding_kind: lifecycle-substrate
+    workflow_families:
+      - participant
+  - id: provider-contract
+    binding_kind: lifecycle-substrate
+    workflow_families:
+      - job
+      - participant

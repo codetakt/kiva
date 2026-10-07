@@ -1,0 +1,1761 @@
+openapi: 3.1.0
+info:
+  title: Kiva Personal Data Store API
+  version: 0.3.0
+  summary: Kiva consent, delegation, lifecycle metadata, governance, approved-data-product, and access-audit contract.
+  description: >
+    Machine-readable API contract for Kiva-specific Personal Data Store
+    endpoints. This contract is intentionally separate from the
+    IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS contract.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /
+    description: Kiva platform base resource.
+tags:
+  - name: Consent Grants
+  - name: Data Products
+  - name: Provider Bindings
+  - name: Lifecycle
+  - name: Governance
+  - name: Access Decisions
+security:
+  - bearerAuth: []
+x-kiva-contract:
+  area: personal-data-store
+  status: Kiva platform extension, not part of the IEEE xAPI LRS surface.
+  evidence:
+    - crates/kiva-pds/src/lib.rs
+    - crates/kiva-pds/src/pds/mod.rs
+    - crates/kiva-pds/src/pds/wire_enums.rs
+    - crates/kiva-pds/src/pds/requests.rs
+    - crates/kiva-pds/src/pds/validation.rs
+    - crates/kiva-pds/src/pds/release_artifacts.rs
+    - crates/kiva-pds/src/pds/identity.rs
+    - crates/kiva-release-artifacts/src/lib.rs
+    - crates/kiva-pds/src/pds/tests.rs
+    - crates/kiva-identity/src/lib.rs
+    - crates/kiva-policy/src/lib.rs
+    - crates/kiva-policy/src/policy/mod.rs
+    - crates/kiva-policy/src/policy/core.rs
+    - crates/kiva-policy/src/policy/lifecycle.rs
+    - crates/kiva-policy/src/policy/delegation.rs
+    - crates/kiva-policy/src/policy/data_products.rs
+    - crates/kiva-policy/src/policy/governance.rs
+    - crates/kiva-policy/src/policy/decision.rs
+    - crates/kiva-policy/src/policy/tests.rs
+    - crates/kiva-policy/src/policy/kani_harnesses.rs
+    - crates/kiva-server/src/core/state.rs
+    - crates/kiva-server/src/core/state/http_context.rs
+    - crates/kiva-server/src/core/request_guards.rs
+    - crates/kiva-pds-openapi-contract/src/lib.rs
+    - crates/kiva-server/src/app/pds.rs
+    - crates/kiva-server/src/app/pds/server_adapters.rs
+    - crates/kiva-server/src/app/pds/server_adapters/pds_records.rs
+    - crates/kiva-server/src/app/pds/server_adapters/projection.rs
+    - crates/kiva-server/src/app/pds/server_adapters/records.rs
+    - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+    - crates/kiva-server/src/app/pds/server_adapters/xapi.rs
+    - crates/kiva-application/src/pds.rs
+    - crates/kiva-application/src/pds/model.rs
+    - crates/kiva-application/src/pds/model/errors.rs
+    - crates/kiva-application/src/pds/model/records.rs
+    - crates/kiva-application/src/pds/model/snapshot.rs
+    - crates/kiva-application/src/pds/capabilities.rs
+    - crates/kiva-application/src/pds/workflow.rs
+    - crates/kiva-server/src/surfaces/pds/routes.rs
+    - crates/kiva-server/src/surfaces/pds/handlers.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/prelude.rs
+    - crates/kiva-server/src/surfaces/pds/handlers/request.rs
+    - crates/kiva-server/src/surfaces/pds/service.rs
+    - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+    - crates/kiva-server/src/surfaces/pds/repository.rs
+    - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/model.rs
+    - crates/kiva-server/src/surfaces/pds/model/state.rs
+    - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/storage.rs
+    - crates/kiva-server/src/surfaces/pds/storage/memory.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/ledger.rs
+    - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+    - crates/kiva-server/src/surfaces/pds/wire.rs
+    - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/common.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs
+    - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+    - crates/kiva-server/src/tests/pds_memory.rs
+    - crates/kiva-server/src/tests/pds_memory
+    - db/migrations/20260619270000_pds_ledger_events.sql
+    - db/schema.sql
+    - docs/architecture/pds-milestones.md
+    - docs/architecture/assurance-and-confidential-computation.md
+paths:
+  /pds/consent-grants:
+    get:
+      tags: [Consent Grants]
+      operationId: getPdsConsentGrants
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List subject-scoped consent and delegation grants.
+      parameters:
+        - $ref: "#/components/parameters/GrantIdOptional"
+      responses:
+        "200":
+          description: Consent grants visible to the authenticated subject.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsentGrantList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Consent Grants]
+      operationId: postPdsConsentGrant
+      x-kiva-required-scopes: ["pds:delegate"]
+      summary: Register an active consent/delegation grant owned by the authenticated subject.
+      requestBody:
+        $ref: "#/components/requestBodies/ConsentGrantRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/consent-revocations:
+    post:
+      tags: [Consent Grants]
+      operationId: postPdsConsentRevocation
+      x-kiva-required-scopes: ["pds:revoke"]
+      summary: Revoke a consent/delegation grant owned by the authenticated subject.
+      requestBody:
+        $ref: "#/components/requestBodies/ConsentRevocationRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /pds/data-products:
+    get:
+      tags: [Data Products]
+      operationId: getPdsDataProducts
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List approved data products registered by the authenticated subject.
+      parameters:
+        - $ref: "#/components/parameters/DataProductIdOptional"
+      responses:
+        "200":
+          description: Approved data-product metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataProductList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Data Products]
+      operationId: postPdsDataProduct
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Register an approved aggregate data product for a confidential release.
+      description: >
+        The release_id must reference an available Kiva confidential release
+        owned by the authenticated subject. Threshold-release artifacts must
+        already be released; differential-privacy-release artifacts must already
+        exist; shamir-threshold-reconstruction sources must reference persisted
+        same-owner reconstruction metadata. The PDS response exposes a
+        normalized releaseArtifact reference plus compatibility sourceKind and
+        releaseId fields, but never aggregate payloads, reconstructed values,
+        shares, signatures, or noise evidence.
+      requestBody:
+        $ref: "#/components/requestBodies/DataProductRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/provider-bindings:
+    get:
+      tags: [Provider Bindings]
+      operationId: getPdsProviderBindings
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List secret/confidential-compute provider binding metadata.
+      description: >
+        Provider bindings are PDS-owned metadata entries admitted by Kiva's
+        confidential provider contract. They expose provider class, digest,
+        evidence-gate, release-gate, and runtime-boundary metadata only; they
+        do not expose provider secrets, keys, ciphertexts, shares, signatures,
+        or provider payloads.
+      parameters:
+        - $ref: "#/components/parameters/BindingIdOptional"
+      responses:
+        "200":
+          description: Provider bindings visible to the authenticated subject.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderBindingList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Provider Bindings]
+      operationId: postPdsProviderBinding
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Register admitted provider binding metadata for PDS experiments.
+      description: >
+        The request is validated against the secret/confidential-compute
+        provider contract before persistence. Reference providers are admitted
+        only as fixture boundaries, while production claims require completed
+        external review evidence under the provider contract.
+      requestBody:
+        $ref: "#/components/requestBodies/ProviderBindingRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/data-product-reads:
+    post:
+      tags: [Data Products]
+      operationId: postPdsDataProductRead
+      x-kiva-required-scopes: ["pds:read"]
+      summary: Read an approved data product through the PDS policy boundary.
+      description: >
+        The request is admitted only as an analyst aggregate-insight read over
+        an existing PDS data product whose owner is the same data subject that
+        delegated aggregate-insight access to the authenticated requester. Every
+        request persists an access-audit event. Successful responses expose
+        data-product metadata only; denied responses expose the decision and
+        deny reason without data-product metadata.
+      requestBody:
+        $ref: "#/components/requestBodies/DataProductReadRequest"
+      responses:
+        "200":
+          description: Data-product metadata admitted by the PDS policy boundary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataProductReadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The data-product read was denied by PDS policy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataProductReadResponse"
+  /pds/record-inventory:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsRecordInventory
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List subject-visible xAPI record metadata and registered data products.
+      description: >
+        The inventory exposes promoted xAPI metadata for the authenticated
+        subject's PDS account IFI and approved data-product metadata. It does
+        not expose raw Statement JSON, result payloads, aggregate payloads,
+        shares, signatures, or noise evidence.
+      responses:
+        "200":
+          description: Subject-visible PDS record inventory.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordInventory"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /pds/metadata-exports:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsMetadataExports
+      x-kiva-required-scopes: ["pds:read"]
+      summary: Export subject-owned PDS metadata without raw xAPI or confidential payloads.
+      responses:
+        "200":
+          description: Subject-owned PDS metadata export.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataExport"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /pds/data-portability-exports:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsDataPortabilityExports
+      x-kiva-required-scopes: ["pds:read"]
+      summary: Export the authenticated subject's accepted Statements and PDS metadata.
+      description: >
+        Returns only Statements whose canonical actor IFI is mapped from the
+        authenticated principal. This governed PDS operation is not part of
+        the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance surface.
+      parameters:
+        - $ref: "#/components/parameters/PortabilityCursor"
+        - $ref: "#/components/parameters/PortabilityPageSize"
+      responses:
+        "200":
+          description: One audited learner-initiated portability export page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortabilityExport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /pds/lifecycle-events:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsLifecycleEvents
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List subject-scoped lifecycle events.
+      parameters:
+        - $ref: "#/components/parameters/EventIdOptional"
+      responses:
+        "200":
+          description: PDS lifecycle events for the authenticated subject.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LifecycleEventList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Lifecycle]
+      operationId: postPdsLifecycleEvent
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Register a subject-owned lifecycle event for PDS metadata.
+      description: >
+        Lifecycle events record export, retention review, correction/dispute,
+        and tombstone metadata around immutable xAPI Statements and PDS
+        resources. They do not mutate accepted xAPI Statements in place.
+      requestBody:
+        $ref: "#/components/requestBodies/LifecycleEventRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/retention-policies:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsRetentionPolicies
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List subject-owned operational retention policies.
+      description: >
+        Retention policies define operational metadata for review schedules,
+        retention periods, and tombstone publication rules. They do not mutate
+        accepted xAPI Statements.
+      parameters:
+        - $ref: "#/components/parameters/PolicyIdOptional"
+      responses:
+        "200":
+          description: Subject-owned retention policy metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetentionPolicyList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Lifecycle]
+      operationId: postPdsRetentionPolicy
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Register a subject-owned operational retention policy.
+      requestBody:
+        $ref: "#/components/requestBodies/RetentionPolicyRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/lifecycle-cases:
+    get:
+      tags: [Lifecycle]
+      operationId: getPdsLifecycleCases
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List correction, dispute, and tombstone workflow cases.
+      description: >
+        Lifecycle cases are metadata-only operational workflows around xAPI and
+        PDS resources. Case state is strict: new cases start open, progress to
+        under-review, then resolve, reject, or tombstone without reopening.
+      parameters:
+        - $ref: "#/components/parameters/CaseIdOptional"
+      responses:
+        "200":
+          description: Subject-owned operational lifecycle cases.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LifecycleCaseList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Lifecycle]
+      operationId: postPdsLifecycleCase
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Open or advance a correction, dispute, or tombstone workflow case.
+      description: >
+        Repeated identical submissions are idempotent. Incompatible metadata,
+        non-open initial states, invalid status transitions, and terminal case
+        rewrites are rejected. The operation records workflow metadata only.
+      requestBody:
+        $ref: "#/components/requestBodies/LifecycleCaseRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/governance-profiles:
+    get:
+      tags: [Governance]
+      operationId: getPdsGovernanceProfiles
+      x-kiva-required-scopes: ["pds:read"]
+      summary: List public-sector governance profiles owned by the authenticated subject.
+      parameters:
+        - $ref: "#/components/parameters/ProfileIdOptional"
+      responses:
+        "200":
+          description: Subject-owned public-sector governance profiles.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GovernanceProfileList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Governance]
+      operationId: postPdsGovernanceProfile
+      x-kiva-required-scopes: ["pds:write"]
+      summary: Register a strict public-sector governance deployment profile.
+      description: >
+        Governance profiles are Kiva PDS extension metadata for deployments
+        where custody, platform operation, policy authority, analysis, audit,
+        and optional identity authority are separated. Profiles declare tenant
+        and subject partitioning, emergency-access policy, and operational
+        runbook references. They do not expose raw xAPI Statements or
+        confidential-computation payloads.
+      requestBody:
+        $ref: "#/components/requestBodies/GovernanceProfileRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /pds/access-checks:
+    post:
+      tags: [Access Decisions]
+      operationId: postPdsAccessCheck
+      x-kiva-required-scopes: ["pds:read"]
+      summary: Evaluate the PDS policy boundary and persist an access-audit event.
+      description: >
+        When data_product_id is supplied, the request must be an aggregate
+        insight read over an existing PDS data product whose owner is the same
+        data subject that delegated access to the authenticated requester.
+      requestBody:
+        $ref: "#/components/requestBodies/AccessCheckRequest"
+      responses:
+        "200":
+          description: Policy decision and audit event metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessCheckResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /pds/access-audit-events:
+    get:
+      tags: [Access Decisions]
+      operationId: getPdsAccessAuditEvents
+      x-kiva-required-scopes: ["pds:audit"]
+      summary: List subject-scoped PDS access-audit events without raw payloads.
+      parameters:
+        - $ref: "#/components/parameters/EventIdOptional"
+      responses:
+        "200":
+          description: PDS access-audit events visible to the authenticated subject.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessAuditEventList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        OAuth/OIDC-derived bearer token accepted by the Kiva resource server.
+        Each PDS operation declares the exact scope required in
+        x-kiva-required-scopes. Missing or refused tokens fail with 401;
+        accepted tokens without the required scope fail with 403.
+  parameters:
+    PortabilityCursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque continuation cursor returned by the previous export page.
+      schema:
+        type: string
+        minLength: 1
+    PortabilityPageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    GrantIdOptional:
+      name: grantId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    DataProductIdOptional:
+      name: dataProductId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    BindingIdOptional:
+      name: bindingId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    EventIdOptional:
+      name: eventId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    PolicyIdOptional:
+      name: policyId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    CaseIdOptional:
+      name: caseId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    ProfileIdOptional:
+      name: profileId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+  requestBodies:
+    ConsentGrantRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConsentGrantRequest"
+    ConsentRevocationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConsentRevocationRequest"
+    DataProductRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DataProductRequest"
+    DataProductReadRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DataProductReadRequest"
+    ProviderBindingRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProviderBindingRequest"
+    LifecycleEventRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LifecycleEventRequest"
+    RetentionPolicyRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RetentionPolicyRequest"
+    LifecycleCaseRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LifecycleCaseRequest"
+    GovernanceProfileRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GovernanceProfileRequest"
+    AccessCheckRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AccessCheckRequest"
+  responses:
+    NoContent:
+      description: Request accepted without response content.
+    BadRequest:
+      description: Request failed structural validation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Bearer authorization is required or refused.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The authenticated subject does not own the requested PDS resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The requested PDS resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: The request conflicts with existing PDS state.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+    Uuid:
+      type: string
+      format: uuid
+    Hex32:
+      type: string
+      pattern: "^[0-9a-fA-F]{64}$"
+    ConsentScope:
+      type: string
+      enum: [raw-records, personal-data, aggregate-insights]
+    ConsentState:
+      type: string
+      enum: [active, revoked]
+    LegalBasis:
+      type: string
+      enum:
+        - consent
+        - public-task
+        - legitimate-interest
+        - contract
+        - legal-obligation
+    DataClass:
+      type: string
+      enum:
+        - statement-metadata
+        - consent-metadata
+        - data-product-metadata
+        - access-audit-metadata
+        - lifecycle-metadata
+    PrincipalRole:
+      type: string
+      enum:
+        - data-subject
+        - data-custodian
+        - policy-authority
+        - analyst
+        - auditor
+        - computation-participant
+    ResourceClass:
+      type: string
+      enum:
+        - raw-learning-record
+        - personal-data-store
+        - aggregate-insight
+        - audit-evidence
+        - confidential-computation
+    PolicyAction:
+      type: string
+      enum: [write, read, delegate, revoke, compute, release, audit]
+    PolicyDecision:
+      type: string
+      enum: [allow, deny]
+    DataProductSourceKind:
+      type: string
+      enum:
+        - threshold-release
+        - differential-privacy-release
+        - shamir-threshold-reconstruction
+    ConfidentialMechanismKind:
+      type: string
+      enum:
+        - additive-n-of-n
+        - private-set-intersection
+        - private-set-intersection-oprf-dh
+        - shamir-threshold
+        - threshold-frost-signing
+        - trusted-execution-environment
+        - trusted-execution-environment-aws-nitro
+        - fhe-sum-feasibility
+        - fhe-sum-runtime
+    SecretComputeProviderKind:
+      type: string
+      enum:
+        - reference-primitive
+        - secret-custody
+        - trusted-execution-environment
+        - fully-homomorphic-encryption
+        - private-set-intersection
+        - threshold-cryptography
+    SecretComputeProviderCapability:
+      type: string
+      enum:
+        - secret-custody
+        - tee-attestation
+        - fhe-evaluation
+        - psi-evaluation
+        - threshold-signing
+        - reference-fixtures
+    SecretComputeProviderProfile:
+      type: string
+      enum:
+        - kiva-reference-primitives-v1
+        - kiva-secret-compute-provider-contract-v1
+    SecretComputeProviderEvidenceGate:
+      type: string
+      enum:
+        - reference-fixture
+        - external-non-production
+        - external-reviewed
+    SecretComputeProviderReleaseGate:
+      type: string
+      enum:
+        - fixture-only
+        - non-production
+        - production
+    SecretComputeProviderRuntimeClass:
+      type: string
+      enum:
+        - reference
+        - external-non-production
+        - external-reviewed-production
+    ReleaseArtifactKind:
+      type: string
+      enum:
+        - threshold-release
+        - differential-privacy-release
+        - shamir-threshold-reconstruction
+    ReleaseArtifactRef:
+      type: object
+      additionalProperties: false
+      required: [kind, artifactId]
+      properties:
+        kind:
+          $ref: "#/components/schemas/ReleaseArtifactKind"
+        artifactId:
+          $ref: "#/components/schemas/Hex32"
+    LifecycleEventType:
+      type: string
+      enum:
+        - exported
+        - retention-reviewed
+        - correction-requested
+        - dispute-opened
+        - tombstone-recorded
+    LifecycleResourceKind:
+      type: string
+      enum:
+        - xapi-statement
+        - consent-grant
+        - data-product
+        - metadata-export
+    TombstonePublicationRule:
+      type: string
+      enum:
+        - metadata-only
+        - subject-visible
+        - public-redacted
+    LifecycleCaseType:
+      type: string
+      enum:
+        - correction
+        - dispute
+        - tombstone
+    LifecycleCaseStatus:
+      type: string
+      enum:
+        - open
+        - under-review
+        - resolved
+        - rejected
+        - tombstoned
+    GovernanceProfileKind:
+      type: string
+      enum:
+        - single-operator
+        - school-district
+        - multi-agency
+    PdsSubjectAgent:
+      type: object
+      additionalProperties: false
+      required: [objectType, account]
+      properties:
+        objectType:
+          type: string
+          const: Agent
+        account:
+          type: object
+          additionalProperties: false
+          required: [homePage, name]
+          properties:
+            homePage:
+              type: string
+              format: uri
+            name:
+              type: string
+              minLength: 1
+    ConsentGrantRequest:
+      type: object
+      additionalProperties: false
+      required: [grant_id, grantee_subject, scope, purpose, legal_basis]
+      properties:
+        grant_id:
+          $ref: "#/components/schemas/Uuid"
+        grantee_subject:
+          type: string
+          minLength: 1
+        scope:
+          $ref: "#/components/schemas/ConsentScope"
+        purpose:
+          type: string
+          minLength: 1
+        legal_basis:
+          $ref: "#/components/schemas/LegalBasis"
+        expires_at:
+          type: string
+          format: date-time
+        renewed_from_grant_id:
+          $ref: "#/components/schemas/Uuid"
+    ConsentRevocationRequest:
+      type: object
+      additionalProperties: false
+      required: [grant_id]
+      properties:
+        grant_id:
+          $ref: "#/components/schemas/Uuid"
+    ConsentGrant:
+      type: object
+      additionalProperties: false
+      required:
+        - grantId
+        - dataSubject
+        - granteeSubject
+        - scope
+        - state
+        - purpose
+        - legalBasis
+        - createdAt
+      properties:
+        grantId:
+          $ref: "#/components/schemas/Uuid"
+        dataSubject:
+          type: string
+        granteeSubject:
+          type: string
+        scope:
+          $ref: "#/components/schemas/ConsentScope"
+        state:
+          $ref: "#/components/schemas/ConsentState"
+        purpose:
+          type: string
+        legalBasis:
+          $ref: "#/components/schemas/LegalBasis"
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        revokedAt:
+          type: string
+          format: date-time
+        renewedFromGrantId:
+          $ref: "#/components/schemas/Uuid"
+    ConsentGrantList:
+      type: object
+      additionalProperties: false
+      required: [grants]
+      properties:
+        grants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentGrant"
+    DataProductRequest:
+      type: object
+      additionalProperties: false
+      required: [data_product_id, source_kind, release_id, title, purpose, legal_basis, data_classes]
+      properties:
+        data_product_id:
+          $ref: "#/components/schemas/Uuid"
+        source_kind:
+          $ref: "#/components/schemas/DataProductSourceKind"
+        release_id:
+          $ref: "#/components/schemas/Hex32"
+        title:
+          type: string
+          minLength: 1
+        purpose:
+          type: string
+          minLength: 1
+        legal_basis:
+          $ref: "#/components/schemas/LegalBasis"
+        data_classes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/DataClass"
+    DataProduct:
+      type: object
+      additionalProperties: false
+      required:
+        - dataProductId
+        - ownerSubject
+        - sourceKind
+        - releaseId
+        - releaseArtifact
+        - title
+        - purpose
+        - legalBasis
+        - dataClasses
+        - createdAt
+      properties:
+        dataProductId:
+          $ref: "#/components/schemas/Uuid"
+        ownerSubject:
+          type: string
+        sourceKind:
+          $ref: "#/components/schemas/DataProductSourceKind"
+        releaseId:
+          $ref: "#/components/schemas/Hex32"
+        releaseArtifact:
+          $ref: "#/components/schemas/ReleaseArtifactRef"
+        title:
+          type: string
+        purpose:
+          type: string
+        legalBasis:
+          $ref: "#/components/schemas/LegalBasis"
+        dataClasses:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DataClass"
+        createdAt:
+          type: string
+          format: date-time
+    DataProductList:
+      type: object
+      additionalProperties: false
+      required: [dataProducts]
+      properties:
+        dataProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataProduct"
+    DataProductReadRequest:
+      type: object
+      additionalProperties: false
+      required: [grant_id, data_product_id]
+      properties:
+        grant_id:
+          $ref: "#/components/schemas/Uuid"
+        data_product_id:
+          $ref: "#/components/schemas/Uuid"
+    DataProductReadResponse:
+      type: object
+      additionalProperties: false
+      required: [eventId, decision]
+      properties:
+        eventId:
+          $ref: "#/components/schemas/Uuid"
+        decision:
+          $ref: "#/components/schemas/PolicyDecision"
+        denyReason:
+          type: string
+        dataProduct:
+          $ref: "#/components/schemas/DataProduct"
+    ProviderBindingRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - binding_id
+        - mechanism
+        - provider_kind
+        - capability
+        - profile
+        - provider_id_digest
+        - artifact_digest
+        - production_claim_requested
+      properties:
+        binding_id:
+          $ref: "#/components/schemas/Uuid"
+        mechanism:
+          $ref: "#/components/schemas/ConfidentialMechanismKind"
+        provider_kind:
+          $ref: "#/components/schemas/SecretComputeProviderKind"
+        capability:
+          $ref: "#/components/schemas/SecretComputeProviderCapability"
+        profile:
+          $ref: "#/components/schemas/SecretComputeProviderProfile"
+        provider_id_digest:
+          $ref: "#/components/schemas/Hex32"
+        artifact_digest:
+          $ref: "#/components/schemas/Hex32"
+        parameter_set_digest:
+          $ref: "#/components/schemas/Hex32"
+        review_evidence_digest:
+          $ref: "#/components/schemas/Hex32"
+        production_claim_requested:
+          type: boolean
+    ProviderBinding:
+      type: object
+      additionalProperties: false
+      required:
+        - bindingId
+        - ownerSubject
+        - mechanism
+        - providerKind
+        - capability
+        - profile
+        - providerIdDigest
+        - artifactDigest
+        - productionClaimRequested
+        - bindingDigest
+        - evidenceGate
+        - releaseGate
+        - runtimeClass
+        - productionReady
+        - createdAt
+      properties:
+        bindingId:
+          $ref: "#/components/schemas/Uuid"
+        ownerSubject:
+          type: string
+        mechanism:
+          $ref: "#/components/schemas/ConfidentialMechanismKind"
+        providerKind:
+          $ref: "#/components/schemas/SecretComputeProviderKind"
+        capability:
+          $ref: "#/components/schemas/SecretComputeProviderCapability"
+        profile:
+          $ref: "#/components/schemas/SecretComputeProviderProfile"
+        providerIdDigest:
+          $ref: "#/components/schemas/Hex32"
+        artifactDigest:
+          $ref: "#/components/schemas/Hex32"
+        parameterSetDigest:
+          $ref: "#/components/schemas/Hex32"
+        reviewEvidenceDigest:
+          $ref: "#/components/schemas/Hex32"
+        productionClaimRequested:
+          type: boolean
+        bindingDigest:
+          $ref: "#/components/schemas/Hex32"
+        evidenceGate:
+          $ref: "#/components/schemas/SecretComputeProviderEvidenceGate"
+        releaseGate:
+          $ref: "#/components/schemas/SecretComputeProviderReleaseGate"
+        runtimeClass:
+          $ref: "#/components/schemas/SecretComputeProviderRuntimeClass"
+        productionReady:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    ProviderBindingList:
+      type: object
+      additionalProperties: false
+      required: [providerBindings]
+      properties:
+        providerBindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderBinding"
+    StatementInventoryRecord:
+      type: object
+      additionalProperties: false
+      required:
+        - statementId
+        - actorIfi
+        - verbId
+        - objectId
+        - storedAt
+        - version
+      properties:
+        statementId:
+          $ref: "#/components/schemas/Uuid"
+        actorIfi:
+          type: string
+        verbId:
+          type: string
+          format: uri
+        objectId:
+          type: string
+          format: uri
+        storedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+    RecordInventory:
+      type: object
+      additionalProperties: false
+      required: [dataSubject, actor, actorIfi, statementRecords, dataProducts]
+      properties:
+        dataSubject:
+          type: string
+        actor:
+          $ref: "#/components/schemas/PdsSubjectAgent"
+        actorIfi:
+          type: string
+        statementRecords:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatementInventoryRecord"
+        dataProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataProduct"
+    LifecycleEventRequest:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, resource_kind, resource_id, reason]
+      properties:
+        event_id:
+          $ref: "#/components/schemas/Uuid"
+        event_type:
+          $ref: "#/components/schemas/LifecycleEventType"
+        resource_kind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        resource_id:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+          minLength: 1
+    LifecycleEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - dataSubject
+        - eventType
+        - resourceKind
+        - resourceId
+        - reason
+        - createdAt
+      properties:
+        eventId:
+          $ref: "#/components/schemas/Uuid"
+        dataSubject:
+          type: string
+        eventType:
+          $ref: "#/components/schemas/LifecycleEventType"
+        resourceKind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        resourceId:
+          type: string
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    LifecycleEventList:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleEvent"
+    RetentionPolicyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - policy_id
+        - resource_kind
+        - data_class
+        - retention_period_days
+        - review_interval_days
+        - tombstone_publication
+        - legal_basis
+        - description
+      properties:
+        policy_id:
+          $ref: "#/components/schemas/Uuid"
+        resource_kind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        data_class:
+          $ref: "#/components/schemas/DataClass"
+        retention_period_days:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        review_interval_days:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        tombstone_after_days:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        tombstone_publication:
+          $ref: "#/components/schemas/TombstonePublicationRule"
+        legal_basis:
+          $ref: "#/components/schemas/LegalBasis"
+        description:
+          type: string
+          minLength: 1
+    RetentionPolicy:
+      type: object
+      additionalProperties: false
+      required:
+        - policyId
+        - ownerSubject
+        - resourceKind
+        - dataClass
+        - retentionPeriodDays
+        - reviewIntervalDays
+        - tombstonePublication
+        - legalBasis
+        - description
+        - createdAt
+      properties:
+        policyId:
+          $ref: "#/components/schemas/Uuid"
+        ownerSubject:
+          type: string
+        resourceKind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        dataClass:
+          $ref: "#/components/schemas/DataClass"
+        retentionPeriodDays:
+          type: integer
+          minimum: 1
+        reviewIntervalDays:
+          type: integer
+          minimum: 1
+        tombstoneAfterDays:
+          type: [integer, "null"]
+          minimum: 1
+        tombstonePublication:
+          $ref: "#/components/schemas/TombstonePublicationRule"
+        legalBasis:
+          $ref: "#/components/schemas/LegalBasis"
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    RetentionPolicyList:
+      type: object
+      additionalProperties: false
+      required: [policies]
+      properties:
+        policies:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetentionPolicy"
+    LifecycleCaseRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - case_id
+        - case_type
+        - resource_kind
+        - resource_id
+        - status
+        - summary
+      properties:
+        case_id:
+          $ref: "#/components/schemas/Uuid"
+        case_type:
+          $ref: "#/components/schemas/LifecycleCaseType"
+        resource_kind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        resource_id:
+          type: string
+          minLength: 1
+        status:
+          $ref: "#/components/schemas/LifecycleCaseStatus"
+        retention_policy_id:
+          $ref: "#/components/schemas/Uuid"
+        summary:
+          type: string
+          minLength: 1
+        resolution:
+          type: string
+          minLength: 1
+        tombstone_publication:
+          $ref: "#/components/schemas/TombstonePublicationRule"
+    LifecycleCase:
+      type: object
+      additionalProperties: false
+      required:
+        - caseId
+        - dataSubject
+        - caseType
+        - resourceKind
+        - resourceId
+        - status
+        - summary
+        - createdAt
+        - updatedAt
+      properties:
+        caseId:
+          $ref: "#/components/schemas/Uuid"
+        dataSubject:
+          type: string
+        caseType:
+          $ref: "#/components/schemas/LifecycleCaseType"
+        resourceKind:
+          $ref: "#/components/schemas/LifecycleResourceKind"
+        resourceId:
+          type: string
+        status:
+          $ref: "#/components/schemas/LifecycleCaseStatus"
+        retentionPolicyId:
+          type: [string, "null"]
+          format: uuid
+        summary:
+          type: string
+        resolution:
+          type: [string, "null"]
+        tombstonePublication:
+          anyOf:
+            - $ref: "#/components/schemas/TombstonePublicationRule"
+            - type: "null"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LifecycleCaseList:
+      type: object
+      additionalProperties: false
+      required: [cases]
+      properties:
+        cases:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleCase"
+    GovernanceProfileRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - profile_kind
+        - tenant_partition
+        - subject_partition
+        - data_custodian_subject
+        - platform_operator_subject
+        - policy_authority_subject
+        - analyst_subject
+        - auditor_subject
+        - emergency_access_policy
+        - runbook_refs
+      properties:
+        profile_id:
+          $ref: "#/components/schemas/Uuid"
+        profile_kind:
+          $ref: "#/components/schemas/GovernanceProfileKind"
+        tenant_partition:
+          type: string
+          minLength: 1
+        subject_partition:
+          type: string
+          minLength: 1
+        data_custodian_subject:
+          type: string
+          minLength: 1
+        platform_operator_subject:
+          type: string
+          minLength: 1
+        policy_authority_subject:
+          type: string
+          minLength: 1
+        analyst_subject:
+          type: string
+          minLength: 1
+        auditor_subject:
+          type: string
+          minLength: 1
+        identity_authority_subject:
+          type: [string, "null"]
+          minLength: 1
+        emergency_access_policy:
+          type: string
+          minLength: 1
+        runbook_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    GovernanceProfile:
+      type: object
+      additionalProperties: false
+      required:
+        - profileId
+        - profileOwnerSubject
+        - profileKind
+        - tenantPartition
+        - subjectPartition
+        - dataCustodianSubject
+        - platformOperatorSubject
+        - policyAuthoritySubject
+        - analystSubject
+        - auditorSubject
+        - emergencyAccessPolicy
+        - runbookRefs
+        - createdAt
+      properties:
+        profileId:
+          $ref: "#/components/schemas/Uuid"
+        profileOwnerSubject:
+          type: string
+        profileKind:
+          $ref: "#/components/schemas/GovernanceProfileKind"
+        tenantPartition:
+          type: string
+        subjectPartition:
+          type: string
+        dataCustodianSubject:
+          type: string
+        platformOperatorSubject:
+          type: string
+        policyAuthoritySubject:
+          type: string
+        analystSubject:
+          type: string
+        auditorSubject:
+          type: string
+        identityAuthoritySubject:
+          type: [string, "null"]
+        emergencyAccessPolicy:
+          type: string
+        runbookRefs:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    GovernanceProfileList:
+      type: object
+      additionalProperties: false
+      required: [profiles]
+      properties:
+        profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/GovernanceProfile"
+    MetadataExport:
+      type: object
+      additionalProperties: false
+      required:
+        - dataSubject
+        - actor
+        - actorIfi
+        - generatedAt
+        - recordInventory
+        - consentGrants
+        - dataProducts
+        - lifecycleEvents
+        - retentionPolicies
+        - lifecycleCases
+        - governanceProfiles
+      properties:
+        dataSubject:
+          type: string
+        actor:
+          $ref: "#/components/schemas/PdsSubjectAgent"
+        actorIfi:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        recordInventory:
+          $ref: "#/components/schemas/RecordInventory"
+        consentGrants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentGrant"
+        dataProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataProduct"
+        lifecycleEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleEvent"
+        retentionPolicies:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetentionPolicy"
+        lifecycleCases:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleCase"
+        governanceProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/GovernanceProfile"
+    PortabilityStatement:
+      type: object
+      additionalProperties: false
+      required: [statementId, storedAt, voided, statement]
+      properties:
+        statementId:
+          $ref: "#/components/schemas/Uuid"
+        storedAt:
+          type: string
+          format: date-time
+        voided:
+          type: boolean
+        statement:
+          type: object
+          description: Stored accepted Statement JSON without typed DTO reprojection.
+          additionalProperties: true
+    PortabilityExport:
+      type: object
+      additionalProperties: false
+      required:
+        - dataSubject
+        - actor
+        - actorIfi
+        - generatedAt
+        - auditReference
+        - statements
+        - consentGrants
+        - dataProducts
+        - lifecycleEvents
+        - retentionPolicies
+        - lifecycleCases
+        - governanceProfiles
+      properties:
+        dataSubject:
+          type: string
+        actor:
+          $ref: "#/components/schemas/PdsSubjectAgent"
+        actorIfi:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        auditReference:
+          $ref: "#/components/schemas/Uuid"
+        statements:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/PortabilityStatement"
+        nextCursor:
+          type: string
+        consentGrants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentGrant"
+        dataProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataProduct"
+        lifecycleEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleEvent"
+        retentionPolicies:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetentionPolicy"
+        lifecycleCases:
+          type: array
+          items:
+            $ref: "#/components/schemas/LifecycleCase"
+        governanceProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/GovernanceProfile"
+    AccessCheckRequest:
+      type: object
+      additionalProperties: false
+      required: [role, resource, action]
+      properties:
+        role:
+          $ref: "#/components/schemas/PrincipalRole"
+        resource:
+          $ref: "#/components/schemas/ResourceClass"
+        action:
+          $ref: "#/components/schemas/PolicyAction"
+        grant_id:
+          $ref: "#/components/schemas/Uuid"
+        data_product_id:
+          description: >
+            Optional PDS data product reference for aggregate insight reads.
+            The referenced product must exist and be owned by the data subject
+            represented by the active aggregate-insight consent grant.
+          $ref: "#/components/schemas/Uuid"
+    AccessCheckResponse:
+      type: object
+      additionalProperties: false
+      required: [eventId, decision]
+      properties:
+        eventId:
+          $ref: "#/components/schemas/Uuid"
+        decision:
+          $ref: "#/components/schemas/PolicyDecision"
+        denyReason:
+          type: string
+    AccessAuditEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - requesterSubject
+        - role
+        - resource
+        - action
+        - decision
+        - createdAt
+      properties:
+        eventId:
+          $ref: "#/components/schemas/Uuid"
+        requesterSubject:
+          type: string
+        role:
+          $ref: "#/components/schemas/PrincipalRole"
+        resource:
+          $ref: "#/components/schemas/ResourceClass"
+        action:
+          $ref: "#/components/schemas/PolicyAction"
+        grantId:
+          $ref: "#/components/schemas/Uuid"
+        dataProductId:
+          $ref: "#/components/schemas/Uuid"
+        decision:
+          $ref: "#/components/schemas/PolicyDecision"
+        denyReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    AccessAuditEventList:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccessAuditEvent"

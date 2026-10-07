@@ -1,0 +1,510 @@
+schema_version: 1
+kind: kiva-application-operation-catalog
+status: active
+generated_from: generated/architecture/surface-catalog.yaml
+projection_basis:
+  root_type: SurfaceOperation
+  projection_role: workflow-and-scope-binding-projection
+  normal_form: surface_operation_normal_form
+  operation_key_fields:
+  - openapi_contract
+  - operation_id
+  route_key_fields:
+  - openapi_contract
+  - method
+  - path
+  joined_facets:
+  - openapi_contract
+  - method
+  - path
+  - operation_id
+  - required_scopes
+  - application_operation_id
+  - application_surface
+  - workflow_label
+  - rust_workflow_kind
+  - workflow_family
+  - pds_resource_family
+  - pds_route_context
+  operation_count: 78
+description: 'Drift-checked catalog linking application workflow labels, Rust workflow variants, OpenAPI operationIds, OAuth/OIDC resource-server scopes, and the generated Rust operation evidence projection.
+
+  '
+rust_registry_path: crates/kiva-application/src/operation_catalog/generated/registry.rs
+rust_operation_ids_path: crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+rust_workflow_metadata_path: crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+source_paths:
+- crates/kiva-application/src/analytics.rs
+- crates/kiva-application/src/operation_catalog.rs
+- crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+- crates/kiva-application/src/operation_catalog/generated/registry.rs
+- crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+- crates/kiva-application/src/pds/workflow.rs
+- crates/kiva-application/src/pds/workflow/commands/consent.rs
+- crates/kiva-application/src/pds/workflow/commands/data_products.rs
+- crates/kiva-application/src/pds/workflow/commands/governance.rs
+- crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+- crates/kiva-application/src/confidential/workflow_kind.rs
+- crates/kiva-application/src/confidential/additive.rs
+- crates/kiva-application/src/confidential/differential_privacy.rs
+- crates/kiva-application/src/confidential/jobs.rs
+- crates/kiva-application/src/confidential/participants.rs
+- crates/kiva-application/src/confidential/shamir.rs
+- crates/kiva-application/src/confidential/threshold.rs
+entries:
+- id: analytics-list-products
+  surface: analytics
+  workflow_label: analytics.list_products
+  rust_workflow_kind: AnalyticsWorkflowKind::ListProducts
+  openapi_contract: spec/openapi/kiva-analytics.yaml
+  operation_id: getAnalyticsProducts
+  required_scopes:
+  - analytics:read
+  workflow_family: aggregate-serving
+- id: analytics-read-product
+  surface: analytics
+  workflow_label: analytics.read_product
+  rust_workflow_kind: AnalyticsWorkflowKind::ReadProduct
+  openapi_contract: spec/openapi/kiva-analytics.yaml
+  operation_id: getAnalyticsProduct
+  required_scopes:
+  - analytics:read
+  workflow_family: aggregate-serving
+- id: analytics-read-aggregate
+  surface: analytics
+  workflow_label: analytics.read_aggregate
+  rust_workflow_kind: AnalyticsWorkflowKind::ReadAggregate
+  openapi_contract: spec/openapi/kiva-analytics.yaml
+  operation_id: getAnalyticsProductAggregate
+  required_scopes:
+  - analytics:read
+  workflow_family: aggregate-serving
+- id: pds-list-access-audit-events
+  surface: pds
+  workflow_label: pds.list_access_audit_events
+  rust_workflow_kind: PdsWorkflowKind::ListAccessAuditEvents
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsAccessAuditEvents
+  required_scopes:
+  - pds:audit
+- id: pds-evaluate-access-check
+  surface: pds
+  workflow_label: pds.evaluate_access_check
+  rust_workflow_kind: PdsWorkflowKind::EvaluateAccessCheck
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsAccessCheck
+  required_scopes:
+  - pds:read
+- id: pds-list-consent-grants
+  surface: pds
+  workflow_label: pds.list_consent_grants
+  rust_workflow_kind: PdsWorkflowKind::ListConsentGrants
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsConsentGrants
+  required_scopes:
+  - pds:read
+- id: pds-register-consent-grant
+  surface: pds
+  workflow_label: pds.register_consent_grant
+  rust_workflow_kind: PdsWorkflowKind::RegisterConsentGrant
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsConsentGrant
+  required_scopes:
+  - pds:delegate
+- id: pds-revoke-consent-grant
+  surface: pds
+  workflow_label: pds.revoke_consent_grant
+  rust_workflow_kind: PdsWorkflowKind::RevokeConsentGrant
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsConsentRevocation
+  required_scopes:
+  - pds:revoke
+- id: pds-export-portability
+  surface: pds
+  workflow_label: pds.export_portability
+  rust_workflow_kind: PdsWorkflowKind::ExportPortability
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsDataPortabilityExports
+  required_scopes:
+  - pds:read
+- id: pds-read-data-product
+  surface: pds
+  workflow_label: pds.read_data_product
+  rust_workflow_kind: PdsWorkflowKind::ReadDataProduct
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsDataProductRead
+  required_scopes:
+  - pds:read
+- id: pds-list-data-products
+  surface: pds
+  workflow_label: pds.list_data_products
+  rust_workflow_kind: PdsWorkflowKind::ListDataProducts
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsDataProducts
+  required_scopes:
+  - pds:read
+- id: pds-register-data-product
+  surface: pds
+  workflow_label: pds.register_data_product
+  rust_workflow_kind: PdsWorkflowKind::RegisterDataProduct
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsDataProduct
+  required_scopes:
+  - pds:write
+- id: pds-list-governance-profiles
+  surface: pds
+  workflow_label: pds.list_governance_profiles
+  rust_workflow_kind: PdsWorkflowKind::ListGovernanceProfiles
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsGovernanceProfiles
+  required_scopes:
+  - pds:read
+- id: pds-register-governance-profile
+  surface: pds
+  workflow_label: pds.register_governance_profile
+  rust_workflow_kind: PdsWorkflowKind::RegisterGovernanceProfile
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsGovernanceProfile
+  required_scopes:
+  - pds:write
+- id: pds-list-lifecycle-cases
+  surface: pds
+  workflow_label: pds.list_lifecycle_cases
+  rust_workflow_kind: PdsWorkflowKind::ListLifecycleCases
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsLifecycleCases
+  required_scopes:
+  - pds:read
+- id: pds-register-lifecycle-case
+  surface: pds
+  workflow_label: pds.register_lifecycle_case
+  rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleCase
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsLifecycleCase
+  required_scopes:
+  - pds:write
+- id: pds-list-lifecycle-events
+  surface: pds
+  workflow_label: pds.list_lifecycle_events
+  rust_workflow_kind: PdsWorkflowKind::ListLifecycleEvents
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsLifecycleEvents
+  required_scopes:
+  - pds:read
+- id: pds-register-lifecycle-event
+  surface: pds
+  workflow_label: pds.register_lifecycle_event
+  rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleEvent
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsLifecycleEvent
+  required_scopes:
+  - pds:write
+- id: pds-export-metadata
+  surface: pds
+  workflow_label: pds.export_metadata
+  rust_workflow_kind: PdsWorkflowKind::ExportMetadata
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsMetadataExports
+  required_scopes:
+  - pds:read
+- id: pds-list-provider-bindings
+  surface: pds
+  workflow_label: pds.list_provider_bindings
+  rust_workflow_kind: PdsWorkflowKind::ListProviderBindings
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsProviderBindings
+  required_scopes:
+  - pds:read
+- id: pds-register-provider-binding
+  surface: pds
+  workflow_label: pds.register_provider_binding
+  rust_workflow_kind: PdsWorkflowKind::RegisterProviderBinding
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsProviderBinding
+  required_scopes:
+  - pds:write
+- id: pds-read-record-inventory
+  surface: pds
+  workflow_label: pds.read_record_inventory
+  rust_workflow_kind: PdsWorkflowKind::ReadRecordInventory
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsRecordInventory
+  required_scopes:
+  - pds:read
+- id: pds-list-retention-policies
+  surface: pds
+  workflow_label: pds.list_retention_policies
+  rust_workflow_kind: PdsWorkflowKind::ListRetentionPolicies
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: getPdsRetentionPolicies
+  required_scopes:
+  - pds:read
+- id: pds-register-retention-policy
+  surface: pds
+  workflow_label: pds.register_retention_policy
+  rust_workflow_kind: PdsWorkflowKind::RegisterRetentionPolicy
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  operation_id: postPdsRetentionPolicy
+  required_scopes:
+  - pds:write
+- id: confidential-release-signed-additive-aggregate
+  surface: confidential
+  workflow_label: confidential.release_signed_additive_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialAdditiveAggregate
+  required_scopes:
+  - confidential:compute
+  workflow_family: additive
+- id: confidential-list-additive-replay-records
+  surface: confidential
+  workflow_label: confidential.list_replay_records
+  rust_workflow_kind: ConfidentialWorkflowKind::ListReplayRecords
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialAdditiveShareReplayRecords
+  required_scopes:
+  - confidential:read
+  workflow_family: additive
+- id: confidential-revoke-share-signing-key
+  surface: confidential
+  workflow_label: confidential.revoke_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RevokeShareSigningKey
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialShareSigningKeyRevocation
+  required_scopes:
+  - confidential:write
+  workflow_family: additive
+- id: confidential-rotate-share-signing-key
+  surface: confidential
+  workflow_label: confidential.rotate_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RotateShareSigningKey
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialShareSigningKeyRotation
+  required_scopes:
+  - confidential:write
+  workflow_family: additive
+- id: confidential-list-share-signing-keys
+  surface: confidential
+  workflow_label: confidential.list_share_signing_keys
+  rust_workflow_kind: ConfidentialWorkflowKind::ListShareSigningKeys
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialShareSigningKeys
+  required_scopes:
+  - confidential:read
+  workflow_family: additive
+- id: confidential-register-share-signing-key
+  surface: confidential
+  workflow_label: confidential.register_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterShareSigningKey
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialShareSigningKey
+  required_scopes:
+  - confidential:write
+  workflow_family: additive
+- id: confidential-list-submitted-shares
+  surface: confidential
+  workflow_label: confidential.list_submitted_shares
+  rust_workflow_kind: ConfidentialWorkflowKind::ListSubmittedShares
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialAdditiveShareSubmissions
+  required_scopes:
+  - confidential:read
+  workflow_family: additive
+- id: confidential-submit-additive-share
+  surface: confidential
+  workflow_label: confidential.submit_additive_share
+  rust_workflow_kind: ConfidentialWorkflowKind::SubmitAdditiveShare
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialAdditiveShareSubmission
+  required_scopes:
+  - confidential:write
+  workflow_family: additive
+- id: confidential-spend-differential-privacy-budget
+  surface: confidential
+  workflow_label: confidential.spend_differential_privacy_budget
+  rust_workflow_kind: ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+  required_scopes:
+  - confidential:write
+  workflow_family: differential_privacy
+- id: confidential-list-differential-privacy-budgets
+  surface: confidential
+  workflow_label: confidential.list_differential_privacy_budgets
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialDifferentialPrivacyBudgets
+  required_scopes:
+  - confidential:read
+  workflow_family: differential_privacy
+- id: confidential-register-differential-privacy-budget
+  surface: confidential
+  workflow_label: confidential.register_differential_privacy_budget
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialDifferentialPrivacyBudget
+  required_scopes:
+  - confidential:write
+  workflow_family: differential_privacy
+- id: confidential-list-differential-privacy-composition-summaries
+  surface: confidential
+  workflow_label: confidential.list_differential_privacy_composition_summaries
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+  required_scopes:
+  - confidential:read
+  workflow_family: differential_privacy
+- id: confidential-list-differential-privacy-releases
+  surface: confidential
+  workflow_label: confidential.list_differential_privacy_releases
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyReleases
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialDifferentialPrivacyReleases
+  required_scopes:
+  - confidential:read
+  workflow_family: differential_privacy
+- id: confidential-release-differential-privacy-aggregate
+  surface: confidential
+  workflow_label: confidential.release_differential_privacy_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialDifferentialPrivacyRelease
+  required_scopes:
+  - confidential:release
+  workflow_family: differential_privacy
+- id: confidential-release-sampled-differential-privacy-aggregate
+  surface: confidential
+  workflow_label: confidential.release_sampled_differential_privacy_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialDifferentialPrivacySampledRelease
+  required_scopes:
+  - confidential:release
+  workflow_family: differential_privacy
+- id: confidential-list-job-audit-events
+  surface: confidential
+  workflow_label: confidential.list_job_audit_events
+  rust_workflow_kind: ConfidentialWorkflowKind::ListJobAuditEvents
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialJobAuditEvents
+  required_scopes:
+  - confidential:read
+  workflow_family: job
+- id: confidential-transition-job
+  surface: confidential
+  workflow_label: confidential.transition_job
+  rust_workflow_kind: ConfidentialWorkflowKind::TransitionJob
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialJobTransition
+  required_scopes:
+  - confidential:write
+  workflow_family: job
+- id: confidential-list-jobs
+  surface: confidential
+  workflow_label: confidential.list_jobs
+  rust_workflow_kind: ConfidentialWorkflowKind::ListJobs
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialJobs
+  required_scopes:
+  - confidential:read
+  workflow_family: job
+- id: confidential-register-job
+  surface: confidential
+  workflow_label: confidential.register_job
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterJob
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialJob
+  required_scopes:
+  - confidential:write
+  workflow_family: job
+- id: confidential-list-participant-audit-events
+  surface: confidential
+  workflow_label: confidential.list_participant_audit_events
+  rust_workflow_kind: ConfidentialWorkflowKind::ListParticipantAuditEvents
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialParticipantAuditEvents
+  required_scopes:
+  - confidential:read
+  workflow_family: participant
+- id: confidential-transition-participant
+  surface: confidential
+  workflow_label: confidential.transition_participant
+  rust_workflow_kind: ConfidentialWorkflowKind::TransitionParticipant
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialParticipantTransition
+  required_scopes:
+  - confidential:write
+  workflow_family: participant
+- id: confidential-list-participants
+  surface: confidential
+  workflow_label: confidential.list_participants
+  rust_workflow_kind: ConfidentialWorkflowKind::ListParticipants
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialParticipants
+  required_scopes:
+  - confidential:read
+  workflow_family: participant
+- id: confidential-register-participant
+  surface: confidential
+  workflow_label: confidential.register_participant
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterParticipant
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialParticipant
+  required_scopes:
+  - confidential:write
+  workflow_family: participant
+- id: confidential-list-shamir-threshold-reconstructions
+  surface: confidential
+  workflow_label: confidential.list_shamir_threshold_reconstructions
+  rust_workflow_kind: ConfidentialWorkflowKind::ListShamirThresholdReconstructions
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialShamirThresholdReconstructions
+  required_scopes:
+  - confidential:read
+  workflow_family: shamir
+- id: confidential-reconstruct-shamir-threshold-secret
+  surface: confidential
+  workflow_label: confidential.reconstruct_shamir_threshold_secret
+  rust_workflow_kind: ConfidentialWorkflowKind::ReconstructShamirThresholdSecret
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialShamirThresholdReconstruction
+  required_scopes:
+  - confidential:compute
+  workflow_family: shamir
+- id: confidential-approve-threshold-release
+  surface: confidential
+  workflow_label: confidential.approve_threshold_release
+  rust_workflow_kind: ConfidentialWorkflowKind::ApproveThresholdRelease
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialThresholdReleaseApproval
+  required_scopes:
+  - confidential:release
+  workflow_family: threshold
+- id: confidential-list-threshold-release-requests
+  surface: confidential
+  workflow_label: confidential.list_threshold_release_requests
+  rust_workflow_kind: ConfidentialWorkflowKind::ListThresholdReleaseRequests
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: getConfidentialThresholdReleaseRequests
+  required_scopes:
+  - confidential:read
+  workflow_family: threshold
+- id: confidential-register-threshold-release-request
+  surface: confidential
+  workflow_label: confidential.register_threshold_release_request
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterThresholdReleaseRequest
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialThresholdReleaseRequest
+  required_scopes:
+  - confidential:write
+  workflow_family: threshold
+- id: confidential-release-threshold-aggregate
+  surface: confidential
+  workflow_label: confidential.release_threshold_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseThresholdAggregate
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  operation_id: postConfidentialThresholdRelease
+  required_scopes:
+  - confidential:release
+  workflow_family: threshold

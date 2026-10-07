@@ -1,0 +1,165 @@
+description: >
+  Included architecture boundary rules split from the root manifest for
+  focused review. The root manifest remains the executable index.
+
+dependency_rules:
+  - id: domain-and-contract-crates-stay-runtime-independent
+    description: Domain, contract, policy, xAPI, PDS, HTTP-core, and confidential contract crates must not depend on server runtime adapters.
+    paths:
+      - crates/kiva-domain/src
+      - crates/kiva-xapi/src
+      - crates/kiva-pds/src
+      - crates/kiva-identity/src
+      - crates/kiva-policy/src
+      - crates/kiva-release-artifacts/src
+      - crates/kiva-application/src
+      - crates/kiva-http-core/src
+      - crates/kiva-confidential-contract/src
+      - crates/kiva-confidential/src
+    forbidden_patterns:
+      - "use axum"
+      - "axum::"
+      - "use sqlx"
+      - "sqlx::"
+      - "kiva_idp_adapter"
+      - "DATABASE_URL_ENV"
+      - "KIVA_TENANT_ID_ENV"
+    forbidden_regexes:
+      - '\bstd::env::'
+  - id: application-layer-stays-http-free
+    description: Cross-surface application workflows must not depend on Axum handlers, route adapters, or HTTP response construction.
+    paths:
+      - crates/kiva-server/src/app
+      - crates/kiva-application/src
+    forbidden_patterns:
+      - "use axum"
+      - "axum::"
+      - "State<"
+      - "HeaderMap"
+      - "StatusCode"
+      - "crate::core::response"
+    forbidden_regexes:
+      - 'crate::surfaces::[a-z_]+::handlers'
+      - 'crate::surfaces::[a-z_]+::routes'
+  - id: pds-application-use-cases-stay-adapter-free
+    description: PDS application use cases and the capability aggregate depend on application handles, while server repository/service adapters stay under app/pds/server_adapters/.
+    paths:
+      - crates/kiva-application/src/pds.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/pds/model.rs
+      - crates/kiva-application/src/pds/model
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow
+    forbidden_patterns:
+      - "crate::surfaces::"
+      - "repository::"
+      - "service::"
+      - "StatementRepository"
+      - "repository::PdsRepository"
+      - "ConfidentialRepository"
+      - "from_repository("
+  - id: pds-handler-shared-units-stay-application-free
+    description: Shared PDS handler imports and request parsing must not expose cross-surface application workflows to every resource family.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/handlers/prelude.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/request.rs
+    forbidden_patterns:
+      - "crate::app::"
+      - "pds_app"
+  - id: pds-server-state-stays-release-artifact-normalized
+    description: PDS server state must not directly depend on confidential transcript identifiers for data-product artifact references.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/model
+      - crates/kiva-server/src/surfaces/pds/storage
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire
+      - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+    forbidden_patterns:
+      - "use kiva_confidential"
+      - "kiva_confidential::"
+      - "SecureAggregateTranscriptId"
+  - id: pds-subject-projection-stays-metadata-only
+    description: PDS cross-surface subject projections use typed statement metadata instead of raw JSON Statement values.
+    paths:
+      - crates/kiva-application/src/pds/capabilities/projection.rs
+    forbidden_patterns:
+      - "serde_json"
+      - "StatementJson"
+  - id: wire-projection-does-not-null-on-serialization-error
+    description: PDS and confidential wire projection must not hide serialization errors as JSON null.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire
+      - crates/kiva-server/src/surfaces/confidential/wire.rs
+      - crates/kiva-server/src/surfaces/confidential/wire
+    forbidden_patterns:
+      - "Value::Null"
+
+
+cargo_dependency_rules:
+  - id: pure-crates-stay-free-of-runtime-adapters
+    description: Runtime-independent crates do not acquire HTTP, SQLx, async runtime, or network client dependencies.
+    manifests:
+      - crates/kiva-domain/Cargo.toml
+      - crates/kiva-xapi/Cargo.toml
+      - crates/kiva-pds/Cargo.toml
+      - crates/kiva-identity/Cargo.toml
+      - crates/kiva-policy/Cargo.toml
+      - crates/kiva-release-artifacts/Cargo.toml
+      - crates/kiva-application/Cargo.toml
+      - crates/kiva-http-core/Cargo.toml
+      - crates/kiva-confidential-core/Cargo.toml
+      - crates/kiva-confidential-contract/Cargo.toml
+      - crates/kiva-confidential/Cargo.toml
+    forbidden_dependencies:
+      - axum
+      - sqlx
+      - tokio
+      - tracing
+      - tracing-subscriber
+      - reqwest
+      - kiva-idp-adapter
+  - id: idp-adapter-stays-at-deployment-edge
+    description: The OAuth/OIDC IdP adapter may depend on identity vocabulary and network/cryptographic clients, but not on Kiva domain, application, surface, policy, persistence, or server implementations.
+    manifests:
+      - crates/kiva-idp-adapter/Cargo.toml
+    required_dependencies:
+      - jsonwebtoken
+      - kiva-identity
+      - reqwest
+    forbidden_dependencies:
+      - kiva-domain
+      - kiva-xapi
+      - kiva-pds
+      - kiva-policy
+      - kiva-application
+      - kiva-confidential
+      - kiva-server
+      - sqlx
+  - id: pds-crate-stays-confidential-independent
+    description: PDS boundary types use normalized release-artifact references rather than confidential primitive types.
+    manifests:
+      - crates/kiva-pds/Cargo.toml
+    forbidden_dependencies:
+      - kiva-confidential
+      - kiva-confidential-core
+  - id: application-stays-free-of-confidential-mechanism-crate
+    description: Pure application workflows depend on confidential boundary types, not mechanism implementations.
+    manifests:
+      - crates/kiva-application/Cargo.toml
+    required_dependencies:
+      - kiva-confidential-core
+    forbidden_dependencies:
+      - kiva-confidential
+  - id: server-retains-runtime-adapter-ownership
+    description: The server crate remains the owner of HTTP, PostgreSQL, and async runtime adapters.
+    manifests:
+      - crates/kiva-server/Cargo.toml
+    required_dependencies:
+      - axum
+      - kiva-idp-adapter
+      - sqlx
+      - tokio

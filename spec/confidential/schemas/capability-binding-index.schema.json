@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:confidential:capability-binding-index:1",
+  "title": "Kiva confidential CapabilityBinding index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "description",
+    "generated_from",
+    "generated_artifacts",
+    "binding_model",
+    "summary",
+    "bindings"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-confidential-capability-binding-index" },
+    "status": { "const": "active" },
+    "description": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_index", "markdown"],
+      "properties": {
+        "binding_index": { "$ref": "#/$defs/nonEmptyString" },
+        "markdown": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "binding_model": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["root_type", "operation_ref_source", "mechanism_ref_source", "rule"],
+      "properties": {
+        "root_type": { "const": "CapabilityBinding" },
+        "operation_ref_source": { "$ref": "#/$defs/nonEmptyString" },
+        "mechanism_ref_source": { "$ref": "#/$defs/nonEmptyString" },
+        "rule": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_count", "operation_ref_count"],
+      "properties": {
+        "binding_count": { "type": "integer", "minimum": 1 },
+        "operation_ref_count": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "bindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/binding" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "operationSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow_families"],
+      "properties": {
+        "workflow_families": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "operationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "operation_id", "method", "path", "workflow_family"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "operation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "method": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "workflow_family": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "root_type",
+        "maturity_mechanism",
+        "capability",
+        "binding_kind",
+        "operation_selector",
+        "operation_count",
+        "operation_refs",
+        "boundary_note"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "root_type": { "const": "CapabilityBinding" },
+        "maturity_mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "capability": { "$ref": "#/$defs/nonEmptyString" },
+        "binding_kind": { "$ref": "#/$defs/nonEmptyString" },
+        "operation_selector": { "$ref": "#/$defs/operationSelector" },
+        "operation_count": { "type": "integer", "minimum": 1 },
+        "operation_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/operationRef" }
+        },
+        "boundary_note": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

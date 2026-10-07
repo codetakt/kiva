@@ -1,0 +1,37 @@
+---
+schema_version: 1
+kind: psi-oprf-dh-voprf-benchmark-plan
+profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+status: reproducible-plan
+purpose: >
+  Benchmark envelope for the external DH-OPRF PSI runtime adapter. The current
+  repository records benchmark requirements and deterministic vector sizes; it
+  does not claim measured production runtime performance before adapter
+  selection and external review.
+workloads:
+  - id: cc11-small-cohort
+    participant_count: 2
+    elements_per_participant: 3
+    expected_intersection_count: 2
+    vector: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+  - id: cc11-school-district-baseline
+    participant_count: 2
+    elements_per_participant: 10000
+    expected_intersection_count: variable
+    fixture_generation: deterministic-runtime-adapter-required
+required_metrics:
+  - blind_ms_per_1000_identifiers
+  - evaluate_ms_per_1000_blinded_elements
+  - finalize_ms_per_1000_elements
+  - intersection_ms_per_1000_elements
+  - peak_memory_mib
+  - transcript_bytes_per_1000_elements
+acceptance_thresholds:
+  small_cohort_wall_clock_ms: 1000
+  district_baseline_wall_clock_ms: 30000
+  peak_memory_mib: 2048
+negative_benchmarks:
+  - duplicate_elements_are_rejected_before_release
+  - aborted_participant_blocks_intersection
+  - replayed_job_id_is_rejected_before_runtime_invocation
+  - review_pending_runtime_blocks_release

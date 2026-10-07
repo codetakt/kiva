@@ -1,0 +1,93 @@
+---
+schema_version: 1
+kind: tee-nitro-attestation-job-contract
+standard: Kiva Architecture
+status: review-gated
+profile: kiva-tee-aws-nitro-review-gated-v1
+milestone: CC12
+use_case: aws-nitro-enclave-confidential-analytics
+claim_boundary: >
+  Kiva binds key release and result release to an AWS Nitro Enclaves
+  attestation verifier adapter. The adapter must verify the raw Nitro
+  attestation document, COSE signature, certificate chain, trust anchor, PCR
+  policy, nonce, and freshness before emitting Kiva's normalized claims. Kiva
+  then enforces job binding, PCR policy, image provenance, policy binding,
+  verifier provenance, key-epoch rotation, rollback and replay storage, policy
+  approval, and external-review gates. This contract does not claim production
+  hardware-backed confidential execution before external security review.
+target_tee:
+  family: aws-nitro-enclaves
+  cloud_provider: aws
+  attestation_document_source: nitro-hypervisor
+  attestation_format: cose-signed-cbor-document
+  normalized_format: verified-nitro-attestation-document-v1
+  production_claim_allowed: false
+verifier_adapter:
+  artifact_digest_required: true
+  trust_anchor_digest_required: true
+  verifier_key_epoch_required: true
+  external_review_evidence_digest_required: true
+  external_security_review_required_before_production_claim: true
+  verifies_certificate_chain: true
+  verifies_cose_signature: true
+  verifies_trust_anchor: true
+  verifies_nonce: true
+  rejects_debug_mode: true
+measurement_policy:
+  requires_pcr0_image_measurement: true
+  requires_pcr1_kernel_bootstrap_measurement: true
+  requires_pcr2_application_measurement: true
+  requires_pcr3_parent_iam_role_measurement: true
+  requires_pcr8_eif_signing_certificate_measurement: true
+  rejects_all_zero_debug_pcrs: true
+  records_image_digest: true
+  records_policy_binding: true
+freshness_and_replay:
+  requires_nonce_digest: true
+  requires_validity_window: true
+  requires_minimum_evidence_sequence: true
+  requires_replay_record: true
+  rejects_not_yet_valid_evidence: true
+  rejects_expired_evidence: true
+  rejects_rollback_sequence: true
+  rejects_replayed_document_digest: true
+provisioning:
+  key_release_requires_accepted_attestation: true
+  key_release_requires_policy_approval: true
+  key_release_requires_external_security_review: true
+  key_release_requires_current_verifier_key_epoch: true
+result_release:
+  requires_accepted_attestation: true
+  requires_prior_secret_provisioning: true
+  requires_job_binding: true
+  requires_policy_approval: true
+  requires_external_security_review: true
+  requires_current_verifier_key_epoch: true
+rollout_and_rollback:
+  image_rollout_requires_new_pcr_policy: true
+  image_rollout_requires_verifier_policy_update: true
+  rollback_requires_retired_sequence_floor_update: true
+  rollback_records_previous_image_digest: true
+  verifier_key_rotation_requires_epoch_increment: true
+operational_assumptions:
+  cloud_operator_trusted_for_nitro_isolation: true
+  side_channels_out_of_scope_without_deployment_review: true
+  debug_mode_forbidden_for_secret_or_result_release: true
+  supply_chain_provenance_required_for_eif_and_verifier: true
+  external_security_review_required_before_hardware_backed_claim: true
+evidence:
+  assurance_profile: spec/confidential/tee-nitro-attestation-assurance.yaml
+  vectors: spec/confidential/tee-nitro-attestation-vectors.yaml
+  validator: scripts/ci/validate_tee_nitro_attestation_assurance.py
+  rust_core: crates/kiva-confidential/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_tee_nitro_boundary.spthy
+  design_note: docs/architecture/tee-nitro-attestation-integration.md
+  operator_runbook: docs/operations/tee-nitro-runbook.md
+non_goals:
+  kiva_parses_raw_cose_cbor_attestation_documents: false
+  production_hardware_backed_confidential_execution_claim_before_review: false
+  proves_cloud_operator_isolation: false
+  proves_side_channel_resistance: false
+  proves_enclave_runtime_correctness: false

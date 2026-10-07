@@ -1,0 +1,699 @@
+schema_version: 1
+kind: kiva-claim-graph
+status: active
+description: 'Source policy for the generated ClaimGraph materialized view. ClaimGraph joins public claims, CI evidence rows, declared receipts, verification obligations, and confidential capability bindings for the primary AssuranceGraph review surface without becoming a new source of truth.
+
+  '
+generated_from:
+- spec/architecture/claim-graph.source.yaml
+- generated/claim-readiness-matrix.yaml
+- generated/evidence/evidence-set.yaml
+- generated/evidence/evidence-receipts.yaml
+- generated/evidence/executed-receipt-overlay.yaml
+- generated/verification/verification-obligations.yaml
+- generated/confidential/capability-binding-index.yaml
+generated_artifacts:
+  claim_graph: generated/architecture/claim-graph.yaml
+  markdown: docs/architecture/generated/claim-graph.md
+graph_model:
+  root_type: ClaimGraph
+  primary_review_surface: generated/architecture/assurance-graph.yaml
+  source_rule: 'ClaimGraph may only join generated artifacts and source policy. It must not introduce new claim, evidence, or verification semantics.
+
+    '
+  edge_rule: 'Claim-to-evidence edges use EvidenceSet receipt ids. Mechanism-to-verification edges use VerificationReceipt ids. Capability-to-operation edges use CapabilityBinding operation references.
+
+    '
+summary:
+  claim_count: 11
+  ready_claim_count: 11
+  evidence_edge_count: 55
+  declared_evidence_receipt_count: 78
+  executed_evidence_receipt_count: 0
+  capability_binding_count: 13
+  verification_obligation_count: 9
+  verified_mechanism_count: 9
+claims:
+- id: reference-reporting-deployments
+  boundary: analytics-serving
+  readiness: ready
+  claim_maturity: reference-fixture
+  matched_projection_ids:
+  - confidential-mechanism-sources-to-mechanism-profile-index
+  - openapi-contracts-to-http-operation-catalog
+  - openapi-contracts-to-rust-dto-map
+  - surface-sources-to-operation-kernel-ir
+  evidence_edges:
+  - group: confidential-computation-assurance
+    check_id: confidential-mechanism-profile-index
+    receipt_id: evidence-receipt.confidential-computation-assurance.confidential-mechanism-profile-index
+    check_kind: generator-check
+    artifact_class: confidential-assurance
+    executed: false
+  - group: openapi-contract
+    check_id: analytics-reporting-templates
+    receipt_id: evidence-receipt.openapi-contract.analytics-reporting-templates
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: http-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.http-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-boundary-ledger
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-map-projection
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-generated-contract-dto-map
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-semantic-compatibility-map
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: operation-kernel
+    receipt_id: evidence-receipt.openapi-contract.operation-kernel
+    check_kind: generator-check
+    artifact_class: generated-ledger
+    executed: false
+  - group: openapi-contract
+    check_id: operation-kernel-authority
+    receipt_id: evidence-receipt.openapi-contract.operation-kernel-authority
+    check_kind: ledger-validator
+    artifact_class: generated-ledger
+    executed: false
+- id: governed-aggregate-analytics-serving
+  boundary: analytics-serving
+  readiness: ready
+  claim_maturity: governed-serving
+  matched_projection_ids:
+  - openapi-contracts-to-http-operation-catalog
+  - openapi-contracts-to-rust-dto-map
+  evidence_edges:
+  - group: openapi-contract
+    check_id: http-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.http-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-boundary-ledger
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-map-projection
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-generated-contract-dto-map
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-semantic-compatibility-map
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+- id: governed-analytics-serving-boundary
+  boundary: analytics-serving
+  readiness: ready
+  claim_maturity: boundary-definition
+  matched_projection_ids:
+  - claim-catalog-and-ci-graph-to-readiness-matrix
+  - claim-catalog-to-public-claim-evidence
+  evidence_edges:
+  - group: openapi-contract
+    check_id: claim-catalog
+    receipt_id: evidence-receipt.openapi-contract.claim-catalog
+    check_kind: generator-check
+    artifact_class: claim-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: claim-readiness-matrix
+    receipt_id: evidence-receipt.openapi-contract.claim-readiness-matrix
+    check_kind: generator-check
+    artifact_class: claim-catalog
+    executed: false
+- id: ieee-xapi-lrs-aligned-interface
+  boundary: xapi-lrs
+  readiness: ready
+  claim_maturity: internal-alignment
+  matched_projection_ids:
+  - openapi-contracts-to-http-operation-catalog
+  - openapi-contracts-to-rust-dto-map
+  - surface-catalog-to-application-operation-catalog
+  evidence_edges:
+  - group: openapi-contract
+    check_id: application-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.application-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: architecture-boundaries
+    receipt_id: evidence-receipt.openapi-contract.architecture-boundaries
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: http-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.http-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-boundary-ledger
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-map-projection
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-generated-contract-dto-map
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-semantic-compatibility-map
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: surface-catalog-projections
+    receipt_id: evidence-receipt.openapi-contract.surface-catalog-projections
+    check_kind: generator-check
+    artifact_class: generated-ledger
+    executed: false
+- id: pds-governed-metadata-platform
+  boundary: personal-data-store
+  readiness: ready
+  claim_maturity: control-plane
+  matched_projection_ids:
+  - openapi-contracts-to-http-operation-catalog
+  - openapi-contracts-to-rust-dto-map
+  - pds-openapi-to-json-schema-artifacts
+  - surface-catalog-to-route-coverage
+  evidence_edges:
+  - group: openapi-contract
+    check_id: http-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.http-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-boundary-ledger
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-map-projection
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-generated-contract-dto-map
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-semantic-compatibility-map
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: pds-openapi-schema-artifacts
+    receipt_id: evidence-receipt.openapi-contract.pds-openapi-schema-artifacts
+    check_kind: schema-artifact-check
+    artifact_class: schema-artifact
+    executed: false
+  - group: openapi-contract
+    check_id: route-coverage
+    receipt_id: evidence-receipt.openapi-contract.route-coverage
+    check_kind: generator-check
+    artifact_class: generated-evidence
+    executed: false
+- id: learner-principal-consent-agency
+  boundary: personal-data-store
+  readiness: ready
+  claim_maturity: control-plane
+  matched_projection_ids:
+  - pds-planes-to-plane-package-index
+  evidence_edges:
+  - group: openapi-contract
+    check_id: pds-plane-packages
+    receipt_id: evidence-receipt.openapi-contract.pds-plane-packages
+    check_kind: generator-check
+    artifact_class: architecture-guard
+    executed: false
+- id: learner-initiated-data-portability
+  boundary: personal-data-store
+  readiness: ready
+  claim_maturity: control-plane
+  matched_projection_ids:
+  - openapi-contracts-to-http-operation-catalog
+  - openapi-contracts-to-rust-dto-map
+  - pds-openapi-to-json-schema-artifacts
+  evidence_edges:
+  - group: openapi-contract
+    check_id: http-operation-catalog
+    receipt_id: evidence-receipt.openapi-contract.http-operation-catalog
+    check_kind: generator-check
+    artifact_class: generated-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-boundary-ledger
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-boundary-ledger
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-dto-map-projection
+    receipt_id: evidence-receipt.openapi-contract.openapi-dto-map-projection
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-generated-contract-dto-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-generated-contract-dto-map
+    check_kind: generator-check
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: openapi-semantic-compatibility-map
+    receipt_id: evidence-receipt.openapi-contract.openapi-semantic-compatibility-map
+    check_kind: contract-validator
+    artifact_class: dto-boundary
+    executed: false
+  - group: openapi-contract
+    check_id: pds-openapi-schema-artifacts
+    receipt_id: evidence-receipt.openapi-contract.pds-openapi-schema-artifacts
+    check_kind: schema-artifact-check
+    artifact_class: schema-artifact
+    executed: false
+- id: production-oauth-oidc-idp-connectivity
+  boundary: identity-provider-deployment-adapter
+  readiness: ready
+  claim_maturity: deployment-integration
+  matched_projection_ids:
+  - design-backbone-to-ci-guard-model
+  evidence_edges:
+  - group: openapi-contract
+    check_id: architecture-boundaries
+    receipt_id: evidence-receipt.openapi-contract.architecture-boundaries
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: design-backbone
+    receipt_id: evidence-receipt.openapi-contract.design-backbone
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+- id: confidential-provider-contract-boundary
+  boundary: confidential-computation
+  readiness: ready
+  claim_maturity: review-gated-external-runtime
+  matched_projection_ids:
+  - confidential-mechanism-source-to-catalog-and-registry
+  - confidential-mechanism-sources-to-mechanism-profile-index
+  - secret-compute-provider-contract-to-kind-registry
+  evidence_edges:
+  - group: confidential-computation-assurance
+    check_id: confidential-mechanism-catalog
+    receipt_id: evidence-receipt.confidential-computation-assurance.confidential-mechanism-catalog
+    check_kind: generator-check
+    artifact_class: confidential-mechanism
+    executed: false
+  - group: confidential-computation-assurance
+    check_id: confidential-mechanism-profile-index
+    receipt_id: evidence-receipt.confidential-computation-assurance.confidential-mechanism-profile-index
+    check_kind: generator-check
+    artifact_class: confidential-assurance
+    executed: false
+  - group: confidential-computation-assurance
+    check_id: mechanism-maturity
+    receipt_id: evidence-receipt.confidential-computation-assurance.mechanism-maturity
+    check_kind: ledger-validator
+    artifact_class: mechanism-maturity
+    executed: false
+  - group: confidential-computation-assurance
+    check_id: secret-compute-provider-kind-registry
+    receipt_id: evidence-receipt.confidential-computation-assurance.secret-compute-provider-kind-registry
+    check_kind: generator-check
+    artifact_class: provider-contract
+    executed: false
+- id: reference-provider-experiment-boundary
+  boundary: confidential-reference-primitives
+  readiness: ready
+  claim_maturity: reference-fixture
+  matched_projection_ids:
+  - secret-compute-provider-contract-to-kind-registry
+  evidence_edges:
+  - group: confidential-computation-assurance
+    check_id: secret-compute-provider-kind-registry
+    receipt_id: evidence-receipt.confidential-computation-assurance.secret-compute-provider-kind-registry
+    check_kind: generator-check
+    artifact_class: provider-contract
+    executed: false
+- id: evidence-gated-release-posture
+  boundary: verification-and-evidence
+  readiness: ready
+  claim_maturity: evidence-gated-release
+  matched_projection_ids:
+  - architecture-graph-sources-to-projection-graph
+  - ci-check-source-to-catalog-and-gate-plan
+  - claim-catalog-and-ci-graph-to-readiness-matrix
+  - declared-receipts-and-run-reports-to-executed-receipt-overlay
+  - design-backbone-to-ci-guard-model
+  - evidence-check-normal-form-policy-to-drift-enforcement
+  - evidence-check-source-to-ci-manifest
+  - evidence-sources-to-unified-evidence-set
+  evidence_edges:
+  - group: openapi-contract
+    check_id: architecture-boundaries
+    receipt_id: evidence-receipt.openapi-contract.architecture-boundaries
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: claim-readiness-matrix
+    receipt_id: evidence-receipt.openapi-contract.claim-readiness-matrix
+    check_kind: generator-check
+    artifact_class: claim-catalog
+    executed: false
+  - group: openapi-contract
+    check_id: design-backbone
+    receipt_id: evidence-receipt.openapi-contract.design-backbone
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: evidence-check-catalog
+    receipt_id: evidence-receipt.openapi-contract.evidence-check-catalog
+    check_kind: generator-check
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: evidence-check-normal-form-policy
+    receipt_id: evidence-receipt.openapi-contract.evidence-check-normal-form-policy
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: evidence-checks
+    receipt_id: evidence-receipt.openapi-contract.evidence-checks
+    check_kind: generator-check
+    artifact_class: architecture-guard
+    executed: false
+  - group: openapi-contract
+    check_id: evidence-set
+    receipt_id: evidence-receipt.openapi-contract.evidence-set
+    check_kind: generator-check
+    artifact_class: generated-evidence
+    executed: false
+  - group: openapi-contract
+    check_id: executed-receipt-overlay
+    receipt_id: evidence-receipt.openapi-contract.executed-receipt-overlay
+    check_kind: generator-check
+    artifact_class: generated-evidence
+    executed: false
+  - group: openapi-contract
+    check_id: executed-receipt-release-policy
+    receipt_id: evidence-receipt.openapi-contract.executed-receipt-release-policy
+    check_kind: ledger-validator
+    artifact_class: generated-evidence
+    executed: false
+  - group: openapi-contract
+    check_id: projection-graph
+    receipt_id: evidence-receipt.openapi-contract.projection-graph
+    check_kind: ledger-validator
+    artifact_class: architecture-guard
+    executed: false
+capability_bindings:
+- id: additive-secure-aggregation-capability
+  maturity_mechanism: additive-secure-aggregation
+  capability: additive-secure-aggregation
+  binding_kind: dedicated-workflow
+  operation_count: 12
+- id: differential-privacy-release-capability
+  maturity_mechanism: differential-privacy-release
+  capability: differential-privacy-release
+  binding_kind: dedicated-workflow
+  operation_count: 7
+- id: shamir-vss-admission-capability
+  maturity_mechanism: shamir-vss-admission
+  capability: threshold-reconstruction
+  binding_kind: dedicated-workflow
+  operation_count: 2
+- id: psi-cohort-hash-token-capability
+  maturity_mechanism: psi-cohort-hash-token
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: psi-oprf-dh-voprf-capability
+  maturity_mechanism: psi-oprf-dh-voprf
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: tee-portable-attestation-capability
+  maturity_mechanism: tee-portable-attestation
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: tee-aws-nitro-attestation-capability
+  maturity_mechanism: tee-aws-nitro-attestation
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: threshold-frost-signing-capability
+  maturity_mechanism: threshold-frost-signing
+  capability: threshold-signing
+  binding_kind: generic-runtime-orchestration
+  operation_count: 12
+- id: fhe-sum-feasibility-capability
+  maturity_mechanism: fhe-sum-feasibility
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: fhe-sum-runtime-capability
+  maturity_mechanism: fhe-sum-runtime
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  operation_count: 8
+- id: confidential-job-lifecycle-capability
+  maturity_mechanism: confidential-job-lifecycle
+  capability: confidential-job-lifecycle
+  binding_kind: lifecycle-substrate
+  operation_count: 4
+- id: confidential-participant-key-lifecycle-capability
+  maturity_mechanism: confidential-participant-key-lifecycle
+  capability: confidential-participant-key-lifecycle
+  binding_kind: lifecycle-substrate
+  operation_count: 4
+- id: secret-compute-provider-contract-capability
+  maturity_mechanism: secret-compute-provider-contract
+  capability: provider-contract
+  binding_kind: lifecycle-substrate
+  operation_count: 8
+verification_obligations:
+- id: additive-share-admission-and-release
+  mechanism: additive-secure-aggregation
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.additive-share-admission-and-release.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.additive-share-admission-and-release.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.additive-share-admission-and-release.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.additive-share-admission-and-release.tamarin
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.additive-share-admission-and-release.fstar
+    status: declared
+- id: differential-privacy-budget-release
+  mechanism: differential-privacy-release
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.differential-privacy-budget-release.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.differential-privacy-budget-release.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.differential-privacy-budget-release.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.differential-privacy-budget-release.tamarin
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.differential-privacy-budget-release.fstar
+    status: declared
+- id: shamir-vss-reconstruction
+  mechanism: shamir-vss-admission
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.shamir-vss-reconstruction.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.shamir-vss-reconstruction.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.shamir-vss-reconstruction.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.shamir-vss-reconstruction.tamarin
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.shamir-vss-reconstruction.fstar
+    status: declared
+- id: psi-cohort-and-oprf-release
+  mechanism: private-set-intersection
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.tamarin
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.assurance-registry
+    status: declared
+- id: tee-attestation-gates
+  mechanism: tee-attestation
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.tee-attestation-gates.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.tee-attestation-gates.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.tee-attestation-gates.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.tee-attestation-gates.tamarin
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.tee-attestation-gates.assurance-registry
+    status: declared
+- id: threshold-frost-runtime
+  mechanism: threshold-frost-signing
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.threshold-frost-runtime.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.threshold-frost-runtime.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.threshold-frost-runtime.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.threshold-frost-runtime.tamarin
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.threshold-frost-runtime.assurance-registry
+    status: declared
+- id: fhe-feasibility-and-runtime
+  mechanism: fhe
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.tamarin
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.assurance-registry
+    status: declared
+- id: confidential-job-participant-lifecycle
+  mechanism: confidential-job-lifecycle
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.kani
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.tamarin
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.assurance-registry
+    status: declared
+- id: provider-runtime-boundary
+  mechanism: secret-compute-provider-contract
+  complete: true
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.provider-runtime-boundary.implementation
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.provider-runtime-boundary.rust-test
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.provider-runtime-boundary.kani
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.provider-runtime-boundary.assurance-registry
+    status: declared

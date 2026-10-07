@@ -1,0 +1,90 @@
+---
+schema_version: 1
+kind: threshold-frost-assurance-profile
+standard: Kiva Architecture
+status: review-gated
+profile: kiva-threshold-frost-ed25519-review-gated-v1
+milestone: CC13
+claim_boundary: >
+  Kiva has a review-gated FROST threshold-signing runtime boundary for
+  strong threshold-cryptography planning. A deployment-specific runtime must
+  perform distributed key generation, share custody, proactive refresh,
+  complaint handling, equivocation detection, and signing. Kiva admits only
+  normalized metadata and enforces threshold policy, participant activity,
+  custody evidence, complaint resolution, replay prevention, transcript
+  digest binding, active key epoch, governed key use, policy approval, and
+  external cryptographic review. Production malicious-robust threshold
+  cryptography remains a prohibited claim until external review is complete.
+target_runtime:
+  suite: ed25519-sha512-frost
+  runtime_adapter: review-gated-external-frost-runtime
+  digest: sha256
+  production_threshold_cryptography_claim_allowed: false
+  malicious_participant_robustness_claim_allowed: false
+key_ceremony:
+  profile: kiva-threshold-frost-ed25519-review-gated-v1
+  digest: sha256
+  domain: kiva-confidential:threshold-frost-key-ceremony:v1
+  records_runtime_artifact_digest: true
+  records_review_evidence_digest: true
+  records_key_epoch: true
+  records_public_commitment_digest: true
+  records_share_custody_digest: true
+  records_ceremony_digest: true
+admission:
+  requires_runtime_binding: true
+  requires_external_cryptographic_review: true
+  requires_threshold_at_least_two: true
+  requires_participant_count_match: true
+  requires_active_participants: true
+  requires_share_custody_evidence: true
+  requires_complaint_resolution: true
+  rejects_equivocation: true
+  rejects_replay: true
+  accepts_metadata_only_records: true
+  uses_generic_confidential_job_evidence_refs: true
+signing:
+  signature_transcript_domain: kiva-confidential:threshold-frost-signature-transcript:v1
+  requires_accepted_key_ceremony: true
+  requires_threshold_signature_shares: true
+  rejects_duplicate_signature_participants: true
+  rejects_out_of_range_signature_participants: true
+  rejects_signing_replay: true
+  requires_signature_transcript_digest_match: true
+  records_message_digest: true
+  records_signature_digest: true
+release:
+  requires_completed_key_ceremony: true
+  requires_computed_signature: true
+  requires_external_cryptographic_review: true
+  requires_active_key_epoch: true
+  requires_policy_approval: true
+  requires_governed_key_use: true
+external_cryptographic_review:
+  required_before_production_claim: true
+  production_threshold_cryptography_claim_allowed: false
+  malicious_participant_robustness_claim_allowed: false
+  review_evidence_digest_required: true
+vectors:
+  path: spec/confidential/threshold-frost-vectors.yaml
+  required_profile: kiva-threshold-frost-ed25519-review-gated-v1
+job_contract:
+  path: spec/confidential/threshold-frost-job-contract.yaml
+evidence:
+  rust_core: crates/kiva-confidential/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  vectors: spec/confidential/threshold-frost-vectors.yaml
+  job_contract: spec/confidential/threshold-frost-job-contract.yaml
+  validator: scripts/ci/validate_threshold_frost_assurance.py
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_threshold_frost_boundary.spthy
+  design_note: docs/architecture/threshold-frost-signing.md
+  operator_runbook: docs/operations/threshold-frost-runbook.md
+non_goals:
+  in_process_frost_implementation: false
+  distributed_key_generation_cryptographic_proof: false
+  proactive_refresh_cryptographic_proof: false
+  dedicated_frost_transcript_http_api: false
+  dedicated_frost_transcript_postgresql_store: false
+  production_threshold_cryptography_before_external_review: false
+  malicious_participant_robustness_before_external_review: false

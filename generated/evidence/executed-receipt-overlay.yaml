@@ -1,0 +1,27 @@
+schema_version: 1
+kind: kiva-executed-receipt-overlay
+status: active
+description: 'Source policy for release-specific executed receipt overlays. The committed generated overlay is intentionally allowed to contain zero executed receipts; release jobs can pass design-review or evidence-check run reports to the generator to produce command-output-hash-backed ReceiptRun rows.
+
+  '
+generated_from:
+- spec/evidence/executed-receipts.source.yaml
+- generated/evidence/evidence-receipts.yaml
+- spec/ci/evidence-checks.yaml
+generated_artifacts:
+  overlay: generated/evidence/executed-receipt-overlay.yaml
+  markdown: docs/architecture/generated/executed-receipt-overlay.md
+run_model:
+  root_type: ReceiptRun
+  committed_overlay_status: no-run-recorded
+  executed_status: executed
+  rule: 'Declared EvidenceReceipt and VerificationReceipt rows name required evidence identities. Executed ReceiptRun overlays bind those identities to concrete CI report files and sha256 hashes without replacing the declared receipt index.
+
+    '
+summary:
+  declared_evidence_receipt_count: 78
+  declared_verification_receipt_count: 44
+  receipt_run_count: 0
+  executed_receipt_count: 0
+receipt_runs: []
+executed_receipts: []

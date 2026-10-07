@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:verification:postgres-report:1",
+  "title": "Kiva PostgreSQL verification report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "kind",
+    "status",
+    "backend",
+    "generated_at_utc",
+    "temporary_cluster",
+    "migrations_applied",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "Kiva Architecture"
+    },
+    "kind": {
+      "const": "postgres-verification"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "backend": {
+      "const": "postgres"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "temporary_cluster": {
+      "type": "boolean"
+    },
+    "migrations_applied": {
+      "type": "boolean"
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "crate",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "crate": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        }
+      }
+    }
+  }
+}

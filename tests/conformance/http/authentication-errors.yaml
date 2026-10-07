@@ -1,0 +1,31 @@
+suite:
+  id: xapi-lrs-authentication-errors
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Credential refusal checks for disposable isolated LRS targets.
+cases:
+  - id: request-rejected-for-refused-credential
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unauthorized
+      - xapi-lrs-4.1.8-authorization-decisions
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      auth_profile: invalid_credential
+      method: GET
+      path: /statements
+      query:
+        limit: '1'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 401
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true

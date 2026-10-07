@@ -1,0 +1,1238 @@
+{
+  "generated_from": [
+    "spec/openapi/kiva-analytics.yaml",
+    "spec/openapi/kiva-xapi.yaml",
+    "spec/openapi/kiva-pds.yaml",
+    "spec/openapi/kiva-confidential.yaml"
+  ],
+  "kind": "kiva-http-operation-catalog-evidence",
+  "operation_count": 78,
+  "operations": [
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProducts",
+      "path": "/analytics/products",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "requirements": [],
+      "summary": "List governed aggregate products",
+      "tags": [
+        "Analytics"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProduct",
+      "path": "/analytics/products/{dataProductId}",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "requirements": [],
+      "summary": "Read governed aggregate product metadata",
+      "tags": [
+        "Analytics"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProductAggregate",
+      "path": "/analytics/products/{dataProductId}/aggregate",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "requirements": [],
+      "summary": "Read an admitted aggregate release payload",
+      "tags": [
+        "Analytics"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getAbout",
+      "path": "/about",
+      "required_scopes": [],
+      "requirements": [
+        "xapi-lrs-4.1.6.7-about-version",
+        "xapi-lrs-4.1.6.7-about-version-header-not-rejected"
+      ],
+      "summary": "Return LRS metadata and supported xAPI versions.",
+      "tags": [
+        "About"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headAbout",
+      "path": "/about",
+      "required_scopes": [],
+      "requirements": [
+        "xapi-lrs-4.1.6.7-about-version",
+        "xapi-lrs-4.1.6.7-about-version-header-not-rejected"
+      ],
+      "summary": "Return LRS metadata headers without a response body.",
+      "tags": [
+        "About"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getActivity",
+      "path": "/activities",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.4-activity-fallback",
+        "xapi-lrs-4.1.6.4-activity-complete"
+      ],
+      "summary": "Fetch an Activity object.",
+      "tags": [
+        "Activities"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headActivity",
+      "path": "/activities",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.4-activity-fallback",
+        "xapi-lrs-4.1.6.4-activity-complete"
+      ],
+      "summary": "Fetch Activity metadata without a response body.",
+      "tags": [
+        "Activities"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getActivityProfiles",
+      "path": "/activities/profile",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.6-activity-profile-get-last-modified"
+      ],
+      "summary": "Fetch an Activity Profile document or Activity Profile ids.",
+      "tags": [
+        "Activities",
+        "Documents"
+      ]
+    },
+    {
+      "method": "put",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "putActivityProfile",
+      "path": "/activities/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.4-put-conflict",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge"
+      ],
+      "summary": "Store a single Activity Profile document.",
+      "tags": [
+        "Activities",
+        "Documents"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "postActivityProfile",
+      "path": "/activities/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge",
+        "xapi-lrs-4.1.6.6-activity-profile-post-json-merge",
+        "xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid",
+        "xapi-lrs-4.1.6.6-activity-profile-post-merge-success"
+      ],
+      "summary": "Merge or store a single Activity Profile document.",
+      "tags": [
+        "Activities",
+        "Documents"
+      ]
+    },
+    {
+      "method": "delete",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "deleteActivityProfile",
+      "path": "/activities/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed"
+      ],
+      "summary": "Delete a single Activity Profile document.",
+      "tags": [
+        "Activities",
+        "Documents"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headActivityProfile",
+      "path": "/activities/profile",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.6-activity-profile-get-last-modified"
+      ],
+      "summary": "Fetch Activity Profile metadata without a response body.",
+      "tags": [
+        "Activities",
+        "Documents"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getStateDocuments",
+      "path": "/activities/state",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.2-state-get-last-modified"
+      ],
+      "summary": "Fetch a State document or State document ids.",
+      "tags": [
+        "State",
+        "Documents"
+      ]
+    },
+    {
+      "method": "put",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "putStateDocument",
+      "path": "/activities/state",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.4-put-conflict",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge"
+      ],
+      "summary": "Store a single State document.",
+      "tags": [
+        "State",
+        "Documents"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "postStateDocument",
+      "path": "/activities/state",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge",
+        "xapi-lrs-4.1.6.2-state-post-json-merge",
+        "xapi-lrs-4.1.6.2-state-post-merge-reject-invalid",
+        "xapi-lrs-4.1.6.2-state-post-merge-success"
+      ],
+      "summary": "Merge or store a single State document.",
+      "tags": [
+        "State",
+        "Documents"
+      ]
+    },
+    {
+      "method": "delete",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "deleteStateDocuments",
+      "path": "/activities/state",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed"
+      ],
+      "summary": "Delete one State document or all State documents in a context.",
+      "tags": [
+        "State",
+        "Documents"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headStateDocuments",
+      "path": "/activities/state",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.2-state-get-last-modified"
+      ],
+      "summary": "Fetch State document metadata without a response body.",
+      "tags": [
+        "State",
+        "Documents"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getAgentPerson",
+      "path": "/agents",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.3-agents-person-fallback",
+        "xapi-lrs-4.1.6.3-person-arrays"
+      ],
+      "summary": "Return a Person object for a specified Agent.",
+      "tags": [
+        "Agents"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headAgentPerson",
+      "path": "/agents",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.3-agents-person-fallback"
+      ],
+      "summary": "Fetch Person metadata without a response body.",
+      "tags": [
+        "Agents"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getAgentProfiles",
+      "path": "/agents/profile",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.5-agent-profile-get-last-modified"
+      ],
+      "summary": "Fetch an Agent Profile document or Agent Profile ids.",
+      "tags": [
+        "Agents",
+        "Documents"
+      ]
+    },
+    {
+      "method": "put",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "putAgentProfile",
+      "path": "/agents/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.4-put-conflict",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge"
+      ],
+      "summary": "Store a single Agent Profile document.",
+      "tags": [
+        "Agents",
+        "Documents"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "postAgentProfile",
+      "path": "/agents/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed",
+        "xapi-lrs-4.1.6-document-no-prior-knowledge",
+        "xapi-lrs-4.1.6.5-agent-profile-post-json-merge",
+        "xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid",
+        "xapi-lrs-4.1.6.5-agent-profile-post-merge-success"
+      ],
+      "summary": "Merge or store a single Agent Profile document.",
+      "tags": [
+        "Agents",
+        "Documents"
+      ]
+    },
+    {
+      "method": "delete",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "deleteAgentProfile",
+      "path": "/agents/profile",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-if-match",
+        "xapi-lrs-4.1.4-precondition-failed"
+      ],
+      "summary": "Delete a single Agent Profile document.",
+      "tags": [
+        "Agents",
+        "Documents"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headAgentProfile",
+      "path": "/agents/profile",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.4-etag-on-document-get",
+        "xapi-lrs-4.1.6.5-agent-profile-get-last-modified"
+      ],
+      "summary": "Fetch Agent Profile metadata without a response body.",
+      "tags": [
+        "Agents",
+        "Documents"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "getStatements",
+      "path": "/statements",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion",
+        "xapi-lrs-4.1.6.1-statement-get-single-query-limits",
+        "xapi-lrs-4.1.6.1-statement-get-empty-result",
+        "xapi-lrs-4.1.6.1-statement-consistent-through",
+        "xapi-lrs-4.1.6.1-statement-get-attachments-true",
+        "xapi-lrs-4.1.6.1-statement-get-attachments-false",
+        "xapi-lrs-4.1.6.1-statement-last-modified",
+        "xapi-lrs-4.1.6.1-statement-format-exact",
+        "xapi-lrs-4.1.6.1-statementref-filtering",
+        "xapi-lrs-4.1.6.1-statement-query-filters",
+        "xapi-lrs-4.1.6.1-statement-query-related-agents",
+        "xapi-lrs-4.1.6.1-statement-query-related-activities",
+        "xapi-lrs-4.1.6.1-statement-query-time-order-limit",
+        "xapi-lrs-4.1.6.1-canonical-language-map-one-language",
+        "xapi-lrs-4.1.6.1-canonical-accept-language",
+        "xapi-lrs-4.1.6.1-voided-not-returned",
+        "xapi-lrs-4.1.6.1-voided-targeting-returned"
+      ],
+      "summary": "Fetch one Statement or a StatementResult.",
+      "tags": [
+        "Statements"
+      ]
+    },
+    {
+      "method": "put",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "putStatement",
+      "path": "/statements",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.3-json-statement-batches",
+        "xapi-lrs-4.1.3-attachment-transmission-criteria",
+        "xapi-lrs-4.1.3-multipart-first-json",
+        "xapi-lrs-4.1.3-multipart-attachment-headers",
+        "xapi-lrs-4.1.3-attachment-header-property-match",
+        "xapi-lrs-4.1.3-multipart-accept-valid",
+        "xapi-lrs-4.1.3-multipart-reject-unmatched",
+        "xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification",
+        "xapi-lrs-4.2-statement-immutability-preserve",
+        "xapi-lrs-4.2-statement-immutability-ignore-excluded"
+      ],
+      "summary": "Store a single Statement with a client-supplied id.",
+      "tags": [
+        "Statements"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "postStatements",
+      "path": "/statements",
+      "required_scopes": [
+        "xapi:write"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.3-json-statement-batches",
+        "xapi-lrs-4.1.3-attachment-transmission-criteria",
+        "xapi-lrs-4.1.3-multipart-first-json",
+        "xapi-lrs-4.1.3-multipart-attachment-headers",
+        "xapi-lrs-4.1.3-attachment-header-property-match",
+        "xapi-lrs-4.1.3-multipart-accept-valid",
+        "xapi-lrs-4.1.3-multipart-reject-unmatched",
+        "xapi-lrs-4.1.5-batch-rejection",
+        "xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification",
+        "xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id"
+      ],
+      "summary": "Store a Statement or a Statement batch.",
+      "tags": [
+        "Statements"
+      ]
+    },
+    {
+      "method": "head",
+      "openapi_contract": "spec/openapi/kiva-xapi.yaml",
+      "operation_id": "headStatements",
+      "path": "/statements",
+      "required_scopes": [
+        "xapi:read"
+      ],
+      "requirements": [
+        "xapi-lrs-4.1.6.1-statement-consistent-through"
+      ],
+      "summary": "Fetch Statement metadata without a response body.",
+      "tags": [
+        "Statements"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsAccessAuditEvents",
+      "path": "/pds/access-audit-events",
+      "required_scopes": [
+        "pds:audit"
+      ],
+      "requirements": [],
+      "summary": "List subject-scoped PDS access-audit events without raw payloads.",
+      "tags": [
+        "Access Decisions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsAccessCheck",
+      "path": "/pds/access-checks",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "Evaluate the PDS policy boundary and persist an access-audit event.",
+      "tags": [
+        "Access Decisions"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsConsentGrants",
+      "path": "/pds/consent-grants",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-scoped consent and delegation grants.",
+      "tags": [
+        "Consent Grants"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsConsentGrant",
+      "path": "/pds/consent-grants",
+      "required_scopes": [
+        "pds:delegate"
+      ],
+      "requirements": [],
+      "summary": "Register an active consent/delegation grant owned by the authenticated subject.",
+      "tags": [
+        "Consent Grants"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsConsentRevocation",
+      "path": "/pds/consent-revocations",
+      "required_scopes": [
+        "pds:revoke"
+      ],
+      "requirements": [],
+      "summary": "Revoke a consent/delegation grant owned by the authenticated subject.",
+      "tags": [
+        "Consent Grants"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsDataPortabilityExports",
+      "path": "/pds/data-portability-exports",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "Export the authenticated subject's accepted Statements and PDS metadata.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsDataProductRead",
+      "path": "/pds/data-product-reads",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "Read an approved data product through the PDS policy boundary.",
+      "tags": [
+        "Data Products"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsDataProducts",
+      "path": "/pds/data-products",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List approved data products registered by the authenticated subject.",
+      "tags": [
+        "Data Products"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsDataProduct",
+      "path": "/pds/data-products",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Register an approved aggregate data product for a confidential release.",
+      "tags": [
+        "Data Products"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsGovernanceProfiles",
+      "path": "/pds/governance-profiles",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List public-sector governance profiles owned by the authenticated subject.",
+      "tags": [
+        "Governance"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsGovernanceProfile",
+      "path": "/pds/governance-profiles",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Register a strict public-sector governance deployment profile.",
+      "tags": [
+        "Governance"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsLifecycleCases",
+      "path": "/pds/lifecycle-cases",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List correction, dispute, and tombstone workflow cases.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsLifecycleCase",
+      "path": "/pds/lifecycle-cases",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Open or advance a correction, dispute, or tombstone workflow case.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsLifecycleEvents",
+      "path": "/pds/lifecycle-events",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-scoped lifecycle events.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsLifecycleEvent",
+      "path": "/pds/lifecycle-events",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Register a subject-owned lifecycle event for PDS metadata.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsMetadataExports",
+      "path": "/pds/metadata-exports",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "Export subject-owned PDS metadata without raw xAPI or confidential payloads.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsProviderBindings",
+      "path": "/pds/provider-bindings",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List secret/confidential-compute provider binding metadata.",
+      "tags": [
+        "Provider Bindings"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsProviderBinding",
+      "path": "/pds/provider-bindings",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Register admitted provider binding metadata for PDS experiments.",
+      "tags": [
+        "Provider Bindings"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsRecordInventory",
+      "path": "/pds/record-inventory",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-visible xAPI record metadata and registered data products.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsRetentionPolicies",
+      "path": "/pds/retention-policies",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned operational retention policies.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsRetentionPolicy",
+      "path": "/pds/retention-policies",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "requirements": [],
+      "summary": "Register a subject-owned operational retention policy.",
+      "tags": [
+        "Lifecycle"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialAdditiveAggregate",
+      "path": "/confidential/additive-aggregates",
+      "required_scopes": [
+        "confidential:compute"
+      ],
+      "requirements": [],
+      "summary": "Verify signed additive shares, persist the computed result, and release an aggregate.",
+      "tags": [
+        "Confidential Aggregates"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialAdditiveShareReplayRecords",
+      "path": "/confidential/additive-share-replay-records",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List transcript-scoped accepted replay-record metadata.",
+      "tags": [
+        "Share Submissions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKeyRevocation",
+      "path": "/confidential/additive-share-signing-key-revocations",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Revoke a subject-owned additive-share signing key.",
+      "tags": [
+        "Share Signing Keys"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKeyRotation",
+      "path": "/confidential/additive-share-signing-key-rotations",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Atomically register a replacement key and revoke the old key.",
+      "tags": [
+        "Share Signing Keys"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialShareSigningKeys",
+      "path": "/confidential/additive-share-signing-keys",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-scoped additive-share signing-key metadata.",
+      "tags": [
+        "Share Signing Keys"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKey",
+      "path": "/confidential/additive-share-signing-keys",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Register a subject-owned additive-share signing key.",
+      "tags": [
+        "Share Signing Keys"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialAdditiveShareSubmissions",
+      "path": "/confidential/additive-share-submissions",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-scoped submitted-share metadata for a transcript.",
+      "tags": [
+        "Share Submissions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialAdditiveShareSubmission",
+      "path": "/confidential/additive-share-submissions",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Submit one signed additive-share envelope.",
+      "tags": [
+        "Share Submissions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyBudgetSpend",
+      "path": "/confidential/differential-privacy-budget-spends",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Atomically spend epsilon from a subject-owned differential privacy budget.",
+      "tags": [
+        "Differential Privacy Budgets"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyBudgets",
+      "path": "/confidential/differential-privacy-budgets",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned differential privacy budget metadata.",
+      "tags": [
+        "Differential Privacy Budgets"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyBudget",
+      "path": "/confidential/differential-privacy-budgets",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Register a subject-owned differential privacy epsilon budget ledger.",
+      "tags": [
+        "Differential Privacy Budgets"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyCompositionSummaries",
+      "path": "/confidential/differential-privacy-composition-summaries",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned differential privacy sequential-composition summaries.",
+      "tags": [
+        "Differential Privacy Budgets"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyReleases",
+      "path": "/confidential/differential-privacy-releases",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned differential privacy release metadata.",
+      "tags": [
+        "Differential Privacy Releases"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyRelease",
+      "path": "/confidential/differential-privacy-releases",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "requirements": [],
+      "summary": "Validate, account, persist, and release a noised differential privacy aggregate.",
+      "tags": [
+        "Differential Privacy Releases"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacySampledRelease",
+      "path": "/confidential/differential-privacy-sampled-releases",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "requirements": [],
+      "summary": "Sample server-side discrete-Laplace noise, account, persist, and release a noised aggregate.",
+      "tags": [
+        "Differential Privacy Releases"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialJobAuditEvents",
+      "path": "/confidential/job-audit-events",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List metadata-only audit events for subject-owned confidential jobs.",
+      "tags": [
+        "Confidential Jobs"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialJobTransition",
+      "path": "/confidential/job-transitions",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Apply a strict durable confidential job lifecycle transition.",
+      "tags": [
+        "Confidential Jobs"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialJobs",
+      "path": "/confidential/jobs",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned durable confidential job metadata.",
+      "tags": [
+        "Confidential Jobs"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialJob",
+      "path": "/confidential/jobs",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Register a durable confidential job in draft state.",
+      "tags": [
+        "Confidential Jobs"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialParticipantAuditEvents",
+      "path": "/confidential/participant-audit-events",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List metadata-only audit events for subject-owned confidential participants.",
+      "tags": [
+        "Confidential Participants"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialParticipantTransition",
+      "path": "/confidential/participant-transitions",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Apply a strict confidential participant lifecycle transition.",
+      "tags": [
+        "Confidential Participants"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialParticipants",
+      "path": "/confidential/participants",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned confidential participant lifecycle metadata.",
+      "tags": [
+        "Confidential Participants"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialParticipant",
+      "path": "/confidential/participants",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Register participant identity, mechanism role, and key-ceremony metadata in invited state.",
+      "tags": [
+        "Confidential Participants"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialShamirThresholdReconstructions",
+      "path": "/confidential/shamir-threshold-reconstructions",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List subject-owned Shamir threshold reconstruction metadata.",
+      "tags": [
+        "Shamir Threshold Reconstructions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShamirThresholdReconstruction",
+      "path": "/confidential/shamir-threshold-reconstructions",
+      "required_scopes": [
+        "confidential:compute"
+      ],
+      "requirements": [],
+      "summary": "Reconstruct and persist a Shamir threshold value.",
+      "tags": [
+        "Shamir Threshold Reconstructions"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdReleaseApproval",
+      "path": "/confidential/threshold-release-approvals",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "requirements": [],
+      "summary": "Record one authority approval for a threshold-release request.",
+      "tags": [
+        "Threshold Releases"
+      ]
+    },
+    {
+      "method": "get",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialThresholdReleaseRequests",
+      "path": "/confidential/threshold-release-requests",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "requirements": [],
+      "summary": "List threshold-release request metadata.",
+      "tags": [
+        "Threshold Releases"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdReleaseRequest",
+      "path": "/confidential/threshold-release-requests",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "requirements": [],
+      "summary": "Register a two-authority release request for a matching computed aggregate.",
+      "tags": [
+        "Threshold Releases"
+      ]
+    },
+    {
+      "method": "post",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdRelease",
+      "path": "/confidential/threshold-releases",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "requirements": [],
+      "summary": "Release an aggregate after both configured authorities approved it.",
+      "tags": [
+        "Threshold Releases"
+      ]
+    }
+  ],
+  "schema_version": 1
+}

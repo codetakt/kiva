@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:projection-artifacts-source:1",
+  "title": "Kiva ProjectionArtifact source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "status", "projection_spec_source", "synchronization_policy", "artifacts"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-projection-artifacts-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "projection_spec_source": { "type": "string", "minLength": 1 },
+    "synchronization_policy": { "const": "normal-form-primary-with-projection-spec-compatibility-view" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["projection_source", "projection_id", "projection_kind", "generated_artifacts", "projection_targets", "projection_exports"],
+        "properties": {
+          "projection_source": { "type": "string", "minLength": 1 },
+          "projection_id": { "type": "string", "minLength": 1 },
+          "projection_kind": { "type": "string", "minLength": 1 },
+          "generated_artifacts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "projection_targets": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "projection_exports": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "bundle": { "type": "string", "minLength": 1 },
+          "index": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

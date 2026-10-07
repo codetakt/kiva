@@ -1,0 +1,118 @@
+schema_version: 1
+kind: analytics-reporting-template-catalog
+standard: Kiva Architecture
+scope: >
+  Reference reporting deployment guidance over the BI1 governed analytics API.
+  These templates do not extend the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS
+  conformance claim, do not host a BI product, and are not legal advice.
+status: published
+templates:
+  - id: school-district-reporting-v1
+    title: School district aggregate reporting
+    deployment_kind: school-district
+    status: published-template
+    intended_use:
+      - district-level completion and participation reporting
+      - approved cohort trend reporting
+    client:
+      protocol: oauth-oidc
+      adapter: kiva-idp-adapter
+      grant_type: client-credentials
+      required_scopes:
+        - analytics:read
+      ignored_scopes_env: KIVA_IDP_IGNORED_SCOPES
+      ignored_scopes:
+        - openid
+        - profile
+      ignored_scopes_grant_authority: false
+    operation_sequence:
+      - sequence: 1
+        operation_id: getAnalyticsProducts
+        purpose: Enumerate visible approved aggregate products.
+      - sequence: 2
+        operation_id: getAnalyticsProduct
+        purpose: Read selected product metadata and release kind.
+      - sequence: 3
+        operation_id: getAnalyticsProductAggregate
+        purpose: Read the admitted aggregate payload for rendering.
+    pagination:
+      max_page_size: 100
+      cursor_opaque: true
+      continue_while_next_cursor: true
+    data_products:
+      release_kinds:
+        - threshold-release
+        - differential-privacy-release
+      raw_statements_allowed: false
+      individual_level_data_allowed: false
+    partitions:
+      tenant_partition: tenant:district-alpha
+      subject_partition: subject-partition:district-alpha:learners
+    external_dashboard:
+      placement: external-consumer
+      hosted_by_kiva: false
+      generic_http_oauth_client: true
+      credential_sharing_allowed: false
+      reidentification_allowed: false
+    error_handling:
+      unauthorized_401: Refresh or reacquire a client token without retrying anonymously.
+      forbidden_403: Stop and correct the exact analytics:read grant.
+      not_found_404: Treat the product or release as outside the visible governed partition.
+    claim_boundary: >
+      Reference configuration for an external school reporting consumer; it is
+      not a hosted dashboard, a production analytics guarantee, or legal advice.
+  - id: corporate-training-reporting-v1
+    title: Corporate training aggregate reporting
+    deployment_kind: corporate-training
+    status: published-template
+    intended_use:
+      - organization-level course completion reporting
+      - approved training effectiveness trend reporting
+    client:
+      protocol: oauth-oidc
+      adapter: kiva-idp-adapter
+      grant_type: client-credentials
+      required_scopes:
+        - analytics:read
+      ignored_scopes_env: KIVA_IDP_IGNORED_SCOPES
+      ignored_scopes:
+        - openid
+        - profile
+      ignored_scopes_grant_authority: false
+    operation_sequence:
+      - sequence: 1
+        operation_id: getAnalyticsProducts
+        purpose: Enumerate visible approved aggregate products.
+      - sequence: 2
+        operation_id: getAnalyticsProduct
+        purpose: Read selected product metadata and release kind.
+      - sequence: 3
+        operation_id: getAnalyticsProductAggregate
+        purpose: Read the admitted aggregate payload for rendering.
+    pagination:
+      max_page_size: 100
+      cursor_opaque: true
+      continue_while_next_cursor: true
+    data_products:
+      release_kinds:
+        - threshold-release
+        - differential-privacy-release
+      raw_statements_allowed: false
+      individual_level_data_allowed: false
+    partitions:
+      tenant_partition: tenant:enterprise-alpha
+      subject_partition: subject-partition:enterprise-alpha:learners
+    external_dashboard:
+      placement: external-consumer
+      hosted_by_kiva: false
+      generic_http_oauth_client: true
+      credential_sharing_allowed: false
+      reidentification_allowed: false
+    error_handling:
+      unauthorized_401: Refresh or reacquire a client token without retrying anonymously.
+      forbidden_403: Stop and correct the exact analytics:read grant.
+      not_found_404: Treat the product or release as outside the visible governed partition.
+    claim_boundary: >
+      Reference configuration for an external corporate training reporting
+      consumer; it is not a hosted dashboard, a production analytics guarantee,
+      or legal advice.

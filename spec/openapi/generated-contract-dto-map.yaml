@@ -1,0 +1,524 @@
+version: 1
+kind: kiva-openapi-rust-dto-map-section
+section: generated-contract-dtos
+source_of_truth: openapi-contracts
+contracts:
+- name: kiva-analytics-generated-response-contract
+  openapi: spec/openapi/kiva-analytics.yaml
+  rust_sources:
+  - crates/kiva-analytics-openapi-contract/src/lib.rs
+  schemas:
+    AnalyticsAggregate:
+      rust: AnalyticsAggregate
+      shape: object
+    AnalyticsProduct:
+      rust: AnalyticsProduct
+      shape: object
+    AnalyticsProductPage:
+      rust: AnalyticsProductPage
+      shape: object
+- name: kiva-xapi-generated-contract
+  openapi: spec/openapi/kiva-xapi.yaml
+  rust_sources:
+  - crates/kiva-xapi-openapi-contract/src/lib.rs
+  schemas:
+    About:
+      rust: About
+      shape: object
+    Account:
+      rust: Account
+      shape: object
+    Activity:
+      rust: Activity
+      shape: object
+    Actor:
+      rust: Actor
+      shape: presence
+    ActorStatementObject:
+      rust: ActorStatementObject
+      shape: presence
+    Agent:
+      rust: Agent
+      shape: object
+    AgentOrIdentifiedGroup:
+      rust: AgentOrIdentifiedGroup
+      shape: presence
+    AgentStatementObject:
+      rust: AgentStatementObject
+      shape: presence
+    Attachment:
+      rust: Attachment
+      shape: object
+    Document:
+      rust: Document
+      shape: presence
+    ErrorResponse:
+      rust: ErrorResponse
+      shape: object
+    Group:
+      rust: Group
+      shape: object
+    IdentifiedGroup:
+      rust: IdentifiedGroup
+      shape: presence
+    Iri:
+      rust: Iri
+      shape: presence
+    LanguageMap:
+      rust: LanguageMap
+      shape: presence
+    NonSubStatementObject:
+      rust: NonSubStatementObject
+      shape: presence
+    Person:
+      rust: Person
+      shape: object
+    Statement:
+      rust: Statement
+      shape: object
+    StatementObject:
+      rust: StatementObject
+      shape: presence
+    StatementRef:
+      rust: StatementRef
+      shape: object
+    StatementResult:
+      rust: StatementResult
+      shape: object
+    StringIdArray:
+      rust: StringIdArray
+      shape: presence
+    SubStatement:
+      rust: SubStatement
+      shape: presence
+    Timestamp:
+      rust: Timestamp
+      shape: presence
+    Uuid:
+      rust: Uuid
+      shape: presence
+    Verb:
+      rust: Verb
+      shape: object
+- name: kiva-pds-generated-request-contract
+  openapi: spec/openapi/kiva-pds.yaml
+  rust_sources:
+  - crates/kiva-pds-openapi-contract/src/lib.rs
+  schemas:
+    AccessCheckRequest:
+      rust: AccessCheckRequest
+      shape: object
+    ConfidentialMechanismKind:
+      rust: ConfidentialMechanismKind
+      shape: enum
+    ConsentGrantRequest:
+      rust: ConsentGrantRequest
+      shape: object
+    ConsentRevocationRequest:
+      rust: ConsentRevocationRequest
+      shape: object
+    ConsentScope:
+      rust: ConsentScope
+      shape: enum
+    DataClass:
+      rust: DataClass
+      shape: enum
+    DataProductReadRequest:
+      rust: DataProductReadRequest
+      shape: object
+    DataProductRequest:
+      rust: DataProductRequest
+      shape: object
+    DataProductSourceKind:
+      rust: DataProductSourceKind
+      shape: enum
+    GovernanceProfileKind:
+      rust: GovernanceProfileKind
+      shape: enum
+    GovernanceProfileRequest:
+      rust: GovernanceProfileRequest
+      shape: object
+    LegalBasis:
+      rust: LegalBasis
+      shape: enum
+    LifecycleCaseRequest:
+      rust: LifecycleCaseRequest
+      shape: object
+    LifecycleCaseStatus:
+      rust: LifecycleCaseStatus
+      shape: enum
+    LifecycleCaseType:
+      rust: LifecycleCaseType
+      shape: enum
+    LifecycleEventRequest:
+      rust: LifecycleEventRequest
+      shape: object
+    LifecycleEventType:
+      rust: LifecycleEventType
+      shape: enum
+    LifecycleResourceKind:
+      rust: LifecycleResourceKind
+      shape: enum
+    PolicyAction:
+      rust: PolicyAction
+      shape: enum
+    PrincipalRole:
+      rust: PrincipalRole
+      shape: enum
+    ProviderBindingRequest:
+      rust: ProviderBindingRequest
+      shape: object
+    ResourceClass:
+      rust: ResourceClass
+      shape: enum
+    RetentionPolicyRequest:
+      rust: RetentionPolicyRequest
+      shape: object
+    SecretComputeProviderCapability:
+      rust: SecretComputeProviderCapability
+      shape: enum
+    SecretComputeProviderKind:
+      rust: SecretComputeProviderKind
+      shape: enum
+    SecretComputeProviderProfile:
+      rust: SecretComputeProviderProfile
+      shape: enum
+    TombstonePublicationRule:
+      rust: TombstonePublicationRule
+      shape: enum
+- name: kiva-pds-generated-response-contract
+  openapi: spec/openapi/kiva-pds.yaml
+  rust_sources:
+  - crates/kiva-pds-openapi-contract/src/lib.rs
+  schemas:
+    AccessAuditEvent:
+      rust: AccessAuditEvent
+      shape: object
+    AccessAuditEventList:
+      rust: AccessAuditEventList
+      shape: object
+    AccessCheckResponse:
+      rust: AccessCheckResponse
+      shape: object
+    ConfidentialMechanismKind:
+      rust: ConfidentialMechanismKind
+      shape: enum
+    ConsentGrant:
+      rust: ConsentGrant
+      shape: object
+    ConsentGrantList:
+      rust: ConsentGrantList
+      shape: object
+    ConsentScope:
+      rust: ConsentScope
+      shape: enum
+    ConsentState:
+      rust: ConsentState
+      shape: enum
+    DataClass:
+      rust: DataClass
+      shape: enum
+    DataProduct:
+      rust: DataProduct
+      shape: object
+    DataProductList:
+      rust: DataProductList
+      shape: object
+    DataProductReadResponse:
+      rust: DataProductReadResponse
+      shape: object
+    DataProductSourceKind:
+      rust: DataProductSourceKind
+      shape: enum
+    ErrorResponse:
+      rust: ErrorResponse
+      shape: object
+    GovernanceProfile:
+      rust: GovernanceProfile
+      shape: object
+    GovernanceProfileKind:
+      rust: GovernanceProfileKind
+      shape: enum
+    GovernanceProfileList:
+      rust: GovernanceProfileList
+      shape: object
+    LegalBasis:
+      rust: LegalBasis
+      shape: enum
+    LifecycleCase:
+      rust: LifecycleCase
+      shape: object
+    LifecycleCaseList:
+      rust: LifecycleCaseList
+      shape: object
+    LifecycleCaseStatus:
+      rust: LifecycleCaseStatus
+      shape: enum
+    LifecycleCaseType:
+      rust: LifecycleCaseType
+      shape: enum
+    LifecycleEvent:
+      rust: LifecycleEvent
+      shape: object
+    LifecycleEventList:
+      rust: LifecycleEventList
+      shape: object
+    LifecycleEventType:
+      rust: LifecycleEventType
+      shape: enum
+    LifecycleResourceKind:
+      rust: LifecycleResourceKind
+      shape: enum
+    MetadataExport:
+      rust: MetadataExport
+      shape: object
+    PdsSubjectAgent:
+      rust: PdsSubjectAgent
+      shape: object
+    PolicyAction:
+      rust: PolicyAction
+      shape: enum
+    PolicyDecision:
+      rust: PolicyDecision
+      shape: enum
+    PortabilityExport:
+      rust: PortabilityExport
+      shape: object
+    PortabilityStatement:
+      rust: PortabilityStatement
+      shape: object
+    PrincipalRole:
+      rust: PrincipalRole
+      shape: enum
+    ProviderBinding:
+      rust: ProviderBinding
+      shape: object
+    ProviderBindingList:
+      rust: ProviderBindingList
+      shape: object
+    RecordInventory:
+      rust: RecordInventory
+      shape: object
+    ReleaseArtifactKind:
+      rust: ReleaseArtifactKind
+      shape: enum
+    ReleaseArtifactRef:
+      rust: ReleaseArtifactRef
+      shape: object
+    ResourceClass:
+      rust: ResourceClass
+      shape: enum
+    RetentionPolicy:
+      rust: RetentionPolicy
+      shape: object
+    RetentionPolicyList:
+      rust: RetentionPolicyList
+      shape: object
+    SecretComputeProviderCapability:
+      rust: SecretComputeProviderCapability
+      shape: enum
+    SecretComputeProviderEvidenceGate:
+      rust: SecretComputeProviderEvidenceGate
+      shape: enum
+    SecretComputeProviderKind:
+      rust: SecretComputeProviderKind
+      shape: enum
+    SecretComputeProviderProfile:
+      rust: SecretComputeProviderProfile
+      shape: enum
+    SecretComputeProviderReleaseGate:
+      rust: SecretComputeProviderReleaseGate
+      shape: enum
+    SecretComputeProviderRuntimeClass:
+      rust: SecretComputeProviderRuntimeClass
+      shape: enum
+    StatementInventoryRecord:
+      rust: StatementInventoryRecord
+      shape: object
+    TombstonePublicationRule:
+      rust: TombstonePublicationRule
+      shape: enum
+- name: kiva-confidential-request-types
+  openapi: spec/openapi/kiva-confidential.yaml
+  rust_sources:
+  - crates/kiva-confidential-contract/src/lib.rs
+  schemas:
+    AdditiveAggregateRequest:
+      rust: AdditiveAggregateRequest
+      shape: object
+    AdditiveShareCommitmentSlot:
+      rust: AdditiveShareCommitmentSlot
+      shape: object
+    AdditiveShareReplayWindow:
+      rust: AdditiveShareReplayWindow
+      shape: object
+    AuthenticatedAdditiveShareEnvelope:
+      rust: AuthenticatedAdditiveShareEnvelope
+      shape: object
+    ConfidentialJobMechanism:
+      rust: ConfidentialJobMechanism
+      shape: enum
+    ConfidentialJobRequest:
+      rust: ConfidentialJobRequest
+      shape: object
+    ConfidentialJobStatus:
+      rust: ConfidentialJobStatus
+      shape: enum
+    ConfidentialJobTransitionRequest:
+      rust: ConfidentialJobTransitionRequest
+      shape: object
+    ConfidentialParticipantRequest:
+      rust: ConfidentialParticipantRequest
+      shape: object
+    ConfidentialParticipantRole:
+      rust: ConfidentialParticipantRole
+      shape: enum
+    ConfidentialParticipantStatus:
+      rust: ConfidentialParticipantStatus
+      shape: enum
+    ConfidentialParticipantTransitionRequest:
+      rust: ConfidentialParticipantTransitionRequest
+      shape: object
+    DifferentialPrivacyBudget:
+      rust: DifferentialPrivacyBudget
+      shape: object
+    DifferentialPrivacyBudgetSpend:
+      rust: DifferentialPrivacyBudgetSpend
+      shape: object
+    DifferentialPrivacyRelease:
+      rust: DifferentialPrivacyRelease
+      shape: object
+    DifferentialPrivacySampledRelease:
+      rust: DifferentialPrivacySampledRelease
+      shape: object
+    SecureAggregateShare:
+      rust: SecureAggregateShare
+      shape: object
+    ShamirShare:
+      rust: ShamirShare
+      shape: object
+    ShamirThresholdReconstruction:
+      rust: ShamirThresholdReconstruction
+      shape: object
+    ShareSigningKeyRegistration:
+      rust: ShareSigningKeyRegistration
+      shape: object
+    ShareSigningKeyRevocation:
+      rust: ShareSigningKeyRevocation
+      shape: object
+    ShareSigningKeyRotation:
+      rust: ShareSigningKeyRotation
+      shape: object
+    ShareSubmission:
+      rust: ShareSubmission
+      shape: object
+    SignedAuthenticatedAdditiveShareEnvelope:
+      rust: SignedAuthenticatedAdditiveShareEnvelope
+      shape: object
+    ThresholdReleaseApproval:
+      rust: ThresholdReleaseApproval
+      shape: object
+    ThresholdReleaseRequest:
+      rust: ThresholdReleaseRequest
+      shape: object
+    VerifiableShamirShare:
+      rust: VerifiableShamirShare
+      shape: object
+- name: kiva-confidential-response-types
+  openapi: spec/openapi/kiva-confidential.yaml
+  rust_sources:
+  - crates/kiva-confidential-contract/src/lib.rs
+  schemas:
+    AdditiveAggregateResponse:
+      rust: AdditiveAggregateResponse
+      shape: object
+    ConfidentialJobAuditEvent:
+      rust: ConfidentialJobAuditEvent
+      shape: object
+    ConfidentialJobAuditEventList:
+      rust: ConfidentialJobAuditEventList
+      shape: object
+    ConfidentialJobMechanism:
+      rust: ConfidentialJobMechanism
+      shape: enum
+    ConfidentialJobMetadata:
+      rust: ConfidentialJobMetadata
+      shape: object
+    ConfidentialJobMetadataList:
+      rust: ConfidentialJobMetadataList
+      shape: object
+    ConfidentialJobStatus:
+      rust: ConfidentialJobStatus
+      shape: enum
+    ConfidentialParticipantAuditEvent:
+      rust: ConfidentialParticipantAuditEvent
+      shape: object
+    ConfidentialParticipantAuditEventList:
+      rust: ConfidentialParticipantAuditEventList
+      shape: object
+    ConfidentialParticipantMetadata:
+      rust: ConfidentialParticipantMetadata
+      shape: object
+    ConfidentialParticipantMetadataList:
+      rust: ConfidentialParticipantMetadataList
+      shape: object
+    ConfidentialParticipantRole:
+      rust: ConfidentialParticipantRole
+      shape: enum
+    ConfidentialParticipantStatus:
+      rust: ConfidentialParticipantStatus
+      shape: enum
+    DifferentialPrivacyBudgetMetadata:
+      rust: DifferentialPrivacyBudgetMetadata
+      shape: object
+    DifferentialPrivacyBudgetMetadataList:
+      rust: DifferentialPrivacyBudgetMetadataList
+      shape: object
+    DifferentialPrivacyCompositionSummary:
+      rust: DifferentialPrivacyCompositionSummary
+      shape: object
+    DifferentialPrivacyCompositionSummaryList:
+      rust: DifferentialPrivacyCompositionSummaryList
+      shape: object
+    DifferentialPrivacyReleaseMetadata:
+      rust: DifferentialPrivacyReleaseMetadata
+      shape: object
+    DifferentialPrivacyReleaseMetadataList:
+      rust: DifferentialPrivacyReleaseMetadataList
+      shape: object
+    ReplayRecordMetadata:
+      rust: ReplayRecordMetadata
+      shape: object
+    ReplayRecordMetadataList:
+      rust: ReplayRecordMetadataList
+      shape: object
+    ShamirThresholdReconstructionMetadata:
+      rust: ShamirThresholdReconstructionMetadata
+      shape: object
+    ShamirThresholdReconstructionMetadataList:
+      rust: ShamirThresholdReconstructionMetadataList
+      shape: object
+    ShamirThresholdReconstructionResponse:
+      rust: ShamirThresholdReconstructionResponse
+      shape: object
+    ShareSigningKeyMetadata:
+      rust: ShareSigningKeyMetadata
+      shape: object
+    ShareSigningKeyMetadataList:
+      rust: ShareSigningKeyMetadataList
+      shape: object
+    SubmittedShareMetadata:
+      rust: SubmittedShareMetadata
+      shape: object
+    SubmittedShareMetadataList:
+      rust: SubmittedShareMetadataList
+      shape: object
+    ThresholdReleaseMetadata:
+      rust: ThresholdReleaseMetadata
+      shape: object
+    ThresholdReleaseMetadataList:
+      rust: ThresholdReleaseMetadataList
+      shape: object
+    ThresholdReleaseResponse:
+      rust: ThresholdReleaseResponse
+      shape: object

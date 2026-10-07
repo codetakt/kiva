@@ -1,0 +1,171 @@
+schema_version: 1
+kind: kiva-pds-invariants-source
+status: active
+description: >
+  Executable PDS invariant ledger. These invariants sit under the PdsCorePlane
+  model and make subject scoping, fail-closed consent, metadata-only exports,
+  audit recording, release-artifact availability, lifecycle terminal state, and
+  provider-binding metadata boundaries explicit.
+core_planes: spec/pds/core-planes.source.yaml
+evidence_manifest: spec/ci/evidence-checks.yaml
+invariant_model:
+  root_type: PdsInvariant
+  parent_root_type: PdsCorePlane
+  parent_model: operation
+  required_planes:
+    - event
+    - inventory
+    - policy
+    - release
+  rule: >
+    PDS invariants must map to one or more PDS core planes, cite executable
+    implementation anchors, and reference CI checks that keep the anchors live.
+invariants:
+  - id: pds-subject-scope
+    plane_refs:
+      - event
+      - inventory
+      - policy
+      - release
+    rule: PDS repositories and projections must scope records to the authenticated or declared data subject.
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+    required_terms:
+      - principal.subject
+      - data_subject
+      - owner_subject
+      - requester_subject
+      - pds_subject_actor_ifi
+    required_checks:
+      - pds-resource-families
+      - pds-openapi-contract
+  - id: pds-consent-revocation-fail-closed
+    plane_refs:
+      - event
+      - policy
+    rule: Delegated PDS reads must fail closed when consent is missing, revoked, expired, or out of scope.
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/decision.rs
+      - crates/kiva-policy/src/policy/delegation.rs
+      - crates/kiva-server/src/surfaces/pds/model/policy_adapter.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+    required_terms:
+      - DenyReason::ConsentRequired
+      - DenyReason::ConsentRevoked
+      - DenyReason::ConsentExpired
+      - DelegationScopeMismatch
+      - decide_personal_data_request
+      - pds_access_audit_event_from_decision
+    required_checks:
+      - pds-resource-families
+      - pds-core-planes
+  - id: pds-metadata-only-inventory-export
+    plane_refs:
+      - inventory
+    rule: Inventory and export responses expose metadata projections, not raw xAPI Statement payloads.
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+      - crates/kiva-application/src/pds/model/records.rs
+      - crates/kiva-application/src/pds/model/snapshot.rs
+      - docs/architecture/pds-extension-compatibility.md
+    required_terms:
+      - RecordInventoryView
+      - MetadataExportView
+      - StatementInventoryRecordDto
+      - statement_inventory_records
+      - metadata-only export shape
+    forbidden_terms:
+      - raw_statement_json
+      - statement_payload
+    required_checks:
+      - pds-openapi-schema-artifacts
+      - pds-openapi-contract
+  - id: pds-access-decision-audit-recorded
+    plane_refs:
+      - event
+      - policy
+    rule: Direct access checks and governed data-product reads must persist an access-audit event and ledger event.
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+    required_terms:
+      - pds_access_audit_event_from_decision
+      - PdsLedgerEventState::access_decision_recorded
+      - insert_pds_access_audit_event_in_transaction
+      - requester_subject
+    required_checks:
+      - pds-resource-families
+      - pds-openapi-contract
+  - id: pds-release-artifact-availability
+    plane_refs:
+      - policy
+      - release
+    rule: PDS data products may reference only available, owner-matching confidential release metadata.
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/decision.rs
+      - crates/kiva-policy/src/policy/data_products.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/confidential/repository/jobs.rs
+    required_terms:
+      - release_artifact_is_available_for_pds_data_product
+      - artifact_exists
+      - principal_matches_artifact_owner
+      - artifact_released
+      - ReleaseArtifactAvailabilityPort
+    required_checks:
+      - confidential-capability-policy-evidence
+      - pds-resource-families
+  - id: pds-lifecycle-terminal-immutability
+    plane_refs:
+      - event
+      - inventory
+    rule: Terminal lifecycle case metadata is immutable except for exact idempotent replay.
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+      - docs/architecture/pds-operational-lifecycle-workflows.md
+    required_terms:
+      - pds_lifecycle_case_transition_is_allowed
+      - requires_resolution()
+      - StoreOutcome::Conflict
+      - terminal case metadata as immutable
+    required_checks:
+      - pds-resource-families
+      - pds-openapi-schema-artifacts
+  - id: pds-provider-binding-metadata-only
+    plane_refs:
+      - policy
+      - release
+    rule: PDS provider bindings store provider metadata and digests only; raw provider secrets and runtime payloads stay outside PDS.
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+      - docs/architecture/secret-compute-provider-integration.md
+    required_terms:
+      - SecretComputeProviderBinding::new
+      - provider_id_digest
+      - artifact_digest
+      - parameter_set_digest
+      - review_evidence_digest
+      - metadata-only PDS provider-binding registry
+    forbidden_terms:
+      - raw_secret_material
+      - ciphertext_payload
+      - private_key_material
+    required_checks:
+      - secret-compute-provider-contract
+      - secret-compute-provider-tck

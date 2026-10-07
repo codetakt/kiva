@@ -1,0 +1,240 @@
+schema_version: 1
+kind: kiva-pds-state-machines-source
+status: active
+description: >
+  PDS state-machine ledger under the PdsCorePlane model. It records the small
+  set of governed state transitions that must stay aligned with policy,
+  repository, and HTTP behavior.
+core_planes: spec/pds/core-planes.source.yaml
+invariant_source: spec/pds/invariants.source.yaml
+evidence_manifest: spec/ci/evidence-checks.yaml
+state_machine_model:
+  root_type: PdsStateMachine
+  parent_root_type: PdsCorePlane
+  parent_model: operation
+  required_machine_ids:
+    - consent-grant
+    - lifecycle-case
+    - release-artifact-availability
+    - provider-binding-admission
+  rule: >
+    PDS state machines must map to one or more PDS core planes, cite the
+    invariants they enforce, define terminal/idempotent behavior, and anchor to
+    executable Rust policy or repository code.
+machines:
+  - id: consent-grant
+    domain_object: PdsConsentGrantState
+    plane_refs:
+      - event
+      - policy
+    invariant_refs:
+      - pds-subject-scope
+      - pds-consent-revocation-fail-closed
+      - pds-access-decision-audit-recorded
+    states:
+      - active
+      - revoked
+      - expired
+    initial_states:
+      - active
+    terminal_states:
+      - revoked
+      - expired
+    idempotent_terminal_states:
+      - revoked
+      - expired
+    transitions:
+      - from: none
+        to: active
+        event: register-grant
+      - from: active
+        to: revoked
+        event: revoke-grant
+      - from: active
+        to: expired
+        event: policy-time-evaluation
+      - from: revoked
+        to: revoked
+        event: idempotent-revoke
+      - from: expired
+        to: expired
+        event: idempotent-expire
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/model/state/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+      - crates/kiva-policy/src/policy/delegation.rs
+      - crates/kiva-policy/src/policy/decision.rs
+    required_terms:
+      - PdsConsentState::Active
+      - PdsConsentState::Revoked
+      - DelegationState::Expired
+      - PdsRevocationOutcome::AlreadyRevoked
+    required_checks:
+      - pds-invariants
+      - pds-core-planes
+  - id: lifecycle-case
+    domain_object: PdsLifecycleCaseState
+    plane_refs:
+      - event
+      - inventory
+    invariant_refs:
+      - pds-subject-scope
+      - pds-lifecycle-terminal-immutability
+    states:
+      - open
+      - under-review
+      - resolved
+      - rejected
+      - tombstoned
+    initial_states:
+      - open
+    terminal_states:
+      - resolved
+      - rejected
+      - tombstoned
+    idempotent_terminal_states:
+      - resolved
+      - rejected
+      - tombstoned
+    transitions:
+      - from: none
+        to: open
+        event: open-case
+      - from: open
+        to: open
+        event: idempotent-open
+      - from: open
+        to: under-review
+        event: begin-review
+      - from: under-review
+        to: under-review
+        event: idempotent-review
+      - from: under-review
+        to: resolved
+        event: resolve-case
+      - from: under-review
+        to: rejected
+        event: reject-case
+      - from: under-review
+        to: tombstoned
+        event: tombstone-case
+      - from: resolved
+        to: resolved
+        event: idempotent-resolve
+      - from: rejected
+        to: rejected
+        event: idempotent-reject
+      - from: tombstoned
+        to: tombstoned
+        event: idempotent-tombstone
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+    required_terms:
+      - pds_lifecycle_case_transition_is_allowed
+      - LifecycleCaseStatus::Open
+      - LifecycleCaseStatus::UnderReview
+      - LifecycleCaseStatus::Resolved
+      - LifecycleCaseStatus::Rejected
+      - LifecycleCaseStatus::Tombstoned
+    required_checks:
+      - pds-invariants
+      - pds-core-planes
+  - id: release-artifact-availability
+    domain_object: ReleaseArtifactAvailability
+    plane_refs:
+      - policy
+      - release
+    invariant_refs:
+      - pds-release-artifact-availability
+    states:
+      - unavailable
+      - available
+      - released
+    initial_states:
+      - unavailable
+    terminal_states:
+      - released
+    idempotent_terminal_states:
+      - released
+    transitions:
+      - from: none
+        to: unavailable
+        event: evaluate-artifact-reference
+      - from: unavailable
+        to: available
+        event: artifact-exists-and-owner-matches
+      - from: available
+        to: released
+        event: threshold-release-completed
+      - from: unavailable
+        to: released
+        event: dp-or-shamir-artifact-persisted
+      - from: released
+        to: released
+        event: idempotent-release-artifact-read
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/decision.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/confidential/repository/jobs.rs
+    required_terms:
+      - release_artifact_is_available_for_pds_data_product
+      - artifact_exists
+      - principal_matches_artifact_owner
+      - artifact_released
+    required_checks:
+      - pds-invariants
+      - confidential-capability-policy-evidence
+  - id: provider-binding-admission
+    domain_object: PdsProviderBindingState
+    plane_refs:
+      - policy
+      - release
+    invariant_refs:
+      - pds-provider-binding-metadata-only
+    states:
+      - pending-review
+      - admitted-reference
+      - production-ready
+    initial_states:
+      - pending-review
+    terminal_states:
+      - admitted-reference
+      - production-ready
+    idempotent_terminal_states:
+      - admitted-reference
+      - production-ready
+    transitions:
+      - from: none
+        to: pending-review
+        event: register-binding-without-review-evidence
+      - from: pending-review
+        to: admitted-reference
+        event: reference-provider-admitted
+      - from: pending-review
+        to: production-ready
+        event: review-evidence-admitted
+      - from: admitted-reference
+        to: admitted-reference
+        event: idempotent-register-reference-binding
+      - from: production-ready
+        to: production-ready
+        event: idempotent-register-production-binding
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+      - crates/kiva-confidential/src/mechanism/provider/admission.rs
+    required_terms:
+      - SecretComputeProviderBinding::new
+      - admit_secret_compute_provider_runtime_boundary
+      - review_evidence_digest
+      - production_ready
+    required_checks:
+      - pds-invariants
+      - secret-compute-provider-tck

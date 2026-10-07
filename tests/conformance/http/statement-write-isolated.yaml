@@ -1,0 +1,449 @@
+suite:
+  id: xapi-lrs-statement-write-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive Statement write checks for disposable isolated LRS targets.
+cases:
+- id: statement-put-stores-json-statement
+  requirements:
+  - xapi-lrs-4.1.3-json-statement-batches
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000101
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000101
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-put-stores-json-statement
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000101
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000101
+          /actor/mbox:
+            equals: mailto:kiva-conformance@example.org
+          /verb/id:
+            equals: https://adlnet.gov/expapi/verbs/experienced
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-put-stores-json-statement
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+  - id: head-statement
+    request:
+      method: HEAD
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000101
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      body:
+        non_empty: false
+- id: statement-post-rejects-duplicate-batch-id
+  requirements:
+  - xapi-lrs-4.1.5-batch-rejection
+  - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+    - id: 00000000-0000-4000-8000-000000000102
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/statement-post-duplicate-batch-id-a
+      version: 2.0.0
+    - id: 00000000-0000-4000-8000-000000000102
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/statement-post-duplicate-batch-id-b
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-put-duplicate-conflict-preserves-original
+  requirements:
+  - xapi-lrs-4.1.3-json-statement-batches
+  - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-original
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000103
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000103
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-put-duplicate-original
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: put-conflicting-duplicate
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000103
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000103
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-put-duplicate-conflict
+        version: 2.0.0
+    expect:
+      status: 409
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 204
+  - id: get-original
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000103
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000103
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-put-duplicate-original
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+- id: statement-post-duplicate-conflict-preserves-original
+  requirements:
+  - xapi-lrs-4.1.3-json-statement-batches
+  - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: post-original
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000104
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-post-duplicate-original
+        version: 2.0.0
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /0:
+            equals: 00000000-0000-4000-8000-000000000104
+  - id: post-conflicting-duplicate
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000104
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-post-duplicate-conflict
+        version: 2.0.0
+    expect:
+      status: 409
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 204
+      - 200
+      checks:
+      - kind: json-shape
+        status: 200
+        shape:
+          type: array
+          min_items: 1
+          max_items: 1
+          items:
+            type: string
+            format: uuid
+            enum:
+            - 00000000-0000-4000-8000-000000000104
+  - id: get-original
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000104
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: 00000000-0000-4000-8000-000000000104
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-post-duplicate-original
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+- id: statement-post-omitted-id-creates-retrievable-id
+  requirements:
+  - xapi-lrs-4.1.3-json-statement-batches
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  - xapi-lrs-4.2.4.2-create-statement-id
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: post-without-id
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/statement-post-omitted-id
+        version: 2.0.0
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /0:
+            present: true
+      capture:
+        generated_statement_id:
+          pointer: /0
+      checks:
+      - kind: json-shape
+        shape:
+          type: array
+          min_items: 1
+          max_items: 1
+          items:
+            type: string
+            format: uuid
+  - id: get-generated-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: '{{generated_statement_id}}'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /id:
+            equals: '{{generated_statement_id}}'
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/statement-post-omitted-id
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      - kind: json-shape
+        shape:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+              format: uuid

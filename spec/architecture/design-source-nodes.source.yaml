@@ -1,0 +1,446 @@
+schema_version: 1
+kind: kiva-design-source-nodes-source
+status: active
+description: Normalized ArchitectureGraph source-node rows owned by DesignUniverse.
+parent_universe: spec/architecture/design-universe.source.yaml
+fragment:
+  id: design-source-nodes
+  parent_root_type: DesignUniverse
+  authoritative_rows: true
+architecture_graph_projection:
+  description: Generated ArchitectureGraph source projection from DesignUniverse.
+    Start at spec/architecture/design-universe.source.yaml and edit normalized
+    source-node rows in spec/architecture/design-source-nodes.source.yaml.
+  generated_artifacts:
+  - spec/architecture/design-backbone.yaml
+  - spec/ci/projection-graph.yaml
+  projection_policy:
+    design_backbone_is_generated_review_projection: true
+    architecture_policy_source: spec/architecture/architecture-policy.source.yaml
+    ci_projection_graph_is_generated_from_design_backbone_sources: true
+    evidence_check_manifest_is_ci_runtime_projection: true
+    projection_spec_source: spec/architecture/projection-specs.source.yaml
+  sources:
+    http_contracts:
+      owner: spec/openapi
+      purpose: External HTTP request and response contracts.
+      artifacts:
+      - spec/openapi/kiva-analytics.yaml
+      - spec/openapi/kiva-xapi.yaml
+      - spec/openapi/kiva-pds.yaml
+      - spec/openapi/kiva-confidential.yaml
+    operation_bindings:
+      owner: scripts/ci/generate_application_operation_catalog.py
+      purpose: Application workflow labels, Rust workflow variants, OpenAPI operationIds,
+        and OAuth/OIDC scopes projected from the generated surface catalog.
+    implementation_claims:
+      owner: spec/architecture/claim-catalog.yaml
+      purpose: Public implementation claims, maturity labels, and the evidence paths
+        supporting each claim.
+      artifacts:
+      - spec/architecture/claim-catalog.yaml
+      - spec/architecture/claim-maturity.yaml
+    analytics_milestones:
+      owner: spec/analytics/publication-milestones.yaml
+      purpose: >
+        BI0 analytics claim boundary and BI1/BI2 publication milestone
+        authority without asserting an implemented analytics surface.
+      artifacts:
+      - spec/analytics/publication-milestones.yaml
+      - docs/architecture/analytics-claim-boundary.md
+    analytics_reporting_templates:
+      owner: spec/analytics/reporting-templates.yaml
+      purpose: >
+        Validated BI2 reference reporting guidance for external school and
+        corporate-training consumers of the governed analytics surface.
+      artifacts:
+      - spec/analytics/reporting-templates.yaml
+      - spec/analytics/schemas/reporting-template-catalog.schema.json
+      - docs/architecture/reference-reporting-deployments.md
+    claim_readiness_matrix:
+      owner: scripts/ci/generate_claim_readiness_matrix.py
+      purpose: Generated claim readiness matrix joining public claims to maturity
+        labels, projection edges, CI checks, and generated evidence artifacts.
+    claim_graph:
+      owner: scripts/ci/generate_claim_graph.py
+      purpose: Generated read-only ClaimGraph joining claim readiness, EvidenceSet,
+        receipt indexes, executed receipt overlays, verification obligations, and
+        confidential capability bindings.
+      artifacts:
+      - spec/architecture/claim-graph.source.yaml
+      - spec/architecture/schemas/claim-graph.source.schema.json
+      - spec/architecture/schemas/claim-graph.schema.json
+    assurance_graph:
+      owner: scripts/ci/generate_assurance_graph.py
+      purpose: Unified generated AssuranceGraph over claims, declared evidence receipts,
+        capability bindings, and verification obligations.
+      artifacts:
+      - generated/architecture/assurance-graph.yaml
+      - docs/architecture/generated/assurance-graph.md
+    evidence_set:
+      owner: scripts/ci/generate_evidence_set.py
+      purpose: Unified generated EvidenceSet index binding CI evidence checks, projection-derived
+        inputs, generated outputs, and ready public claims.
+      artifacts:
+      - spec/evidence/evidence-set.source.yaml
+      - spec/evidence/schemas/evidence-set.schema.json
+    evidence_receipts:
+      owner: scripts/ci/generate_evidence_receipts.py
+      purpose: Generated EvidenceReceipt and VerificationReceipt index binding CI
+        checks and verification discharges to stable receipt identities.
+      artifacts:
+      - spec/evidence/evidence-receipts.source.yaml
+      - spec/evidence/schemas/evidence-receipts.schema.json
+    executed_receipt_overlay:
+      owner: scripts/ci/generate_executed_receipt_overlay.py
+      purpose: Generated release-run overlay model that binds declared receipt ids
+        to optional CI run reports and sha256 hashes without claiming execution in
+        the committed no-run overlay.
+      artifacts:
+      - spec/evidence/executed-receipts.source.yaml
+      - spec/evidence/schemas/executed-receipts.source.schema.json
+      - spec/evidence/schemas/executed-receipt-overlay.schema.json
+    source_ledger_schemas:
+      owner: scripts/ci/validate_source_ledger_schemas.py
+      purpose: Schema-first validation registry for canonical source ledgers.
+      artifacts:
+      - spec/architecture/source-ledger-schemas.yaml
+      - spec/architecture/schemas/source-ledger-schemas.schema.json
+      - spec/architecture/schemas/generic-source-ledger.schema.json
+    architecture_graph:
+      owner: scripts/ci/generate_design_universe_projections.py
+      purpose: Generated ArchitectureGraph projection node that materializes the source
+        identity list consumed by the compiled architecture IR.
+      artifacts:
+      - spec/architecture/architecture-graph.source.yaml
+      - spec/architecture/schemas/architecture-graph.source.schema.json
+    architecture_core_model:
+      owner: spec/architecture/core-model.source.yaml
+      purpose: Minimal primary design model over OperationKernel, assurance primitives,
+        ProjectionRuntime, CI command registry, CapabilityPort, PDS planes, and BoundaryProperty
+        verification.
+      artifacts:
+      - spec/architecture/core-model.source.yaml
+    design_universe:
+      owner: spec/architecture/design-universe.source.yaml
+      purpose: Compact DesignUniverse entrypoint that owns normalized source-node,
+        package-row, and ledger-row fragments and renders review projections.
+      artifacts:
+      - spec/architecture/design-universe.source.yaml
+    design_source_nodes:
+      owner: spec/architecture/design-source-nodes.source.yaml
+      purpose: Normalized DesignUniverse fragment owning ArchitectureGraph source-node rows.
+      artifacts:
+      - spec/architecture/design-source-nodes.source.yaml
+    design_package_rows:
+      owner: spec/architecture/design-package-rows.source.yaml
+      purpose: Normalized DesignUniverse fragment owning DesignPackage rows.
+      artifacts:
+      - spec/architecture/design-package-rows.source.yaml
+    design_ledger_rows:
+      owner: spec/architecture/design-ledger-rows.source.yaml
+      purpose: Normalized DesignUniverse fragment owning LedgerCatalog rows.
+      artifacts:
+      - spec/architecture/design-ledger-rows.source.yaml
+    design_packages:
+      owner: scripts/ci/generate_design_universe_projections.py
+      purpose: Generated DesignPackage source projection that maps each core model
+        root to its editable entrypoint, generated review surfaces, supporting refs,
+        and lifecycle.
+      artifacts:
+      - spec/architecture/design-packages.source.yaml
+    ledger_catalog:
+      owner: scripts/ci/generate_design_universe_projections.py
+      purpose: Generated LedgerCatalog source projection joining architecture source
+        ids, schema coverage, lifecycle, generated compatibility artifacts, generators,
+        validators, and primary review surfaces.
+      artifacts:
+      - spec/architecture/ledger-catalog.source.yaml
+    operation_kernel_source:
+      owner: spec/architecture/operation-kernel.source.yaml
+      purpose: Thin human review entrypoint that groups OperationKernel split ledgers
+        without creating parallel operation authority.
+      artifacts:
+      - spec/architecture/operation-kernel.source.yaml
+    assurance_primitive_source:
+      owner: spec/evidence/assurance-primitive.source.yaml
+      purpose: Thin human review entrypoint that fixes AssuranceGraph as the primary
+        review surface over Claim, Obligation, Discharge, and Receipt.
+      artifacts:
+      - spec/evidence/assurance-primitive.source.yaml
+    evidence_review_bundle:
+      owner: spec/evidence/review-bundle.source.yaml
+      purpose: Human-facing evidence bundle that limits routine generated-artifact
+        review to SourceRegistry, OperationKernel, AssuranceGraph, and MechanismProfile
+        while keeping compatibility-retirement history as supporting evidence.
+      artifacts:
+      - spec/evidence/review-bundle.source.yaml
+    source_registry:
+      owner: scripts/ci/generate_source_registry.py
+      purpose: Unified generated SourceRegistry view over architecture source nodes,
+        source-layer classification, schema coverage, and projection roles.
+      artifacts:
+      - generated/architecture/source-registry.yaml
+      - docs/architecture/generated/source-registry.md
+    architecture_policy:
+      owner: spec/architecture/architecture-policy.source.yaml
+      purpose: Source-layer classification, compiled architecture IR ownership, SurfaceOperation
+        kernel policy, PDS resource pattern, control/data-plane boundary, workflow
+        entrypoint policy, HTTP adapter boundary, and confidential assurance source
+        model.
+      artifacts:
+      - spec/architecture/architecture-policy.source.yaml
+      - spec/architecture/policies/source-layer-policy.source.yaml
+      - spec/architecture/policies/artifact-class-policy.source.yaml
+      - spec/architecture/policies/architecture-ir-policy.source.yaml
+      - spec/architecture/policies/operation-kernel-policy.source.yaml
+      - spec/architecture/policies/confidential-assurance-source-policy.source.yaml
+      - spec/architecture/policies/pds-resource-pattern.source.yaml
+      - spec/architecture/policies/control-plane-boundary-policy.source.yaml
+      - spec/architecture/policies/workflow-entrypoint-policy.source.yaml
+      - spec/architecture/policies/http-adapter-boundary-policy.source.yaml
+      - spec/architecture/policies/architecture-domain-model.source.yaml
+    projection_specs:
+      owner: spec/architecture/projection-specs.source.yaml
+      purpose: Generated-only compatibility ProjectionSpec view over primary ProjectionRuntime
+        normal-form ledgers; not a canonical or human-edited source.
+      artifacts:
+      - spec/architecture/projection-specs.source.yaml
+    projection_auxiliary_ledgers:
+      owner: scripts/ci/generate_projection_auxiliary_ledgers.py
+      purpose: Primary ProjectionArtifact, ProjectionRuntime, and ProjectionCheckBinding
+        source-form ledgers for source-to-projection behavior.
+      artifacts:
+      - spec/architecture/projection-artifacts.source.yaml
+      - spec/architecture/projection-runtime.source.yaml
+      - spec/architecture/projection-check-bindings.source.yaml
+    projection_normal_form_policy:
+      owner: spec/architecture/projection-normal-form-policy.source.yaml
+      purpose: Governance policy that keeps ProjectionRuntime normal-form ledgers
+        primary and ProjectionSpec as a generated compatibility view.
+      artifacts:
+      - spec/architecture/projection-normal-form-policy.source.yaml
+      - spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+    compiled_architecture:
+      owner: scripts/ci/generate_compiled_architecture.py
+      purpose: Generated compiled architecture IR that joins graph sources, architecture
+        policy, source classification, and artifact catalog for downstream review
+        projections.
+    pds_resource_families:
+      owner: scripts/ci/generate_surface_catalog_projections.py
+      purpose: PDS resource-family ownership projection across route contexts, implementation
+        files, and evidence anchors generated from the surface catalog.
+    surface_families:
+      owner: scripts/ci/generate_surface_catalog_projections.py
+      purpose: Cross-surface family ownership projection for xAPI, PDS, and confidential-computation
+        HTTP routes generated from the surface catalog.
+    surface_operation_overlay:
+      owner: spec/architecture/operation-ownership.source.yaml
+      purpose: Sparse OpenAPI-keyed semantic overlay for application workflow ownership,
+        PDS route contexts, and PDS resource-family handler ownership.
+      artifacts:
+      - spec/architecture/operation-ownership.source.yaml
+    surface_projection_review_policy:
+      owner: spec/architecture/surface-projections.yaml
+      purpose: Thin review entrypoint and edit policy for split surface source ledgers.
+      artifacts:
+      - spec/architecture/surface-projections.yaml
+    surface_operation_model:
+      owner: spec/architecture/surface-model.source.yaml
+      purpose: SurfaceOperation algebra joining OpenAPI-derived HTTP operation identity
+        with an optional semantic overlay.
+      artifacts:
+      - spec/architecture/surface-model.source.yaml
+    surface_generation_policy:
+      owner: spec/architecture/surface-generation.policy.yaml
+      purpose: Generated surface catalog output, source-ledger, and projection policy.
+      artifacts:
+      - spec/architecture/surface-generation.policy.yaml
+    surface_implementation_policy:
+      owner: spec/architecture/surface-implementation.policy.yaml
+      purpose: Route coverage, application-operation, PDS resource-family, and cross-surface
+        family implementation projection policy.
+      artifacts:
+      - spec/architecture/surface-implementation.policy.yaml
+    pds_resource_family_sources:
+      owner: spec/architecture/pds-resource-families.source.yaml
+      purpose: Human-owned PDS family descriptions and implementation anchors.
+      artifacts:
+      - spec/architecture/pds-resource-families.source.yaml
+    surface_family_sources:
+      owner: spec/architecture/surface-families.source.yaml
+      purpose: Human-owned cross-surface xAPI, PDS, and confidential family descriptions.
+      artifacts:
+      - spec/architecture/surface-families.source.yaml
+    surface_catalog:
+      owner: scripts/ci/generate_surface_catalog_bundle.py
+      purpose: Generated surface review catalog and Rust surface profile registry
+        projected from split surface source ledgers.
+    operation_kernel:
+      owner: scripts/ci/generate_operation_kernel.py
+      purpose: First-class generated OperationKernel IR joining HTTP contract identity,
+        SurfaceOperation semantics, workflow ownership, resource-family assignment,
+        and requirement evidence.
+      artifacts:
+      - spec/architecture/schemas/operation-kernel.schema.json
+    openapi_dto_boundary:
+      owner: scripts/ci/generate_generated_contract_dto_map.py + scripts/ci/generate_openapi_dto_map_projection.py
+      purpose: OpenAPI-to-Rust DTO boundary projection, generated contract DTO map,
+        and generated schema-closure membership manifest for generated contract crate
+        slices.
+    milestone_status:
+      owner: spec/pds and spec/confidential ledgers
+      purpose: Completion state and claim boundary for PDS and confidential-computation
+        milestones.
+      artifacts:
+      - spec/pds/publication-milestones.yaml
+      - spec/confidential/computation-milestones.yaml
+      - spec/confidential/mechanism-maturity.yaml
+    pds_core_planes:
+      owner: spec/pds/core-planes.source.yaml
+      purpose: Minimal PDS event, inventory, policy, and release plane model mapped
+        to PDS milestones and checks.
+      artifacts:
+      - spec/pds/core-planes.source.yaml
+    pds_state_machines:
+      owner: spec/pds/state-machines.source.yaml
+      purpose: PDS consent, lifecycle, release-artifact, and provider-binding state-machine
+        ledger under the PdsCorePlane model.
+      artifacts:
+      - spec/pds/state-machines.source.yaml
+    pds_plane_packages:
+      owner: scripts/ci/generate_pds_plane_packages.py
+      purpose: Generated PdsPlanePackage review view joining operation-owned planes,
+        invariants, state machines, resource families, implementation anchors, and checks.
+      artifacts:
+      - generated/architecture/pds-plane-packages.yaml
+    architecture_guards:
+      owner: spec/architecture/boundaries.yaml
+      purpose: Executable drift checks for source anchors, docs, dependencies, route
+        ownership, module ownership, source size, and hygiene rules.
+    compatibility_deletion_readiness:
+      owner: scripts/ci/generate_compatibility_deletion_readiness.py
+      purpose: Generated deletion-readiness report for retained or removed compatibility
+        surfaces and their retirement gates.
+    compatibility_retirement_plane:
+      owner: scripts/ci/generate_compatibility_retirement_plane.py
+      purpose: Generated compatibility-retirement review plane joining retained or
+        removed compatibility-surface history, DTO semantic-compatibility retirement,
+        and executable deletion-readiness gates.
+      artifacts:
+      - spec/architecture/schemas/compatibility-retirement-plane.schema.json
+    compatibility_exit_gates:
+      owner: scripts/ci/validate_compatibility_exit_gates.py
+      purpose: Dedicated validator that every retained compatibility surface has an
+        explicit migration target, forbidden call-site gate, and deletion-ready next
+        status while removed surfaces remain closed history.
+    ci_check_manifest:
+      owner: scripts/ci/generate_evidence_checks.py
+      purpose: Generated manifest-driven OpenAPI, architecture, and confidential-computation
+        CI validator groups and registry-driven command runtime.
+      artifacts:
+      - spec/ci/evidence-check-groups.source.yaml
+      - scripts/ci/kiva-ci
+      - scripts/ci/kiva_ci/cli.py
+      - scripts/ci/run_generators.py
+      - scripts/ci/run_evidence_checks.py
+      - scripts/ci/generate_evidence_checks.py
+      - scripts/ci/generate_design_backbone.py
+      - scripts/ci/generate_projection_graph.py
+      - scripts/ci/validate_projection_graph.py
+      - scripts/ci/generate_openapi_dto_map_projection.py
+    ci_check_compatibility_view:
+      owner: spec/ci/evidence-checks.source.yaml
+      purpose: Retained compatibility view of per-check CI rows over primary CheckCatalog
+        and GatePlan ledgers; not a canonical CI source.
+      artifacts:
+      - spec/ci/evidence-checks.source.yaml
+    ci_check_normal_form:
+      owner: scripts/ci/generate_evidence_check_catalog.py
+      purpose: Primary CI CheckCatalog and GatePlan ledgers for registry-driven evidence
+        execution.
+      artifacts:
+      - spec/ci/evidence-check-catalog.source.yaml
+      - spec/ci/evidence-gate-plan.source.yaml
+    ci_check_normal_form_policy:
+      owner: spec/ci/evidence-check-normal-form-policy.source.yaml
+      purpose: Governance policy that keeps CheckCatalog and GatePlan primary while
+        evidence-checks.source.yaml remains a compatibility view.
+      artifacts:
+      - spec/ci/evidence-check-normal-form-policy.source.yaml
+      - spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+    projection_graph:
+      owner: scripts/ci/generate_projection_graph.py
+      purpose: Generated machine-readable graph of CI-checked source-to-projection
+        relationships.
+    confidential_assurance_model:
+      owner: spec/confidential and spec/verification
+      purpose: One-way relationship between confidential claim packaging, typed source
+        evidence, and verified kernel boundaries.
+      artifacts:
+      - spec/confidential/confidential-computation-assurance-package.yaml
+      - spec/confidential/assurance-evidence-registry.yaml
+      - spec/verification/confidential-verified-kernels.yaml
+      - spec/confidential/mechanism-maturity.yaml
+    confidential_mechanism_packages:
+      owner: spec/confidential/mechanism-packages.source.yaml
+      purpose: Thin human review entrypoint for MechanismPackage rows joining mechanism,
+        capability, provider boundary, maturity, assurance, and verification facets.
+      artifacts:
+      - spec/confidential/mechanism-packages.source.yaml
+    confidential_mechanism_catalog:
+      owner: scripts/ci/generate_confidential_mechanism_catalog.py
+      purpose: Generated confidential mechanism descriptor catalog and Rust mechanism
+        registry projected from the human-owned semantic mechanism/provider algebra
+        and checked against mechanism maturity.
+    confidential_capability_bindings:
+      owner: scripts/ci/generate_confidential_capability_binding_index.py
+      purpose: Generated CapabilityBinding index joining confidential maturity mechanisms
+        to OperationKernel HTTP workflow families without generator-local workflow
+        maps.
+      artifacts:
+      - spec/confidential/capability-bindings.source.yaml
+      - spec/confidential/capability-taxonomy.source.yaml
+      - spec/confidential/schemas/capability-binding-index.schema.json
+      - spec/confidential/schemas/capability-bindings.source.schema.json
+      - spec/confidential/schemas/capability-taxonomy.source.schema.json
+    confidential_mechanism_profile_index:
+      owner: scripts/ci/generate_confidential_mechanism_profile_index.py
+      purpose: Generated MechanismProfile review index joining mechanism catalog rows,
+        provider boundary requirements, maturity claims, OperationKernel HTTP operations,
+        assurance registry evidence, and verified kernels.
+      artifacts:
+      - spec/confidential/schemas/mechanism-profile-index.schema.json
+    confidential_capability_policy_evidence:
+      owner: scripts/ci/generate_confidential_capability_policy_evidence.py
+      purpose: Generated Capability/Policy/Evidence review plane joining capability
+        bindings, provider policy, mechanism maturity, operation affinity, assurance
+        registry entries, and verification kernels.
+      artifacts:
+      - generated/confidential/capability-policy-evidence.yaml
+      - docs/architecture/generated/confidential-capability-policy-evidence.md
+    verification_obligations:
+      owner: scripts/ci/generate_verification_obligations.py
+      purpose: Generated tool-neutral VerificationObligation index that treats Kani,
+        Tamarin, F*, Rust tests, implementation anchors, and assurance registry entries
+        as discharge methods for boundary properties.
+      artifacts:
+      - spec/verification/verification-obligations.source.yaml
+      - spec/verification/schemas/verification-obligations.schema.json
+    secret_compute_provider_kind_registry:
+      owner: scripts/ci/generate_secret_compute_provider_kind_registry.py
+      purpose: Generated provider-kind registry projected from the secret-compute
+        provider contract into Rust and review YAML.
+    generated_schema_artifacts:
+      owner: scripts/ci/export_pds_openapi_schemas.py
+      purpose: Publication-oriented JSON Schema artifacts derived from the PDS OpenAPI
+        contract.
+    http_operation_catalog:
+      owner: scripts/ci/generate_http_operation_catalog.py
+      purpose: Complete HTTP operation projection generated from the OpenAPI contracts.
+    surface_operation_index:
+      owner: scripts/ci/generate_surface_operation_index.py
+      purpose: Generated joined surface-operation projection from the surface catalog.
+    route_coverage:
+      owner: scripts/ci/generate_route_coverage.py
+      purpose: Generated Axum route coverage evidence from the surface catalog.

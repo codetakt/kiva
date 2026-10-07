@@ -1,0 +1,152 @@
+{
+  "dataSubject": "learner-a",
+  "actor": {
+    "objectType": "Agent",
+    "account": {
+      "homePage": "https://kiva.example/pds-subjects",
+      "name": "learner-a"
+    }
+  },
+  "actorIfi": "account:https://kiva.example/pds-subjects:learner-a",
+  "generatedAt": "2026-06-25T00:00:00Z",
+  "recordInventory": {
+    "dataSubject": "learner-a",
+    "actor": {
+      "objectType": "Agent",
+      "account": {
+        "homePage": "https://kiva.example/pds-subjects",
+        "name": "learner-a"
+      }
+    },
+    "actorIfi": "account:https://kiva.example/pds-subjects:learner-a",
+    "statementRecords": [
+      {
+        "statementId": "00000000-0000-4000-8000-000000000601",
+        "actorIfi": "account:https://kiva.example/pds-subjects:learner-a",
+        "verbId": "https://example.org/xapi/verbs/completed",
+        "objectId": "https://example.org/xapi/activities/course-1",
+        "storedAt": "2026-06-25T00:00:00Z",
+        "version": "2.0.0"
+      }
+    ],
+    "dataProducts": [
+      {
+        "dataProductId": "00000000-0000-4000-8000-000000000201",
+        "ownerSubject": "learner-a",
+        "sourceKind": "differential-privacy-release",
+        "releaseId": "1111111111111111111111111111111111111111111111111111111111111111",
+        "releaseArtifact": {
+          "kind": "differential-privacy-release",
+          "artifactId": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "title": "District attendance trend",
+        "purpose": "privacy-preserving public reporting",
+        "legalBasis": "public-task",
+        "dataClasses": [
+          "data-product-metadata",
+          "access-audit-metadata"
+        ],
+        "createdAt": "2026-06-25T00:00:00Z"
+      }
+    ]
+  },
+  "consentGrants": [
+    {
+      "grantId": "00000000-0000-4000-8000-000000000101",
+      "dataSubject": "learner-a",
+      "granteeSubject": "district-analyst",
+      "scope": "aggregate-insights",
+      "state": "active",
+      "purpose": "district-level attendance dashboard",
+      "legalBasis": "public-task",
+      "createdAt": "2026-06-25T00:00:00Z",
+      "expiresAt": "2027-03-31T23:59:59Z"
+    }
+  ],
+  "dataProducts": [
+    {
+      "dataProductId": "00000000-0000-4000-8000-000000000201",
+      "ownerSubject": "learner-a",
+      "sourceKind": "differential-privacy-release",
+      "releaseId": "1111111111111111111111111111111111111111111111111111111111111111",
+      "releaseArtifact": {
+        "kind": "differential-privacy-release",
+        "artifactId": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "title": "District attendance trend",
+      "purpose": "privacy-preserving public reporting",
+      "legalBasis": "public-task",
+      "dataClasses": [
+        "data-product-metadata",
+        "access-audit-metadata"
+      ],
+      "createdAt": "2026-06-25T00:00:00Z"
+    }
+  ],
+  "lifecycleEvents": [
+    {
+      "eventId": "00000000-0000-4000-8000-000000000301",
+      "dataSubject": "learner-a",
+      "eventType": "retention-reviewed",
+      "resourceKind": "metadata-export",
+      "resourceId": "metadata-export-2026-spring",
+      "reason": "annual public-sector retention review",
+      "createdAt": "2026-06-25T00:00:00Z"
+    }
+  ],
+  "retentionPolicies": [
+    {
+      "policyId": "00000000-0000-4000-8000-000000000501",
+      "ownerSubject": "learner-a",
+      "resourceKind": "xapi-statement",
+      "dataClass": "statement-metadata",
+      "retentionPeriodDays": 365,
+      "reviewIntervalDays": 90,
+      "tombstoneAfterDays": 730,
+      "tombstonePublication": "metadata-only",
+      "legalBasis": "public-task",
+      "description": "Annual public-sector retention policy for learner xAPI statement metadata.",
+      "createdAt": "2026-06-25T00:00:00Z"
+    }
+  ],
+  "lifecycleCases": [
+    {
+      "caseId": "00000000-0000-4000-8000-000000000502",
+      "dataSubject": "learner-a",
+      "caseType": "correction",
+      "resourceKind": "xapi-statement",
+      "resourceId": "00000000-0000-4000-8000-000000000601",
+      "status": "open",
+      "retentionPolicyId": "00000000-0000-4000-8000-000000000501",
+      "summary": "Learner requested correction review for a statement metadata record.",
+      "resolution": null,
+      "tombstonePublication": null,
+      "createdAt": "2026-06-25T00:00:00Z",
+      "updatedAt": "2026-06-25T00:00:00Z"
+    }
+  ],
+  "governanceProfiles": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000401",
+      "profileOwnerSubject": "public-admin",
+      "profileKind": "school-district",
+      "tenantPartition": "tenant:district-alpha",
+      "subjectPartition": "subject-partition:district-alpha:learners",
+      "dataCustodianSubject": "school-data-custodian",
+      "platformOperatorSubject": "regional-platform-operator",
+      "policyAuthoritySubject": "district-policy-authority",
+      "analystSubject": "district-analyst",
+      "auditorSubject": "public-auditor",
+      "identityAuthoritySubject": "district-identity-authority",
+      "emergencyAccessPolicy": "emergency access requires policy-authority approval and auditor review",
+      "runbookRefs": [
+        "runbook:key-rotation",
+        "runbook:policy-change",
+        "runbook:consent-incident",
+        "runbook:audit-export",
+        "runbook:emergency-access"
+      ],
+      "createdAt": "2026-06-25T00:00:00Z"
+    }
+  ]
+}

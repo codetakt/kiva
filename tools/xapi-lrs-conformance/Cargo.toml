@@ -1,0 +1,32 @@
+[package]
+name = "xapi-lrs-conformance"
+description = "Black-box xAPI LRS conformance aid runner for IEEE/ISO/IEC 39274-1-1-2025."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "xapi-lrs-conformance"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+iri-string.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+time.workspace = true
+tokio.workspace = true
+url.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,28 @@
+[package]
+name = "kiva-idp-adapter"
+description = "OAuth/OIDC identity-provider adapter for the Kiva resource server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+jsonwebtoken.workspace = true
+kiva-identity = { path = "../kiva-identity", version = "0.0.0" }
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+time.workspace = true
+
+[dev-dependencies]
+axum.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

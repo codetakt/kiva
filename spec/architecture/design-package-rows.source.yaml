@@ -1,0 +1,155 @@
+schema_version: 1
+kind: kiva-design-package-rows-source
+status: active
+description: Normalized DesignPackage rows owned by DesignUniverse.
+parent_universe: spec/architecture/design-universe.source.yaml
+fragment:
+  id: design-package-rows
+  parent_root_type: DesignUniverse
+  authoritative_rows: true
+design_package_projection:
+  package_model:
+    root_type: DesignPackage
+    parent_source: spec/architecture/core-model.source.yaml
+    source_root: spec/architecture/design-universe.source.yaml
+    generated_projection: true
+    rule: 'A package is the unit reviewers edit or inspect. Packages may include supporting
+      source fragments, but they must not create additional top-level design roots
+      beyond the core model.
+
+      '
+  packages:
+  - id: http-contract-package
+    core_model_id: http-contract
+    root_type: OpenAPI
+    role: external-http-contract
+    lifecycle: canonical-source-package
+    entrypoint_refs:
+    - spec/openapi/kiva-analytics.yaml
+    - spec/openapi/kiva-xapi.yaml
+    - spec/openapi/kiva-pds.yaml
+    - spec/openapi/kiva-confidential.yaml
+    supporting_refs: []
+    review_refs:
+    - generated/http-operation-catalog.evidence.json
+    - generated/openapi-dto-map-projection.yaml
+    required_check: xapi-openapi-contract
+  - id: operation-kernel-package
+    core_model_id: operation
+    root_type: OperationKernel
+    role: internal-operation-ir
+    lifecycle: canonical-source-package
+    entrypoint_refs:
+    - spec/architecture/operation-kernel.source.yaml
+    supporting_refs:
+    - spec/architecture/operation-ownership.source.yaml
+    - spec/architecture/surface-model.source.yaml
+    - spec/architecture/surface-generation.policy.yaml
+    - spec/architecture/surface-implementation.policy.yaml
+    - spec/architecture/pds-resource-families.source.yaml
+    - spec/architecture/surface-families.source.yaml
+    review_refs:
+    - generated/architecture/operation-kernel.yaml
+    - generated/architecture/surface-catalog.yaml
+    - generated/architecture/pds-resource-families.yaml
+    required_check: operation-kernel-authority
+  - id: assurance-primitive-package
+    core_model_id: assurance
+    root_type: AssurancePrimitive
+    role: evidence-meta-model
+    lifecycle: canonical-source-package
+    entrypoint_refs:
+    - spec/evidence/assurance-primitive.source.yaml
+    supporting_refs:
+    - spec/evidence/evidence-set.source.yaml
+    - spec/evidence/evidence-receipts.source.yaml
+    - spec/evidence/executed-receipts.source.yaml
+    - spec/architecture/claim-graph.source.yaml
+    review_refs:
+    - generated/architecture/assurance-graph.yaml
+    - generated/evidence/evidence-set.yaml
+    - generated/evidence/evidence-receipts.yaml
+    - generated/architecture/claim-graph.yaml
+    required_check: assurance-graph
+  - id: confidential-capability-package
+    core_model_id: confidential-capability
+    root_type: CapabilityPort
+    role: confidential-computation-boundary
+    lifecycle: canonical-source-package
+    entrypoint_refs:
+    - spec/confidential/mechanism-packages.source.yaml
+    supporting_refs:
+    - spec/confidential/capability-taxonomy.source.yaml
+    - spec/confidential/capability-bindings.source.yaml
+    - spec/confidential/secret-compute-provider-contract.yaml
+    - spec/confidential/secret-compute-provider-tck.source.yaml
+    - spec/confidential/mechanism-maturity.yaml
+    - spec/confidential/assurance-evidence-registry.yaml
+    - spec/verification/confidential-verified-kernels.yaml
+    review_refs:
+    - generated/confidential/mechanism-profile-index.yaml
+    - generated/confidential/capability-binding-index.yaml
+    - generated/confidential/capability-policy-evidence.yaml
+    required_check: confidential-mechanism-profile-index
+  - id: projection-runtime-package
+    core_model_id: projection
+    root_type: ProjectionRuntime
+    role: governance-projection-runtime
+    lifecycle: normal-form-source-package
+    entrypoint_refs:
+    - spec/architecture/projection-normal-form-policy.source.yaml
+    supporting_refs:
+    - spec/architecture/projection-artifacts.source.yaml
+    - spec/architecture/projection-runtime.source.yaml
+    - spec/architecture/projection-check-bindings.source.yaml
+    generated_compatibility_refs:
+    - spec/architecture/projection-specs.source.yaml
+    review_refs:
+    - spec/ci/projection-graph.yaml
+    required_check: projection-normal-form-policy
+  - id: ci-command-package
+    core_model_id: ci-command
+    root_type: RegistryDrivenCommand
+    role: ci-dispatch-model
+    lifecycle: normal-form-source-package
+    entrypoint_refs:
+    - spec/ci/evidence-check-normal-form-policy.source.yaml
+    supporting_refs:
+    - spec/ci/evidence-check-catalog.source.yaml
+    - spec/ci/evidence-gate-plan.source.yaml
+    - spec/ci/evidence-check-groups.source.yaml
+    - scripts/ci/kiva-ci
+    - scripts/ci/kiva_ci/cli.py
+    - scripts/ci/run_generators.py
+    generated_compatibility_refs:
+    - spec/ci/evidence-checks.source.yaml
+    review_refs:
+    - spec/ci/evidence-checks.yaml
+    required_check: ci-command-registry
+  - id: pds-plane-package
+    core_model_id: pds
+    root_type: PdsCorePlane
+    role: personal-data-store-model
+    lifecycle: supporting-source-package
+    entrypoint_refs:
+    - spec/pds/core-planes.source.yaml
+    supporting_refs:
+    - spec/pds/invariants.source.yaml
+    - spec/pds/state-machines.source.yaml
+    - spec/pds/publication-milestones.yaml
+    review_refs:
+    - generated/architecture/pds-resource-families.yaml
+    required_check: pds-core-planes
+  - id: verification-boundary-package
+    core_model_id: verification
+    root_type: BoundaryProperty
+    role: formal-verification-model
+    lifecycle: supporting-source-package
+    entrypoint_refs:
+    - spec/verification/verification-obligations.source.yaml
+    supporting_refs:
+    - spec/verification/confidential-verified-kernels.yaml
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses.rs
+    review_refs:
+    - generated/verification/verification-obligations.yaml
+    required_check: verification-obligations

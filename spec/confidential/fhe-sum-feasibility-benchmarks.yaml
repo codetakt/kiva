@@ -1,0 +1,47 @@
+schema_version: 1
+kind: fhe-sum-feasibility-benchmark-fixtures
+status: published
+profile: kiva-fhe-sum-bfv-feasibility-v1
+fixture_scope:
+  deterministic_fixture_only: true
+  measured_with_real_fhe_library: false
+  production_sizing_claim: false
+  purpose: Keep CC6 practical only for small exact aggregate sums.
+parameter_set:
+  polynomial_modulus_degree: 4096
+  plaintext_modulus: 1048583
+  ciphertext_modulus_bits: 109
+  security_level_bits: 128
+  max_participant_count: 16
+  max_plaintext_value: 65000
+cost_model:
+  operation: sum
+  ciphertexts_per_participant: 1
+  encoded_slots_per_ciphertext: 1
+  estimated_ciphertext_bytes_per_participant: 8192
+  estimated_evaluated_ciphertext_bytes: 8192
+  sum_noise_budget_cost_bits: 4
+  initial_noise_budget_bits: 48
+  bootstrapping_required: false
+  supported_for_interactive_bi: false
+fixtures:
+  - name: three-party-small-sum
+    participant_count: 3
+    plaintext_values:
+      - 42
+      - 57
+      - 100
+    expected_sum: 199
+    estimated_input_ciphertext_bytes: 24576
+    estimated_output_ciphertext_bytes: 8192
+  - name: maximum-admitted-boundary
+    participant_count: 16
+    plaintext_value_per_participant: 65000
+    expected_sum: 1040000
+    plaintext_modulus: 1048583
+    expected_sum_below_plaintext_modulus: true
+    estimated_input_ciphertext_bytes: 131072
+    estimated_output_ciphertext_bytes: 8192
+practicality_boundary:
+  recommended_use: offline feasibility experiments and governed small sums
+  not_recommended_use: broad ad hoc BI, high-cardinality analytics, approximate statistics, or production privacy claims

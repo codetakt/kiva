@@ -1,0 +1,51 @@
+description: >
+  Included architecture boundary rules split from the root manifest for
+  focused review. The root manifest remains the executable index.
+
+route_ownership_rules:
+  - id: pds-route-context-ownership
+    description: PDS read/direct-access routes stay in the PDS context while PDS command writes stay in the application context.
+    path: crates/kiva-server/src/surfaces/pds/routes.rs
+    owners:
+      - id: pds
+        start_anchor: "let pds_router = Router::new()"
+        end_anchor: ".with_state(pds_state)"
+        required_text:
+          - "PDS_CONSENT_GRANTS_PATH"
+          - ".route(PDS_DATA_PRODUCTS_PATH, get(get_pds_data_products))"
+          - "PDS_PROVIDER_BINDINGS_PATH"
+          - "PDS_DATA_PRODUCT_READS_PATH"
+          - "PDS_ACCESS_CHECKS_PATH"
+          - "PDS_ACCESS_AUDIT_EVENTS_PATH"
+          - "PDS_LIFECYCLE_EVENTS_PATH"
+          - "PDS_RETENTION_POLICIES_PATH"
+          - "PDS_LIFECYCLE_CASES_PATH"
+          - "PDS_GOVERNANCE_PROFILES_PATH"
+          - ".with_state(pds_state)"
+        forbidden_text:
+          - "post(post_pds_consent_grant)"
+          - "post(post_pds_consent_revocation)"
+          - "post(post_pds_data_product)"
+          - "post(post_pds_lifecycle_event)"
+          - "post(post_pds_retention_policy)"
+          - "post(post_pds_lifecycle_case)"
+          - "post(post_pds_governance_profile)"
+          - "get(get_pds_record_inventory)"
+          - "get(get_pds_metadata_exports)"
+      - id: pds-application
+        start_anchor: "let application_router = Router::new()"
+        end_anchor: ".with_state(application_state)"
+        required_text:
+          - ".route(PDS_CONSENT_GRANTS_PATH, post(post_pds_consent_grant))"
+          - "PDS_CONSENT_REVOCATIONS_PATH"
+          - ".route(PDS_DATA_PRODUCTS_PATH, post(post_pds_data_product))"
+          - ".route(PDS_LIFECYCLE_EVENTS_PATH, post(post_pds_lifecycle_event))"
+          - "post(post_pds_retention_policy)"
+          - ".route(PDS_LIFECYCLE_CASES_PATH, post(post_pds_lifecycle_case))"
+          - "post(post_pds_governance_profile)"
+          - ".route(PDS_RECORD_INVENTORY_PATH, get(get_pds_record_inventory))"
+          - ".route(PDS_METADATA_EXPORTS_PATH, get(get_pds_metadata_exports))"
+          - ".with_state(application_state)"
+        forbidden_text:
+          - "post(post_pds_data_product_read)"
+          - "post(post_pds_access_check)"

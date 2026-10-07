@@ -1,0 +1,174 @@
+openapi: 3.1.0
+info:
+  title: Kiva Governed Analytics API
+  version: 0.1.0
+  description: >
+    Governed aggregate serving over approved PDS data products and admitted
+    confidential releases. This contract does not expose xAPI Statements or
+    individual-level data and is separate from the xAPI LRS conformance surface.
+x-kiva-contract:
+  area: governed-analytics
+  status: Kiva platform extension, not part of the IEEE xAPI LRS surface.
+  evidence:
+    - crates/kiva-application/src/analytics.rs
+    - crates/kiva-analytics-openapi-contract/src/lib.rs
+    - crates/kiva-server/src/app/analytics.rs
+    - crates/kiva-server/src/surfaces/analytics/routes.rs
+    - crates/kiva-server/src/surfaces/analytics/handlers.rs
+    - crates/kiva-server/src/surfaces/analytics/wire.rs
+    - crates/kiva-server/src/tests/helpers/analytics.rs
+servers:
+  - url: /
+paths:
+  /analytics/products:
+    get:
+      operationId: getAnalyticsProducts
+      tags: [Analytics]
+      summary: List governed aggregate products
+      x-kiva-required-scopes: ["analytics:read"]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: A bounded page of governed aggregate products.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsProductPage"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /analytics/products/{dataProductId}:
+    get:
+      operationId: getAnalyticsProduct
+      tags: [Analytics]
+      summary: Read governed aggregate product metadata
+      x-kiva-required-scopes: ["analytics:read"]
+      parameters:
+        - $ref: "#/components/parameters/DataProductId"
+      responses:
+        "200":
+          description: Governed aggregate product metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsProduct"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /analytics/products/{dataProductId}/aggregate:
+    get:
+      operationId: getAnalyticsProductAggregate
+      tags: [Analytics]
+      summary: Read an admitted aggregate release payload
+      description: >
+        Returns only an admitted aggregate output. Differential-privacy
+        products expose the noised value, never the source aggregate.
+      x-kiva-required-scopes: ["analytics:read"]
+      parameters:
+        - $ref: "#/components/parameters/DataProductId"
+      responses:
+        "200":
+          description: Admitted aggregate output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsAggregate"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /oauth/token
+          scopes:
+            analytics:read: Read governed aggregate analytics products.
+  parameters:
+    DataProductId:
+      name: dataProductId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor returned by the preceding page.
+      schema: { type: string, minLength: 1, maxLength: 128 }
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+  schemas:
+    AnalyticsProduct:
+      type: object
+      additionalProperties: false
+      required: [dataProductId, title, purpose, releaseKind, approvedAt]
+      properties:
+        dataProductId: { type: string, format: uuid }
+        title: { type: string, minLength: 1 }
+        purpose: { type: string, minLength: 1 }
+        releaseKind:
+          type: string
+          enum: [threshold-release, differential-privacy-release]
+        approvedAt: { type: string, format: date-time }
+    AnalyticsProductPage:
+      type: object
+      additionalProperties: false
+      required: [products]
+      properties:
+        products:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/AnalyticsProduct" }
+        nextCursor:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 128
+    AnalyticsAggregate:
+      type: object
+      additionalProperties: false
+      required: [dataProductId, releaseKind, value, releasedAt]
+      properties:
+        dataProductId: { type: string, format: uuid }
+        releaseKind:
+          type: string
+          enum: [threshold-release, differential-privacy-release]
+        value: { type: integer, format: int64 }
+        releasedAt: { type: string, format: date-time }
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error: { type: string }
+  responses:
+    BadRequest:
+      description: Invalid identifier, cursor, or page-size request.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Unauthorized:
+      description: Missing or refused bearer token.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: The bearer token lacks analytics:read.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: The product or admitted aggregate is not visible.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+security:
+  - OAuth2: ["analytics:read"]

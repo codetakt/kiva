@@ -1,0 +1,11 @@
+{
+  "policy_id": "00000000-0000-4000-8000-000000000501",
+  "resource_kind": "xapi-statement",
+  "data_class": "statement-metadata",
+  "retention_period_days": 365,
+  "review_interval_days": 90,
+  "tombstone_after_days": 730,
+  "tombstone_publication": "metadata-only",
+  "legal_basis": "public-task",
+  "description": "Annual public-sector retention policy for learner xAPI statement metadata."
+}

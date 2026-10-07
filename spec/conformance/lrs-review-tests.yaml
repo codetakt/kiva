@@ -1,0 +1,249 @@
+schema_version: 1
+scope: Public LRS source projection
+notes:
+- These are executable review procedures, not waivers or automatic passes.
+- An HTTP run cannot discharge them merely by passing an associated case.
+- Record source revision, target revision/configuration, observations, and pass/fail/not-applicable with justification.
+- Advisory outcomes must be kept separate from mandatory conformance outcomes.
+tests:
+- id: conflict-resolution-explanation
+  level: required
+  setup: Run each of the three generated unconditional document PUT conflict cases; preserve its 409 response body.
+  action: Read the explanation in the language returned by the LRS.
+  expected: It instructs the provider to check the current resource and retry with If-Match set to the current ETag.
+    A generic conflict message or a nonempty body alone is insufficient.
+- id: consistent-through-visibility
+  level: required
+  setup: Use a disposable target fixture that can delay Statement visibility while recording its assigned stored
+    time.
+  action: Store Statements during the delay; observe X-Experience-API-Consistent-Through on success, error, GET,
+    and HEAD; release visibility and query all Statements before the reported watermark.
+  expected: Every Statement stored before the watermark is available for retrieval with reasonable certainty. Delay
+    the watermark when visibility is delayed; never advance it past known invisible records.
+- id: http-rfc-interoperability
+  level: required
+  setup: Use HTTP 1.1 clients with UTF-8 strings, valid request framing, language negotiation, and all listed applicable
+    headers.
+  action: Exercise the resource methods with valid alternative header casing and syntax and the applicable RFC conditional
+    semantics. Check HEAD has GET-equivalent headers and no body.
+  expected: The target implements and validates the listed headers in their specified contexts. Content negotiation
+    recommendations and optional compression choices are reported separately.
+- id: mime-rfc-framing
+  level: required
+  setup: Use the generated multipart fixtures with an RFC 2046 independent parser and transport variations.
+  action: Check preambles, epilogues, quoted boundaries, case-insensitive media types and header names, legal folding,
+    closing delimiters, and binary bytes including embedded boundary-like substrings.
+  expected: Valid MIME framing is accepted and returned framing is valid; attachment identity is determined by SHA-2.
+    The parser must not split a delimiter-like substring inside binary content.
+- id: declared-limit-and-extension-contexts
+  level: conditional-required
+  setup: Declare target credential permissions, each configured document/Statement/attachment size limit, rate limits,
+    and intentionally supported extension parameters.
+  action: Probe just over each declared limit and denied operation, and send a parameter explicitly absent from
+    the declared extension vocabulary in each resource context.
+  expected: Size, rate, and permission denials yield 413, 429, and 403 respectively. Truly unrecognized parameters
+    yield 400. Intentionally recognized extensions are allowed; no particular limits are mandated.
+- id: duplicate-state-and-response-observation
+  level: required
+  setup: Store a Statement carrying Activity definitions and snapshot available Activity and Person resources plus
+    the Statement. Enable delayed visibility if supported.
+  action: PUT and POST known ids with individually changed immutable and excluded properties; read the Statement
+    and other affected objects after visibility settles.
+  expected: No duplicate request changes any stored object. PUT may return 204 or 409; POST may also return 200
+    with the corresponding UUID array. Recommendations about 409 are not mandatory. Logical-equivalence exclusions
+    remain separate from duplicate state preservation.
+- id: exact-and-ids-recursive-response
+  level: required
+  setup: Store Agents, identified and anonymous Groups, Activities, Verbs, context relationships and SubStatements
+    with all legal identifying and display properties.
+  action: Retrieve each fixture with default/exact, ids, and canonical formats; walk every nested object according
+    to its table.
+  expected: Exact/default preserve received Agent, Group, Activity and Verb data subject to explicit LRS transformations.
+    ids contains only the minimum identifying fields, including each anonymous Group member; canonical preserves
+    original Agent/Group data.
+- id: reference-time-sequence-and-cycles
+  level: required
+  setup: Store recursive StatementRefs with distinct stored times, a context.statement reference, a missing target,
+    and references to a voided target.
+  action: Combine agent/verb/activity/registration filters with since, until, limit and ascending; retrieve single
+    ids separately.
+  expected: Non-time filters inherit recursively through Object StatementRefs; time and sequence restrictions apply
+    to the targeting Statement. Context references do not inherit filters. No voided target is leaked; targeting
+    and voiding Statements remain eligible.
+- id: canonical-language-negotiation
+  level: required
+  setup: Obtain the canonical maps the target elects to maintain; include Activity name, description and interaction
+    component maps with different language availability.
+  action: Query canonical format with language ranges, quality weights, wildcard, absent header, and preferences
+    unavailable in some maps. Include the direct object and Context category maps used in statement-get-format-canonical-selects-accept-language;
+    use the maintained inventory rather than submitted values.
+  expected: Select one language per Activity map independently using the applicable Accept-Language semantics. Apply
+    the same rule to other maps only when the target returns their canonical form; untouched Verb and extension
+    maps are permitted. A submitted definition that the LRS elects not to maintain is not a FAIL; if ja-JP is in
+    the maintained map and preferred, it must be selected.
+- id: document-updated-time-boundary
+  level: required
+  setup: Use an independent fixture clock that fixes modification times at known ISO timestamps for every document
+    family and scope.
+  action: Create and update documents; GET single documents and list ids with since immediately before, equal to,
+    and after the known updated time. Delete all State for one scope while preserving another.
+  expected: Last-Modified identifies the last modification, since is exclusive, updated documents move across the
+    boundary, and scope isolation is preserved. HTTP-date second precision alone is not sufficient to infer a subsecond
+    updated time.
+- id: person-semantic-identifiers
+  level: required
+  setup: Use previously unknown Agents with each of the four IFIs and known Agents with directory enrichment.
+  action: GET the Person resource and validate each returned array element against the corresponding Agent/account
+    definitions.
+  expected: A Person is returned even without enrichment, complete account members have homePage and name, and identifying
+    properties retain valid formats. Multiple identifying arrays are permitted.
+  rubric:
+  - Preserve the request and raw response for each of the four IFIs. Confirm the queried IFI is present in its corresponding
+    returned array; do not accept a Person shell alone.
+  - Check every element, including additional enrichment entries, against the Agent definitions. Check mailto IRI,
+    hex SHA-1, URI, account homePage IRL and string name. Full external grammar boundaries remain a separately recorded
+    handover.
+  - Record each property/array index and its pass/fail observation. A missing requested IFI, incomplete account,
+    wrong element type or invalid direct format fails; extra valid identifying arrays are allowed.
+- id: canonical-activity-available-information
+  level: required
+  setup: Declare the target's canonical metadata policy and known available definitions, including an Activity with
+    no known definition.
+  action: Query Activities after authorized definition writes and query an unknown Activity.
+  expected: Return the requested Activity and all information available under the target's canonical policy, with
+    an Activity fallback when no canonical definition exists.
+  rubric:
+  - Obtain an explicit inventory of information the target maintains for the Activity. Retain the policy and inventory
+    with the observation; two submitted definitions alone do not establish this inventory.
+  - Compare each available property with the returned Activity after the declared visibility condition. Missing
+    maintained information fails. A policy that elects not to incorporate submitted metadata is permitted.
+  - Record not-run when the inventory or fixture is unavailable. The generic Activity id/shape case cannot discharge
+    this conditional completeness check.
+- id: older-version-routing
+  level: conditional-required
+  setup: Declare whether requests for a version before 2.0.0 route to a conformant prior implementation.
+  action: Run the older-version case and, if it is routed, run that version's conformance suite against the actual
+    routed implementation. Also run the 2.1.0-or-greater rejection and read every 400 response body.
+  expected: The older version yields either 400 with a short problem explanation or a fully conformant implementation
+    of exactly the declared earlier version. The 2.1.0-or-greater case yields 400 with a short problem explanation.
+    Nonempty generic text is insufficient; the text must identify the unsupported version/request problem. Receiving
+    200 alone does not establish the routing exception.
+- id: authorization-policy-fixture
+  level: required
+  setup: Declare how validity and permission decisions are made/delegated and supply refused, permitted and operation-denied
+    credential fixtures.
+  action: Run credential-sensitive cases and inspect the configured delegation/decision boundary for the observed
+    outcomes.
+  expected: Credentials or their absence determine operation permissions and Statement validity decisions as declared;
+    401 and 403 are distinguished correctly. No specific authentication mechanism is required.
+- id: interaction-validation-policy
+  level: conditional-required
+  setup: Declare whether the LRS validates interaction properties beyond interactionType.
+  action: Run interaction/component vectors and validate any chosen optional validation against the interaction
+    type/component/pattern tables; include characterstring parameters.
+  expected: Invalid interactionType and common duplicate-key, null and key-case violations always reject. Both acceptance
+    and 400 are allowed for optional remaining interaction-specific validation; characterstring parameters are not
+    validated. RelevantTypes empty-cardinality alternatives are a separate registered judgment.
+- id: resolvable-metadata-advisory
+  level: advisory
+  setup: Use controlled metadata URLs and record whether the LRS implements resolvable metadata.
+  action: Observe optional GET requests, Accept preferences, incorporation of valid definitions and preservation
+    of fields absent from fetched definitions.
+  expected: Report SHOULD/MAY behavior separately. Hosted metadata is optional and does not create a mandatory network-fetch
+    requirement.
+- id: rejection-policy-and-clock-margin
+  level: advisory-and-conditional
+  setup: Declare security/data retention policies, future clock margin and any intentional limits.
+  action: Exercise reordered JSON, unknown void targets, future timestamps inside the declared margin, unusually
+    large individual fields and unauthorized batches.
+  expected: Required acceptance exceptions apply within the declared fixture. Recommendations about field sizes
+    and whole-batch authorization are advisory; no unspecified numerical clock margin is imposed.
+- id: authority-overwrite-policy
+  level: conditional-required
+  setup: Declare trusted-provider authority policy and overwrite behavior; use at least two credential identities.
+  action: Compare complete authorities for repeated writes under the same credentials and inspect the mapping when
+    authority is overwritten.
+  expected: Every stored Statement has authority; overwriting uses a deterministic credential mapping. Keeping a
+    trusted submitted authority is allowed and recommendations are reported separately.
+- id: canonical-metadata-and-cursor-policy
+  level: advisory
+  setup: Record whether the target updates/corrects canonical metadata and whether pagination caches or reruns queries.
+  action: Update definitions with and without authority; add or void Statements between successive page requests.
+  expected: Record allowed cache/rerun and metadata choices without forcing a single implementation. Version retention/default
+    remains mandatory and is tested automatically.
+- id: iri-comparison-allowed-strategies
+  level: required
+  setup: Declare simple comparison, syntax normalization, or their allowed combination under RFC 3987 sections 5.3.1/5.3.2.
+  action: Exercise Unicode IRIs, percent encoding, case-sensitive path differences, dot segments and default-port
+    variants using the declared strategy.
+  expected: Only the two allowed strategies govern identity; no scheme-based or protocol-based normalization is
+    substituted. Resolve the public source's broad case-equivalence language separately before donation.
+- id: language-tag-full-rfc-boundary
+  level: required
+  setup: Use independent RFC 5646 vectors including token lengths, grandfathered tags, private use, scripts and
+    regions at every language-map location.
+  action: Exercise valid/invalid tags and distinguish minimum token-length validation from optional registry/value
+    validation.
+  expected: Reject invalid language-map tags at least at the mandated token-length level; do not invent locale-specific
+    language requirements or render strings as markup.
+- id: timestamp-precision-rounding
+  level: required
+  setup: Use offset timestamps with three and greater fractional-second precision at top level and in SubStatements.
+  action: Store and retrieve timestamps; compare instants at three-decimal precision and allowed rounding/truncation
+    boundaries.
+  expected: Return UTC; accept non-UTC inputs; preserve at least three decimal digits, allowing the specified higher-precision
+    rounding/truncation.
+- id: table-driven-response-preservation
+  level: required
+  setup: Use the valid fixture and every accepted property/enum/omission vector from lrs-tables.yaml at every declared
+    placement. Keep each exact request and response and the xAPI source table row. Use an isolated LRS and settle
+    accepted writes before judging retrieval. Include both attachment-two-file-urls and attachment-two-multipart
+    fixtures, whose two metadata entries and raw parts differ.
+  action: Retrieve default/exact, walk each submitted property recursively, and classify every output difference
+    under an explicitly permitted transformation. Repeat POST batches and single PUTs; preserve the source/target/case
+    revisions and record each pointer's observation.
+  expected: Required accepted data is not lost or changed beyond explicit exceptions; typed output obeys its table.
+    Required/generated id, stored, timestamp, authority and version exist with valid types. Group member ordering
+    is unrestricted, contextActivities singles become length-one arrays, timestamps become UTC with permitted precision,
+    stored/authority use declared overwrite conditions, and version is retained or defaulted. No other value/type
+    change is an automatic pass.
+  rubric:
+  - Separate logical immutability from exact response preservation and duplicate state preservation; exemptions
+    from logical equivalence are not blanket permission to omit returned data.
+  - Agent and Group name/IFI/member, Verb display, Activity definition, Result score/success/completion/response/duration/extensions,
+    Context and attachments are all traversed. Compare objects by key and Group members without order; preserve
+    attachment array order. Compare all extension values recursively including nulls and mixed arrays.
+  - Use the source's duration and numeric/timestamp precision allowances; inspect omitted SubStatement timestamp
+    creation without inventing equality with top-level stored. Authority credential mapping conditions are judged
+    by the separate policy procedure.
+  - For each difference record request pointer, response pointer, source anchor, permitted transformation or violation,
+    and verdict. Missing evidence is not-run; no nonempty response or HTTP 200 substitutes for this comparison.
+- id: related-agents-returned-authority
+  level: required
+  setup: Use a disposable target with permission to write/query and an Actor distinct from every returned authority
+    IFI. For an Agent query its actual Object; for any Group query its IFI if identified and every identifiable
+    member, whether the Group is identified or anonymous. Preserve actual authority after overwrite/retention; do
+    not require submitted authority equality.
+  action: Run scripts/ci/probe_lrs_authority_filter.py --endpoint ENDPOINT --runner RUNNER --output FRESH_ROOT [--headers-file
+    PRIVATE_JSON]. The script stores a unique-verb Statement, captures actual authority/member Objects, and runs
+    a generated portable case through the same runner. Preserve setup.json, cases.yaml, report.json and configuration.
+    Header values remain private.
+  expected: For each captured authority or member identifier, related_agents=true contains the stored id and default/false
+    contains no such Statement within the unique-verb fixture. Ignoring authority is FAIL. If the authority has
+    no identifiable Agent/Group/member, record that matching-identifier precondition is unavailable; do not call
+    it PASS. No blanket exclusion of the authority placement is allowed.
+  rubric:
+  - Check that captured pointers correspond to all relevant returned authority identifiers and are disjoint from
+    Actor/Object IFIs.
+  - Require contains-id with true, and an empty statements array without true. Store exact request/response evidence;
+    200 alone does not pass.
+- id: voiding-a-voiding-statement
+  level: required
+  setup: 'Use voiding-statement-cannot-be-voided: A ordinary, B voids A, C attempts to void B. Retain the actual
+    status for C; 4.2.4.1 allows rejecting C. The allowance to reject C is the general acceptance/rejection permission
+    at public line 1182; line 1188 forbids rejecting a missing target and is not the reason.'
+  action: After visibility settles, observe normal-id GET and query for B and A. If C was accepted, require normal-id
+    GET/query to return C; if C was rejected, require no C state. Preserve statuses and complete returned ids.
+  expected: A stays voided; B remains returnable and never becomes voided. C is returnable if accepted. C rejection
+    is allowed and does not restore A or hide B. The automatic case checks A/B regardless of C status; this procedure
+    checks C retrieval conditional on actual acceptance.

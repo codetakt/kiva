@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:evidence:evidence-set-source:1",
+  "title": "Kiva EvidenceSet source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "source_model",
+    "assurance_meta_model",
+    "generated_artifacts",
+    "projection_policy"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-evidence-set-source" },
+    "status": { "const": "active" },
+    "source_model": {
+      "type": "object",
+      "required": ["root_type", "ci_check_source", "projection_graph_source", "claim_readiness_source"],
+      "properties": {
+        "root_type": { "const": "EvidenceSet" },
+        "ci_check_source": { "type": "string", "minLength": 1 },
+        "projection_graph_source": { "type": "string", "minLength": 1 },
+        "claim_readiness_source": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "assurance_meta_model": {
+      "type": "object",
+      "required": ["root_type", "primitive_flow", "bindings", "rule"],
+      "properties": {
+        "root_type": { "const": "AssurancePrimitive" },
+        "primitive_flow": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "Claim" },
+            { "const": "Obligation" },
+            { "const": "Discharge" },
+            { "const": "Receipt" }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "bindings": {
+          "type": "object",
+          "required": ["claim", "obligation", "discharge", "receipt"],
+          "properties": {
+            "claim": { "type": "string", "minLength": 1 },
+            "obligation": { "type": "string", "minLength": 1 },
+            "discharge": { "type": "string", "minLength": 1 },
+            "receipt": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "required": ["evidence_set", "markdown"],
+      "properties": {
+        "evidence_set": { "type": "string", "minLength": 1 },
+        "markdown": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "projection_policy": { "type": "object", "additionalProperties": true }
+  }
+}

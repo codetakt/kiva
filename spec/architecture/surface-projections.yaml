@@ -1,0 +1,23 @@
+schema_version: 1
+kind: kiva-surface-projection-policy
+status: active
+description: >
+  Canonical generated surface catalog policy for Kiva public HTTP surfaces. This
+  file is the review entrypoint; role-specific model, generation, and
+  implementation policy lives in split source files and is merged by
+  scripts/ci/surface_catalog.py.
+split_policy_sources:
+  model: spec/architecture/surface-model.source.yaml
+  generation: spec/architecture/surface-generation.policy.yaml
+  implementation: spec/architecture/surface-implementation.policy.yaml
+edit_policy:
+  review_entrypoint: spec/architecture/surface-projections.yaml
+  operation_overlay_entrypoint: spec/architecture/operation-ownership.source.yaml
+  human_editable_sources:
+    - spec/architecture/operation-ownership.source.yaml
+    - spec/architecture/surface-projections.yaml
+    - spec/architecture/surface-model.source.yaml
+    - spec/architecture/surface-generation.policy.yaml
+    - spec/architecture/surface-implementation.policy.yaml
+    - spec/architecture/pds-resource-families.source.yaml
+    - spec/architecture/surface-families.source.yaml

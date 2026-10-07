@@ -1,0 +1,145 @@
+---
+schema_version: 1
+kind: confidential-assurance-evidence-registry
+description: >
+  Central registry for source-level assurance evidence used by confidential
+  computation validators. Typed evidence entries name Rust boundary symbols,
+  Rust tests, Kani harnesses, and selected formal evidence together with the
+  source files that validators must resolve instead of carrying ad hoc source
+  scans in each validator.
+entries:
+  tee-attestation:
+    milestone: CC5
+    profile: kiva-tee-portable-attestation-v1
+    evidence:
+      - { id: tee-attestation.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/tee.rs, symbol: TeeBoundaryError, mechanism: tee }
+      - { id: tee-attestation.policy, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/policy.rs, symbol: TeeAttestationPolicy, mechanism: tee }
+      - { id: tee-attestation.evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/evidence.rs, symbol: TeeAttestationEvidence, mechanism: tee }
+      - { id: tee-attestation.evidence-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/evidence.rs, symbol: derive_tee_attestation_evidence_digest, mechanism: tee }
+      - { id: tee-attestation.verify-evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs, symbol: verify_tee_attestation_evidence, mechanism: tee }
+      - { id: tee-attestation.gate-context, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs, symbol: validate_tee_attestation_gate_context, mechanism: tee }
+      - { id: tee-attestation.secret-provisioning, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs, symbol: validate_tee_secret_provisioning, mechanism: tee }
+      - { id: tee-attestation.result-release, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs, symbol: validate_tee_result_release, mechanism: tee }
+  fhe-feasibility:
+    milestone: CC6
+    profile: kiva-fhe-sum-bfv-feasibility-v1
+    evidence:
+      - { id: fhe-feasibility.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/fhe.rs, symbol: FheBoundaryError, mechanism: fhe }
+      - { id: fhe-feasibility.profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/fhe.rs, symbol: FHE_FEASIBILITY_PROFILE, mechanism: fhe }
+      - { id: fhe-feasibility.parameter-set, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/parameters.rs, symbol: FheFeasibilityParameterSet, mechanism: fhe }
+      - { id: fhe-feasibility.plan, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/parameters.rs, symbol: FheFeasibilityPlan, mechanism: fhe }
+      - { id: fhe-feasibility.ciphertext-fixture, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs, symbol: FheFeasibilityCiphertextFixture, mechanism: fhe }
+      - { id: fhe-feasibility.ciphertext-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs, symbol: derive_fhe_feasibility_ciphertext_digest, mechanism: fhe }
+      - { id: fhe-feasibility.fixture-encryption, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs, symbol: encrypt_fhe_feasibility_plaintext_fixture, mechanism: fhe }
+      - { id: fhe-feasibility.sum-evaluation, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs, symbol: evaluate_fhe_feasibility_sum, mechanism: fhe }
+      - { id: fhe-feasibility.release-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/release.rs, symbol: validate_fhe_feasibility_release, mechanism: fhe }
+      - { id: fhe-feasibility.release-fixture, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/release.rs, symbol: release_fhe_feasibility_sum_fixture, mechanism: fhe }
+  confidential-job-lifecycle:
+    milestone: CC9
+    profile: kiva-confidential-job-lifecycle-v1
+    evidence:
+      - { id: confidential-job-lifecycle.strict-transition-test, kind: rust-test, source_file: crates/kiva-confidential/src/mechanism/core/tests/lifecycle.rs, test: crates/kiva-confidential/src/lib.rs::confidential_job_lifecycle_allows_only_strict_transitions, mechanism: job }
+      - { id: confidential-job-lifecycle.admission-test, kind: rust-test, source_file: crates/kiva-confidential/src/mechanism/core/tests/lifecycle.rs, test: crates/kiva-confidential/src/lib.rs::confidential_job_admission_fails_closed, mechanism: job }
+      - { id: confidential-job-lifecycle.memory-server-test, kind: rust-test, source_file: crates/kiva-server/src/tests/confidential_memory/jobs.rs, test: crates/kiva-server/src/lib.rs::confidential_job_lifecycle_persists_metadata_and_audit_in_memory, mechanism: job }
+      - { id: confidential-job-lifecycle.memory-admission-test, kind: rust-test, source_file: crates/kiva-server/src/tests/confidential_memory/jobs.rs, test: crates/kiva-server/src/lib.rs::confidential_job_admission_rejects_invalid_metadata_in_memory, mechanism: job }
+      - { id: confidential-job-lifecycle.memory-deadline-test, kind: rust-test, source_file: crates/kiva-server/src/tests/confidential_memory/jobs.rs, test: crates/kiva-server/src/lib.rs::confidential_job_transition_rejects_expired_deadline_in_memory, mechanism: job }
+      - { id: confidential-job-lifecycle.postgres-test, kind: rust-test, source_file: crates/kiva-server/src/tests/postgres.rs, test: crates/kiva-server/src/lib.rs::postgres_confidential_job_lifecycle_is_idempotent_and_audited, mechanism: job }
+      - { id: confidential-job-lifecycle.strict-transition-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/jobs.rs, harness: kani_harnesses::confidential_job_lifecycle_matches_strict_transition_table, mechanism: job }
+      - { id: confidential-job-lifecycle.admission-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/jobs.rs, harness: kani_harnesses::confidential_job_admission_gate_fails_closed, mechanism: job }
+  confidential-key-participant-lifecycle:
+    milestone: CC10
+    profile: kiva-confidential-key-participant-lifecycle-v1
+    evidence:
+      - { id: confidential-key-participant-lifecycle.strict-transition-test, kind: rust-test, source_file: crates/kiva-confidential/src/mechanism/core/tests/lifecycle.rs, test: crates/kiva-confidential/src/lib.rs::confidential_participant_lifecycle_is_strict_and_fail_closed, mechanism: participant }
+      - { id: confidential-key-participant-lifecycle.memory-server-test, kind: rust-test, source_file: crates/kiva-server/src/tests/confidential_memory/participants_lifecycle.rs, test: crates/kiva-server/src/lib.rs::confidential_participant_lifecycle_persists_metadata_and_audit_in_memory, mechanism: participant }
+      - { id: confidential-key-participant-lifecycle.memory-gate-test, kind: rust-test, source_file: crates/kiva-server/src/tests/confidential_memory/participants_gates.rs, test: crates/kiva-server/src/lib.rs::confidential_participant_gates_keys_and_jobs_fail_closed_in_memory, mechanism: participant }
+      - { id: confidential-key-participant-lifecycle.postgres-test, kind: rust-test, source_file: crates/kiva-server/src/tests/postgres.rs, test: crates/kiva-server/src/lib.rs::postgres_confidential_participant_lifecycle_is_idempotent_and_audited, mechanism: participant }
+      - { id: confidential-key-participant-lifecycle.transition-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/participants_and_additive.rs, harness: kani_harnesses::confidential_participant_lifecycle_matches_strict_transition_table, mechanism: participant }
+      - { id: confidential-key-participant-lifecycle.admission-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/participants_and_additive.rs, harness: kani_harnesses::confidential_participant_admission_is_active_only, mechanism: participant }
+  production-psi-upgrade:
+    milestone: CC11
+    profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+    evidence:
+      - { id: production-psi-upgrade.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/psi.rs, symbol: PsiBoundaryError, mechanism: psi }
+      - { id: production-psi-upgrade.runtime-binding, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/psi/oprf/profile.rs, symbol: PsiOprfRuntimeBinding, mechanism: psi }
+      - { id: production-psi-upgrade.intersection, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/psi/oprf/intersection.rs, symbol: compute_psi_oprf_intersection, mechanism: psi }
+      - { id: production-psi-upgrade.release-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/psi/release.rs, symbol: validate_psi_oprf_release, mechanism: psi }
+      - { id: production-psi-upgrade.regression-test, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tests/psi.rs, symbol: psi_oprf_rejects_abort_duplicate_replay_and_review_pending_release, mechanism: psi }
+      - { id: production-psi-upgrade.intersection-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/psi.rs, harness: kani_harnesses::psi_oprf_intersection_exposes_only_common_elements, mechanism: psi }
+      - { id: production-psi-upgrade.release-kani, kind: kani-harness, source_file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/psi.rs, harness: kani_harnesses::psi_oprf_release_gate_fails_closed, mechanism: psi }
+      - { id: production-psi-upgrade.review-lemma, kind: tamarin-lemma, source_file: proofs/tamarin/kiva_psi_oprf_boundary.spthy, lemma: release_requires_reviewed_runtime, mechanism: psi }
+      - { id: production-psi-upgrade.replay-lemma, kind: tamarin-lemma, source_file: proofs/tamarin/kiva_psi_oprf_boundary.spthy, lemma: accepted_transcript_has_replay_record, mechanism: psi }
+      - { id: production-psi-upgrade.abort-lemma, kind: tamarin-lemma, source_file: proofs/tamarin/kiva_psi_oprf_boundary.spthy, lemma: aborted_transcript_is_not_released, mechanism: psi }
+      - { id: production-psi-upgrade.raw-id-lemma, kind: tamarin-lemma, source_file: proofs/tamarin/kiva_psi_oprf_boundary.spthy, lemma: raw_identifier_is_never_published, mechanism: psi }
+  tee-nitro-attestation:
+    milestone: CC12
+    profile: kiva-tee-aws-nitro-review-gated-v1
+    evidence:
+      - { id: tee-nitro-attestation.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/tee.rs, symbol: TeeBoundaryError, mechanism: tee }
+      - { id: tee-nitro-attestation.profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/tee.rs, symbol: TEE_AWS_NITRO_ATTESTATION_PROFILE, mechanism: tee }
+      - { id: tee-nitro-attestation.policy, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs, symbol: TeeAwsNitroAttestationPolicy, mechanism: tee }
+      - { id: tee-nitro-attestation.evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/claims.rs, symbol: TeeAwsNitroAttestationEvidence, mechanism: tee }
+      - { id: tee-nitro-attestation.document-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/claims.rs, symbol: derive_tee_aws_nitro_attestation_document_digest, mechanism: tee }
+      - { id: tee-nitro-attestation.verify-evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs, symbol: verify_tee_aws_nitro_attestation_evidence, mechanism: tee }
+      - { id: tee-nitro-attestation.gate-context, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs, symbol: validate_tee_aws_nitro_attestation_gate_context, mechanism: tee }
+      - { id: tee-nitro-attestation.key-release, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/release.rs, symbol: validate_tee_aws_nitro_key_release, mechanism: tee }
+      - { id: tee-nitro-attestation.result-release, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/tee/nitro/release.rs, symbol: validate_tee_aws_nitro_result_release, mechanism: tee }
+  threshold-frost:
+    milestone: CC13
+    profile: kiva-threshold-frost-ed25519-review-gated-v1
+    evidence:
+      - { id: threshold-frost.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/frost.rs, symbol: FrostBoundaryError, mechanism: frost }
+      - { id: threshold-frost.profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/frost.rs, symbol: THRESHOLD_FROST_PROFILE, mechanism: frost }
+      - { id: threshold-frost.runtime-binding, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/profile.rs, symbol: ThresholdFrostRuntimeBinding, mechanism: frost }
+      - { id: threshold-frost.key-ceremony-plan, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/profile.rs, symbol: ThresholdFrostKeyCeremonyPlan, mechanism: frost }
+      - { id: threshold-frost.participant-transcript, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/transcript.rs, symbol: ThresholdFrostParticipantTranscript, mechanism: frost }
+      - { id: threshold-frost.key-ceremony-facts, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/gate.rs, symbol: ThresholdFrostKeyCeremonyFacts, mechanism: frost }
+      - { id: threshold-frost.key-ceremony-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/admission.rs, symbol: derive_threshold_frost_key_ceremony_digest, mechanism: frost }
+      - { id: threshold-frost.accept-key-ceremony, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/admission.rs, symbol: accept_threshold_frost_key_ceremony, mechanism: frost }
+      - { id: threshold-frost.signature-transcript-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/signature.rs, symbol: derive_threshold_frost_signature_transcript_digest, mechanism: frost }
+      - { id: threshold-frost.accept-signature-transcript, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/signature.rs, symbol: accept_threshold_frost_signature_transcript, mechanism: frost }
+      - { id: threshold-frost.key-ceremony-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/gate.rs, symbol: validate_threshold_frost_key_ceremony_gate_context, mechanism: frost }
+      - { id: threshold-frost.release-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/frost/release.rs, symbol: validate_threshold_frost_release, mechanism: frost }
+  fhe-runtime:
+    milestone: CC14
+    profile: kiva-fhe-sum-runtime-review-gated-v1
+    evidence:
+      - { id: fhe-runtime.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/fhe.rs, symbol: FheBoundaryError, mechanism: fhe }
+      - { id: fhe-runtime.profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/fhe.rs, symbol: FHE_RUNTIME_PROFILE, mechanism: fhe }
+      - { id: fhe-runtime.runtime-binding, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/profile.rs, symbol: FheRuntimeBinding, mechanism: fhe }
+      - { id: fhe-runtime.plan, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/profile.rs, symbol: FheRuntimePlan, mechanism: fhe }
+      - { id: fhe-runtime.participant-ciphertext, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs, symbol: FheRuntimeParticipantCiphertext, mechanism: fhe }
+      - { id: fhe-runtime.transcript-facts, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs, symbol: FheRuntimeCiphertextTranscriptFacts, mechanism: fhe }
+      - { id: fhe-runtime.transcript-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs, symbol: derive_fhe_runtime_ciphertext_transcript_digest, mechanism: fhe }
+      - { id: fhe-runtime.accept-transcript, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs, symbol: accept_fhe_runtime_ciphertext_transcript, mechanism: fhe }
+      - { id: fhe-runtime.evaluation-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/evaluation.rs, symbol: derive_fhe_runtime_evaluation_digest, mechanism: fhe }
+      - { id: fhe-runtime.accept-evaluation, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/evaluation.rs, symbol: accept_fhe_runtime_evaluation, mechanism: fhe }
+      - { id: fhe-runtime.transcript-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs, symbol: validate_fhe_runtime_ciphertext_transcript_gate_context, mechanism: fhe }
+      - { id: fhe-runtime.release-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/release.rs, symbol: validate_fhe_runtime_release, mechanism: fhe }
+      - { id: fhe-runtime.release-metadata, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/release.rs, symbol: release_fhe_runtime_sum_metadata, mechanism: fhe }
+  secret-compute-provider-contract:
+    milestone: CC16
+    profile: kiva-secret-compute-provider-contract-v1
+    evidence:
+      - { id: secret-compute-provider-contract.boundary-error, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/errors/provider.rs, symbol: SecretComputeProviderBoundaryError, mechanism: provider }
+      - { id: secret-compute-provider-contract.profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/provider.rs, symbol: SECRET_COMPUTE_PROVIDER_CONTRACT_PROFILE, mechanism: provider }
+      - { id: secret-compute-provider-contract.reference-profile, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/core/profiles/provider.rs, symbol: REFERENCE_PRIMITIVE_PROVIDER_PROFILE, mechanism: provider }
+      - { id: secret-compute-provider-contract.binding, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: SecretComputeProviderBinding, mechanism: provider }
+      - { id: secret-compute-provider-contract.typed-evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: SecretComputeProviderEvidence, mechanism: provider }
+      - { id: secret-compute-provider-contract.review-evidence, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: SecretComputeProviderReviewEvidence, mechanism: provider }
+      - { id: secret-compute-provider-contract.usage-claim, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: SecretComputeProviderUsageClaim, mechanism: provider }
+      - { id: secret-compute-provider-contract.kind, kind: rust-symbol, source_file: crates/kiva-secret-provider-contract/src/lib.rs, symbol: SecretComputeProviderKind, mechanism: provider }
+      - { id: secret-compute-provider-contract.capability, kind: rust-symbol, source_file: crates/kiva-secret-provider-contract/src/lib.rs, symbol: SecretComputeProviderCapability, mechanism: provider }
+      - { id: secret-compute-provider-contract.provider-profile, kind: rust-symbol, source_file: crates/kiva-secret-provider-contract/src/lib.rs, symbol: SecretComputeProviderProfile, mechanism: provider }
+      - { id: secret-compute-provider-contract.admission, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/admission.rs, symbol: SecretComputeProviderAdmission, mechanism: provider }
+      - { id: secret-compute-provider-contract.evidence-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/admission.rs, symbol: SecretComputeProviderEvidenceGate, mechanism: provider }
+      - { id: secret-compute-provider-contract.release-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/admission.rs, symbol: SecretComputeProviderReleaseGate, mechanism: provider }
+      - { id: secret-compute-provider-contract.runtime-boundary, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/runtime.rs, symbol: SecretComputeProviderRuntimeBoundary, mechanism: provider }
+      - { id: secret-compute-provider-contract.runtime-claim, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/runtime.rs, symbol: SecretComputeProviderRuntimeBoundaryClaim, mechanism: provider }
+      - { id: secret-compute-provider-contract.binding-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: validate_secret_compute_provider_binding, mechanism: provider }
+      - { id: secret-compute-provider-contract.mechanism-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/admission.rs, symbol: validate_secret_compute_provider_for_mechanism, mechanism: provider }
+      - { id: secret-compute-provider-contract.admission-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/admission.rs, symbol: admit_secret_compute_provider, mechanism: provider }
+      - { id: secret-compute-provider-contract.runtime-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/runtime.rs, symbol: admit_secret_compute_provider_runtime_boundary, mechanism: provider }
+      - { id: secret-compute-provider-contract.required-capability, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: secret_compute_required_capability_for_mechanism, mechanism: provider }
+      - { id: secret-compute-provider-contract.parameter-set-gate, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/binding.rs, symbol: secret_compute_provider_kind_requires_parameter_set, mechanism: provider }
+      - { id: secret-compute-provider-contract.binding-digest, kind: rust-symbol, source_file: crates/kiva-confidential/src/mechanism/provider/digest.rs, symbol: derive_secret_compute_provider_binding_digest, mechanism: provider }

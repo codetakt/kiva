@@ -1,0 +1,153 @@
+---
+version: 1
+kind: kiva-openapi-rust-dto-map-section
+section: semantic-compatibility
+source_of_truth: openapi-contracts
+contracts:
+- name: kiva-pds-boundary-types
+  openapi: spec/openapi/kiva-pds.yaml
+  rust: crates/kiva-pds/src/lib.rs
+  rust_sources:
+  - crates/kiva-pds/src/pds/mod.rs
+  - crates/kiva-pds/src/pds/wire_enums.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-pds/src/pds/validation.rs
+  - crates/kiva-pds/src/pds/release_artifacts.rs
+  - crates/kiva-release-artifacts/src/lib.rs
+  schemas:
+    AccessCheckRequest:
+      rust: AccessCheckIntent
+      shape: object
+    AccessCheckResponse:
+      rust: AccessCheckResponse
+      shape: object
+    AccessAuditEvent:
+      rust: AccessAuditEvent
+      shape: object
+    AccessAuditEventList:
+      rust: AccessAuditEventList
+      shape: object
+    ConsentGrant:
+      rust: ConsentGrant
+      shape: object
+    ConsentGrantList:
+      rust: ConsentGrantList
+      shape: object
+    ConsentGrantRequest:
+      rust: ConsentGrantCommandInput
+      shape: object
+    ConsentRevocationRequest:
+      rust: ConsentRevocationCommandInput
+      shape: object
+    ConsentScope:
+      rust: ConsentScope
+      shape: enum
+    ConsentState:
+      rust: ConsentState
+      shape: enum
+    DataClass:
+      rust: DataClass
+      shape: enum
+    DataProduct:
+      rust: DataProduct
+      shape: object
+    DataProductList:
+      rust: DataProductList
+      shape: object
+    DataProductReadResponse:
+      rust: DataProductReadResponse
+      shape: object
+    DataProductReadRequest:
+      rust: DataProductReadIntent
+      shape: object
+    DataProductRequest:
+      rust: DataProductRegistrationCommandInput
+      shape: object
+    DataProductSourceKind:
+      rust: DataProductSourceKind
+      shape: enum
+    ProviderBinding:
+      rust: ProviderBinding
+      shape: object
+    ProviderBindingList:
+      rust: ProviderBindingList
+      shape: object
+    ProviderBindingRequest:
+      rust: ProviderBindingRegistrationCommandInput
+      shape: object
+    GovernanceProfileKind:
+      rust: GovernanceProfileKind
+      shape: enum
+    GovernanceProfile:
+      rust: GovernanceProfile
+      shape: object
+    GovernanceProfileList:
+      rust: GovernanceProfileList
+      shape: object
+    GovernanceProfileRequest:
+      rust: GovernanceProfileCommandInput
+      shape: object
+    LegalBasis:
+      rust: LegalBasis
+      shape: enum
+    LifecycleCase:
+      rust: LifecycleCase
+      shape: object
+    LifecycleCaseList:
+      rust: LifecycleCaseList
+      shape: object
+    LifecycleCaseRequest:
+      rust: LifecycleCaseCommandInput
+      shape: object
+    LifecycleCaseStatus:
+      rust: LifecycleCaseStatus
+      shape: enum
+    LifecycleCaseType:
+      rust: LifecycleCaseType
+      shape: enum
+    LifecycleEventRequest:
+      rust: LifecycleEventCommandInput
+      shape: object
+    LifecycleEventType:
+      rust: LifecycleEventType
+      shape: enum
+    LifecycleEvent:
+      rust: LifecycleEvent
+      shape: object
+    LifecycleEventList:
+      rust: LifecycleEventList
+      shape: object
+    LifecycleResourceKind:
+      rust: LifecycleResourceKind
+      shape: enum
+    MetadataExport:
+      rust: MetadataExport
+      shape: object
+    PdsSubjectAgent:
+      rust: PdsSubjectAgent
+      shape: object
+    RecordInventory:
+      rust: RecordInventory
+      shape: object
+    ReleaseArtifactKind:
+      rust: ReleaseArtifactKind
+      shape: enum
+    ReleaseArtifactRef:
+      rust: ReleaseArtifactRef
+      shape: object
+    RetentionPolicy:
+      rust: RetentionPolicy
+      shape: object
+    RetentionPolicyList:
+      rust: RetentionPolicyList
+      shape: object
+    RetentionPolicyRequest:
+      rust: RetentionPolicyCommandInput
+      shape: object
+    StatementInventoryRecord:
+      rust: StatementInventoryRecord
+      shape: object
+    TombstonePublicationRule:
+      rust: TombstonePublicationRule
+      shape: enum

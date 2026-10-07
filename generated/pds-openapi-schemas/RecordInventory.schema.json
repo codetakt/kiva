@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:RecordInventory",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/RecordInventory",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

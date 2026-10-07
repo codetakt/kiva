@@ -1,0 +1,150 @@
+schema_version: 1
+kind: kiva-confidential-mechanism-packages-source
+status: active
+description: >
+  Thin human review entrypoint for confidential-computation MechanismPackage
+  rows. Each package binds a maturity mechanism, CapabilityBinding, provider
+  boundary, assurance entry, and verification family into one review unit.
+mechanism_package_model:
+  root_type: MechanismPackage
+  authoritative_edit_entrypoint: true
+  facet_sources_are_not_roots: true
+  facet_edit_policy:
+    package_is_only_confidential_edit_unit: true
+    facet_sources_remain_supporting_rows: true
+    review_must_enter_through_mechanism_profile_index: true
+    every_facet_row_must_be_owned_by_exactly_one_package: true
+  primary_review_surface: generated/confidential/mechanism-profile-index.yaml
+  package_profile_projection: generated/confidential/mechanism-profile-index.yaml#/package_profiles
+  package_flow:
+    - Mechanism
+    - Capability
+    - ProviderBoundary
+    - Maturity
+    - Assurance
+    - Verification
+  sealed_provider_boundary: spec/confidential/secret-compute-provider-contract.yaml#/sealed_capability_boundary
+  package_rule: >
+    CapabilityBinding, provider contract, mechanism maturity, assurance
+    registry, and verification kernels are package facets. They should not be
+    reviewed as independent confidential-computation roots.
+package_source_refs:
+  - spec/confidential/mechanism-catalog.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/secret-compute-provider-contract.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/confidential/assurance-evidence-registry.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+packages:
+  - id: additive-secure-aggregation-package
+    maturity_mechanism: additive-secure-aggregation
+    capability_binding: additive-secure-aggregation-capability
+    capability: additive-secure-aggregation
+    mechanism_catalog_id: additive-n-of-n
+    provider_kind: reference-primitive
+    assurance_registry_entry: null
+    verification_family: additive
+  - id: differential-privacy-release-package
+    maturity_mechanism: differential-privacy-release
+    capability_binding: differential-privacy-release-capability
+    capability: differential-privacy-release
+    mechanism_catalog_id: null
+    provider_kind: reference-primitive
+    assurance_registry_entry: null
+    verification_family: differential-privacy
+  - id: shamir-vss-admission-package
+    maturity_mechanism: shamir-vss-admission
+    capability_binding: shamir-vss-admission-capability
+    capability: threshold-reconstruction
+    mechanism_catalog_id: shamir-threshold
+    provider_kind: threshold-cryptography
+    assurance_registry_entry: null
+    verification_family: shamir
+  - id: psi-cohort-hash-token-package
+    maturity_mechanism: psi-cohort-hash-token
+    capability_binding: psi-cohort-hash-token-capability
+    capability: psi-evaluation
+    mechanism_catalog_id: private-set-intersection
+    provider_kind: private-set-intersection
+    assurance_registry_entry: null
+    verification_family: psi
+  - id: tee-portable-attestation-package
+    maturity_mechanism: tee-portable-attestation
+    capability_binding: tee-portable-attestation-capability
+    capability: tee-attestation
+    mechanism_catalog_id: trusted-execution-environment
+    provider_kind: trusted-execution-environment
+    assurance_registry_entry: tee-attestation
+    verification_family: tee
+  - id: fhe-sum-feasibility-package
+    maturity_mechanism: fhe-sum-feasibility
+    capability_binding: fhe-sum-feasibility-capability
+    capability: fhe-evaluation
+    mechanism_catalog_id: fhe-sum-feasibility
+    provider_kind: fully-homomorphic-encryption
+    assurance_registry_entry: fhe-feasibility
+    verification_family: fhe
+  - id: confidential-job-lifecycle-package
+    maturity_mechanism: confidential-job-lifecycle
+    capability_binding: confidential-job-lifecycle-capability
+    capability: confidential-job-lifecycle
+    mechanism_catalog_id: null
+    provider_kind: secret-custody
+    assurance_registry_entry: confidential-job-lifecycle
+    verification_family: job-lifecycle
+  - id: confidential-participant-key-lifecycle-package
+    maturity_mechanism: confidential-participant-key-lifecycle
+    capability_binding: confidential-participant-key-lifecycle-capability
+    capability: confidential-participant-key-lifecycle
+    mechanism_catalog_id: null
+    provider_kind: secret-custody
+    assurance_registry_entry: confidential-key-participant-lifecycle
+    verification_family: participant-lifecycle
+  - id: psi-oprf-dh-voprf-package
+    maturity_mechanism: psi-oprf-dh-voprf
+    capability_binding: psi-oprf-dh-voprf-capability
+    capability: psi-evaluation
+    mechanism_catalog_id: private-set-intersection-oprf-dh
+    provider_kind: private-set-intersection
+    assurance_registry_entry: production-psi-upgrade
+    verification_family: psi
+  - id: tee-aws-nitro-attestation-package
+    maturity_mechanism: tee-aws-nitro-attestation
+    capability_binding: tee-aws-nitro-attestation-capability
+    capability: tee-attestation
+    mechanism_catalog_id: trusted-execution-environment-aws-nitro
+    provider_kind: trusted-execution-environment
+    assurance_registry_entry: tee-nitro-attestation
+    verification_family: tee
+  - id: threshold-frost-signing-package
+    maturity_mechanism: threshold-frost-signing
+    capability_binding: threshold-frost-signing-capability
+    capability: threshold-signing
+    mechanism_catalog_id: threshold-frost-signing
+    provider_kind: threshold-cryptography
+    assurance_registry_entry: threshold-frost
+    verification_family: threshold-frost
+  - id: fhe-sum-runtime-package
+    maturity_mechanism: fhe-sum-runtime
+    capability_binding: fhe-sum-runtime-capability
+    capability: fhe-evaluation
+    mechanism_catalog_id: fhe-sum-runtime
+    provider_kind: fully-homomorphic-encryption
+    assurance_registry_entry: fhe-runtime
+    verification_family: fhe
+  - id: secret-compute-provider-contract-package
+    maturity_mechanism: secret-compute-provider-contract
+    capability_binding: secret-compute-provider-contract-capability
+    capability: provider-contract
+    mechanism_catalog_id: null
+    provider_kind: secret-custody
+    assurance_registry_entry: secret-compute-provider-contract
+    verification_family: provider-contract
+review_surfaces:
+  primary:
+    - generated/confidential/mechanism-profile-index.yaml
+  supporting:
+    - generated/confidential/capability-binding-index.yaml
+    - generated/confidential/capability-policy-evidence.yaml
+    - generated/verification/verification-obligations.yaml

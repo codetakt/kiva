@@ -1,0 +1,32 @@
+schema_version: 1
+kind: kiva-surface-generation-policy
+status: active
+description: >
+  Generated artifact and source-ledger policy for the Kiva surface catalog.
+component_sources:
+  operation_ownership: spec/architecture/operation-ownership.source.yaml
+  pds_resource_families: spec/architecture/pds-resource-families.source.yaml
+  surface_families: spec/architecture/surface-families.source.yaml
+generated_artifact_policy:
+  current_location: generated/architecture
+  target_location: generated/architecture
+  migrated_generated_locations:
+    - generated/architecture/surface-catalog.yaml
+    - generated/architecture/operation-kernel.yaml
+    - generated/architecture/operation-catalog.yaml
+    - generated/architecture/pds-resource-families.yaml
+    - generated/architecture/surface-families.yaml
+    - docs/architecture/generated/operation-kernel.md
+  migration_rule: >
+    Generated architecture ledgers live under generated/architecture. Historical
+    spec/architecture generated paths are retained only in git history and must
+    not be reintroduced as human-editable design sources.
+generated_bundle: generated/architecture/surface-catalog.yaml
+source_ledgers:
+  http_operation_catalog:
+    path: generated/http-operation-catalog.evidence.json
+    role: complete-openapi-http-operation-projection
+projection_policy:
+  surface_operation_index_is_generated_from_this_catalog: true
+  generated_projections_are_declared_in_surface_operation_algebra: true
+validator: scripts/ci/validate_surface_catalog.py

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:source-ledger-schema-registry:1",
+  "title": "Kiva source ledger schema registry",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "schemas"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-source-ledger-schema-registry" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "schemas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "schema"],
+        "properties": {
+          "source": { "type": "string", "minLength": 1 },
+          "schema": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

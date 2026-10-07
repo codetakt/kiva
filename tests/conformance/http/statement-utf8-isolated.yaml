@@ -1,0 +1,88 @@
+suite:
+  id: xapi-lrs-statement-utf8-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive UTF-8 Statement checks for disposable isolated LRS targets.
+cases:
+  - id: statement-stores-and-returns-utf8-strings
+    requirements:
+      - xapi-lrs-4.1.2-utf8
+      - xapi-lrs-4.2.4.2-return-serialization
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000601
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000601
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-utf8@example.org
+              name: 学習者
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+              display:
+                ja-JP: 経験しました
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/utf8
+              definition:
+                name:
+                  ja-JP: 学習活動
+            context:
+              extensions:
+                https://example.org/kiva/conformance/extensions/utf8: 個人データ
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: get-statement
+        request:
+          method: GET
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000601
+            format: exact
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+            Last-Modified:
+              present: true
+          json:
+            pointers:
+              /actor/name:
+                equals: 学習者
+              /verb/display/ja-JP:
+                equals: 経験しました
+              /object/definition/name/ja-JP:
+                equals: 学習活動
+              /context/extensions:
+                equals:
+                  https://example.org/kiva/conformance/extensions/utf8: 個人データ
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              equals_pointer: /stored

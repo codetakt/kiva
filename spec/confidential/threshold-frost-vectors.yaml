@@ -1,0 +1,38 @@
+schema_version: 1
+standard: Kiva Confidential Computation
+kind: threshold-frost-vectors
+summary: >
+  Deterministic metadata-only vectors for the CC13 review-gated FROST
+  threshold-signing boundary. These vectors cover transcript digest projection;
+  they do not claim to implement or validate FROST cryptographic soundness.
+vectors:
+  - profile: kiva-threshold-frost-ed25519-review-gated-v1
+    key_ceremony_domain: "kiva-confidential:threshold-frost-key-ceremony:v1"
+    signature_transcript_domain: "kiva-confidential:threshold-frost-signature-transcript:v1"
+    suite: ed25519-sha512-frost
+    job_seed: 121
+    participant_count: 3
+    threshold: 2
+    key_epoch: 7
+    runtime_artifact_seed: 141
+    review_evidence_seed: 142
+    external_review_completed: true
+    participants:
+      - participant_index: 1
+        public_commitment_seed: 101
+        share_custody_seed: 111
+      - participant_index: 2
+        public_commitment_seed: 102
+        share_custody_seed: 112
+      - participant_index: 3
+        public_commitment_seed: 103
+        share_custody_seed: 113
+    message_digest_seed: 151
+    signature_digest_seed: 152
+    signature_shares:
+      - participant_index: 1
+        signature_share_seed: 161
+      - participant_index: 2
+        signature_share_seed: 162
+    expected_key_ceremony_digest_hex: "7444a8adcf8e7f6741c4b3ac34e2cba4e732a66af939340769e6ee2ab8becfa7"
+    expected_signature_transcript_digest_hex: "5537beb806644455570dbbb5999be8ac5e47eeec6ed91bf77bb960838344d74b"

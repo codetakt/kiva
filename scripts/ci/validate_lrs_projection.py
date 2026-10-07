@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Validate portable case contracts and their source projection, without HTTP."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import jsonschema
+import yaml
+
+from audit_lrs_source_projection import DEFAULT_SOURCE, ROOT, audit
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument("--skip-source", action="store_true")
+    args = parser.parse_args()
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/ci/generate_lrs_projection_cases.py"),
+            "--check",
+        ],
+        check=True,
+    )
+    schema = json.loads(
+        (ROOT / "spec/conformance/schemas/conformance-case.schema.json").read_text()
+    )
+    jsonschema.Draft202012Validator.check_schema(schema)
+    validator = jsonschema.Draft202012Validator(schema)
+    count = 0
+    for path in sorted((ROOT / "tests/conformance/http").rglob("*.yaml")):
+        data = yaml.load(
+            path.read_text(), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+        )
+        errors = list(validator.iter_errors(data))
+        if errors:
+            raise SystemExit(
+                f"{path.relative_to(ROOT)} {errors[0].json_path}: {errors[0].message}"
+            )
+        count += len(data["cases"])
+    result = audit(None if args.skip_source else args.source, False)
+    if result["cases_without_source_rule"]:
+        raise SystemExit(f"unbound cases: {result['cases_without_source_rule']}")
+    print(
+        f"validated {count} portable cases; source bytes verified: {result['source_bytes_verified']}"
+    )
+
+
+if __name__ == "__main__":
+    main()

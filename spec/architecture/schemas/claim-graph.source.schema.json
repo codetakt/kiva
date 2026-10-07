@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:claim-graph-source:1",
+  "title": "Kiva ClaimGraph source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "inputs", "generated_artifacts", "graph_model"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-claim-graph-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_readiness",
+        "evidence_set",
+        "evidence_receipts",
+        "executed_receipt_overlay",
+        "verification_obligations",
+        "capability_bindings"
+      ],
+      "properties": {
+        "claim_readiness": { "type": "string", "minLength": 1 },
+        "evidence_set": { "type": "string", "minLength": 1 },
+        "evidence_receipts": { "type": "string", "minLength": 1 },
+        "executed_receipt_overlay": { "type": "string", "minLength": 1 },
+        "verification_obligations": { "type": "string", "minLength": 1 },
+        "capability_bindings": { "type": "string", "minLength": 1 }
+      }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_graph", "markdown"],
+      "properties": {
+        "claim_graph": { "type": "string", "minLength": 1 },
+        "markdown": { "type": "string", "minLength": 1 }
+      }
+    },
+    "graph_model": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["root_type", "source_rule", "edge_rule"],
+      "properties": {
+        "root_type": { "const": "ClaimGraph" },
+        "source_rule": { "type": "string", "minLength": 1 },
+        "edge_rule": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,73 @@
+schema_version: 1
+kind: fhe-sum-feasibility-job-contract
+status: published
+profile: kiva-fhe-sum-bfv-feasibility-v1
+use_case: small-governed-aggregate-feasibility
+operation:
+  family: bfv-style-integer-sum
+  operation: sum
+  deterministic_fixture: true
+  production_encryption: false
+  minimum_participants: 2
+  requires_all_participants: true
+  ciphertext_domain: kiva-confidential:fhe-sum-feasibility-ciphertext:v1
+  evaluation_domain: kiva-confidential:fhe-sum-feasibility-evaluation:v1
+parameters:
+  polynomial_modulus_degree: 4096
+  plaintext_modulus: 1048583
+  ciphertext_modulus_bits: 109
+  security_level_bits: 128
+  max_participant_count: 16
+  max_plaintext_value: 65000
+request:
+  required_fields:
+    - job_id
+    - parameter_set
+    - participant_index
+    - ciphertext_digest
+  forbidden_fields:
+    - plaintext
+    - plaintextValue
+    - rawPlaintext
+    - decryptionKey
+    - secretKey
+    - participantInputs
+evaluation:
+  required_fields:
+    - job_id
+    - participant_count
+    - evaluated_ciphertext_digest
+    - noise_budget_bits
+  rejects_missing_participants: true
+  rejects_duplicate_participants: true
+  rejects_job_mismatch: true
+  rejects_parameter_mismatch: true
+  rejects_plaintext_modulus_wrap: true
+release:
+  required_fields:
+    - evaluated_ciphertext_digest
+    - aggregate_value
+    - participant_count
+  requires_completed_evaluation: true
+  requires_policy_approval: true
+  requires_governed_release_treatment: true
+  requires_clear_plaintext_boundary: true
+pds:
+  dedicated_data_product_source_kind_implemented: false
+  future_source_kind: fhe-sum-feasibility-result
+  resource_class: aggregate-insights
+  raw_record_read: false
+  raw_ciphertext_or_plaintext_publication: false
+  governed_release_fact_required: true
+  current_release_boundary: rust_feasibility_release_gate
+  pds_openapi_source_kind: absent
+  pds_postgresql_source_kind: absent
+  pds_policy_source_kind: absent
+non_goals:
+  production_fhe_security: false
+  fhe_key_management: false
+  ciphertext_wire_format: false
+  bootstrapping: false
+  ckks_approximate_arithmetic: false
+  malicious_participant_robustness: false
+  dedicated_fhe_pds_data_product_source_kind: false

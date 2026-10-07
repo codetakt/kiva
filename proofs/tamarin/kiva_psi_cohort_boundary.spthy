@@ -1,0 +1,103 @@
+theory Kiva_PSI_Cohort_Boundary
+begin
+
+rule ConfigurePsiCohortJob:
+  [ Fr(~job) ]
+  --[ PsiJobConfigured(~job, 'kiva_psi_cohort_hash_v1') ]->
+  [ !PsiJob(~job) ]
+
+rule SubmitLeftParticipantDataset:
+  [ !PsiJob(job), Fr(~submission) ]
+  --[
+    PsiParticipantAdmitted(job, 'school_a'),
+    PsiDigestSubmitted(job, 'school_a', 'match_digest', ~submission),
+    PsiDigestSubmitted(job, 'school_a', 'left_only_digest', ~submission)
+  ]->
+  [
+    PsiLeftMatch(job, 'match_digest'),
+    PsiLeftOnly(job, 'left_only_digest')
+  ]
+
+rule SubmitRightParticipantDataset:
+  [ !PsiJob(job), Fr(~submission) ]
+  --[
+    PsiParticipantAdmitted(job, 'school_b'),
+    PsiDigestSubmitted(job, 'school_b', 'match_digest', ~submission),
+    PsiDigestSubmitted(job, 'school_b', 'right_only_digest', ~submission)
+  ]->
+  [
+    PsiRightMatch(job, 'match_digest'),
+    PsiRightOnly(job, 'right_only_digest')
+  ]
+
+rule ComputeIntersection:
+  [
+    PsiLeftMatch(job, digest),
+    PsiRightMatch(job, digest)
+  ]
+  --[
+    PsiIntersectionComputed(job, digest)
+  ]->
+  [ PsiIntersectionResult(job, digest) ]
+
+rule SuppressLeftNonMatch:
+  [ PsiLeftOnly(job, digest) ]
+  --[ PsiNonMatchSuppressed(job, digest) ]->
+  []
+
+rule SuppressRightNonMatch:
+  [ PsiRightOnly(job, digest) ]
+  --[ PsiNonMatchSuppressed(job, digest) ]->
+  []
+
+rule ReleaseIntersection:
+  [ PsiIntersectionResult(job, digest), Fr(~authority) ]
+  --[
+    PsiReleaseAuthorized(job, ~authority),
+    PsiResultReleased(job, digest, ~authority)
+  ]->
+  [ !PersistedPsiResult(job, digest) ]
+
+lemma release_requires_configured_job:
+  "All job digest authority #i.
+    PsiResultReleased(job, digest, authority) @ #i
+    ==>
+    Ex #j.
+      PsiJobConfigured(job, 'kiva_psi_cohort_hash_v1') @ #j
+      & #j < #i"
+
+lemma intersection_requires_left_participant_digest:
+  "All job digest #i.
+    PsiIntersectionComputed(job, digest) @ #i
+    ==>
+    Ex submission #j.
+      PsiDigestSubmitted(job, 'school_a', digest, submission) @ #j
+      & #j < #i"
+
+lemma intersection_requires_right_participant_digest:
+  "All job digest #i.
+    PsiIntersectionComputed(job, digest) @ #i
+    ==>
+    Ex submission #j.
+      PsiDigestSubmitted(job, 'school_b', digest, submission) @ #j
+      & #j < #i"
+
+lemma release_requires_prior_intersection:
+  "All job digest authority #i.
+    PsiResultReleased(job, digest, authority) @ #i
+    ==>
+    Ex #j.
+      PsiIntersectionComputed(job, digest) @ #j
+      & #j < #i"
+
+lemma left_non_match_is_not_released:
+  "All job authority #i.
+    PsiResultReleased(job, 'left_only_digest', authority) @ #i
+    ==> F"
+
+lemma right_non_match_is_not_released:
+  "All job authority #i.
+    PsiResultReleased(job, 'right_only_digest', authority) @ #i
+    ==> F"
+
+end

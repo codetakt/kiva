@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:AccessAuditEvent",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/AccessAuditEvent",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

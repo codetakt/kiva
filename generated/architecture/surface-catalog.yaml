@@ -1,0 +1,3406 @@
+schema_version: 1
+kind: kiva-surface-operation-catalog
+status: active
+description: 'Canonical generated surface catalog policy for Kiva public HTTP surfaces. This file is the review entrypoint; role-specific model, generation, and implementation policy lives in split source files and is merged by scripts/ci/surface_catalog.py.
+
+  '
+component_sources:
+  operation_ownership: spec/architecture/operation-ownership.source.yaml
+  surface_projections: spec/architecture/surface-projections.yaml
+  pds_resource_families: spec/architecture/pds-resource-families.source.yaml
+  surface_families: spec/architecture/surface-families.source.yaml
+split_policy_sources:
+  model: spec/architecture/surface-model.source.yaml
+  generation: spec/architecture/surface-generation.policy.yaml
+  implementation: spec/architecture/surface-implementation.policy.yaml
+source_ledgers:
+  http_operation_catalog:
+    path: generated/http-operation-catalog.evidence.json
+    role: complete-openapi-http-operation-projection
+generated_artifact_policy:
+  current_location: generated/architecture
+  target_location: generated/architecture
+  migrated_generated_locations:
+  - generated/architecture/surface-catalog.yaml
+  - generated/architecture/operation-kernel.yaml
+  - generated/architecture/operation-catalog.yaml
+  - generated/architecture/pds-resource-families.yaml
+  - generated/architecture/surface-families.yaml
+  - docs/architecture/generated/operation-kernel.md
+  migration_rule: 'Generated architecture ledgers live under generated/architecture. Historical spec/architecture generated paths are retained only in git history and must not be reintroduced as human-editable design sources.
+
+    '
+surface_operation_algebra:
+  description: 'SurfaceOperation is the sole public operation algebra produced by joining OpenAPI-derived HttpOperation identity with a sparse human-owned SemanticOperationOverlay. HTTP route, operationId, and scope fields are projected from OpenAPI; the overlay owns only application workflow, PDS resource family, and route-context decisions.
+
+    '
+  root_type: SurfaceOperation
+  join_type: HttpOperation + Optional<SemanticOperationOverlay>
+  sole_operation_algebra: true
+  canonical_source: spec/architecture/operation-ownership.source.yaml
+  policy_source: spec/architecture/surface-projections.yaml
+  generated_review_surface: generated/architecture/surface-catalog.yaml
+  openapi_derived_facets:
+    source_of_truth: openapi-contracts
+    drift_check: generated/http-operation-catalog.evidence.json
+    compatibility_fields:
+    - openapi_contract
+    - method
+    - path
+    - operation_id
+    - required_scopes
+    retirement_target: completed-operation-ownership-overlay-keyed-by-openapi-operationId
+  semantic_owned_facets:
+  - application_operation_id
+  - application_surface
+  - workflow_label
+  - rust_workflow_kind
+  - workflow_family
+  - pds_resource_family
+  - pds_route_context
+  joined_facets:
+  - openapi_contract
+  - method
+  - path
+  - operation_id
+  - required_scopes
+  - application_operation_id
+  - application_surface
+  - workflow_label
+  - rust_workflow_kind
+  - workflow_family
+  - pds_resource_family
+  - pds_route_context
+  projections:
+  - id: operation_kernel
+    target: generated/architecture/operation-kernel.yaml
+    role: first-class-operation-kernel-ir
+  - id: operation_kernel_markdown
+    target: docs/architecture/generated/operation-kernel.md
+    role: first-class-operation-kernel-review-projection
+  - id: application_operation_catalog
+    target: generated/architecture/operation-catalog.yaml
+    role: workflow-and-scope-binding-projection
+  - id: pds_resource_family_ledger
+    target: generated/architecture/pds-resource-families.yaml
+    role: pds-route-context-and-handler-ownership-projection
+  - id: surface_family_ledger
+    target: generated/architecture/surface-families.yaml
+    role: cross-surface-family-ownership-projection
+  - id: surface_operation_index
+    target: docs/architecture/generated/surface-operation-index.md
+    role: review-index-projection
+  - id: surface_operation_index_evidence
+    target: generated/surface-operation-index.evidence.json
+    role: review-index-evidence-projection
+  - id: route_coverage
+    target: docs/architecture/generated/route-coverage.md
+    role: axum-route-coverage-projection
+  - id: route_coverage_evidence
+    target: generated/route-coverage.evidence.json
+    role: axum-route-coverage-evidence-projection
+  - id: server_surface_profile_registry
+    target: crates/kiva-server/src/core/state/generated_surface_profiles.rs
+    role: bounded-context-profile-projection
+surface_operation_normal_form:
+  root_type: SurfaceOperation
+  join_type: HttpOperation + Optional<SemanticOperationOverlay>
+  entry_count: 78
+  entries:
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      operation_id: getAnalyticsProducts
+    http_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products
+      operation_id: getAnalyticsProducts
+      required_scopes:
+      - analytics:read
+    semantic_overlay:
+      application_operation_id: analytics-list-products
+      application_surface: analytics
+      workflow_label: analytics.list_products
+      rust_workflow_kind: AnalyticsWorkflowKind::ListProducts
+      workflow_family: aggregate-serving
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products
+      operation_id: getAnalyticsProducts
+      required_scopes:
+      - analytics:read
+      application_operation_id: analytics-list-products
+      application_surface: analytics
+      workflow_label: analytics.list_products
+      rust_workflow_kind: AnalyticsWorkflowKind::ListProducts
+      workflow_family: aggregate-serving
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      operation_id: getAnalyticsProduct
+    http_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products/{dataProductId}
+      operation_id: getAnalyticsProduct
+      required_scopes:
+      - analytics:read
+    semantic_overlay:
+      application_operation_id: analytics-read-product
+      application_surface: analytics
+      workflow_label: analytics.read_product
+      rust_workflow_kind: AnalyticsWorkflowKind::ReadProduct
+      workflow_family: aggregate-serving
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products/{dataProductId}
+      operation_id: getAnalyticsProduct
+      required_scopes:
+      - analytics:read
+      application_operation_id: analytics-read-product
+      application_surface: analytics
+      workflow_label: analytics.read_product
+      rust_workflow_kind: AnalyticsWorkflowKind::ReadProduct
+      workflow_family: aggregate-serving
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      operation_id: getAnalyticsProductAggregate
+    http_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products/{dataProductId}/aggregate
+      operation_id: getAnalyticsProductAggregate
+      required_scopes:
+      - analytics:read
+    semantic_overlay:
+      application_operation_id: analytics-read-aggregate
+      application_surface: analytics
+      workflow_label: analytics.read_aggregate
+      rust_workflow_kind: AnalyticsWorkflowKind::ReadAggregate
+      workflow_family: aggregate-serving
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-analytics.yaml
+      method: get
+      path: /analytics/products/{dataProductId}/aggregate
+      operation_id: getAnalyticsProductAggregate
+      required_scopes:
+      - analytics:read
+      application_operation_id: analytics-read-aggregate
+      application_surface: analytics
+      workflow_label: analytics.read_aggregate
+      rust_workflow_kind: AnalyticsWorkflowKind::ReadAggregate
+      workflow_family: aggregate-serving
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getAbout
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /about
+      operation_id: getAbout
+      required_scopes: []
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /about
+      operation_id: getAbout
+      required_scopes: []
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headAbout
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /about
+      operation_id: headAbout
+      required_scopes: []
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /about
+      operation_id: headAbout
+      required_scopes: []
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getActivity
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities
+      operation_id: getActivity
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities
+      operation_id: getActivity
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headActivity
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities
+      operation_id: headActivity
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities
+      operation_id: headActivity
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getActivityProfiles
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities/profile
+      operation_id: getActivityProfiles
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities/profile
+      operation_id: getActivityProfiles
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: putActivityProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /activities/profile
+      operation_id: putActivityProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /activities/profile
+      operation_id: putActivityProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: postActivityProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /activities/profile
+      operation_id: postActivityProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /activities/profile
+      operation_id: postActivityProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: deleteActivityProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /activities/profile
+      operation_id: deleteActivityProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /activities/profile
+      operation_id: deleteActivityProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headActivityProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities/profile
+      operation_id: headActivityProfile
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities/profile
+      operation_id: headActivityProfile
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getStateDocuments
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities/state
+      operation_id: getStateDocuments
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /activities/state
+      operation_id: getStateDocuments
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: putStateDocument
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /activities/state
+      operation_id: putStateDocument
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /activities/state
+      operation_id: putStateDocument
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: postStateDocument
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /activities/state
+      operation_id: postStateDocument
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /activities/state
+      operation_id: postStateDocument
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: deleteStateDocuments
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /activities/state
+      operation_id: deleteStateDocuments
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /activities/state
+      operation_id: deleteStateDocuments
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headStateDocuments
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities/state
+      operation_id: headStateDocuments
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /activities/state
+      operation_id: headStateDocuments
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getAgentPerson
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /agents
+      operation_id: getAgentPerson
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /agents
+      operation_id: getAgentPerson
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headAgentPerson
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /agents
+      operation_id: headAgentPerson
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /agents
+      operation_id: headAgentPerson
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getAgentProfiles
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /agents/profile
+      operation_id: getAgentProfiles
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /agents/profile
+      operation_id: getAgentProfiles
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: putAgentProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /agents/profile
+      operation_id: putAgentProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /agents/profile
+      operation_id: putAgentProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: postAgentProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /agents/profile
+      operation_id: postAgentProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /agents/profile
+      operation_id: postAgentProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: deleteAgentProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /agents/profile
+      operation_id: deleteAgentProfile
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: delete
+      path: /agents/profile
+      operation_id: deleteAgentProfile
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headAgentProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /agents/profile
+      operation_id: headAgentProfile
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /agents/profile
+      operation_id: headAgentProfile
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: getStatements
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /statements
+      operation_id: getStatements
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: get
+      path: /statements
+      operation_id: getStatements
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: putStatement
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /statements
+      operation_id: putStatement
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: put
+      path: /statements
+      operation_id: putStatement
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: postStatements
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /statements
+      operation_id: postStatements
+      required_scopes:
+      - xapi:write
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: post
+      path: /statements
+      operation_id: postStatements
+      required_scopes:
+      - xapi:write
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      operation_id: headStatements
+    http_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /statements
+      operation_id: headStatements
+      required_scopes:
+      - xapi:read
+    semantic_overlay: {}
+    overlay_present: false
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-xapi.yaml
+      method: head
+      path: /statements
+      operation_id: headStatements
+      required_scopes:
+      - xapi:read
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsAccessAuditEvents
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/access-audit-events
+      operation_id: getPdsAccessAuditEvents
+      required_scopes:
+      - pds:audit
+    semantic_overlay:
+      application_operation_id: pds-list-access-audit-events
+      application_surface: pds
+      workflow_label: pds.list_access_audit_events
+      rust_workflow_kind: PdsWorkflowKind::ListAccessAuditEvents
+      pds_resource_family: access
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/access-audit-events
+      operation_id: getPdsAccessAuditEvents
+      required_scopes:
+      - pds:audit
+      application_operation_id: pds-list-access-audit-events
+      application_surface: pds
+      workflow_label: pds.list_access_audit_events
+      rust_workflow_kind: PdsWorkflowKind::ListAccessAuditEvents
+      pds_resource_family: access
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsAccessCheck
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/access-checks
+      operation_id: postPdsAccessCheck
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-evaluate-access-check
+      application_surface: pds
+      workflow_label: pds.evaluate_access_check
+      rust_workflow_kind: PdsWorkflowKind::EvaluateAccessCheck
+      pds_resource_family: access
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/access-checks
+      operation_id: postPdsAccessCheck
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-evaluate-access-check
+      application_surface: pds
+      workflow_label: pds.evaluate_access_check
+      rust_workflow_kind: PdsWorkflowKind::EvaluateAccessCheck
+      pds_resource_family: access
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsConsentGrants
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/consent-grants
+      operation_id: getPdsConsentGrants
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-consent-grants
+      application_surface: pds
+      workflow_label: pds.list_consent_grants
+      rust_workflow_kind: PdsWorkflowKind::ListConsentGrants
+      pds_resource_family: consent
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/consent-grants
+      operation_id: getPdsConsentGrants
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-consent-grants
+      application_surface: pds
+      workflow_label: pds.list_consent_grants
+      rust_workflow_kind: PdsWorkflowKind::ListConsentGrants
+      pds_resource_family: consent
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsConsentGrant
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/consent-grants
+      operation_id: postPdsConsentGrant
+      required_scopes:
+      - pds:delegate
+    semantic_overlay:
+      application_operation_id: pds-register-consent-grant
+      application_surface: pds
+      workflow_label: pds.register_consent_grant
+      rust_workflow_kind: PdsWorkflowKind::RegisterConsentGrant
+      pds_resource_family: consent
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/consent-grants
+      operation_id: postPdsConsentGrant
+      required_scopes:
+      - pds:delegate
+      application_operation_id: pds-register-consent-grant
+      application_surface: pds
+      workflow_label: pds.register_consent_grant
+      rust_workflow_kind: PdsWorkflowKind::RegisterConsentGrant
+      pds_resource_family: consent
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsConsentRevocation
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/consent-revocations
+      operation_id: postPdsConsentRevocation
+      required_scopes:
+      - pds:revoke
+    semantic_overlay:
+      application_operation_id: pds-revoke-consent-grant
+      application_surface: pds
+      workflow_label: pds.revoke_consent_grant
+      rust_workflow_kind: PdsWorkflowKind::RevokeConsentGrant
+      pds_resource_family: consent
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/consent-revocations
+      operation_id: postPdsConsentRevocation
+      required_scopes:
+      - pds:revoke
+      application_operation_id: pds-revoke-consent-grant
+      application_surface: pds
+      workflow_label: pds.revoke_consent_grant
+      rust_workflow_kind: PdsWorkflowKind::RevokeConsentGrant
+      pds_resource_family: consent
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsDataPortabilityExports
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/data-portability-exports
+      operation_id: getPdsDataPortabilityExports
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-export-portability
+      application_surface: pds
+      workflow_label: pds.export_portability
+      rust_workflow_kind: PdsWorkflowKind::ExportPortability
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/data-portability-exports
+      operation_id: getPdsDataPortabilityExports
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-export-portability
+      application_surface: pds
+      workflow_label: pds.export_portability
+      rust_workflow_kind: PdsWorkflowKind::ExportPortability
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsDataProductRead
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/data-product-reads
+      operation_id: postPdsDataProductRead
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-read-data-product
+      application_surface: pds
+      workflow_label: pds.read_data_product
+      rust_workflow_kind: PdsWorkflowKind::ReadDataProduct
+      pds_resource_family: data-products
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/data-product-reads
+      operation_id: postPdsDataProductRead
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-read-data-product
+      application_surface: pds
+      workflow_label: pds.read_data_product
+      rust_workflow_kind: PdsWorkflowKind::ReadDataProduct
+      pds_resource_family: data-products
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsDataProducts
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/data-products
+      operation_id: getPdsDataProducts
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-data-products
+      application_surface: pds
+      workflow_label: pds.list_data_products
+      rust_workflow_kind: PdsWorkflowKind::ListDataProducts
+      pds_resource_family: data-products
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/data-products
+      operation_id: getPdsDataProducts
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-data-products
+      application_surface: pds
+      workflow_label: pds.list_data_products
+      rust_workflow_kind: PdsWorkflowKind::ListDataProducts
+      pds_resource_family: data-products
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsDataProduct
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/data-products
+      operation_id: postPdsDataProduct
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-data-product
+      application_surface: pds
+      workflow_label: pds.register_data_product
+      rust_workflow_kind: PdsWorkflowKind::RegisterDataProduct
+      pds_resource_family: data-products
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/data-products
+      operation_id: postPdsDataProduct
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-data-product
+      application_surface: pds
+      workflow_label: pds.register_data_product
+      rust_workflow_kind: PdsWorkflowKind::RegisterDataProduct
+      pds_resource_family: data-products
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsGovernanceProfiles
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/governance-profiles
+      operation_id: getPdsGovernanceProfiles
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-governance-profiles
+      application_surface: pds
+      workflow_label: pds.list_governance_profiles
+      rust_workflow_kind: PdsWorkflowKind::ListGovernanceProfiles
+      pds_resource_family: governance
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/governance-profiles
+      operation_id: getPdsGovernanceProfiles
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-governance-profiles
+      application_surface: pds
+      workflow_label: pds.list_governance_profiles
+      rust_workflow_kind: PdsWorkflowKind::ListGovernanceProfiles
+      pds_resource_family: governance
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsGovernanceProfile
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/governance-profiles
+      operation_id: postPdsGovernanceProfile
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-governance-profile
+      application_surface: pds
+      workflow_label: pds.register_governance_profile
+      rust_workflow_kind: PdsWorkflowKind::RegisterGovernanceProfile
+      pds_resource_family: governance
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/governance-profiles
+      operation_id: postPdsGovernanceProfile
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-governance-profile
+      application_surface: pds
+      workflow_label: pds.register_governance_profile
+      rust_workflow_kind: PdsWorkflowKind::RegisterGovernanceProfile
+      pds_resource_family: governance
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsLifecycleCases
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/lifecycle-cases
+      operation_id: getPdsLifecycleCases
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-lifecycle-cases
+      application_surface: pds
+      workflow_label: pds.list_lifecycle_cases
+      rust_workflow_kind: PdsWorkflowKind::ListLifecycleCases
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/lifecycle-cases
+      operation_id: getPdsLifecycleCases
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-lifecycle-cases
+      application_surface: pds
+      workflow_label: pds.list_lifecycle_cases
+      rust_workflow_kind: PdsWorkflowKind::ListLifecycleCases
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsLifecycleCase
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/lifecycle-cases
+      operation_id: postPdsLifecycleCase
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-lifecycle-case
+      application_surface: pds
+      workflow_label: pds.register_lifecycle_case
+      rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleCase
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/lifecycle-cases
+      operation_id: postPdsLifecycleCase
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-lifecycle-case
+      application_surface: pds
+      workflow_label: pds.register_lifecycle_case
+      rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleCase
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsLifecycleEvents
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/lifecycle-events
+      operation_id: getPdsLifecycleEvents
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-lifecycle-events
+      application_surface: pds
+      workflow_label: pds.list_lifecycle_events
+      rust_workflow_kind: PdsWorkflowKind::ListLifecycleEvents
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/lifecycle-events
+      operation_id: getPdsLifecycleEvents
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-lifecycle-events
+      application_surface: pds
+      workflow_label: pds.list_lifecycle_events
+      rust_workflow_kind: PdsWorkflowKind::ListLifecycleEvents
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsLifecycleEvent
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/lifecycle-events
+      operation_id: postPdsLifecycleEvent
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-lifecycle-event
+      application_surface: pds
+      workflow_label: pds.register_lifecycle_event
+      rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleEvent
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/lifecycle-events
+      operation_id: postPdsLifecycleEvent
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-lifecycle-event
+      application_surface: pds
+      workflow_label: pds.register_lifecycle_event
+      rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleEvent
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsMetadataExports
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/metadata-exports
+      operation_id: getPdsMetadataExports
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-export-metadata
+      application_surface: pds
+      workflow_label: pds.export_metadata
+      rust_workflow_kind: PdsWorkflowKind::ExportMetadata
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/metadata-exports
+      operation_id: getPdsMetadataExports
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-export-metadata
+      application_surface: pds
+      workflow_label: pds.export_metadata
+      rust_workflow_kind: PdsWorkflowKind::ExportMetadata
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsProviderBindings
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/provider-bindings
+      operation_id: getPdsProviderBindings
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-provider-bindings
+      application_surface: pds
+      workflow_label: pds.list_provider_bindings
+      rust_workflow_kind: PdsWorkflowKind::ListProviderBindings
+      pds_resource_family: provider-bindings
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/provider-bindings
+      operation_id: getPdsProviderBindings
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-provider-bindings
+      application_surface: pds
+      workflow_label: pds.list_provider_bindings
+      rust_workflow_kind: PdsWorkflowKind::ListProviderBindings
+      pds_resource_family: provider-bindings
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsProviderBinding
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/provider-bindings
+      operation_id: postPdsProviderBinding
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-provider-binding
+      application_surface: pds
+      workflow_label: pds.register_provider_binding
+      rust_workflow_kind: PdsWorkflowKind::RegisterProviderBinding
+      pds_resource_family: provider-bindings
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/provider-bindings
+      operation_id: postPdsProviderBinding
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-provider-binding
+      application_surface: pds
+      workflow_label: pds.register_provider_binding
+      rust_workflow_kind: PdsWorkflowKind::RegisterProviderBinding
+      pds_resource_family: provider-bindings
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsRecordInventory
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/record-inventory
+      operation_id: getPdsRecordInventory
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-read-record-inventory
+      application_surface: pds
+      workflow_label: pds.read_record_inventory
+      rust_workflow_kind: PdsWorkflowKind::ReadRecordInventory
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/record-inventory
+      operation_id: getPdsRecordInventory
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-read-record-inventory
+      application_surface: pds
+      workflow_label: pds.read_record_inventory
+      rust_workflow_kind: PdsWorkflowKind::ReadRecordInventory
+      pds_resource_family: inventory-export
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: getPdsRetentionPolicies
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/retention-policies
+      operation_id: getPdsRetentionPolicies
+      required_scopes:
+      - pds:read
+    semantic_overlay:
+      application_operation_id: pds-list-retention-policies
+      application_surface: pds
+      workflow_label: pds.list_retention_policies
+      rust_workflow_kind: PdsWorkflowKind::ListRetentionPolicies
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: get
+      path: /pds/retention-policies
+      operation_id: getPdsRetentionPolicies
+      required_scopes:
+      - pds:read
+      application_operation_id: pds-list-retention-policies
+      application_surface: pds
+      workflow_label: pds.list_retention_policies
+      rust_workflow_kind: PdsWorkflowKind::ListRetentionPolicies
+      pds_resource_family: lifecycle
+      pds_route_context: pds
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      operation_id: postPdsRetentionPolicy
+    http_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/retention-policies
+      operation_id: postPdsRetentionPolicy
+      required_scopes:
+      - pds:write
+    semantic_overlay:
+      application_operation_id: pds-register-retention-policy
+      application_surface: pds
+      workflow_label: pds.register_retention_policy
+      rust_workflow_kind: PdsWorkflowKind::RegisterRetentionPolicy
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-pds.yaml
+      method: post
+      path: /pds/retention-policies
+      operation_id: postPdsRetentionPolicy
+      required_scopes:
+      - pds:write
+      application_operation_id: pds-register-retention-policy
+      application_surface: pds
+      workflow_label: pds.register_retention_policy
+      rust_workflow_kind: PdsWorkflowKind::RegisterRetentionPolicy
+      pds_resource_family: lifecycle
+      pds_route_context: pds-application
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialAdditiveAggregate
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-aggregates
+      operation_id: postConfidentialAdditiveAggregate
+      required_scopes:
+      - confidential:compute
+    semantic_overlay:
+      application_operation_id: confidential-release-signed-additive-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_signed_additive_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-aggregates
+      operation_id: postConfidentialAdditiveAggregate
+      required_scopes:
+      - confidential:compute
+      application_operation_id: confidential-release-signed-additive-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_signed_additive_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialAdditiveShareReplayRecords
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-replay-records
+      operation_id: getConfidentialAdditiveShareReplayRecords
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-additive-replay-records
+      application_surface: confidential
+      workflow_label: confidential.list_replay_records
+      rust_workflow_kind: ConfidentialWorkflowKind::ListReplayRecords
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-replay-records
+      operation_id: getConfidentialAdditiveShareReplayRecords
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-additive-replay-records
+      application_surface: confidential
+      workflow_label: confidential.list_replay_records
+      rust_workflow_kind: ConfidentialWorkflowKind::ListReplayRecords
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialShareSigningKeyRevocation
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-key-revocations
+      operation_id: postConfidentialShareSigningKeyRevocation
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-revoke-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.revoke_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RevokeShareSigningKey
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-key-revocations
+      operation_id: postConfidentialShareSigningKeyRevocation
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-revoke-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.revoke_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RevokeShareSigningKey
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialShareSigningKeyRotation
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-key-rotations
+      operation_id: postConfidentialShareSigningKeyRotation
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-rotate-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.rotate_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RotateShareSigningKey
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-key-rotations
+      operation_id: postConfidentialShareSigningKeyRotation
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-rotate-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.rotate_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RotateShareSigningKey
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialShareSigningKeys
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-signing-keys
+      operation_id: getConfidentialShareSigningKeys
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-share-signing-keys
+      application_surface: confidential
+      workflow_label: confidential.list_share_signing_keys
+      rust_workflow_kind: ConfidentialWorkflowKind::ListShareSigningKeys
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-signing-keys
+      operation_id: getConfidentialShareSigningKeys
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-share-signing-keys
+      application_surface: confidential
+      workflow_label: confidential.list_share_signing_keys
+      rust_workflow_kind: ConfidentialWorkflowKind::ListShareSigningKeys
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialShareSigningKey
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-keys
+      operation_id: postConfidentialShareSigningKey
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-register-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.register_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterShareSigningKey
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-signing-keys
+      operation_id: postConfidentialShareSigningKey
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-register-share-signing-key
+      application_surface: confidential
+      workflow_label: confidential.register_share_signing_key
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterShareSigningKey
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialAdditiveShareSubmissions
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-submissions
+      operation_id: getConfidentialAdditiveShareSubmissions
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-submitted-shares
+      application_surface: confidential
+      workflow_label: confidential.list_submitted_shares
+      rust_workflow_kind: ConfidentialWorkflowKind::ListSubmittedShares
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/additive-share-submissions
+      operation_id: getConfidentialAdditiveShareSubmissions
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-submitted-shares
+      application_surface: confidential
+      workflow_label: confidential.list_submitted_shares
+      rust_workflow_kind: ConfidentialWorkflowKind::ListSubmittedShares
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialAdditiveShareSubmission
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-submissions
+      operation_id: postConfidentialAdditiveShareSubmission
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-submit-additive-share
+      application_surface: confidential
+      workflow_label: confidential.submit_additive_share
+      rust_workflow_kind: ConfidentialWorkflowKind::SubmitAdditiveShare
+      workflow_family: additive
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/additive-share-submissions
+      operation_id: postConfidentialAdditiveShareSubmission
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-submit-additive-share
+      application_surface: confidential
+      workflow_label: confidential.submit_additive_share
+      rust_workflow_kind: ConfidentialWorkflowKind::SubmitAdditiveShare
+      workflow_family: additive
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-budget-spends
+      operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-spend-differential-privacy-budget
+      application_surface: confidential
+      workflow_label: confidential.spend_differential_privacy_budget
+      rust_workflow_kind: ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-budget-spends
+      operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-spend-differential-privacy-budget
+      application_surface: confidential
+      workflow_label: confidential.spend_differential_privacy_budget
+      rust_workflow_kind: ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialDifferentialPrivacyBudgets
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-budgets
+      operation_id: getConfidentialDifferentialPrivacyBudgets
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-differential-privacy-budgets
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_budgets
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-budgets
+      operation_id: getConfidentialDifferentialPrivacyBudgets
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-differential-privacy-budgets
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_budgets
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialDifferentialPrivacyBudget
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-budgets
+      operation_id: postConfidentialDifferentialPrivacyBudget
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-register-differential-privacy-budget
+      application_surface: confidential
+      workflow_label: confidential.register_differential_privacy_budget
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-budgets
+      operation_id: postConfidentialDifferentialPrivacyBudget
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-register-differential-privacy-budget
+      application_surface: confidential
+      workflow_label: confidential.register_differential_privacy_budget
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-composition-summaries
+      operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-differential-privacy-composition-summaries
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_composition_summaries
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-composition-summaries
+      operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-differential-privacy-composition-summaries
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_composition_summaries
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialDifferentialPrivacyReleases
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-releases
+      operation_id: getConfidentialDifferentialPrivacyReleases
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-differential-privacy-releases
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_releases
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyReleases
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/differential-privacy-releases
+      operation_id: getConfidentialDifferentialPrivacyReleases
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-differential-privacy-releases
+      application_surface: confidential
+      workflow_label: confidential.list_differential_privacy_releases
+      rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyReleases
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialDifferentialPrivacyRelease
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-releases
+      operation_id: postConfidentialDifferentialPrivacyRelease
+      required_scopes:
+      - confidential:release
+    semantic_overlay:
+      application_operation_id: confidential-release-differential-privacy-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_differential_privacy_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-releases
+      operation_id: postConfidentialDifferentialPrivacyRelease
+      required_scopes:
+      - confidential:release
+      application_operation_id: confidential-release-differential-privacy-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_differential_privacy_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialDifferentialPrivacySampledRelease
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-sampled-releases
+      operation_id: postConfidentialDifferentialPrivacySampledRelease
+      required_scopes:
+      - confidential:release
+    semantic_overlay:
+      application_operation_id: confidential-release-sampled-differential-privacy-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_sampled_differential_privacy_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate
+      workflow_family: differential_privacy
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/differential-privacy-sampled-releases
+      operation_id: postConfidentialDifferentialPrivacySampledRelease
+      required_scopes:
+      - confidential:release
+      application_operation_id: confidential-release-sampled-differential-privacy-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_sampled_differential_privacy_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate
+      workflow_family: differential_privacy
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialJobAuditEvents
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/job-audit-events
+      operation_id: getConfidentialJobAuditEvents
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-job-audit-events
+      application_surface: confidential
+      workflow_label: confidential.list_job_audit_events
+      rust_workflow_kind: ConfidentialWorkflowKind::ListJobAuditEvents
+      workflow_family: job
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/job-audit-events
+      operation_id: getConfidentialJobAuditEvents
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-job-audit-events
+      application_surface: confidential
+      workflow_label: confidential.list_job_audit_events
+      rust_workflow_kind: ConfidentialWorkflowKind::ListJobAuditEvents
+      workflow_family: job
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialJobTransition
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/job-transitions
+      operation_id: postConfidentialJobTransition
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-transition-job
+      application_surface: confidential
+      workflow_label: confidential.transition_job
+      rust_workflow_kind: ConfidentialWorkflowKind::TransitionJob
+      workflow_family: job
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/job-transitions
+      operation_id: postConfidentialJobTransition
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-transition-job
+      application_surface: confidential
+      workflow_label: confidential.transition_job
+      rust_workflow_kind: ConfidentialWorkflowKind::TransitionJob
+      workflow_family: job
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialJobs
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/jobs
+      operation_id: getConfidentialJobs
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-jobs
+      application_surface: confidential
+      workflow_label: confidential.list_jobs
+      rust_workflow_kind: ConfidentialWorkflowKind::ListJobs
+      workflow_family: job
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/jobs
+      operation_id: getConfidentialJobs
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-jobs
+      application_surface: confidential
+      workflow_label: confidential.list_jobs
+      rust_workflow_kind: ConfidentialWorkflowKind::ListJobs
+      workflow_family: job
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialJob
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/jobs
+      operation_id: postConfidentialJob
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-register-job
+      application_surface: confidential
+      workflow_label: confidential.register_job
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterJob
+      workflow_family: job
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/jobs
+      operation_id: postConfidentialJob
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-register-job
+      application_surface: confidential
+      workflow_label: confidential.register_job
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterJob
+      workflow_family: job
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialParticipantAuditEvents
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/participant-audit-events
+      operation_id: getConfidentialParticipantAuditEvents
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-participant-audit-events
+      application_surface: confidential
+      workflow_label: confidential.list_participant_audit_events
+      rust_workflow_kind: ConfidentialWorkflowKind::ListParticipantAuditEvents
+      workflow_family: participant
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/participant-audit-events
+      operation_id: getConfidentialParticipantAuditEvents
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-participant-audit-events
+      application_surface: confidential
+      workflow_label: confidential.list_participant_audit_events
+      rust_workflow_kind: ConfidentialWorkflowKind::ListParticipantAuditEvents
+      workflow_family: participant
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialParticipantTransition
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/participant-transitions
+      operation_id: postConfidentialParticipantTransition
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-transition-participant
+      application_surface: confidential
+      workflow_label: confidential.transition_participant
+      rust_workflow_kind: ConfidentialWorkflowKind::TransitionParticipant
+      workflow_family: participant
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/participant-transitions
+      operation_id: postConfidentialParticipantTransition
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-transition-participant
+      application_surface: confidential
+      workflow_label: confidential.transition_participant
+      rust_workflow_kind: ConfidentialWorkflowKind::TransitionParticipant
+      workflow_family: participant
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialParticipants
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/participants
+      operation_id: getConfidentialParticipants
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-participants
+      application_surface: confidential
+      workflow_label: confidential.list_participants
+      rust_workflow_kind: ConfidentialWorkflowKind::ListParticipants
+      workflow_family: participant
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/participants
+      operation_id: getConfidentialParticipants
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-participants
+      application_surface: confidential
+      workflow_label: confidential.list_participants
+      rust_workflow_kind: ConfidentialWorkflowKind::ListParticipants
+      workflow_family: participant
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialParticipant
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/participants
+      operation_id: postConfidentialParticipant
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-register-participant
+      application_surface: confidential
+      workflow_label: confidential.register_participant
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterParticipant
+      workflow_family: participant
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/participants
+      operation_id: postConfidentialParticipant
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-register-participant
+      application_surface: confidential
+      workflow_label: confidential.register_participant
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterParticipant
+      workflow_family: participant
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialShamirThresholdReconstructions
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/shamir-threshold-reconstructions
+      operation_id: getConfidentialShamirThresholdReconstructions
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-shamir-threshold-reconstructions
+      application_surface: confidential
+      workflow_label: confidential.list_shamir_threshold_reconstructions
+      rust_workflow_kind: ConfidentialWorkflowKind::ListShamirThresholdReconstructions
+      workflow_family: shamir
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/shamir-threshold-reconstructions
+      operation_id: getConfidentialShamirThresholdReconstructions
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-shamir-threshold-reconstructions
+      application_surface: confidential
+      workflow_label: confidential.list_shamir_threshold_reconstructions
+      rust_workflow_kind: ConfidentialWorkflowKind::ListShamirThresholdReconstructions
+      workflow_family: shamir
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialShamirThresholdReconstruction
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/shamir-threshold-reconstructions
+      operation_id: postConfidentialShamirThresholdReconstruction
+      required_scopes:
+      - confidential:compute
+    semantic_overlay:
+      application_operation_id: confidential-reconstruct-shamir-threshold-secret
+      application_surface: confidential
+      workflow_label: confidential.reconstruct_shamir_threshold_secret
+      rust_workflow_kind: ConfidentialWorkflowKind::ReconstructShamirThresholdSecret
+      workflow_family: shamir
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/shamir-threshold-reconstructions
+      operation_id: postConfidentialShamirThresholdReconstruction
+      required_scopes:
+      - confidential:compute
+      application_operation_id: confidential-reconstruct-shamir-threshold-secret
+      application_surface: confidential
+      workflow_label: confidential.reconstruct_shamir_threshold_secret
+      rust_workflow_kind: ConfidentialWorkflowKind::ReconstructShamirThresholdSecret
+      workflow_family: shamir
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialThresholdReleaseApproval
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-release-approvals
+      operation_id: postConfidentialThresholdReleaseApproval
+      required_scopes:
+      - confidential:release
+    semantic_overlay:
+      application_operation_id: confidential-approve-threshold-release
+      application_surface: confidential
+      workflow_label: confidential.approve_threshold_release
+      rust_workflow_kind: ConfidentialWorkflowKind::ApproveThresholdRelease
+      workflow_family: threshold
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-release-approvals
+      operation_id: postConfidentialThresholdReleaseApproval
+      required_scopes:
+      - confidential:release
+      application_operation_id: confidential-approve-threshold-release
+      application_surface: confidential
+      workflow_label: confidential.approve_threshold_release
+      rust_workflow_kind: ConfidentialWorkflowKind::ApproveThresholdRelease
+      workflow_family: threshold
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: getConfidentialThresholdReleaseRequests
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/threshold-release-requests
+      operation_id: getConfidentialThresholdReleaseRequests
+      required_scopes:
+      - confidential:read
+    semantic_overlay:
+      application_operation_id: confidential-list-threshold-release-requests
+      application_surface: confidential
+      workflow_label: confidential.list_threshold_release_requests
+      rust_workflow_kind: ConfidentialWorkflowKind::ListThresholdReleaseRequests
+      workflow_family: threshold
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: get
+      path: /confidential/threshold-release-requests
+      operation_id: getConfidentialThresholdReleaseRequests
+      required_scopes:
+      - confidential:read
+      application_operation_id: confidential-list-threshold-release-requests
+      application_surface: confidential
+      workflow_label: confidential.list_threshold_release_requests
+      rust_workflow_kind: ConfidentialWorkflowKind::ListThresholdReleaseRequests
+      workflow_family: threshold
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialThresholdReleaseRequest
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-release-requests
+      operation_id: postConfidentialThresholdReleaseRequest
+      required_scopes:
+      - confidential:write
+    semantic_overlay:
+      application_operation_id: confidential-register-threshold-release-request
+      application_surface: confidential
+      workflow_label: confidential.register_threshold_release_request
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterThresholdReleaseRequest
+      workflow_family: threshold
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-release-requests
+      operation_id: postConfidentialThresholdReleaseRequest
+      required_scopes:
+      - confidential:write
+      application_operation_id: confidential-register-threshold-release-request
+      application_surface: confidential
+      workflow_label: confidential.register_threshold_release_request
+      rust_workflow_kind: ConfidentialWorkflowKind::RegisterThresholdReleaseRequest
+      workflow_family: threshold
+  - operation_key:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      operation_id: postConfidentialThresholdRelease
+    http_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-releases
+      operation_id: postConfidentialThresholdRelease
+      required_scopes:
+      - confidential:release
+    semantic_overlay:
+      application_operation_id: confidential-release-threshold-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_threshold_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseThresholdAggregate
+      workflow_family: threshold
+    overlay_present: true
+    surface_operation:
+      openapi_contract: spec/openapi/kiva-confidential.yaml
+      method: post
+      path: /confidential/threshold-releases
+      operation_id: postConfidentialThresholdRelease
+      required_scopes:
+      - confidential:release
+      application_operation_id: confidential-release-threshold-aggregate
+      application_surface: confidential
+      workflow_label: confidential.release_threshold_aggregate
+      rust_workflow_kind: ConfidentialWorkflowKind::ReleaseThresholdAggregate
+      workflow_family: threshold
+route_coverage_projection:
+  description: 'Route coverage projection generated from the surface catalog. It verifies that every OpenAPI operation has a matching Axum route registration and records whether the path is bound by literal route text or a shared path constant.
+
+    '
+  targets:
+  - openapi_contract: spec/openapi/kiva-analytics.yaml
+    route_file: crates/kiva-server/src/surfaces/analytics/routes.rs
+    path_binding: path-constant
+    path_constants_file: crates/kiva-server/src/core/paths.rs
+  - openapi_contract: spec/openapi/kiva-xapi.yaml
+    route_file: crates/kiva-server/src/surfaces/xapi/routes.rs
+    path_binding: literal
+  - openapi_contract: spec/openapi/kiva-pds.yaml
+    route_file: crates/kiva-server/src/surfaces/pds/routes.rs
+    path_binding: path-constant
+    path_constants_file: crates/kiva-server/src/core/paths.rs
+  - openapi_contract: spec/openapi/kiva-confidential.yaml
+    route_file: crates/kiva-server/src/surfaces/confidential/routes.rs
+    path_binding: path-constant
+    path_constants_file: crates/kiva-server/src/core/paths.rs
+application_operation_projection:
+  description: 'Drift-checked catalog linking application workflow labels, Rust workflow variants, OpenAPI operationIds, OAuth/OIDC resource-server scopes, and the generated Rust operation evidence projection.
+
+    '
+  rust_registry_path: crates/kiva-application/src/operation_catalog/generated/registry.rs
+  rust_operation_ids_path: crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+  rust_workflow_metadata_path: crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+  source_paths:
+  - crates/kiva-application/src/analytics.rs
+  - crates/kiva-application/src/operation_catalog.rs
+  - crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+  - crates/kiva-application/src/operation_catalog/generated/registry.rs
+  - crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+  - crates/kiva-application/src/pds/workflow.rs
+  - crates/kiva-application/src/pds/workflow/commands/consent.rs
+  - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+  - crates/kiva-application/src/pds/workflow/commands/governance.rs
+  - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+  - crates/kiva-application/src/confidential/workflow_kind.rs
+  - crates/kiva-application/src/confidential/additive.rs
+  - crates/kiva-application/src/confidential/differential_privacy.rs
+  - crates/kiva-application/src/confidential/jobs.rs
+  - crates/kiva-application/src/confidential/participants.rs
+  - crates/kiva-application/src/confidential/shamir.rs
+  - crates/kiva-application/src/confidential/threshold.rs
+pds_resource_family_projection:
+  description: 'Reviewable ownership ledger for PDS resource families. Each operation keeps the human-owned family and route-context decision here; OpenAPI operationId, request/response schemas, Rust path constants, and handlers are derived by the validator.
+
+    '
+  resource_family_profile_model:
+    root_type: PdsResourceFamilyProfile
+    generated_ledger: generated/architecture/pds-resource-families.yaml
+    source_family_ledger: spec/architecture/pds-resource-families.source.yaml
+    source_policy: spec/architecture/surface-implementation.policy.yaml#/pds_resource_family_projection
+    required_roles:
+    - handler
+    - repository
+    - memory_storage
+    - postgres_storage
+    - wire_projection
+    - openapi_projection
+    rule: 'Each PDS resource family is reviewed as one profile containing operation ownership, route context, implementation files, and the standard server role matrix.
+
+      '
+  source_contract: spec/openapi/kiva-pds.yaml
+  http_operation_catalog: generated/http-operation-catalog.evidence.json
+  operation_catalog: generated/architecture/operation-catalog.yaml
+  route_file: crates/kiva-server/src/surfaces/pds/routes.rs
+  path_constants_file: crates/kiva-server/src/core/paths.rs
+  derived_fields:
+  - operation_id
+  - path_constant
+  - handler
+  - request_schemas
+  - response_schemas
+  application_operation_catalog_policy:
+    source_of_truth: surface-catalog-for-pds-operation-lifecycle
+    http_operation_catalog_source: generated-http-operation-catalog-from-openapi
+    pds_operation_lifecycle_coverage: operation-catalog
+    catalog_required_route_contexts:
+    - pds
+    - pds-application
+    catalog_required_methods:
+    - get
+    - post
+    operation_catalog_owns:
+    - workflow_label
+    - rust_workflow_kind
+    - operation_id
+    - required_scopes
+    resource_family_ledger_owns:
+    - resource_family
+    - route_context
+    - implementation_files
+  server_resource_family_boilerplate_policy:
+    family_role_matrix:
+      consent: &id001
+      - handler
+      - repository
+      - memory_storage
+      - postgres_storage
+      - wire_projection
+      - openapi_projection
+      data-products: *id001
+      provider-bindings: *id001
+      inventory-export: *id001
+      access: *id001
+      lifecycle: *id001
+      governance: *id001
+    role_prefixes:
+      handler: crates/kiva-server/src/surfaces/pds/handlers/
+      repository: crates/kiva-server/src/surfaces/pds/repository/
+      memory_storage: crates/kiva-server/src/surfaces/pds/storage/memory/
+      postgres_storage: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      wire_projection: crates/kiva-server/src/surfaces/pds/wire/
+      openapi_projection: crates/kiva-server/src/surfaces/pds/wire/openapi/
+surface_family_projection:
+  description: 'Cross-surface review ledger for public HTTP resource families. It projects xAPI, PDS, and confidential-computation operations from the canonical SurfaceOperation catalog into exactly one family owner per route.
+
+    '
+  source_contracts:
+  - spec/openapi/kiva-analytics.yaml
+  - spec/openapi/kiva-xapi.yaml
+  - spec/openapi/kiva-pds.yaml
+  - spec/openapi/kiva-confidential.yaml
+  source_family_ledger: spec/architecture/surface-families.source.yaml
+  pds_family_source: spec/architecture/pds-resource-families.source.yaml
+  assignment_policy:
+    route_ownership: exactly-one-surface-family
+    pds_assignment: source_pds_resource_family-must-match-pds_resource_family
+    prefix_assignment: longest-path-prefix-wins
+    empty_family_policy: reject-empty-family
+  derived_fields:
+  - operation_id
+  - required_scopes
+  - application_operation_id
+  - pds_resource_family
+  - pds_route_context
+surface_family_implementation_anchor_policy:
+  role: review-anchors-not-assignment-inputs
+  assignment_fields:
+  - source_pds_resource_family
+  - path_prefixes
+  review_anchor_fields:
+  - implementation_files
+  description: 'Surface-family ownership is assigned only by PDS resource-family inheritance or OpenAPI path prefixes. implementation_files are review anchors carried into generated ledgers; they do not participate in route classification.
+
+    '
+pds_resource_families:
+- id: consent
+  description: Consent and delegation grant lifecycle.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/consent.rs
+  - crates/kiva-pds/src/pds/events/consent.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/consent.rs
+  - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+- id: data-products
+  description: Approved aggregate data-product metadata and policy-gated reads.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/data_products.rs
+  - crates/kiva-pds/src/pds/events/data_products.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-pds/src/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+- id: provider-bindings
+  description: Metadata-only secret/confidential-compute provider bindings.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+  - db/migrations/20260619280000_pds_provider_bindings.sql
+- id: inventory-export
+  description: Subject-visible inventory, metadata export, and governed portability projections.
+  implementation_files:
+  - crates/kiva-application/src/pds/model/snapshot.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/portability.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+  - docs/architecture/learner-data-portability-export.md
+- id: access
+  description: Access-decision evaluation and audit-event projections.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+  - crates/kiva-server/src/surfaces/pds/model/policy_adapter.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/access.rs
+  - crates/kiva-server/src/surfaces/pds/repository/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+- id: lifecycle
+  description: Lifecycle events, retention policies, and workflow cases.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/lifecycle.rs
+  - crates/kiva-pds/src/pds/events/lifecycle.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/events.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/retention.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+- id: governance
+  description: Public-sector deployment governance profiles.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/governance.rs
+  - crates/kiva-pds/src/pds/events/governance.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/governance.rs
+  - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs
+surface_families:
+- id: analytics.aggregate-products
+  surface: analytics
+  openapi_contract: spec/openapi/kiva-analytics.yaml
+  description: Governed aggregate product metadata and admitted release payloads.
+  path_prefixes:
+  - /analytics/products
+  implementation_files:
+  - crates/kiva-application/src/analytics.rs
+  - crates/kiva-server/src/app/analytics.rs
+  - crates/kiva-server/src/surfaces/analytics/routes.rs
+  - crates/kiva-server/src/surfaces/analytics/handlers.rs
+  - crates/kiva-server/src/surfaces/analytics/wire.rs
+- id: xapi.about
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI About discovery resource.
+  path_prefixes:
+  - /about
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/about.rs
+  - crates/kiva-server/src/surfaces/xapi/response.rs
+- id: xapi.statements
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Statement storage and query resource.
+  path_prefixes:
+  - /statements
+  implementation_files:
+  - crates/kiva-xapi/src/xapi/admission.rs
+  - crates/kiva-xapi/src/xapi/filtering.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+- id: xapi.state-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity state document resource.
+  path_prefixes:
+  - /activities/state
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.activity-profile-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity profile document resource.
+  path_prefixes:
+  - /activities/profile
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.activities
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity lookup resource.
+  path_prefixes:
+  - /activities
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+  - crates/kiva-server/src/surfaces/xapi/request/query.rs
+- id: xapi.agent-profile-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Agent profile document resource.
+  path_prefixes:
+  - /agents/profile
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.agents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Agent/person lookup resource.
+  path_prefixes:
+  - /agents
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+  - crates/kiva-server/src/surfaces/xapi/request/person.rs
+- id: pds.access
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS access-decision and access-audit resources.
+  source_pds_resource_family: access
+- id: pds.consent
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS consent and revocation resources.
+  source_pds_resource_family: consent
+- id: pds.data-products
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS approved data-product resources.
+  source_pds_resource_family: data-products
+- id: pds.governance
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS public-sector governance profile resources.
+  source_pds_resource_family: governance
+- id: pds.inventory-export
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS record-inventory and metadata-export resources.
+  source_pds_resource_family: inventory-export
+- id: pds.lifecycle
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS lifecycle event, retention, and case resources.
+  source_pds_resource_family: lifecycle
+- id: pds.provider-bindings
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS secret/confidential-compute provider-binding resources.
+  source_pds_resource_family: provider-bindings
+- id: confidential.additive
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Additive secure-aggregation and share-signing resources.
+  path_prefixes:
+  - /confidential/additive-
+  - /confidential/share-signing-
+  implementation_files:
+  - crates/kiva-application/src/confidential/additive.rs
+  - crates/kiva-server/src/app/confidential/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/additive.rs
+- id: confidential.threshold-release
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Threshold release request, approval, and release resources.
+  path_prefixes:
+  - /confidential/threshold-
+  implementation_files:
+  - crates/kiva-application/src/confidential/threshold.rs
+  - crates/kiva-server/src/app/confidential/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/threshold.rs
+- id: confidential.shamir
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Shamir threshold reconstruction resources.
+  path_prefixes:
+  - /confidential/shamir-
+  implementation_files:
+  - crates/kiva-application/src/confidential/shamir.rs
+  - crates/kiva-server/src/app/confidential/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/shamir.rs
+- id: confidential.differential-privacy
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Differential privacy budget, composition, and release resources.
+  path_prefixes:
+  - /confidential/differential-privacy-
+  implementation_files:
+  - crates/kiva-application/src/confidential/differential_privacy.rs
+  - crates/kiva-server/src/app/confidential/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/differential_privacy.rs
+- id: confidential.jobs
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Confidential job lifecycle resources.
+  path_prefixes:
+  - /confidential/jobs
+  - /confidential/job-
+  implementation_files:
+  - crates/kiva-application/src/confidential/jobs.rs
+  - crates/kiva-server/src/app/confidential/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/jobs.rs
+- id: confidential.participants
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Confidential participant lifecycle resources.
+  path_prefixes:
+  - /confidential/participants
+  - /confidential/participant-
+  implementation_files:
+  - crates/kiva-application/src/confidential/participants.rs
+  - crates/kiva-server/src/app/confidential/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/participants.rs
+join_policy:
+  required_http_fields:
+  - openapi_contract
+  - method
+  - path
+  - operation_id
+  - required_scopes
+  required_application_fields:
+  - application_operation_id
+  - application_surface
+  - workflow_label
+  - rust_workflow_kind
+  required_pds_fields:
+  - pds_resource_family
+  - pds_route_context
+  require_pds_family_for_contracts:
+  - spec/openapi/kiva-pds.yaml
+  require_application_operations_for_route_contexts:
+  - pds
+  - pds-application
+  scope_drift_policy: application-and-http-scopes-must-match
+projection_policy:
+  surface_operation_index_is_generated_from_this_catalog: true
+  generated_projections_are_declared_in_surface_operation_algebra: true
+entries:
+- openapi_contract: spec/openapi/kiva-analytics.yaml
+  method: get
+  path: /analytics/products
+  operation_id: getAnalyticsProducts
+  required_scopes:
+  - analytics:read
+  application_operation_id: analytics-list-products
+  application_surface: analytics
+  workflow_label: analytics.list_products
+  rust_workflow_kind: AnalyticsWorkflowKind::ListProducts
+  workflow_family: aggregate-serving
+- openapi_contract: spec/openapi/kiva-analytics.yaml
+  method: get
+  path: /analytics/products/{dataProductId}
+  operation_id: getAnalyticsProduct
+  required_scopes:
+  - analytics:read
+  application_operation_id: analytics-read-product
+  application_surface: analytics
+  workflow_label: analytics.read_product
+  rust_workflow_kind: AnalyticsWorkflowKind::ReadProduct
+  workflow_family: aggregate-serving
+- openapi_contract: spec/openapi/kiva-analytics.yaml
+  method: get
+  path: /analytics/products/{dataProductId}/aggregate
+  operation_id: getAnalyticsProductAggregate
+  required_scopes:
+  - analytics:read
+  application_operation_id: analytics-read-aggregate
+  application_surface: analytics
+  workflow_label: analytics.read_aggregate
+  rust_workflow_kind: AnalyticsWorkflowKind::ReadAggregate
+  workflow_family: aggregate-serving
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /about
+  operation_id: getAbout
+  required_scopes: []
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /about
+  operation_id: headAbout
+  required_scopes: []
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /activities
+  operation_id: getActivity
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /activities
+  operation_id: headActivity
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /activities/profile
+  operation_id: getActivityProfiles
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: put
+  path: /activities/profile
+  operation_id: putActivityProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: post
+  path: /activities/profile
+  operation_id: postActivityProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: delete
+  path: /activities/profile
+  operation_id: deleteActivityProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /activities/profile
+  operation_id: headActivityProfile
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /activities/state
+  operation_id: getStateDocuments
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: put
+  path: /activities/state
+  operation_id: putStateDocument
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: post
+  path: /activities/state
+  operation_id: postStateDocument
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: delete
+  path: /activities/state
+  operation_id: deleteStateDocuments
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /activities/state
+  operation_id: headStateDocuments
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /agents
+  operation_id: getAgentPerson
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /agents
+  operation_id: headAgentPerson
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /agents/profile
+  operation_id: getAgentProfiles
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: put
+  path: /agents/profile
+  operation_id: putAgentProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: post
+  path: /agents/profile
+  operation_id: postAgentProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: delete
+  path: /agents/profile
+  operation_id: deleteAgentProfile
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /agents/profile
+  operation_id: headAgentProfile
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: get
+  path: /statements
+  operation_id: getStatements
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: put
+  path: /statements
+  operation_id: putStatement
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: post
+  path: /statements
+  operation_id: postStatements
+  required_scopes:
+  - xapi:write
+- openapi_contract: spec/openapi/kiva-xapi.yaml
+  method: head
+  path: /statements
+  operation_id: headStatements
+  required_scopes:
+  - xapi:read
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/access-audit-events
+  operation_id: getPdsAccessAuditEvents
+  required_scopes:
+  - pds:audit
+  application_operation_id: pds-list-access-audit-events
+  application_surface: pds
+  workflow_label: pds.list_access_audit_events
+  rust_workflow_kind: PdsWorkflowKind::ListAccessAuditEvents
+  pds_resource_family: access
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/access-checks
+  operation_id: postPdsAccessCheck
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-evaluate-access-check
+  application_surface: pds
+  workflow_label: pds.evaluate_access_check
+  rust_workflow_kind: PdsWorkflowKind::EvaluateAccessCheck
+  pds_resource_family: access
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/consent-grants
+  operation_id: getPdsConsentGrants
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-consent-grants
+  application_surface: pds
+  workflow_label: pds.list_consent_grants
+  rust_workflow_kind: PdsWorkflowKind::ListConsentGrants
+  pds_resource_family: consent
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/consent-grants
+  operation_id: postPdsConsentGrant
+  required_scopes:
+  - pds:delegate
+  application_operation_id: pds-register-consent-grant
+  application_surface: pds
+  workflow_label: pds.register_consent_grant
+  rust_workflow_kind: PdsWorkflowKind::RegisterConsentGrant
+  pds_resource_family: consent
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/consent-revocations
+  operation_id: postPdsConsentRevocation
+  required_scopes:
+  - pds:revoke
+  application_operation_id: pds-revoke-consent-grant
+  application_surface: pds
+  workflow_label: pds.revoke_consent_grant
+  rust_workflow_kind: PdsWorkflowKind::RevokeConsentGrant
+  pds_resource_family: consent
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/data-portability-exports
+  operation_id: getPdsDataPortabilityExports
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-export-portability
+  application_surface: pds
+  workflow_label: pds.export_portability
+  rust_workflow_kind: PdsWorkflowKind::ExportPortability
+  pds_resource_family: inventory-export
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/data-product-reads
+  operation_id: postPdsDataProductRead
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-read-data-product
+  application_surface: pds
+  workflow_label: pds.read_data_product
+  rust_workflow_kind: PdsWorkflowKind::ReadDataProduct
+  pds_resource_family: data-products
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/data-products
+  operation_id: getPdsDataProducts
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-data-products
+  application_surface: pds
+  workflow_label: pds.list_data_products
+  rust_workflow_kind: PdsWorkflowKind::ListDataProducts
+  pds_resource_family: data-products
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/data-products
+  operation_id: postPdsDataProduct
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-data-product
+  application_surface: pds
+  workflow_label: pds.register_data_product
+  rust_workflow_kind: PdsWorkflowKind::RegisterDataProduct
+  pds_resource_family: data-products
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/governance-profiles
+  operation_id: getPdsGovernanceProfiles
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-governance-profiles
+  application_surface: pds
+  workflow_label: pds.list_governance_profiles
+  rust_workflow_kind: PdsWorkflowKind::ListGovernanceProfiles
+  pds_resource_family: governance
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/governance-profiles
+  operation_id: postPdsGovernanceProfile
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-governance-profile
+  application_surface: pds
+  workflow_label: pds.register_governance_profile
+  rust_workflow_kind: PdsWorkflowKind::RegisterGovernanceProfile
+  pds_resource_family: governance
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/lifecycle-cases
+  operation_id: getPdsLifecycleCases
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-lifecycle-cases
+  application_surface: pds
+  workflow_label: pds.list_lifecycle_cases
+  rust_workflow_kind: PdsWorkflowKind::ListLifecycleCases
+  pds_resource_family: lifecycle
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/lifecycle-cases
+  operation_id: postPdsLifecycleCase
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-lifecycle-case
+  application_surface: pds
+  workflow_label: pds.register_lifecycle_case
+  rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleCase
+  pds_resource_family: lifecycle
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/lifecycle-events
+  operation_id: getPdsLifecycleEvents
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-lifecycle-events
+  application_surface: pds
+  workflow_label: pds.list_lifecycle_events
+  rust_workflow_kind: PdsWorkflowKind::ListLifecycleEvents
+  pds_resource_family: lifecycle
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/lifecycle-events
+  operation_id: postPdsLifecycleEvent
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-lifecycle-event
+  application_surface: pds
+  workflow_label: pds.register_lifecycle_event
+  rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleEvent
+  pds_resource_family: lifecycle
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/metadata-exports
+  operation_id: getPdsMetadataExports
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-export-metadata
+  application_surface: pds
+  workflow_label: pds.export_metadata
+  rust_workflow_kind: PdsWorkflowKind::ExportMetadata
+  pds_resource_family: inventory-export
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/provider-bindings
+  operation_id: getPdsProviderBindings
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-provider-bindings
+  application_surface: pds
+  workflow_label: pds.list_provider_bindings
+  rust_workflow_kind: PdsWorkflowKind::ListProviderBindings
+  pds_resource_family: provider-bindings
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/provider-bindings
+  operation_id: postPdsProviderBinding
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-provider-binding
+  application_surface: pds
+  workflow_label: pds.register_provider_binding
+  rust_workflow_kind: PdsWorkflowKind::RegisterProviderBinding
+  pds_resource_family: provider-bindings
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/record-inventory
+  operation_id: getPdsRecordInventory
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-read-record-inventory
+  application_surface: pds
+  workflow_label: pds.read_record_inventory
+  rust_workflow_kind: PdsWorkflowKind::ReadRecordInventory
+  pds_resource_family: inventory-export
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: get
+  path: /pds/retention-policies
+  operation_id: getPdsRetentionPolicies
+  required_scopes:
+  - pds:read
+  application_operation_id: pds-list-retention-policies
+  application_surface: pds
+  workflow_label: pds.list_retention_policies
+  rust_workflow_kind: PdsWorkflowKind::ListRetentionPolicies
+  pds_resource_family: lifecycle
+  pds_route_context: pds
+- openapi_contract: spec/openapi/kiva-pds.yaml
+  method: post
+  path: /pds/retention-policies
+  operation_id: postPdsRetentionPolicy
+  required_scopes:
+  - pds:write
+  application_operation_id: pds-register-retention-policy
+  application_surface: pds
+  workflow_label: pds.register_retention_policy
+  rust_workflow_kind: PdsWorkflowKind::RegisterRetentionPolicy
+  pds_resource_family: lifecycle
+  pds_route_context: pds-application
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/additive-aggregates
+  operation_id: postConfidentialAdditiveAggregate
+  required_scopes:
+  - confidential:compute
+  application_operation_id: confidential-release-signed-additive-aggregate
+  application_surface: confidential
+  workflow_label: confidential.release_signed_additive_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/additive-share-replay-records
+  operation_id: getConfidentialAdditiveShareReplayRecords
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-additive-replay-records
+  application_surface: confidential
+  workflow_label: confidential.list_replay_records
+  rust_workflow_kind: ConfidentialWorkflowKind::ListReplayRecords
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/additive-share-signing-key-revocations
+  operation_id: postConfidentialShareSigningKeyRevocation
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-revoke-share-signing-key
+  application_surface: confidential
+  workflow_label: confidential.revoke_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RevokeShareSigningKey
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/additive-share-signing-key-rotations
+  operation_id: postConfidentialShareSigningKeyRotation
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-rotate-share-signing-key
+  application_surface: confidential
+  workflow_label: confidential.rotate_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RotateShareSigningKey
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/additive-share-signing-keys
+  operation_id: getConfidentialShareSigningKeys
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-share-signing-keys
+  application_surface: confidential
+  workflow_label: confidential.list_share_signing_keys
+  rust_workflow_kind: ConfidentialWorkflowKind::ListShareSigningKeys
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/additive-share-signing-keys
+  operation_id: postConfidentialShareSigningKey
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-register-share-signing-key
+  application_surface: confidential
+  workflow_label: confidential.register_share_signing_key
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterShareSigningKey
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/additive-share-submissions
+  operation_id: getConfidentialAdditiveShareSubmissions
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-submitted-shares
+  application_surface: confidential
+  workflow_label: confidential.list_submitted_shares
+  rust_workflow_kind: ConfidentialWorkflowKind::ListSubmittedShares
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/additive-share-submissions
+  operation_id: postConfidentialAdditiveShareSubmission
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-submit-additive-share
+  application_surface: confidential
+  workflow_label: confidential.submit_additive_share
+  rust_workflow_kind: ConfidentialWorkflowKind::SubmitAdditiveShare
+  workflow_family: additive
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/differential-privacy-budget-spends
+  operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-spend-differential-privacy-budget
+  application_surface: confidential
+  workflow_label: confidential.spend_differential_privacy_budget
+  rust_workflow_kind: ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/differential-privacy-budgets
+  operation_id: getConfidentialDifferentialPrivacyBudgets
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-differential-privacy-budgets
+  application_surface: confidential
+  workflow_label: confidential.list_differential_privacy_budgets
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/differential-privacy-budgets
+  operation_id: postConfidentialDifferentialPrivacyBudget
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-register-differential-privacy-budget
+  application_surface: confidential
+  workflow_label: confidential.register_differential_privacy_budget
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/differential-privacy-composition-summaries
+  operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-differential-privacy-composition-summaries
+  application_surface: confidential
+  workflow_label: confidential.list_differential_privacy_composition_summaries
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/differential-privacy-releases
+  operation_id: getConfidentialDifferentialPrivacyReleases
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-differential-privacy-releases
+  application_surface: confidential
+  workflow_label: confidential.list_differential_privacy_releases
+  rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyReleases
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/differential-privacy-releases
+  operation_id: postConfidentialDifferentialPrivacyRelease
+  required_scopes:
+  - confidential:release
+  application_operation_id: confidential-release-differential-privacy-aggregate
+  application_surface: confidential
+  workflow_label: confidential.release_differential_privacy_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/differential-privacy-sampled-releases
+  operation_id: postConfidentialDifferentialPrivacySampledRelease
+  required_scopes:
+  - confidential:release
+  application_operation_id: confidential-release-sampled-differential-privacy-aggregate
+  application_surface: confidential
+  workflow_label: confidential.release_sampled_differential_privacy_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate
+  workflow_family: differential_privacy
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/job-audit-events
+  operation_id: getConfidentialJobAuditEvents
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-job-audit-events
+  application_surface: confidential
+  workflow_label: confidential.list_job_audit_events
+  rust_workflow_kind: ConfidentialWorkflowKind::ListJobAuditEvents
+  workflow_family: job
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/job-transitions
+  operation_id: postConfidentialJobTransition
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-transition-job
+  application_surface: confidential
+  workflow_label: confidential.transition_job
+  rust_workflow_kind: ConfidentialWorkflowKind::TransitionJob
+  workflow_family: job
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/jobs
+  operation_id: getConfidentialJobs
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-jobs
+  application_surface: confidential
+  workflow_label: confidential.list_jobs
+  rust_workflow_kind: ConfidentialWorkflowKind::ListJobs
+  workflow_family: job
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/jobs
+  operation_id: postConfidentialJob
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-register-job
+  application_surface: confidential
+  workflow_label: confidential.register_job
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterJob
+  workflow_family: job
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/participant-audit-events
+  operation_id: getConfidentialParticipantAuditEvents
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-participant-audit-events
+  application_surface: confidential
+  workflow_label: confidential.list_participant_audit_events
+  rust_workflow_kind: ConfidentialWorkflowKind::ListParticipantAuditEvents
+  workflow_family: participant
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/participant-transitions
+  operation_id: postConfidentialParticipantTransition
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-transition-participant
+  application_surface: confidential
+  workflow_label: confidential.transition_participant
+  rust_workflow_kind: ConfidentialWorkflowKind::TransitionParticipant
+  workflow_family: participant
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/participants
+  operation_id: getConfidentialParticipants
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-participants
+  application_surface: confidential
+  workflow_label: confidential.list_participants
+  rust_workflow_kind: ConfidentialWorkflowKind::ListParticipants
+  workflow_family: participant
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/participants
+  operation_id: postConfidentialParticipant
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-register-participant
+  application_surface: confidential
+  workflow_label: confidential.register_participant
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterParticipant
+  workflow_family: participant
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/shamir-threshold-reconstructions
+  operation_id: getConfidentialShamirThresholdReconstructions
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-shamir-threshold-reconstructions
+  application_surface: confidential
+  workflow_label: confidential.list_shamir_threshold_reconstructions
+  rust_workflow_kind: ConfidentialWorkflowKind::ListShamirThresholdReconstructions
+  workflow_family: shamir
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/shamir-threshold-reconstructions
+  operation_id: postConfidentialShamirThresholdReconstruction
+  required_scopes:
+  - confidential:compute
+  application_operation_id: confidential-reconstruct-shamir-threshold-secret
+  application_surface: confidential
+  workflow_label: confidential.reconstruct_shamir_threshold_secret
+  rust_workflow_kind: ConfidentialWorkflowKind::ReconstructShamirThresholdSecret
+  workflow_family: shamir
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/threshold-release-approvals
+  operation_id: postConfidentialThresholdReleaseApproval
+  required_scopes:
+  - confidential:release
+  application_operation_id: confidential-approve-threshold-release
+  application_surface: confidential
+  workflow_label: confidential.approve_threshold_release
+  rust_workflow_kind: ConfidentialWorkflowKind::ApproveThresholdRelease
+  workflow_family: threshold
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: get
+  path: /confidential/threshold-release-requests
+  operation_id: getConfidentialThresholdReleaseRequests
+  required_scopes:
+  - confidential:read
+  application_operation_id: confidential-list-threshold-release-requests
+  application_surface: confidential
+  workflow_label: confidential.list_threshold_release_requests
+  rust_workflow_kind: ConfidentialWorkflowKind::ListThresholdReleaseRequests
+  workflow_family: threshold
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/threshold-release-requests
+  operation_id: postConfidentialThresholdReleaseRequest
+  required_scopes:
+  - confidential:write
+  application_operation_id: confidential-register-threshold-release-request
+  application_surface: confidential
+  workflow_label: confidential.register_threshold_release_request
+  rust_workflow_kind: ConfidentialWorkflowKind::RegisterThresholdReleaseRequest
+  workflow_family: threshold
+- openapi_contract: spec/openapi/kiva-confidential.yaml
+  method: post
+  path: /confidential/threshold-releases
+  operation_id: postConfidentialThresholdRelease
+  required_scopes:
+  - confidential:release
+  application_operation_id: confidential-release-threshold-aggregate
+  application_surface: confidential
+  workflow_label: confidential.release_threshold_aggregate
+  rust_workflow_kind: ConfidentialWorkflowKind::ReleaseThresholdAggregate
+  workflow_family: threshold
+validator: scripts/ci/validate_surface_catalog.py

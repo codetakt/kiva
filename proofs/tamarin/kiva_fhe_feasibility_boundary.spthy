@@ -1,0 +1,118 @@
+theory Kiva_FHE_Feasibility_Boundary
+begin
+
+rule ConfigureFheJob:
+  [ Fr(~job) ]
+  --[
+    FheJobConfigured(~job, 'bfv_style_integer_sum', 'sum'),
+    FhePolicyApproved(~job)
+  ]->
+  [ !FheJob(~job, 'bfv_style_integer_sum', 'sum') ]
+
+rule AcceptLeftCiphertext:
+  [ !FheJob(job, family, operation), Fr(~ciphertext) ]
+  --[
+    FheSupportedParameters(job, family, operation),
+    FheCiphertextAccepted(job, 'left', ~ciphertext)
+  ]->
+  [ !FheCiphertext(job, 'left', ~ciphertext) ]
+
+rule AcceptRightCiphertext:
+  [ !FheJob(job, family, operation), Fr(~ciphertext) ]
+  --[
+    FheSupportedParameters(job, family, operation),
+    FheCiphertextAccepted(job, 'right', ~ciphertext)
+  ]->
+  [ !FheCiphertext(job, 'right', ~ciphertext) ]
+
+rule EvaluateSum:
+  [
+    !FheJob(job, family, 'sum'),
+    !FheCiphertext(job, 'left', left_ciphertext),
+    !FheCiphertext(job, 'right', right_ciphertext)
+  ]
+  --[
+    FheSumEvaluated(job, left_ciphertext, right_ciphertext)
+  ]->
+  [ !FheEvaluation(job, 'sum') ]
+
+rule ReleaseFheResult:
+  [
+    !FheJob(job, family, 'sum'),
+    !FheEvaluation(job, 'sum'),
+    Fr(~authority)
+  ]
+  --[
+    FheGovernedDataProduct(job),
+    FhePlaintextBoundaryClear(job),
+    FheResultReleased(job, ~authority)
+  ]->
+  [ !FheReleasedResult(job, ~authority) ]
+
+rule RejectUnsupportedParameters:
+  [ Fr(~job) ]
+  --[ FheUnsupportedParametersRejected(~job) ]->
+  []
+
+lemma accepted_ciphertext_requires_configured_job:
+  "All job party ciphertext #i.
+    FheCiphertextAccepted(job, party, ciphertext) @ #i
+    ==>
+    Ex family operation #j.
+      FheJobConfigured(job, family, operation) @ #j
+      & #j < #i"
+
+lemma evaluation_requires_left_and_right_ciphertexts:
+  "All job left_ciphertext right_ciphertext #i.
+    FheSumEvaluated(job, left_ciphertext, right_ciphertext) @ #i
+    ==>
+    (Ex #j.
+      FheCiphertextAccepted(job, 'left', left_ciphertext) @ #j
+      & #j < #i)
+    &
+    (Ex #k.
+      FheCiphertextAccepted(job, 'right', right_ciphertext) @ #k
+      & #k < #i)"
+
+lemma release_requires_configured_job:
+  "All job authority #i.
+    FheResultReleased(job, authority) @ #i
+    ==>
+    Ex family operation #j.
+      FheJobConfigured(job, family, operation) @ #j
+      & #j < #i"
+
+lemma release_requires_prior_evaluation:
+  "All job authority #i.
+    FheResultReleased(job, authority) @ #i
+    ==>
+    Ex left_ciphertext right_ciphertext #j.
+      FheSumEvaluated(job, left_ciphertext, right_ciphertext) @ #j
+      & #j < #i"
+
+lemma release_requires_policy_approval:
+  "All job authority #i.
+    FheResultReleased(job, authority) @ #i
+    ==>
+    Ex #j.
+      FhePolicyApproved(job) @ #j
+      & #j < #i"
+
+lemma release_requires_governed_data_product:
+  "All job authority #i.
+    FheResultReleased(job, authority) @ #i
+    ==>
+    Ex #j.
+      FheGovernedDataProduct(job) @ #j
+      & #j = #i"
+
+lemma plaintext_is_not_publicly_released:
+  "not(Ex job plaintext #i. FhePlaintextPublished(job, plaintext) @ #i)"
+
+lemma rejected_unsupported_parameters_are_not_configured:
+  "All job #i.
+    FheUnsupportedParametersRejected(job) @ #i
+    ==>
+    not(Ex family operation #j. FheJobConfigured(job, family, operation) @ #j)"
+
+end

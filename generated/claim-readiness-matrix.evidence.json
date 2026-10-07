@@ -1,0 +1,687 @@
+{
+  "claim_count": 11,
+  "claims": [
+    {
+      "boundary": "analytics-serving",
+      "claim": "Kiva provides validated reference reporting deployments for schools and corporate training as external consumers of the governed analytics API.\n",
+      "claim_maturity": "reference-fixture",
+      "evidence_path_count": 7,
+      "evidence_paths": [
+        "spec/analytics/reporting-templates.yaml",
+        "spec/analytics/schemas/reporting-template-catalog.schema.json",
+        "scripts/ci/validate_analytics_reporting_templates.py",
+        "spec/analytics/publication-milestones.yaml",
+        "generated/architecture/operation-kernel.yaml",
+        "spec/openapi/kiva-analytics.yaml",
+        "docs/architecture/reference-reporting-deployments.md"
+      ],
+      "id": "reference-reporting-deployments",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "confidential-assurance",
+          "check_id": "confidential-mechanism-profile-index",
+          "check_kind": "generator-check",
+          "group": "confidential-computation-assurance"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "analytics-reporting-templates",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "http-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-boundary-ledger",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-map-projection",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-generated-contract-dto-map",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-semantic-compatibility-map",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-ledger",
+          "check_id": "operation-kernel",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-ledger",
+          "check_id": "operation-kernel-authority",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "confidential-mechanism-sources-to-mechanism-profile-index",
+        "openapi-contracts-to-http-operation-catalog",
+        "openapi-contracts-to-rust-dto-map",
+        "surface-sources-to-operation-kernel-ir"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "BI2 consists of schema-checked, vendor-neutral deployment guidance. It does not host a BI product, extend the xAPI LRS conformance claim, provide legal advice, or claim production analytics correctness.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "analytics-serving",
+      "claim": "Kiva provides analytics-ready governed aggregate serving for institutional reporting.\n",
+      "claim_maturity": "governed-serving",
+      "evidence_path_count": 8,
+      "evidence_paths": [
+        "spec/openapi/kiva-analytics.yaml",
+        "crates/kiva-application/src/analytics.rs",
+        "crates/kiva-server/src/app/analytics.rs",
+        "crates/kiva-server/src/surfaces/analytics/handlers.rs",
+        "crates/kiva-server/src/tests/helpers/analytics.rs",
+        "scripts/ci/validate_analytics_openapi.py",
+        "spec/analytics/publication-milestones.yaml",
+        "docs/architecture/analytics-claim-boundary.md"
+      ],
+      "id": "governed-aggregate-analytics-serving",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "http-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-boundary-ledger",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-map-projection",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-generated-contract-dto-map",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-semantic-compatibility-map",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "openapi-contracts-to-http-operation-catalog",
+        "openapi-contracts-to-rust-dto-map"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "BI1 is limited to a read-only HTTP surface over approved PDS products and currently admitted confidential aggregate releases. It excludes raw Statements, individual-level data, and a hosted reporting product.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "analytics-serving",
+      "claim": "Analytics serving is a governed read boundary over approved data products, separate from the xAPI LRS conformance surface.\n",
+      "claim_maturity": "boundary-definition",
+      "evidence_path_count": 4,
+      "evidence_paths": [
+        "spec/analytics/publication-milestones.yaml",
+        "docs/architecture/analytics-claim-boundary.md",
+        "spec/architecture/claim-catalog.yaml",
+        "spec/architecture/claim-maturity.yaml"
+      ],
+      "id": "governed-analytics-serving-boundary",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "claim-catalog",
+          "check_id": "claim-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "claim-catalog",
+          "check_id": "claim-readiness-matrix",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "claim-catalog-and-ci-graph-to-readiness-matrix",
+        "claim-catalog-to-public-claim-evidence"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "BI0 records a reviewed architecture boundary and milestone ledger. It does not claim that an analytics serving API has been implemented.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "xapi-lrs",
+      "claim": "Kiva exposes an IEEE/ISO/IEC 39274-1-1:2025 aligned xAPI LRS interface with OpenAPI, conformance-aid, memory, and PostgreSQL evidence.\n",
+      "claim_maturity": "internal-alignment",
+      "evidence_path_count": 5,
+      "evidence_paths": [
+        "spec/openapi/kiva-xapi.yaml",
+        "generated/architecture/operation-catalog.yaml",
+        "tools/xapi-lrs-conformance/src/lib.rs",
+        "scripts/ci/validate_conformance_evidence_bundle.py",
+        "docs/architecture/conformance-claim.md"
+      ],
+      "id": "ieee-xapi-lrs-aligned-interface",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "application-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "architecture-boundaries",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "http-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-boundary-ledger",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-map-projection",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-generated-contract-dto-map",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-semantic-compatibility-map",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-ledger",
+          "check_id": "surface-catalog-projections",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "openapi-contracts-to-http-operation-catalog",
+        "openapi-contracts-to-rust-dto-map",
+        "surface-catalog-to-application-operation-catalog"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "The public xAPI LRS claim must be backed by generated contract, conformance, and CI projection evidence.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "personal-data-store",
+      "claim": "Kiva implements PDS metadata governance for consent, access audit, lifecycle, retention, public-sector governance, approved data products, and provider-binding registry metadata.\n",
+      "claim_maturity": "control-plane",
+      "evidence_path_count": 6,
+      "evidence_paths": [
+        "spec/openapi/kiva-pds.yaml",
+        "crates/kiva-pds/src/pds/mod.rs",
+        "crates/kiva-server/src/surfaces/pds/routes.rs",
+        "crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs",
+        "crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs",
+        "docs/architecture/pds-milestones.md"
+      ],
+      "id": "pds-governed-metadata-platform",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "http-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-boundary-ledger",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-map-projection",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-generated-contract-dto-map",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-semantic-compatibility-map",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "schema-artifact",
+          "check_id": "pds-openapi-schema-artifacts",
+          "check_kind": "schema-artifact-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-evidence",
+          "check_id": "route-coverage",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "openapi-contracts-to-http-operation-catalog",
+        "openapi-contracts-to-rust-dto-map",
+        "pds-openapi-to-json-schema-artifacts",
+        "surface-catalog-to-route-coverage"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "The PDS governance claim crosses HTTP contracts, implementation resources, and CI-checked projection ledgers.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "personal-data-store",
+      "claim": "Kiva supports a learner-principal deployment profile in which the authenticated data subject directly exercises consent grant and revocation, record inventory, and metadata export over their own PDS metadata through subject-bound OAuth/OIDC resource-server scopes.\n",
+      "claim_maturity": "control-plane",
+      "evidence_path_count": 6,
+      "evidence_paths": [
+        "spec/pds/core-planes.source.yaml",
+        "spec/pds/deployment-templates.yaml",
+        "spec/pds/publication-milestones.yaml",
+        "crates/kiva-server/src/tests/helpers/learner_principal.rs",
+        "crates/kiva-server/src/tests/pds_memory/learner_principal.rs",
+        "docs/architecture/pds-public-sector-deployment-templates.md"
+      ],
+      "id": "learner-principal-consent-agency",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "pds-plane-packages",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "pds-planes-to-plane-package-index"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "The learner-agency claim must be backed by the PDS plane model projection, the validated deployment template, and the subject-bound token flow tests recorded for milestone M15.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "personal-data-store",
+      "claim": "Kiva supports learner-initiated data portability through a subject-bound, audited export of accepted Statement JSON and PDS metadata.\n",
+      "claim_maturity": "control-plane",
+      "evidence_path_count": 8,
+      "evidence_paths": [
+        "spec/openapi/kiva-pds.yaml",
+        "spec/pds/publication-milestones.yaml",
+        "crates/kiva-application/src/pds/workflow/queries.rs",
+        "crates/kiva-server/src/surfaces/pds/handlers/portability.rs",
+        "crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs",
+        "crates/kiva-server/src/tests/pds_memory/portability.rs",
+        "crates/kiva-server/src/tests/postgres.rs",
+        "docs/architecture/learner-data-portability-export.md"
+      ],
+      "id": "learner-initiated-data-portability",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "generated-catalog",
+          "check_id": "http-operation-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-boundary-ledger",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-dto-map-projection",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-generated-contract-dto-map",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "dto-boundary",
+          "check_id": "openapi-semantic-compatibility-map",
+          "check_kind": "contract-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "schema-artifact",
+          "check_id": "pds-openapi-schema-artifacts",
+          "check_kind": "schema-artifact-check",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "openapi-contracts-to-http-operation-catalog",
+        "openapi-contracts-to-rust-dto-map",
+        "pds-openapi-to-json-schema-artifacts"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "M17 is limited to an exact-IFI subject partition, bounded pages, stored Statement JSON, and durable PDS audit evidence. It does not extend the xAPI LRS conformance surface or imply identity equivalence.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "identity-provider-deployment-adapter",
+      "claim": "Kiva connects to production OAuth/OIDC identity providers.\n",
+      "claim_maturity": "deployment-integration",
+      "evidence_path_count": 6,
+      "evidence_paths": [
+        "crates/kiva-idp-adapter/src/lib.rs",
+        "crates/kiva-idp-adapter/src/tests.rs",
+        "crates/kiva-server/src/core/auth.rs",
+        "spec/architecture/boundaries.yaml",
+        "spec/architecture/boundaries/dependency-rules.yaml",
+        "docs/architecture/oauth-oidc-resource-server-binding.md"
+      ],
+      "id": "production-oauth-oidc-idp-connectivity",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "architecture-boundaries",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "design-backbone",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "design-backbone-to-ci-guard-model"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "M16 is a deployment-edge integration backed by adapter and server contract tests plus CI-enforced architecture dependency rules. It does not assert that an identity provider or the complete authentication deployment is production-ready.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "confidential-computation",
+      "claim": "Kiva admits secret/confidential-compute provider metadata through a typed provider contract and review gates before PDS registry persistence.\n",
+      "claim_maturity": "review-gated-external-runtime",
+      "evidence_path_count": 7,
+      "evidence_paths": [
+        "spec/confidential/secret-compute-provider-contract.yaml",
+        "crates/kiva-secret-provider-contract/src/lib.rs",
+        "crates/kiva-confidential/src/mechanism/provider.rs",
+        "crates/kiva-confidential/src/mechanism/provider/binding.rs",
+        "crates/kiva-confidential/src/mechanism/provider/runtime.rs",
+        "scripts/ci/validate_secret_compute_provider_contract.py",
+        "docs/architecture/secret-compute-provider-integration.md"
+      ],
+      "id": "confidential-provider-contract-boundary",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "confidential-mechanism",
+          "check_id": "confidential-mechanism-catalog",
+          "check_kind": "generator-check",
+          "group": "confidential-computation-assurance"
+        },
+        {
+          "artifact_class": "confidential-assurance",
+          "check_id": "confidential-mechanism-profile-index",
+          "check_kind": "generator-check",
+          "group": "confidential-computation-assurance"
+        },
+        {
+          "artifact_class": "mechanism-maturity",
+          "check_id": "mechanism-maturity",
+          "check_kind": "ledger-validator",
+          "group": "confidential-computation-assurance"
+        },
+        {
+          "artifact_class": "provider-contract",
+          "check_id": "secret-compute-provider-kind-registry",
+          "check_kind": "generator-check",
+          "group": "confidential-computation-assurance"
+        }
+      ],
+      "matched_projection_ids": [
+        "confidential-mechanism-source-to-catalog-and-registry",
+        "confidential-mechanism-sources-to-mechanism-profile-index",
+        "secret-compute-provider-contract-to-kind-registry"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "Provider-boundary claims must be tied to the confidential mechanism catalog, provider contract, and assurance validation checks.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "confidential-reference-primitives",
+      "claim": "Kiva includes deterministic reference primitive providers for experiments, fixtures, tests, and formal boundary work; these providers do not support production security claims.\n",
+      "claim_maturity": "reference-fixture",
+      "evidence_path_count": 6,
+      "evidence_paths": [
+        "crates/kiva-secret-provider-contract/src/lib.rs",
+        "crates/kiva-confidential/src/mechanism/provider/runtime.rs",
+        "crates/kiva-confidential/src/mechanism/core/tests/provider.rs",
+        "crates/kiva-server/src/tests/pds_memory/provider_bindings.rs",
+        "scripts/ci/validate_confidential_computation_assurance_package.py",
+        "docs/architecture/assurance-and-confidential-computation.md"
+      ],
+      "id": "reference-provider-experiment-boundary",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "provider-contract",
+          "check_id": "secret-compute-provider-kind-registry",
+          "check_kind": "generator-check",
+          "group": "confidential-computation-assurance"
+        }
+      ],
+      "matched_projection_ids": [
+        "secret-compute-provider-contract-to-kind-registry"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "path-only",
+        "minimum_evidence_check_matches": 0,
+        "minimum_projection_matches": 0,
+        "rationale": "Reference primitives are deterministic fixtures and formal-boundary anchors. They are intentionally not a production-security projection and may be admitted by path evidence without projection/check matches.\n"
+      },
+      "status": "internally-verified"
+    },
+    {
+      "boundary": "verification-and-evidence",
+      "claim": "Kiva release confidence is gated by Rust tests, PostgreSQL checks, OpenAPI validation, conformance evidence, Kani/Tamarin/F* artifacts for selected narrow boundaries, and Nix CI checks.\n",
+      "claim_maturity": "evidence-gated-release",
+      "evidence_path_count": 6,
+      "evidence_paths": [
+        "spec/ci/evidence-checks.yaml",
+        "scripts/ci/run_evidence_checks.py",
+        "scripts/ci/run_kani_verification.sh",
+        "scripts/ci/run_tamarin_verification.sh",
+        "scripts/ci/run_fstar_verification.sh",
+        "docs/operations/ci-gates.md"
+      ],
+      "id": "evidence-gated-release-posture",
+      "matched_evidence_checks": [
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "architecture-boundaries",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "claim-catalog",
+          "check_id": "claim-readiness-matrix",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "design-backbone",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "evidence-check-catalog",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "evidence-check-normal-form-policy",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "evidence-checks",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-evidence",
+          "check_id": "evidence-set",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-evidence",
+          "check_id": "executed-receipt-overlay",
+          "check_kind": "generator-check",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "generated-evidence",
+          "check_id": "executed-receipt-release-policy",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        },
+        {
+          "artifact_class": "architecture-guard",
+          "check_id": "projection-graph",
+          "check_kind": "ledger-validator",
+          "group": "openapi-contract"
+        }
+      ],
+      "matched_projection_ids": [
+        "architecture-graph-sources-to-projection-graph",
+        "ci-check-source-to-catalog-and-gate-plan",
+        "claim-catalog-and-ci-graph-to-readiness-matrix",
+        "declared-receipts-and-run-reports-to-executed-receipt-overlay",
+        "design-backbone-to-ci-guard-model",
+        "evidence-check-normal-form-policy-to-drift-enforcement",
+        "evidence-check-source-to-ci-manifest",
+        "evidence-sources-to-unified-evidence-set"
+      ],
+      "readiness": "ready",
+      "readiness_reason": "requirement satisfied",
+      "readiness_requirement": {
+        "evidence_mode": "projection-backed",
+        "minimum_evidence_check_matches": 1,
+        "minimum_projection_matches": 1,
+        "rationale": "Release-posture claims must be backed by the CI evidence manifest, projection graph, and executable verification gates.\n"
+      },
+      "status": "internally-verified"
+    }
+  ],
+  "generated_from": [
+    "spec/architecture/claim-catalog.yaml",
+    "spec/architecture/claim-maturity.yaml",
+    "spec/ci/projection-graph.yaml",
+    "spec/ci/evidence-checks.yaml"
+  ],
+  "kind": "kiva-claim-readiness-matrix-evidence",
+  "schema_version": 1,
+  "status": "ready"
+}

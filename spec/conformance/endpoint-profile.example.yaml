@@ -1,0 +1,10 @@
+schema_version: 1
+standard: IEEE/ISO/IEC 39274-1-1-2025
+profiles:
+  deterministic-too-large-threshold:
+    max_request_body_bytes: 4096
+    probe_body_bytes: 8192
+  deterministic-rate-limit-trigger:
+    request_count: 3
+    window_seconds: 1
+    path: /__kiva/conformance/rate-limit

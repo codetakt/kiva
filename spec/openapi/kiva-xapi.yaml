@@ -1,0 +1,1758 @@
+openapi: 3.1.0
+info:
+  title: Kiva xAPI LRS API
+  version: 0.1.0
+  summary: IEEE/ISO/IEC 39274-1-1-2025 aligned xAPI LRS interface contract.
+  description: >
+    Initial machine-readable API contract for Kiva's xAPI Learning Record Store
+    surface. This contract formalizes the HTTP resource families, headers,
+    parameters, request bodies, responses, and non-OpenAPI assertions that Kiva
+    must preserve when implementing IEEE/ISO/IEC 39274-1-1-2025 aligned xAPI
+    behavior.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /
+    description: Kiva platform base resource for the xAPI LRS interface.
+tags:
+  - name: Statements
+  - name: State
+  - name: Agents
+  - name: Activities
+  - name: Documents
+  - name: About
+security:
+  - bearerAuth: []
+x-kiva-requirements:
+  - xapi-lrs-4.1.1-headers
+  - xapi-lrs-4.1.2-utf8
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.5-unknown-parameters
+  - xapi-lrs-4.1.5-parameter-case
+  - xapi-lrs-4.1.5-forbidden
+  - xapi-lrs-4.1.5-too-large
+  - xapi-lrs-4.1.5-rate-limit
+  - xapi-lrs-4.1.6-support-resources
+  - xapi-lrs-4.1.6-request-parameter-validation
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  - xapi-lrs-4.1.7-version-2-0-alias
+  - xapi-lrs-4.1.7-version-reject-before-2
+  - xapi-lrs-4.1.7-version-reject-2-1-or-greater
+  - xapi-lrs-4.1.7-version-reject-400
+  - xapi-lrs-4.1.8-authorization-decisions
+paths:
+  /statements:
+    put:
+      tags: [Statements]
+      operationId: putStatement
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Store a single Statement with a client-supplied id.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.3-json-statement-batches
+        - xapi-lrs-4.1.3-attachment-transmission-criteria
+        - xapi-lrs-4.1.3-multipart-first-json
+        - xapi-lrs-4.1.3-multipart-attachment-headers
+        - xapi-lrs-4.1.3-attachment-header-property-match
+        - xapi-lrs-4.1.3-multipart-accept-valid
+        - xapi-lrs-4.1.3-multipart-reject-unmatched
+        - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+        - xapi-lrs-4.2-statement-immutability-preserve
+        - xapi-lrs-4.2-statement-immutability-ignore-excluded
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/StatementId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Statement"
+          multipart/mixed:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/RequestEntityTooLarge"
+      x-kiva-assertions:
+        - id: xapi.statement.put.idempotent
+          text: >
+            If the LRS already contains the requested statementId, it must not
+            modify that Statement or any other object.
+        - id: xapi.statement.put.immutable-equivalence
+          text: >
+            Conflict detection for an existing Statement is based on xAPI
+            Statement immutability rules, not byte-for-byte JSON equality.
+    post:
+      tags: [Statements]
+      operationId: postStatements
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Store a Statement or a Statement batch.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.3-json-statement-batches
+        - xapi-lrs-4.1.3-attachment-transmission-criteria
+        - xapi-lrs-4.1.3-multipart-first-json
+        - xapi-lrs-4.1.3-multipart-attachment-headers
+        - xapi-lrs-4.1.3-attachment-header-property-match
+        - xapi-lrs-4.1.3-multipart-accept-valid
+        - xapi-lrs-4.1.3-multipart-reject-unmatched
+        - xapi-lrs-4.1.5-batch-rejection
+        - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+        - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/Statement"
+                - type: array
+                  minItems: 1
+                  items:
+                    $ref: "#/components/schemas/Statement"
+          multipart/mixed:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Statement ids in the same order as accepted Statements.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Uuid"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/RequestEntityTooLarge"
+      x-kiva-assertions:
+        - id: xapi.statement.post.batch-all-or-nothing
+          text: >
+            If any Statement in a batch is rejected, the entire batch is
+            rejected.
+        - id: xapi.statement.post.no-duplicate-batch-ids
+          text: >
+            A batch containing two or more Statements with the same id must be
+            rejected with 400 Bad Request.
+    get:
+      tags: [Statements]
+      operationId: getStatements
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch one Statement or a StatementResult.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+        - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+        - xapi-lrs-4.1.6.1-statement-get-empty-result
+        - xapi-lrs-4.1.6.1-statement-consistent-through
+        - xapi-lrs-4.1.6.1-statement-get-attachments-true
+        - xapi-lrs-4.1.6.1-statement-get-attachments-false
+        - xapi-lrs-4.1.6.1-statement-last-modified
+        - xapi-lrs-4.1.6.1-statement-format-exact
+        - xapi-lrs-4.1.6.1-statementref-filtering
+        - xapi-lrs-4.1.6.1-statement-query-filters
+        - xapi-lrs-4.1.6.1-statement-query-related-agents
+        - xapi-lrs-4.1.6.1-statement-query-related-activities
+        - xapi-lrs-4.1.6.1-statement-query-time-order-limit
+        - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+        - xapi-lrs-4.1.6.1-canonical-accept-language
+        - xapi-lrs-4.1.6.1-voided-not-returned
+        - xapi-lrs-4.1.6.1-voided-targeting-returned
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/StatementIdOptional"
+        - $ref: "#/components/parameters/VoidedStatementId"
+        - $ref: "#/components/parameters/AgentFilter"
+        - $ref: "#/components/parameters/VerbFilter"
+        - $ref: "#/components/parameters/ActivityFilter"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/RelatedActivities"
+        - $ref: "#/components/parameters/RelatedAgents"
+        - $ref: "#/components/parameters/Since"
+        - $ref: "#/components/parameters/Until"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/StatementFormat"
+        - $ref: "#/components/parameters/Attachments"
+        - $ref: "#/components/parameters/Ascending"
+      responses:
+        "200":
+          description: A single Statement or a StatementResult.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+            X-Experience-API-Consistent-Through:
+              $ref: "#/components/headers/XExperienceApiConsistentThrough"
+            Last-Modified:
+              $ref: "#/components/headers/LastModified"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Statement"
+                  - $ref: "#/components/schemas/StatementResult"
+            multipart/mixed:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "413":
+          $ref: "#/components/responses/RequestEntityTooLarge"
+      x-kiva-assertions:
+        - id: xapi.statement.get.single-mutual-exclusion
+          text: >
+            Requests containing both statementId and voidedStatementId must be
+            rejected with 400 Bad Request.
+        - id: xapi.statement.get.single-query-limits
+          text: >
+            Requests containing statementId or voidedStatementId may include
+            only attachments and format as additional query parameters.
+        - id: xapi.statement.get.voided-filter
+          text: >
+            Voided Statements are not returned unless requested by
+            voidedStatementId.
+    head:
+      tags: [Statements]
+      operationId: headStatements
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch Statement metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.1-statement-consistent-through
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/StatementIdOptional"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /activities/state:
+    put:
+      tags: [State, Documents]
+      operationId: putStateDocument
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Store a single State document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.4-put-conflict
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/StateId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    post:
+      tags: [State, Documents]
+      operationId: postStateDocument
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Merge or store a single State document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+        - xapi-lrs-4.1.6.2-state-post-json-merge
+        - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+        - xapi-lrs-4.1.6.2-state-post-merge-success
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/StateId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+      x-kiva-assertions:
+        - id: xapi.document.post.top-level-json-merge
+          text: >
+            POST with application/json against an existing application/json
+            document merges only top-level object properties.
+    get:
+      tags: [State, Documents]
+      operationId: getStateDocuments
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch a State document or State document ids.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.2-state-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/StateIdOptional"
+        - $ref: "#/components/parameters/Since"
+      responses:
+        "200":
+          description: State document content or an array of State ids.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Last-Modified:
+              $ref: "#/components/headers/LastModified"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Document"
+                  - $ref: "#/components/schemas/StringIdArray"
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            text/plain:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      x-kiva-assertions:
+        - id: xapi.state.get.single-or-list
+          text: >
+            If stateId is present, GET returns a single document. If stateId is
+            absent, GET returns available State ids for the Activity, Agent, and
+            optional registration context.
+    delete:
+      tags: [State, Documents]
+      operationId: deleteStateDocuments
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Delete one State document or all State documents in a context.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/StateIdOptional"
+        - $ref: "#/components/parameters/IfMatch"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    head:
+      tags: [State, Documents]
+      operationId: headStateDocuments
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch State document metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.2-state-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/Registration"
+        - $ref: "#/components/parameters/StateIdOptional"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /agents:
+    get:
+      tags: [Agents]
+      operationId: getAgentPerson
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Return a Person object for a specified Agent.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.3-agents-person-fallback
+        - xapi-lrs-4.1.6.3-person-arrays
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+      responses:
+        "200":
+          description: Person object.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    head:
+      tags: [Agents]
+      operationId: headAgentPerson
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch Person metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.3-agents-person-fallback
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /activities:
+    get:
+      tags: [Activities]
+      operationId: getActivity
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch an Activity object.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.4-activity-fallback
+        - xapi-lrs-4.1.6.4-activity-complete
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+      responses:
+        "200":
+          description: Activity object.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    head:
+      tags: [Activities]
+      operationId: headActivity
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch Activity metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.4-activity-fallback
+        - xapi-lrs-4.1.6.4-activity-complete
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /agents/profile:
+    put:
+      tags: [Agents, Documents]
+      operationId: putAgentProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Store a single Agent Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.4-put-conflict
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    post:
+      tags: [Agents, Documents]
+      operationId: postAgentProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Merge or store a single Agent Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+        - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+        - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+        - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    get:
+      tags: [Agents, Documents]
+      operationId: getAgentProfiles
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch an Agent Profile document or Agent Profile ids.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/ProfileIdOptional"
+        - $ref: "#/components/parameters/Since"
+      responses:
+        "200":
+          $ref: "#/components/responses/DocumentOrIds"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Agents, Documents]
+      operationId: deleteAgentProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Delete a single Agent Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    head:
+      tags: [Agents, Documents]
+      operationId: headAgentProfile
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch Agent Profile metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/Agent"
+        - $ref: "#/components/parameters/ProfileIdOptional"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /activities/profile:
+    put:
+      tags: [Activities, Documents]
+      operationId: putActivityProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Store a single Activity Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.4-put-conflict
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    post:
+      tags: [Activities, Documents]
+      operationId: postActivityProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Merge or store a single Activity Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+        - xapi-lrs-4.1.6-document-no-prior-knowledge
+        - xapi-lrs-4.1.6.6-activity-profile-post-json-merge
+        - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+        - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IfNoneMatch"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentBody"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    get:
+      tags: [Activities, Documents]
+      operationId: getActivityProfiles
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch an Activity Profile document or Activity Profile ids.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/ProfileIdOptional"
+        - $ref: "#/components/parameters/Since"
+      responses:
+        "200":
+          $ref: "#/components/responses/DocumentOrIds"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Activities, Documents]
+      operationId: deleteActivityProfile
+      x-kiva-required-scopes: ["xapi:write"]
+      summary: Delete a single Activity Profile document.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-if-match
+        - xapi-lrs-4.1.4-precondition-failed
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+    head:
+      tags: [Activities, Documents]
+      operationId: headActivityProfile
+      x-kiva-required-scopes: ["xapi:read"]
+      summary: Fetch Activity Profile metadata without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.4-etag-on-document-get
+        - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+      parameters:
+        - $ref: "#/components/parameters/RequiredXapiVersion"
+        - $ref: "#/components/parameters/ActivityId"
+        - $ref: "#/components/parameters/ProfileIdOptional"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /about:
+    get:
+      tags: [About]
+      operationId: getAbout
+      summary: Return LRS metadata and supported xAPI versions.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.7-about-version
+        - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/OptionalXapiVersion"
+      responses:
+        "200":
+          description: LRS metadata.
+          headers:
+            X-Experience-API-Version:
+              $ref: "#/components/headers/XExperienceApiVersion"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
+    head:
+      tags: [About]
+      operationId: headAbout
+      summary: Return LRS metadata headers without a response body.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.7-about-version
+        - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/OptionalXapiVersion"
+      responses:
+        "200":
+          $ref: "#/components/responses/HeadOk"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Kiva uses OAuth/OIDC-derived bearer tokens at the platform boundary.
+        xAPI itself does not mandate a specific authentication mechanism. Kiva
+        enforces x-kiva-required-scopes when a bearer token is presented or
+        when KIVA_REQUIRE_AUTHORIZATION=true.
+
+  headers:
+    XExperienceApiVersion:
+      description: Latest xAPI patch version supported by this LRS.
+      schema:
+        type: string
+        enum: ["2.0.0"]
+    XExperienceApiConsistentThrough:
+      description: Timestamp through which returned Statements are known to be consistent.
+      schema:
+        $ref: "#/components/schemas/Timestamp"
+    ETag:
+      description: HTTP entity tag for xAPI document resources.
+      schema:
+        type: string
+    LastModified:
+      description: Last modification timestamp for the returned resource.
+      schema:
+        type: string
+
+  parameters:
+    RequiredXapiVersion:
+      name: X-Experience-API-Version
+      in: header
+      required: true
+      schema:
+        type: string
+        enum: ["2.0", "2.0.0"]
+      description: xAPI version requested by the client.
+    OptionalXapiVersion:
+      name: X-Experience-API-Version
+      in: header
+      required: false
+      schema:
+        type: string
+        enum: ["2.0", "2.0.0"]
+      description: Optional for /about; ignored for rejection purposes.
+    IfMatch:
+      name: If-Match
+      in: header
+      required: false
+      schema:
+        type: string
+      description: HTTP conditional request header for optimistic concurrency.
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      schema:
+        type: string
+      description: HTTP conditional request header for optimistic concurrency.
+    StatementId:
+      name: statementId
+      in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    StatementIdOptional:
+      name: statementId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    VoidedStatementId:
+      name: voidedStatementId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    AgentFilter:
+      name: agent
+      in: query
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentOrIdentifiedGroup"
+    Agent:
+      name: agent
+      in: query
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Agent"
+    VerbFilter:
+      name: verb
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Iri"
+    ActivityFilter:
+      name: activity
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Iri"
+    ActivityId:
+      name: activityId
+      in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/Iri"
+    Registration:
+      name: registration
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    RelatedActivities:
+      name: related_activities
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+    RelatedAgents:
+      name: related_agents
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+    Since:
+      name: since
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Timestamp"
+    Until:
+      name: until
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Timestamp"
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    StatementFormat:
+      name: format
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [ids, exact, canonical]
+        default: exact
+    Attachments:
+      name: attachments
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+    Ascending:
+      name: ascending
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+    StateId:
+      name: stateId
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    StateIdOptional:
+      name: stateId
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    ProfileId:
+      name: profileId
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    ProfileIdOptional:
+      name: profileId
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+
+  requestBodies:
+    DocumentBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Document"
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+        text/plain:
+          schema:
+            type: string
+
+  responses:
+    NoContent:
+      description: No Content.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    HeadOk:
+      description: Successful response without a response body.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+        ETag:
+          $ref: "#/components/headers/ETag"
+        Last-Modified:
+          $ref: "#/components/headers/LastModified"
+    DocumentOrIds:
+      description: xAPI document content or a list of document ids.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+        ETag:
+          $ref: "#/components/headers/ETag"
+        Last-Modified:
+          $ref: "#/components/headers/LastModified"
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Document"
+              - $ref: "#/components/schemas/StringIdArray"
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+        text/plain:
+          schema:
+            type: string
+    BadRequest:
+      description: Bad Request.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+        text/plain:
+          schema:
+            type: string
+    Unauthorized:
+      description: Authentication is required or invalid.
+      x-kiva-requirements:
+        - xapi-lrs-4.1.5-unauthorized
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    Forbidden:
+      description: Credentials do not permit the requested xAPI operation.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    NotFound:
+      description: Requested xAPI resource was not found.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    Conflict:
+      description: Request conflicts with current resource state.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    PreconditionFailed:
+      description: If-Match or If-None-Match precondition failed.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    RequestEntityTooLarge:
+      description: Statement, document, or attachment exceeds the LRS limit.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+    TooManyRequests:
+      description: The LRS rejected the request because of rate limiting.
+      headers:
+        X-Experience-API-Version:
+          $ref: "#/components/headers/XExperienceApiVersion"
+
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+      x-kiva-requirements:
+        - xapi-lrs-4.2.7-uuid-string
+    Iri:
+      type: string
+      format: iri
+      minLength: 1
+      x-kiva-requirements:
+        - xapi-lrs-4.2.1-statement-invalid-iris
+        - xapi-lrs-4.2.7-iri-comparison
+    Timestamp:
+      type: string
+      format: date-time
+      x-kiva-requirements:
+        - xapi-lrs-4.2.7-timestamps-utc
+    LanguageMap:
+      type: object
+      additionalProperties:
+        type: string
+      x-kiva-requirements:
+        - xapi-lrs-4.2.7-language-tags
+    Account:
+      type: object
+      required: [homePage, name]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.1-actor-account-shape
+      properties:
+        homePage:
+          $ref: "#/components/schemas/Iri"
+        name:
+          type: string
+      additionalProperties: false
+    Agent:
+      type: object
+      description: xAPI Agent object. objectType is optional and defaults to Agent when absent.
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.1-actor-object-type
+        - xapi-lrs-4.2.2.1-agent-exactly-one-ifi
+        - xapi-lrs-4.2.2.1-actor-ifi-formats
+        - xapi-lrs-4.2.2.1-actor-account-shape
+        - xapi-lrs-4.2.4.2-actor-single-ifi
+      properties:
+        objectType:
+          type: string
+          enum: [Agent]
+        name:
+          type: string
+        mbox:
+          $ref: "#/components/schemas/Iri"
+        mbox_sha1sum:
+          type: string
+        openid:
+          $ref: "#/components/schemas/Iri"
+        account:
+          $ref: "#/components/schemas/Account"
+      oneOf:
+        - required: [mbox]
+        - required: [mbox_sha1sum]
+        - required: [openid]
+        - required: [account]
+      additionalProperties: true
+    Group:
+      type: object
+      description: xAPI Group object. Anonymous Groups have member; identified Groups have exactly one IFI.
+      required: [objectType]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.1-actor-object-type
+        - xapi-lrs-4.2.2.1-group-identification
+        - xapi-lrs-4.2.2.1-group-member-agent
+        - xapi-lrs-4.2.2.1-actor-ifi-formats
+        - xapi-lrs-4.2.2.1-actor-account-shape
+        - xapi-lrs-4.2.4.2-actor-single-ifi
+        - xapi-lrs-4.2.4.2-no-group-member-group
+      properties:
+        objectType:
+          type: string
+          enum: [Group]
+        name:
+          type: string
+        member:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Agent"
+        mbox:
+          $ref: "#/components/schemas/Iri"
+        mbox_sha1sum:
+          type: string
+        openid:
+          $ref: "#/components/schemas/Iri"
+        account:
+          $ref: "#/components/schemas/Account"
+      anyOf:
+        - required: [member]
+        - required: [mbox]
+        - required: [mbox_sha1sum]
+        - required: [openid]
+        - required: [account]
+      not:
+        anyOf:
+          - required: [mbox, mbox_sha1sum]
+          - required: [mbox, openid]
+          - required: [mbox, account]
+          - required: [mbox_sha1sum, openid]
+          - required: [mbox_sha1sum, account]
+          - required: [openid, account]
+      additionalProperties: true
+    Actor:
+      x-kiva-requirements:
+        - xapi-lrs-4.2.4.2-actor-single-ifi
+      oneOf:
+        - $ref: "#/components/schemas/Agent"
+        - $ref: "#/components/schemas/Group"
+    IdentifiedGroup:
+      allOf:
+        - $ref: "#/components/schemas/Group"
+        - anyOf:
+            - required: [mbox]
+            - required: [mbox_sha1sum]
+            - required: [openid]
+            - required: [account]
+    AgentOrIdentifiedGroup:
+      oneOf:
+        - $ref: "#/components/schemas/Agent"
+        - $ref: "#/components/schemas/IdentifiedGroup"
+    AgentStatementObject:
+      allOf:
+        - $ref: "#/components/schemas/Agent"
+        - required: [objectType]
+    ActorStatementObject:
+      oneOf:
+        - $ref: "#/components/schemas/AgentStatementObject"
+        - $ref: "#/components/schemas/Group"
+    Person:
+      type: object
+      required: [objectType]
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.3-person-arrays
+      properties:
+        objectType:
+          type: string
+          enum: [Person]
+        name:
+          type: array
+          items:
+            type: string
+        mbox:
+          type: array
+          items:
+            $ref: "#/components/schemas/Iri"
+        mbox_sha1sum:
+          type: array
+          items:
+            type: string
+        openid:
+          type: array
+          items:
+            type: string
+        account:
+          type: array
+          items:
+            $ref: "#/components/schemas/Account"
+      additionalProperties: false
+    Verb:
+      type: object
+      required: [id]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.2-verb-properties
+      properties:
+        id:
+          $ref: "#/components/schemas/Iri"
+        display:
+          $ref: "#/components/schemas/LanguageMap"
+      additionalProperties: false
+    Activity:
+      type: object
+      required: [id]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.3-object-default-activity
+        - xapi-lrs-4.2.2.3-activity-properties
+      properties:
+        objectType:
+          type: string
+          enum: [Activity]
+        id:
+          $ref: "#/components/schemas/Iri"
+        definition:
+          $ref: "#/components/schemas/ActivityDefinition"
+      additionalProperties: false
+    ActivityDefinition:
+      type: object
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.3-activity-definition-properties
+        - xapi-lrs-4.2.4.2-interaction-type
+      properties:
+        name:
+          $ref: "#/components/schemas/LanguageMap"
+        description:
+          $ref: "#/components/schemas/LanguageMap"
+        type:
+          $ref: "#/components/schemas/Iri"
+        moreInfo:
+          $ref: "#/components/schemas/Iri"
+        interactionType:
+          type: string
+          enum: [true-false, choice, fill-in, long-fill-in, matching, performance, sequencing, likert, numeric, other]
+        correctResponsesPattern:
+          type: array
+          items:
+            type: string
+        choices:
+          $ref: "#/components/schemas/InteractionComponentArray"
+        scale:
+          $ref: "#/components/schemas/InteractionComponentArray"
+        source:
+          $ref: "#/components/schemas/InteractionComponentArray"
+        target:
+          $ref: "#/components/schemas/InteractionComponentArray"
+        steps:
+          $ref: "#/components/schemas/InteractionComponentArray"
+        extensions:
+          type: object
+          propertyNames:
+            $ref: "#/components/schemas/Iri"
+          additionalProperties: true
+      additionalProperties: false
+    InteractionComponentArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/InteractionComponent"
+    InteractionComponent:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        description:
+          $ref: "#/components/schemas/LanguageMap"
+      additionalProperties: false
+    StatementObject:
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.3-object-default-activity
+      oneOf:
+        - $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/ActorStatementObject"
+        - $ref: "#/components/schemas/StatementRef"
+        - $ref: "#/components/schemas/SubStatement"
+    NonSubStatementObject:
+      oneOf:
+        - $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/ActorStatementObject"
+        - $ref: "#/components/schemas/StatementRef"
+    StatementRef:
+      type: object
+      required: [objectType, id]
+      properties:
+        objectType:
+          type: string
+          enum: [StatementRef]
+        id:
+          $ref: "#/components/schemas/Uuid"
+      additionalProperties: false
+    SubStatement:
+      type: object
+      required: [objectType, actor, verb, object]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.3-substatement-properties
+        - xapi-lrs-4.2.4.2-no-nested-substatement
+      properties:
+        objectType:
+          type: string
+          enum: [SubStatement]
+        actor:
+          $ref: "#/components/schemas/Actor"
+        verb:
+          $ref: "#/components/schemas/Verb"
+        object:
+          $ref: "#/components/schemas/NonSubStatementObject"
+        result:
+          $ref: "#/components/schemas/Result"
+        context:
+          $ref: "#/components/schemas/Context"
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attachment"
+        extensions:
+          type: object
+          propertyNames:
+            $ref: "#/components/schemas/Iri"
+          additionalProperties: true
+      not:
+        anyOf:
+          - required: [id]
+          - required: [stored]
+          - required: [authority]
+          - required: [version]
+      additionalProperties: false
+    Score:
+      type: object
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.4-score-properties
+        - xapi-lrs-4.2.4.2-number-precision
+      properties:
+        scaled:
+          type: number
+          minimum: -1
+          maximum: 1
+        raw:
+          type: number
+        min:
+          type: number
+        max:
+          type: number
+      additionalProperties: false
+    Result:
+      type: object
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.4-result-properties
+        - xapi-lrs-4.2.2.4-score-properties
+        - xapi-lrs-4.2.7-duration-format
+        - xapi-lrs-4.2.7-extension-key-iri
+        - xapi-lrs-4.2.7-extension-values
+      properties:
+        score:
+          $ref: "#/components/schemas/Score"
+        success:
+          type: boolean
+        completion:
+          type: boolean
+        response:
+          type: string
+        duration:
+          type: string
+        extensions:
+          type: object
+          propertyNames:
+            $ref: "#/components/schemas/Iri"
+          additionalProperties: true
+      additionalProperties: false
+    ContextActivities:
+      type: object
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.5-context-activities
+      properties:
+        parent:
+          $ref: "#/components/schemas/ContextActivityValue"
+        grouping:
+          $ref: "#/components/schemas/ContextActivityValue"
+        category:
+          $ref: "#/components/schemas/ContextActivityValue"
+        other:
+          $ref: "#/components/schemas/ContextActivityValue"
+      additionalProperties: false
+    ContextActivityValue:
+      oneOf:
+        - $ref: "#/components/schemas/Activity"
+        - type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Activity"
+    RelevantTypeArray:
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/components/schemas/Iri"
+    ContextAgent:
+      type: object
+      required: [objectType, agent]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.5-context-agent-relations
+      properties:
+        objectType:
+          type: string
+          enum: [contextAgent]
+        agent:
+          $ref: "#/components/schemas/Agent"
+        relevantTypes:
+          $ref: "#/components/schemas/RelevantTypeArray"
+      additionalProperties: false
+    ContextGroup:
+      type: object
+      required: [objectType, group]
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.5-context-group-relations
+      properties:
+        objectType:
+          type: string
+          enum: [contextGroup]
+        group:
+          $ref: "#/components/schemas/Group"
+        relevantTypes:
+          $ref: "#/components/schemas/RelevantTypeArray"
+      additionalProperties: false
+    Context:
+      type: object
+      x-kiva-requirements:
+        - xapi-lrs-4.2.2.5-context-properties
+        - xapi-lrs-4.2.2.5-context-activities
+        - xapi-lrs-4.2.2.5-context-agent-relations
+        - xapi-lrs-4.2.2.5-context-group-relations
+        - xapi-lrs-4.2.7-uuid-string
+        - xapi-lrs-4.2.7-extension-key-iri
+        - xapi-lrs-4.2.7-extension-values
+      properties:
+        registration:
+          $ref: "#/components/schemas/Uuid"
+        instructor:
+          $ref: "#/components/schemas/Actor"
+        team:
+          $ref: "#/components/schemas/Group"
+        contextActivities:
+          $ref: "#/components/schemas/ContextActivities"
+        contextAgents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContextAgent"
+        contextGroups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContextGroup"
+        revision:
+          type: string
+        platform:
+          type: string
+        language:
+          type: string
+        statement:
+          $ref: "#/components/schemas/StatementRef"
+        extensions:
+          type: object
+          propertyNames:
+            $ref: "#/components/schemas/Iri"
+          additionalProperties: true
+      additionalProperties: false
+    Attachment:
+      type: object
+      required: [usageType, display, contentType, length, sha2]
+      x-kiva-requirements:
+        - xapi-lrs-4.1.3-attachment-sha2-match
+        - xapi-lrs-4.1.3-attachment-transmission-criteria
+        - xapi-lrs-4.2.2.6-attachment-properties
+        - xapi-lrs-4.2.6-signed-statement-attachment
+      properties:
+        usageType:
+          $ref: "#/components/schemas/Iri"
+        display:
+          $ref: "#/components/schemas/LanguageMap"
+        description:
+          $ref: "#/components/schemas/LanguageMap"
+        contentType:
+          type: string
+          pattern: "^[^/[:space:]]+/[^/[:space:]]+(;.*)?$"
+        length:
+          type: integer
+          minimum: 0
+        sha2:
+          type: string
+          pattern: "^[0-9A-Fa-f]{64}$"
+        fileUrl:
+          $ref: "#/components/schemas/Iri"
+      additionalProperties: false
+    Statement:
+      type: object
+      required: [actor, verb, object]
+      x-kiva-requirements:
+        - xapi-lrs-4.2-statement-immutability-preserve
+        - xapi-lrs-4.2-statement-immutability-ignore-excluded
+        - xapi-lrs-4.2.1-statement-type-validation
+        - xapi-lrs-4.2.1-statement-extra-properties
+        - xapi-lrs-4.2.1-statement-invalid-iris
+        - xapi-lrs-4.2.1-statement-duplicate-properties
+        - xapi-lrs-4.2.1-statement-required-null-case
+        - xapi-lrs-4.2.2-statement-version-format
+        - xapi-lrs-4.2.2.2-verb-properties
+        - xapi-lrs-4.2.2.3-activity-properties
+        - xapi-lrs-4.2.2.3-activity-definition-properties
+        - xapi-lrs-4.2.2.3-substatement-properties
+        - xapi-lrs-4.2.2.4-result-properties
+        - xapi-lrs-4.2.2.4-score-properties
+        - xapi-lrs-4.2.2.5-context-properties
+        - xapi-lrs-4.2.2.5-context-activities
+        - xapi-lrs-4.2.2.5-context-agent-relations
+        - xapi-lrs-4.2.2.5-context-group-relations
+        - xapi-lrs-4.2.2.6-attachment-properties
+        - xapi-lrs-4.2.4.1-voided-target-missing-not-rejected
+        - xapi-lrs-4.2.4.1-future-timestamp-not-rejected
+        - xapi-lrs-4.2.4.2-return-serialization
+        - xapi-lrs-4.2.4.2-create-statement-id
+        - xapi-lrs-4.2.4.2-number-precision
+        - xapi-lrs-4.2.4.2-interaction-type
+        - xapi-lrs-4.2.4.2-timestamp-default
+        - xapi-lrs-4.2.4.2-stored-set-by-lrs
+        - xapi-lrs-4.2.4.2-authority-present
+        - xapi-lrs-4.2.4.2-authority-deterministic
+        - xapi-lrs-4.2.4.2-context-activities-array
+        - xapi-lrs-4.2.4.3-version-retention
+        - xapi-lrs-4.2.5-voided-verb-rejection
+        - xapi-lrs-4.2.5-voided-state
+        - xapi-lrs-4.2.6-jws-compact
+        - xapi-lrs-4.2.6-jws-payload
+        - xapi-lrs-4.2.6-jws-algorithm
+        - xapi-lrs-4.2.6-reject-malformed-signature
+        - xapi-lrs-4.2.6-verify-signature
+        - xapi-lrs-4.2.7-extension-key-iri
+        - xapi-lrs-4.2.7-extension-values
+        - xapi-lrs-4.2.7-duration-format
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        actor:
+          $ref: "#/components/schemas/Actor"
+        verb:
+          $ref: "#/components/schemas/Verb"
+        object:
+          $ref: "#/components/schemas/StatementObject"
+        result:
+          $ref: "#/components/schemas/Result"
+        context:
+          $ref: "#/components/schemas/Context"
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+        stored:
+          $ref: "#/components/schemas/Timestamp"
+        authority:
+          $ref: "#/components/schemas/Actor"
+        version:
+          type: string
+          pattern: '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attachment"
+      additionalProperties: false
+    StatementResult:
+      type: object
+      required: [statements]
+      properties:
+        statements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Statement"
+        more:
+          type: string
+      additionalProperties: false
+    Document:
+      description: Generic xAPI document resource body.
+      oneOf:
+        - type: object
+          additionalProperties: true
+        - type: array
+          items: true
+        - type: string
+        - type: number
+        - type: boolean
+    StringIdArray:
+      type: array
+      items:
+        type: string
+    About:
+      type: object
+      required: [version]
+      x-kiva-requirements:
+        - xapi-lrs-4.1.6.7-about-version
+      properties:
+        version:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: ["2.0.0"]
+        extensions:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+      additionalProperties: false
+
+x-kiva-contract:
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  xapi-version: 2.0.0
+  requirement-catalog: spec/requirements/ieee-39274-1-1-2025.yaml
+  contract-level: validated-http-boundary
+  evidence:
+    - crates/kiva-http-core/src/lib.rs
+    - crates/kiva-http-core/src/http/mod.rs
+    - crates/kiva-http-core/src/http/version.rs
+    - crates/kiva-http-core/src/http/auth.rs
+    - crates/kiva-http-core/src/http/etag.rs
+    - crates/kiva-http-core/src/http/documents.rs
+    - crates/kiva-http-core/src/http/statements.rs
+    - crates/kiva-http-core/src/http/kani_harnesses.rs
+    - crates/kiva-http-core/src/http/tests.rs
+    - crates/kiva-xapi/src/lib.rs
+    - crates/kiva-xapi/src/xapi/mod.rs
+    - crates/kiva-xapi/src/xapi/constants.rs
+    - crates/kiva-xapi/src/xapi/errors.rs
+    - crates/kiva-xapi/src/xapi/admission.rs
+    - crates/kiva-xapi/src/xapi/authority.rs
+    - crates/kiva-xapi/src/xapi/language.rs
+    - crates/kiva-xapi/src/xapi/filtering.rs
+    - crates/kiva-xapi/src/xapi/comparison.rs
+    - crates/kiva-xapi/src/xapi/actor.rs
+    - crates/kiva-xapi/src/xapi/validation.rs
+    - crates/kiva-xapi/src/xapi/tests.rs
+    - crates/kiva-server/src/core/state.rs
+    - crates/kiva-server/src/core/request_guards.rs
+    - crates/kiva-server/src/surfaces/xapi/routes.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers/about.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers/common.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+    - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+    - crates/kiva-server/src/surfaces/xapi/request.rs
+    - crates/kiva-server/src/surfaces/xapi/request/attachments.rs
+    - crates/kiva-server/src/surfaces/xapi/request/content.rs
+    - crates/kiva-server/src/surfaces/xapi/request/json.rs
+    - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+    - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+    - crates/kiva-server/src/surfaces/xapi/request/person.rs
+    - crates/kiva-server/src/surfaces/xapi/request/query.rs
+    - crates/kiva-server/src/surfaces/xapi/request/projection.rs
+    - crates/kiva-server/src/surfaces/xapi/service.rs
+    - crates/kiva-server/src/surfaces/xapi/repository.rs
+    - crates/kiva-server/src/surfaces/xapi/storage.rs
+    - crates/kiva-server/src/surfaces/xapi/wire.rs
+  authorization-boundary: >
+    OAuth/OIDC-derived bearer tokens are a Kiva resource-server boundary.
+    Non-/about xAPI operations declare xapi:read or xapi:write in
+    x-kiva-required-scopes. Anonymous xAPI requests remain deployment
+    configurable for conformance compatibility unless KIVA_REQUIRE_AUTHORIZATION
+    is enabled; bearer-token requests fail closed on missing scopes.
+  notes:
+    - >
+      This OpenAPI contract captures the HTTP boundary. Deep xAPI data-model
+      requirements, Statement immutability equivalence, multipart attachment
+      hash matching, and permission-driven query behavior require conformance
+      tests and/or separate formal models.

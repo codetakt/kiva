@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:verification:obligations:1",
+  "title": "Kiva verification obligation index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "description",
+    "generated_from",
+    "generated_artifacts",
+    "model",
+    "summary",
+    "obligations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-verification-obligation-index" },
+    "status": { "const": "active" },
+    "description": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["obligation_index", "markdown"],
+      "properties": {
+        "obligation_index": { "$ref": "#/$defs/nonEmptyString" },
+        "markdown": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_type", "property_first", "tool_neutral", "discharge_methods"],
+      "properties": {
+        "root_type": { "const": "VerificationObligation" },
+        "property_first": { "const": true },
+        "tool_neutral": { "const": true },
+        "discharge_methods": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["obligation_count", "complete_count", "incomplete_count", "receipt_required_count"],
+      "properties": {
+        "obligation_count": { "type": "integer", "minimum": 0 },
+        "complete_count": { "type": "integer", "minimum": 0 },
+        "incomplete_count": { "type": "integer", "minimum": 0 },
+        "receipt_required_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "obligations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/obligation" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "discharge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "receipt_id", "source_field", "count", "status"],
+      "properties": {
+        "method": { "$ref": "#/$defs/nonEmptyString" },
+        "receipt_id": { "$ref": "#/$defs/nonEmptyString" },
+        "source_field": { "$ref": "#/$defs/nonEmptyString" },
+        "count": { "type": "integer", "minimum": 1 },
+        "status": { "const": "declared" }
+      }
+    },
+    "obligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "root_type",
+        "status",
+        "mechanism",
+        "boundary_property",
+        "required_discharge_methods",
+        "declared_discharges",
+        "missing_required_discharge_methods",
+        "complete"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "root_type": { "const": "VerificationObligation" },
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "mechanism": { "$ref": "#/$defs/nonEmptyString" },
+        "boundary_property": { "$ref": "#/$defs/nonEmptyString" },
+        "required_discharge_methods": { "$ref": "#/$defs/stringArray" },
+        "declared_discharges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/discharge" }
+        },
+        "missing_required_discharge_methods": { "$ref": "#/$defs/stringArray" },
+        "complete": { "type": "boolean" }
+      }
+    }
+  }
+}

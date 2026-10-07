@@ -1,0 +1,122 @@
+schema_version: 1
+kind: kiva-pds-resource-family-source
+status: active
+description: Canonical PDS resource-family descriptions and implementation anchors used by the surface catalog bundle.
+pds_resource_families:
+- id: consent
+  description: Consent and delegation grant lifecycle.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/consent.rs
+  - crates/kiva-pds/src/pds/events/consent.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/consent.rs
+  - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+- id: data-products
+  description: Approved aggregate data-product metadata and policy-gated reads.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/data_products.rs
+  - crates/kiva-pds/src/pds/events/data_products.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-pds/src/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+- id: provider-bindings
+  description: Metadata-only secret/confidential-compute provider bindings.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+  - db/migrations/20260619280000_pds_provider_bindings.sql
+- id: inventory-export
+  description: Subject-visible inventory, metadata export, and governed portability projections.
+  implementation_files:
+  - crates/kiva-application/src/pds/model/snapshot.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/portability.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+  - docs/architecture/learner-data-portability-export.md
+- id: access
+  description: Access-decision evaluation and audit-event projections.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+  - crates/kiva-server/src/surfaces/pds/model/policy_adapter.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/access.rs
+  - crates/kiva-server/src/surfaces/pds/repository/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+- id: lifecycle
+  description: Lifecycle events, retention policies, and workflow cases.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/lifecycle.rs
+  - crates/kiva-pds/src/pds/events/lifecycle.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/events.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/retention.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+- id: governance
+  description: Public-sector deployment governance profiles.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/governance.rs
+  - crates/kiva-pds/src/pds/events/governance.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/governance.rs
+  - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs

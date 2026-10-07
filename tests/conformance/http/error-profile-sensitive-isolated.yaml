@@ -1,0 +1,54 @@
+suite:
+  id: xapi-lrs-error-profile-sensitive-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Error checks that require deterministic endpoint fixture profiles.
+cases:
+  - id: request-too-large-profile-returns-413
+    requirements:
+      - xapi-lrs-4.1.5-too-large
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: true
+    requires_endpoint_profiles:
+      - deterministic-too-large-threshold
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000901
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      raw_body: '{{kiva_endpoint_profile_too_large_statement_body}}'
+    expect:
+      status: 413
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: deterministic-rate-limit-profile-returns-429
+    requirements:
+      - xapi-lrs-4.1.5-rate-limit
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: true
+    requires_endpoint_profiles:
+      - deterministic-rate-limit-trigger
+    request:
+      method: GET
+      path: '{{kiva_endpoint_profile_rate_limit_path}}'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      repeat:
+        count: '{{kiva_endpoint_profile_rate_limit_request_count}}'
+    expect:
+      status: 429
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0

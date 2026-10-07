@@ -1,0 +1,116 @@
+---
+schema_version: 1
+kind: psi-oprf-dh-voprf-job-contract
+profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+use_case: cross-school-cohort-matching
+status: review-gated-runtime-boundary
+claim_boundary: >
+  Kiva defines a narrow DH-OPRF PSI runtime boundary for n-of-n cohort
+  matching. Kiva accepts only opaque evaluated OPRF elements and transcript
+  metadata from an isolated runtime adapter. Raw identifiers, OPRF private
+  keys, blinds, unblinded intermediate values, non-matches, and per-participant
+  transcript contents are not released by the Kiva boundary. Production use is
+  blocked until external cryptographic review is complete.
+protocol:
+  family: dh-oprf-psi
+  suite: ristretto255-sha512-voprf
+  profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+  participant_model: cross-school-custodians
+  minimum_participants: 2
+  requires_all_participants: true
+  runtime_adapter: isolated-reviewed-runtime
+runtime_boundary:
+  kiva_accepts:
+    - job_id
+    - participant_index
+    - transcript_status
+    - evaluated_oprf_elements
+    - runtime_artifact_digest
+    - review_evidence_digest
+  kiva_rejects_or_never_accepts:
+    - rawIdentifier
+    - raw_identifier
+    - identifier
+    - identifiers
+    - studentId
+    - student_id
+    - email
+    - oprfPrivateKey
+    - oprf_private_key
+    - blind
+    - blinds
+    - unblindedElement
+    - unblinded_element
+wire_format:
+  request_required_fields:
+    - job_id
+    - profile
+    - suite
+    - participant_count
+    - runtime_artifact_digest
+    - review_evidence_digest
+    - external_review_completed
+    - participants
+  participant_required_fields:
+    - participant_index
+    - status
+    - evaluated_elements
+  response_required_fields:
+    - job_id
+    - profile
+    - suite
+    - participant_count
+    - intersection_elements
+    - intersection_count
+    - transcript_digest
+transcript_record_boundary:
+  replay_key:
+    - job_id
+    - transcript_digest
+  record_shape: PsiOprfTranscriptRecord
+  dedicated_http_api: false
+  dedicated_postgresql_store: false
+  generic_confidential_job_evidence_boundary: true
+  duplicate_job_id_rejected: true
+  duplicate_transcript_digest_rejected: true
+abort_semantics:
+  participant_statuses:
+    - submitted
+    - aborted
+  any_aborted_participant_blocks_intersection: true
+  aborted_transcript_is_not_releasable: true
+release_gate:
+  requires:
+    - intersection_computed
+    - participants_active
+    - external_crypto_review_completed
+    - policy_approved
+    - governed_pds_data_product
+leakage_profile:
+  reveals:
+    - intersection opaque element values
+    - intersection cardinality
+    - participant count
+    - transcript digest
+  does_not_reveal:
+    - raw identifiers
+    - OPRF private keys
+    - blinding values
+    - non-matching elements
+    - per-participant element sets
+    - participant ownership of non-matches
+pds:
+  dedicated_data_product_source_kind_implemented: false
+  future_source_kind: private-set-intersection-result
+  resource_class: aggregate-insights
+  raw_record_read: false
+  data_product_admission_requires: []
+  current_release_boundary: generic_confidential_job_evidence
+evidence:
+  core: crates/kiva-confidential/src/lib.rs
+  vectors: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+  assurance_profile: spec/confidential/production-psi-upgrade-assurance.yaml
+  validator: scripts/ci/validate_production_psi_upgrade_assurance.py
+  tamarin_model: proofs/tamarin/kiva_psi_oprf_boundary.spthy
+  design_note: docs/architecture/production-psi-upgrade.md
+  operator_runbook: docs/operations/psi-oprf-runbook.md

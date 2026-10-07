@@ -1,0 +1,420 @@
+theory Kiva_Confidential_Workflow_Boundary
+begin
+
+rule RegisterDataCustodian:
+  [ Fr(~custodian) ]
+  --[ DataCustodianRegistered(~custodian) ]->
+  [ !DataCustodian(~custodian) ]
+
+rule RegisterPolicyAuthority:
+  [ Fr(~authority) ]
+  --[ PolicyAuthorityRegistered(~authority) ]->
+  [ !PolicyAuthority(~authority) ]
+
+rule RegisterAnalyst:
+  [ Fr(~analyst) ]
+  --[ AnalystRegistered(~analyst) ]->
+  [ !Analyst(~analyst) ]
+
+rule RegisterComputationParticipant:
+  [ Fr(~participant) ]
+  --[ ComputationParticipantRegistered(~participant) ]->
+  [ !ComputationParticipant(~participant) ]
+
+rule CustodianReadsRawRecord:
+  [ !DataCustodian(custodian) ]
+  --[ RawRecordRead(custodian) ]->
+  []
+
+rule OpenConfidentialWorkflow:
+  [ Fr(~workflow) ]
+  --[ ConfidentialWorkflowOpened(~workflow) ]->
+  [ WorkflowOpen(~workflow) ]
+
+rule AdmitCustodianInput:
+  [
+    WorkflowOpen(workflow),
+    !DataCustodian(custodian)
+  ]
+  --[ CustodianInputAdmitted(workflow, custodian) ]->
+  [ WaitingForComputationParticipant(workflow, custodian) ]
+
+rule AdmitComputationParticipant:
+  [
+    WaitingForComputationParticipant(workflow, custodian),
+    !ComputationParticipant(participant)
+  ]
+  --[ ComputationParticipantAdmitted(workflow, participant) ]->
+  [ WorkflowReady(workflow, custodian, participant) ]
+
+rule CommitConfidentialInput:
+  [ WorkflowReady(workflow, custodian, participant) ]
+  --[ ConfidentialInputCommitted(workflow, custodian, participant) ]->
+  [ ComputationReady(workflow, custodian, participant) ]
+
+rule ComputeAggregateInsight:
+  [ ComputationReady(workflow, custodian, participant) ]
+  --[ AggregateComputed(workflow, custodian, participant) ]->
+  [ PendingResultRelease(workflow, custodian, participant) ]
+
+rule AuthorizeAggregateRelease:
+  [
+    PendingResultRelease(workflow, custodian, participant),
+    !PolicyAuthority(authority)
+  ]
+  --[
+    AggregateReleaseAuthorized(workflow, authority),
+    AggregateReleased(workflow, authority)
+  ]->
+  [ !ReleasedAggregate(workflow) ]
+
+rule AnalystReadsReleasedAggregate:
+  [
+    !ReleasedAggregate(workflow),
+    !Analyst(analyst)
+  ]
+  --[ AggregateRead(workflow, analyst) ]->
+  []
+
+rule OpenThresholdReleaseWorkflow:
+  [
+    Fr(~workflow),
+    Fr(~left_authority),
+    Fr(~right_authority)
+  ]
+  --[
+    PolicyAuthorityRegistered(~left_authority),
+    PolicyAuthorityRegistered(~right_authority),
+    ThresholdReleaseAuthoritiesAssigned(
+      ~workflow, ~left_authority, ~right_authority
+    ),
+    ThresholdConfidentialWorkflowOpened(~workflow)
+  ]->
+  [
+    !PolicyAuthority(~left_authority),
+    !PolicyAuthority(~right_authority),
+    ThresholdWorkflowOpen(~workflow, ~left_authority, ~right_authority)
+  ]
+
+rule AdmitThresholdCustodianInput:
+  [
+    ThresholdWorkflowOpen(workflow, left_authority, right_authority),
+    !DataCustodian(custodian)
+  ]
+  --[ ThresholdCustodianInputAdmitted(workflow, custodian) ]->
+  [
+    WaitingForThresholdComputationParticipant(
+      workflow, custodian, left_authority, right_authority
+    )
+  ]
+
+rule AdmitThresholdComputationParticipant:
+  [
+    WaitingForThresholdComputationParticipant(
+      workflow, custodian, left_authority, right_authority
+    ),
+    !ComputationParticipant(participant)
+  ]
+  --[ ThresholdComputationParticipantAdmitted(workflow, participant) ]->
+  [
+    ThresholdWorkflowReady(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule CommitThresholdConfidentialInput:
+  [
+    ThresholdWorkflowReady(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+  --[ ThresholdConfidentialInputCommitted(workflow, custodian, participant) ]->
+  [
+    ThresholdComputationReady(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule ComputeThresholdAggregateInsight:
+  [
+    ThresholdComputationReady(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+  --[
+    ThresholdAggregateComputed(workflow, custodian, participant),
+    ThresholdComputedAggregatePersisted(workflow)
+  ]->
+  [
+    !ThresholdPersistedComputedAggregate(workflow),
+    ThresholdComputedResult(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule PersistThresholdReleaseRequest:
+  [
+    ThresholdComputedResult(
+      workflow, custodian, participant, left_authority, right_authority
+    ),
+    !ThresholdPersistedComputedAggregate(workflow)
+  ]
+  --[
+    ThresholdReleaseRequestPersisted(
+      workflow, left_authority, right_authority
+    )
+  ]->
+  [
+    !ThresholdPersistedReleaseRequest(
+      workflow, left_authority, right_authority
+    ),
+    ThresholdAwaitingLeftReleaseApproval(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule RecordLeftThresholdReleaseApproval:
+  [
+    ThresholdAwaitingLeftReleaseApproval(
+      workflow, custodian, participant, left_authority, right_authority
+    ),
+    !ThresholdPersistedReleaseRequest(
+      workflow, left_authority, right_authority
+    ),
+    !PolicyAuthority(left_authority)
+  ]
+  --[ ThresholdReleaseApproved(workflow, left_authority) ]->
+  [
+    ThresholdAwaitingRightReleaseApproval(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule RecordRightThresholdReleaseApproval:
+  [
+    ThresholdAwaitingRightReleaseApproval(
+      workflow, custodian, participant, left_authority, right_authority
+    ),
+    !ThresholdPersistedReleaseRequest(
+      workflow, left_authority, right_authority
+    ),
+    !PolicyAuthority(right_authority)
+  ]
+  --[ ThresholdReleaseApproved(workflow, right_authority) ]->
+  [
+    ThresholdApprovedRelease(
+      workflow, custodian, participant, left_authority, right_authority
+    )
+  ]
+
+rule ReleaseThresholdAggregate:
+  [
+    ThresholdApprovedRelease(
+      workflow, custodian, participant, left_authority, right_authority
+    ),
+    !ThresholdPersistedReleaseRequest(
+      workflow, left_authority, right_authority
+    )
+  ]
+  --[
+    ThresholdAggregateReleased(workflow, left_authority, right_authority),
+    ThresholdAggregateReleaseAudited(
+      workflow, left_authority, right_authority
+    )
+  ]->
+  [ !ThresholdReleasedAggregate(workflow) ]
+
+rule AnalystReadsThresholdReleasedAggregate:
+  [
+    !ThresholdReleasedAggregate(workflow),
+    !Analyst(analyst)
+  ]
+  --[ ThresholdAggregateRead(workflow, analyst) ]->
+  []
+
+lemma raw_record_read_requires_data_custodian:
+  "All principal #i.
+    RawRecordRead(principal) @ #i
+    ==>
+    Ex #j.
+      DataCustodianRegistered(principal) @ #j
+      & #j < #i"
+
+lemma analyst_cannot_read_raw_records:
+  "All principal #i #j.
+    AnalystRegistered(principal) @ #i
+    & RawRecordRead(principal) @ #j
+    ==>
+    F"
+
+lemma computation_participant_admission_requires_registration:
+  "All workflow participant #i.
+    ComputationParticipantAdmitted(workflow, participant) @ #i
+    ==>
+    Ex #j.
+      ComputationParticipantRegistered(participant) @ #j
+      & #j < #i"
+
+lemma aggregate_compute_requires_custodian_and_computation_participant:
+  "All workflow custodian participant #i.
+    AggregateComputed(workflow, custodian, participant) @ #i
+    ==>
+    (Ex #j.
+      CustodianInputAdmitted(workflow, custodian) @ #j
+      & #j < #i)
+    & (Ex #k.
+      ComputationParticipantAdmitted(workflow, participant) @ #k
+      & #k < #i)"
+
+lemma aggregate_release_requires_policy_authority:
+  "All workflow authority #i.
+    AggregateReleased(workflow, authority) @ #i
+    ==>
+    Ex #j.
+      PolicyAuthorityRegistered(authority) @ #j
+      & #j < #i"
+
+lemma aggregate_release_requires_prior_computation:
+  "All workflow authority #i.
+    AggregateReleased(workflow, authority) @ #i
+    ==>
+    Ex custodian participant #j.
+      AggregateComputed(workflow, custodian, participant) @ #j
+      & #j < #i"
+
+lemma aggregate_read_requires_release:
+  "All workflow analyst #i.
+    AggregateRead(workflow, analyst) @ #i
+    ==>
+    Ex authority #j.
+      AggregateReleased(workflow, authority) @ #j
+      & #j < #i"
+
+lemma aggregate_read_requires_analyst_registration:
+  "All workflow analyst #i.
+    AggregateRead(workflow, analyst) @ #i
+    ==>
+    Ex #j.
+      AnalystRegistered(analyst) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_left_policy_authority:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      PolicyAuthorityRegistered(left_authority) @ #j
+      & #j < #i"
+
+lemma threshold_release_authorities_are_distinct:
+  "All workflow left_authority right_authority #i.
+    ThresholdReleaseAuthoritiesAssigned(
+      workflow, left_authority, right_authority
+    ) @ #i
+    & left_authority = right_authority
+    ==>
+    F"
+
+lemma threshold_release_requires_right_policy_authority:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      PolicyAuthorityRegistered(right_authority) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_left_approval:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      ThresholdReleaseApproved(workflow, left_authority) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_right_approval:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      ThresholdReleaseApproved(workflow, right_authority) @ #j
+      & #j < #i"
+
+lemma threshold_approval_requires_persisted_release_request:
+  "All workflow authority #i.
+    ThresholdReleaseApproved(workflow, authority) @ #i
+    ==>
+    Ex left_authority right_authority #j.
+      ThresholdReleaseRequestPersisted(
+        workflow, left_authority, right_authority
+      ) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_prior_computation:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex custodian participant #j.
+      ThresholdAggregateComputed(workflow, custodian, participant) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_persisted_computed_aggregate:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      ThresholdComputedAggregatePersisted(workflow) @ #j
+      & #j < #i"
+
+lemma threshold_release_requires_persisted_release_request:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    Ex #j.
+      ThresholdReleaseRequestPersisted(
+        workflow, left_authority, right_authority
+      ) @ #j
+      & #j < #i"
+
+lemma threshold_release_produces_audit_record:
+  "All workflow left_authority right_authority #i.
+    ThresholdAggregateReleased(
+      workflow, left_authority, right_authority
+    ) @ #i
+    ==>
+    ThresholdAggregateReleaseAudited(
+      workflow, left_authority, right_authority
+    ) @ #i"
+
+lemma threshold_aggregate_read_requires_release:
+  "All workflow analyst #i.
+    ThresholdAggregateRead(workflow, analyst) @ #i
+    ==>
+    Ex left_authority right_authority #j.
+      ThresholdAggregateReleased(
+        workflow, left_authority, right_authority
+      ) @ #j
+      & #j < #i"
+
+lemma threshold_aggregate_read_requires_analyst_registration:
+  "All workflow analyst #i.
+    ThresholdAggregateRead(workflow, analyst) @ #i
+    ==>
+    Ex #j.
+      AnalystRegistered(analyst) @ #j
+      & #j < #i"
+
+end

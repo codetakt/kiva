@@ -1,0 +1,74 @@
+name: Release Evidence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NIX_CONFIG: experimental-features = nix-command flakes
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  release-evidence:
+    name: Evidence Set Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          free-disk: "true"
+          enable-flakehub-cache: "true"
+
+      - name: Validate strict release evidence contract fixture
+        run: nix build .#checks.x86_64-linux.release-evidence-contract --print-build-logs
+
+      - name: Build evidence bundles
+        run: |
+          nix build .#conformance-evidence-static \
+            --print-build-logs \
+            --out-link result-conformance-evidence-static
+          nix build .#formal-verification-evidence-smoke \
+            --print-build-logs \
+            --out-link result-formal-verification-evidence-smoke
+          nix build .#pds-evidence-static \
+            --print-build-logs \
+            --out-link result-pds-evidence-static
+
+      - name: Validate generated evidence set
+        run: |
+          nix develop .#verification -c python scripts/ci/validate_release_evidence_set.py \
+            --conformance result-conformance-evidence-static \
+            --formal result-formal-verification-evidence-smoke \
+            --allow-dirty \
+            --allow-static-conformance \
+            --allow-formal-smoke
+
+      - name: Collect evidence bundles
+        run: |
+          mkdir -p artifacts/conformance-evidence-static artifacts/formal-verification-evidence-smoke artifacts/pds-evidence-static
+          cp -R --dereference result-conformance-evidence-static/. artifacts/conformance-evidence-static/
+          cp -R --dereference result-formal-verification-evidence-smoke/. artifacts/formal-verification-evidence-smoke/
+          cp -R --dereference result-pds-evidence-static/. artifacts/pds-evidence-static/
+
+      - name: Upload release evidence set
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-set
+          path: artifacts/
+          retention-days: 30

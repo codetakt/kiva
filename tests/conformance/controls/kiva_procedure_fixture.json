@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "axis": "target implementation",
+  "basis": "Author-declared disposable local Kiva fixture, policy information confirmed in the bound implementation; expected obligations remain source-derived. This is not an external operator statement.",
+  "clock_control": false,
+  "host_clock_shared": true,
+  "canonical_submitted_fixture": "Direct Activity definitions retained by statement storage; canonical Statement projection selects language maps. /activities merges available direct Object definitions. Fixture uses one uncontested definition per id; policy input digests bound.",
+  "authorization_policy": "Local optional authorization; refused token and statement-read-only token fixtures are configured by conformance_lib.sh. No external IdP delegation exercised.",
+  "authority_policy": "Local credential subject maps deterministically to Agent; anonymous default and writer-a supply two identities; submitted authority overwritten.",
+  "interaction_policy": "Configured built-in common validity; optional pattern/component acceptance remains distinct from invalid interactionType. Full optional policy audit is open.",
+  "resolvable_metadata_policy": "No hosted metadata fixture declared; optional fetch observation remains open.",
+  "cursor_policy": "No fixed cache/rerun declaration; observe as advisory only.",
+  "size_limit": 4096,
+  "rate_path": "/__kiva/conformance/rate-limit",
+  "policy_inputs": {
+    "crates/kiva-server/src/surfaces/xapi/wire.rs": "0cebf7276edeffabc73a588b9ed72a982b5274371b4852adaf090cf124291adc",
+    "crates/kiva-server/src/surfaces/xapi/request/projection.rs": "01b39840a9de8eecb83e50f85633795d648461f0ab69cc4e473cf31626a103fd",
+    "crates/kiva-xapi/src/xapi/language.rs": "5cdd6086c716c3bd64a30014c536433de29f06ee811adb311b65586cf98d08ab",
+    "crates/kiva-server/src/core/auth.rs": "7e32b03bdd94d303da84c9c91d49b5be5654e014b129cc5af4ab6ae67cfccd62",
+    "crates/kiva-server/src/surfaces/xapi/handlers/documents.rs": "abf3e5644d661a1ba3061291725e31f6fa4f496bfe6f5964e8bc1d67efc8f0fe",
+    "scripts/ci/conformance_lib.sh": "b636a82b262f31c8fa909e9291791348253d3fd7cc112678618cd70cb8f8866c",
+    "crates/kiva-server/src/core/runtime.rs": "3544c7c8ca2a968d172ffbc665eed49b770399fe27b6ebfe05d2a6546edd50b6",
+    "crates/kiva-server/src/surfaces/xapi/model.rs": "63813e8626e79d10e990d4bb3546c00ade6183fb836a118072ba6a4b82e69e26",
+    "crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs": "b12497c50a84313c1c3839ad7d1dda06aa0c6460b5166318ed99e9aedca7a93a",
+    "crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs": "517829212c577e24c576724df3e08cfa78b18182e6e27af7dbe28b631248ff1d"
+  },
+  "rate_window_seconds": 1,
+  "rate_trigger_request_count": 3
+}

@@ -1,0 +1,17 @@
+[package]
+name = "kiva-http-core"
+description = "Pure HTTP boundary contracts for Kiva."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

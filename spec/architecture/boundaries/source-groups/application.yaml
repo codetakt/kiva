@@ -1,0 +1,282 @@
+description: >
+  Source-group boundary anchors split by architectural area.
+
+source_groups:
+  - id: application-runtime-boundary
+    description: Application workflows receive deterministic runtime ports for time, workflow identifiers, and workflow boundary observation.
+    paths:
+      - crates/kiva-application/src/lib.rs
+      - crates/kiva-application/src/pds.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/runtime.rs
+      - crates/kiva-application/src/runtime/workflow.rs
+      - crates/kiva-application/src/runtime/workflow/admission.rs
+      - crates/kiva-application/src/runtime/workflow/audit.rs
+      - crates/kiva-application/src/runtime/workflow/context.rs
+      - crates/kiva-application/src/runtime/workflow/executor.rs
+      - crates/kiva-application/src/runtime/workflow/operation.rs
+      - crates/kiva-application/src/runtime/workflow/operation/gateway.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities/ports.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/commands/consent.rs
+      - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+      - crates/kiva-application/src/pds/workflow/commands/governance.rs
+      - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+      - crates/kiva-application/src/pds/workflow/queries.rs
+    required_text:
+      - "pub mod runtime;"
+      - "pub trait ApplicationClock"
+      - "pub trait ApplicationIdGenerator"
+      - "pub trait ApplicationWorkflowBoundary"
+      - "pub trait ApplicationRuntimePort"
+      - "pub enum ApplicationWorkflowAuditStatus"
+      - "pub struct ApplicationWorkflowAuditEvent"
+      - "struct ApplicationWorkflowExecutor"
+      - "pub trait ApplicationOperation"
+      - "pub trait ApplicationAdmissionPolicy"
+      - "struct ApplicationOperationKernel"
+      - "pub struct ApplicationOperationGateway"
+      - "pub struct ApplicationOperationPlan"
+      - "pub struct ApplicationWorkflowFailure"
+      - "enum ApplicationWorkflowExecutionError"
+      - "pub struct ApplicationWorkflowContext"
+      - "pub struct Admitted<T, W = UnscopedAdmission>"
+      - "pub struct PrincipalBound"
+      - "pub struct WorkflowBound"
+      - "complete_workflow_boundary"
+      - "fail_workflow_boundary"
+      - "pub struct ApplicationWorkflowKind"
+      - "pub struct ApplicationWorkflowSpec"
+      - "pub struct ApplicationRuntime"
+      - "pub type DefaultApplicationRuntime"
+      - "pub(crate) mod workflow"
+      - "pub(crate) enum PdsWorkflowKind"
+      - "workflow_spec()"
+      - "PdsWorkflowKind::RegisterDataProduct"
+      - "run_write_workflow("
+      - "self.operation_gateway()"
+      - "PdsWorkflowKind::RegisterConsentGrant"
+      - "PdsWorkflowKind::RegisterGovernanceProfile"
+      - "self.runtime().now_utc()"
+  - id: pds-application-boundary
+    description: Cross-surface PDS workflows exposed through application methods and capabilities.
+    paths:
+      - crates/kiva-server/src/app/pds.rs
+      - crates/kiva-server/src/app/pds/server_adapters.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/reads.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/consent.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/data_products.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/governance.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes/lifecycle.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/outcomes.rs
+      - crates/kiva-server/src/app/pds/server_adapters/projection.rs
+      - crates/kiva-server/src/app/pds/server_adapters/records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-server/src/app/pds/server_adapters/xapi.rs
+      - crates/kiva-application/src/pds.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/pds/model.rs
+      - crates/kiva-application/src/pds/model/errors.rs
+      - crates/kiva-application/src/pds/model/records.rs
+      - crates/kiva-application/src/pds/model/snapshot.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities/ports.rs
+      - crates/kiva-application/src/pds/capabilities/projection.rs
+      - crates/kiva-application/src/pds/capabilities/records.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/commands/consent.rs
+      - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+      - crates/kiva-application/src/pds/workflow/commands/governance.rs
+      - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+      - crates/kiva-application/src/pds/workflow/queries.rs
+      - crates/kiva-application/src/runtime.rs
+      - crates/kiva-application/src/runtime/workflow.rs
+      - crates/kiva-application/src/runtime/workflow/admission.rs
+      - crates/kiva-application/src/runtime/workflow/audit.rs
+      - crates/kiva-application/src/runtime/workflow/context.rs
+      - crates/kiva-application/src/runtime/workflow/executor.rs
+      - crates/kiva-application/src/runtime/workflow/operation.rs
+      - crates/kiva-application/src/runtime/workflow/operation/gateway.rs
+      - crates/kiva-pds/src/pds/identity.rs
+    required_text:
+      - "pub struct PdsApplication"
+      - "pub struct PdsSubjectId"
+      - "pub struct PdsSubjectSnapshot"
+      - "pub struct PdsMetadataRecords"
+      - "pub struct PdsSubjectProjectionPort"
+      - "pub trait PdsSubjectIdentityMapper"
+      - "pub struct AccountHomePagePdsSubjectIdentityMapper"
+      - "pub struct PdsSubjectAccountNamespace"
+      - "pub fn pds_subject_actor_ifi("
+      - "pub trait PdsApplicationPortSet"
+      - "pub struct PdsApplicationPorts"
+      - "pub(crate) struct XapiStatementReadPort"
+      - "pub(crate) struct PdsRecordPort"
+      - "pub(crate) struct ReleaseArtifactAvailabilityPort"
+      - "pub struct PdsApplicationWorkflow"
+      - "pub fn begin_workflow("
+      - "pub trait XapiStatementReader"
+      - "pub trait PdsRecordReadPort"
+      - "pub trait PdsRecordWritePort"
+      - "pub trait ReleaseArtifactAvailability"
+      - "pub trait ApplicationRuntimePort"
+      - "pub(crate) fn capabilities_from_server_adapters("
+      - "pub(crate) const fn from_server_adapter("
+      - "mod errors;"
+      - "mod pds_records;"
+      - "mod projection;"
+      - "mod records;"
+      - "mod release_artifacts;"
+      - "mod snapshot;"
+      - "mod xapi;"
+      - "pub async fn record_inventory("
+      - "pub async fn metadata_export("
+      - "pub async fn register_data_product("
+      - "pub async fn register_consent_grant("
+      - "pub async fn register_governance_profile("
+      - "pub enum ApplicationRevocationOutcome"
+      - "pub enum ApplicationWriteOutcome"
+      - "pub enum PdsApplicationWriteError"
+      - "fn list_metadata_records<'a>"
+      - "fn append_domain_event<'a>"
+      - "admit_domain_event_for_principal("
+      - "execute_principal_bound_domain_event("
+      - "ApplicationOperationPlan::with_admission_policy"
+      - "event.controlling_subject()"
+      - "context.admit_principal(self.principal.subject.clone(), event)"
+      - "Admitted<PdsDomainEvent, PrincipalBound>"
+      - "PrincipalBound"
+      - "trait PdsDomainEventProjector"
+      - "fn project_domain_event<'a>"
+  - id: pds-subject-indexed-read-model
+    description: PDS inventory and metadata export use xAPI metadata indexed by subject IFI, not raw Statement JSON scans.
+    paths:
+      - crates/kiva-server/src/app/pds/server_adapters.rs
+      - crates/kiva-server/src/app/pds/server_adapters/projection.rs
+      - crates/kiva-server/src/app/pds/server_adapters/xapi.rs
+      - crates/kiva-application/src/pds/model.rs
+      - crates/kiva-application/src/pds/model/snapshot.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities/projection.rs
+      - crates/kiva-application/src/pds/capabilities/records.rs
+      - crates/kiva-pds/src/pds/identity.rs
+      - crates/kiva-server/src/surfaces/xapi/model.rs
+      - crates/kiva-server/src/surfaces/xapi/repository.rs
+      - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+      - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+    required_text:
+      - "pub(crate) struct StoredStatementMetadata"
+      - "pub struct PdsSubjectProjectionPort"
+      - "pub trait PdsSubjectIdentityMapper"
+      - "pub struct PdsSubjectSnapshot"
+      - "pub struct PdsSubjectId"
+      - "pub struct PdsSubjectAccountNamespace"
+      - "fn list_metadata_by_actor_ifi<'a>"
+      - "self.identity.actor_ifi(&principal.subject)"
+      - "WHERE tenant_id = $1 AND actor_ifi = $2"
+  - id: pds-owned-application-capability-handle
+    description: PDS cross-surface workflows receive an owned application capability handle assembled by the composition root.
+    paths:
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/core/state/http_context.rs
+      - crates/kiva-server/src/app/pds.rs
+      - crates/kiva-server/src/app/pds/server_adapters.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/capabilities/ports.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/commands/consent.rs
+      - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+      - crates/kiva-application/src/pds/workflow/commands/governance.rs
+      - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+      - crates/kiva-application/src/pds/workflow/queries.rs
+      - crates/kiva-application/src/runtime.rs
+      - crates/kiva-application/src/runtime/workflow.rs
+    required_text:
+      - "pub(crate) pds: PdsApplicationAdapter"
+      - "pub(crate) type PdsApplicationPorts"
+      - "application: PdsApplicationAdapter"
+      - "PdsApplicationAdapter::from_server_adapters(&statements, &pds, &release_artifacts)"
+      - "ReleaseArtifactAvailabilityPort::from_server_adapter"
+      - "PdsApplicationWorkflow::new(self.clone())"
+      - "pub(crate) fn pds_application(&self) -> PdsApplicationAdapter"
+      - "DefaultApplicationRuntime"
+  - id: confidential-owned-application-capability-handle
+    description: Confidential routes receive an owned application capability handle assembled by the composition root.
+    paths:
+      - crates/kiva-application/src/lib.rs
+      - crates/kiva-application/src/confidential.rs
+      - crates/kiva-application/src/confidential/boundary.rs
+      - crates/kiva-application/src/confidential/family.rs
+      - crates/kiva-application/src/confidential/operation.rs
+      - crates/kiva-application/src/confidential/workflow_kind.rs
+      - crates/kiva-application/src/confidential/additive.rs
+      - crates/kiva-application/src/confidential/differential_privacy.rs
+      - crates/kiva-application/src/confidential/jobs.rs
+      - crates/kiva-application/src/confidential/participants.rs
+      - crates/kiva-application/src/confidential/shamir.rs
+      - crates/kiva-application/src/confidential/threshold.rs
+      - crates/kiva-confidential-core/src/lib.rs
+      - crates/kiva-server/src/app/confidential.rs
+      - crates/kiva-server/src/app/confidential/additive.rs
+      - crates/kiva-server/src/app/confidential/differential_privacy.rs
+      - crates/kiva-server/src/app/confidential/participants.rs
+      - crates/kiva-server/src/app/confidential/shamir.rs
+      - crates/kiva-server/src/app/confidential/threshold.rs
+      - crates/kiva-server/src/app/confidential
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/core/state/http_context.rs
+    required_text:
+      - "pub mod confidential;"
+      - "pub trait ConfidentialWorkflowRepository"
+      - "pub trait ConfidentialAdditiveRepository"
+      - "pub trait ConfidentialDifferentialPrivacyRepository"
+      - "pub trait ConfidentialJobRepository"
+      - "pub trait ConfidentialParticipantRepository"
+      - "pub trait ConfidentialShamirRepository"
+      - "pub trait ConfidentialThresholdRepository"
+      - "pub trait ConfidentialWorkflowAdmissionRecorder"
+      - "admission_recorder: D"
+      - "with_admission_recorder"
+      - "pub enum ConfidentialWorkflowFamily"
+      - "pub enum ConfidentialWorkflowKind"
+      - "pub struct ConfidentialCommand"
+      - "pub enum ConfidentialDomainEvent"
+      - "pub enum ConfidentialOutcome"
+      - "WorkflowAdmitted"
+      - "family: ConfidentialWorkflowFamily"
+      - "fn record_workflow_event<'a>"
+      - "ConfidentialWorkflowAdmissionRecorder for ConfidentialWorkflowPort"
+      - "pub use kiva_confidential_core::{ConfidentialJobStatus, SecureAggregateTranscriptId}"
+      - "pub const CONFIDENTIAL_ARTIFACT_BYTES"
+      - "pub struct ConfidentialApplicationCapabilities"
+      - "pub struct ConfidentialApplicationWorkflow"
+      - "type AggregateRequest: ?Sized"
+      - "From<ConfidentialApplicationError>"
+      - "ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate"
+      - "ConfidentialWorkflowKind::ListJobs"
+      - "pub(crate) struct ConfidentialApplicationAdapter"
+      - "ConfidentialApplicationAdapter::from_server_adapters"
+      - "fn begin_workflow("
+      - "pub(crate) confidential: ConfidentialApplicationAdapter"
+      - "application: ConfidentialApplicationAdapter"
+      - "pub(crate) fn confidential_application(&self) -> ConfidentialApplicationAdapter"
+      - ".begin_workflow()"
+      - "release_signed_additive_aggregate(principal, request)"
+      - "register_differential_privacy_budget(principal, request)"
+      - "register_confidential_job(principal, command)"
+      - "transition_confidential_job(principal, command)"
+      - "list_confidential_jobs(principal, filter)"
+      - "register_confidential_participant(principal, request)"
+      - "reconstruct_shamir_threshold_secret(principal, request)"
+      - "register_threshold_release_request(principal, request)"
+      - "ConfidentialWorkflowPort::from_server_adapter"

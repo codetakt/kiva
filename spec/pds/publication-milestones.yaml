@@ -1,0 +1,93 @@
+schema_version: 1
+kind: pds-publication-milestone-mirror
+standard: Kiva Architecture
+scope: >
+  Kiva Personal Data Store platform extension milestones. These milestones do
+  not expand the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance claim.
+source: docs/architecture/pds-milestones.md
+milestones:
+  - id: M0
+    title: PDS boundary
+    status: completed
+    release_label: pds-m0-boundary
+    claim_boundary: Kiva PDS extension is separate from the xAPI LRS surface.
+  - id: M1
+    title: Consent and audit substrate
+    status: completed
+    release_label: pds-m1-consent-audit
+    claim_boundary: Consent, revocation, policy decision, and audit metadata substrate.
+  - id: M2
+    title: Approved data products
+    status: completed
+    release_label: pds-m2-data-products
+    claim_boundary: Data-product metadata registration from approved confidential releases.
+  - id: M3
+    title: Policy assurance
+    status: completed-current-boundary
+    release_label: pds-m3-policy-assurance
+    claim_boundary: Tests plus Kani and Tamarin evidence for current pure policy boundaries.
+  - id: M4
+    title: Personal-data lifecycle
+    status: completed-metadata-lifecycle-boundary
+    release_label: pds-m4-lifecycle-metadata
+    claim_boundary: Subject-facing inventory, metadata export, and immutable lifecycle metadata.
+  - id: M5
+    title: Confidential analytics integration
+    status: completed-current-analytics-boundary
+    release_label: pds-m5-confidential-analytics
+    claim_boundary: Governed metadata-only data-product reads backed by approved confidential releases.
+  - id: M6
+    title: Public-sector governance
+    status: completed-governance-metadata-boundary
+    release_label: pds-m6-public-sector-governance
+    claim_boundary: Separated-duty public-sector governance profile metadata.
+  - id: M7
+    title: Publication readiness
+    status: completed-publication-readiness-boundary
+    release_label: pds-m7-publication-readiness
+    claim_boundary: Contracts, examples, generated schemas, compatibility guidance, and evidence tooling.
+  - id: M8
+    title: Confidential mechanism abstraction
+    status: completed-implemented-mechanism-boundary
+    release_label: pds-m8-confidential-mechanism-abstraction
+    claim_boundary: Strict mechanism selection across the current additive, PSI, DH-OPRF PSI, Shamir, FROST, TEE, Nitro, FHE feasibility, and FHE runtime admission boundaries; dedicated PDS source kinds remain limited to threshold releases, differential-privacy releases, and Shamir reconstruction metadata.
+  - id: M9
+    title: Shamir threshold cryptography
+    status: completed-reconstruction-boundary
+    release_label: pds-m9-shamir-threshold-cryptography
+    claim_boundary: Shamir reconstruction with API, persistence, tests, and formal boundary evidence; not malicious-robust VSS or production MPC.
+  - id: M10
+    title: PDS Shamir data products
+    status: completed-metadata-only-data-product-boundary
+    release_label: pds-m10-pds-shamir-data-products
+    claim_boundary: PDS data products can reference persisted Shamir reconstruction metadata without exposing reconstructed secrets, submitted shares, or malicious-robust VSS semantics.
+  - id: M11
+    title: OAuth/OIDC resource-server binding
+    status: completed-resource-server-scope-boundary
+    release_label: pds-m11-oauth-oidc-resource-server-binding
+    claim_boundary: Protected xAPI, PDS, and confidential-computation operations are bound to exact OAuth/OIDC-derived bearer-token scopes after token validation; production IdP/JWKS/introspection integration remains outside this milestone.
+  - id: M12
+    title: Operational lifecycle workflows
+    status: completed-metadata-only-operational-workflow-boundary
+    release_label: pds-m12-operational-lifecycle-workflows
+    claim_boundary: Retention schedules, tombstone publication rules, and correction/dispute/tombstone case state machines are represented as subject-scoped PDS metadata without mutating accepted xAPI Statements or executing physical deletion/redaction.
+  - id: M13
+    title: Public-sector deployment templates
+    status: completed-validated-deployment-guidance-boundary
+    release_label: pds-m13-public-sector-deployment-templates
+    claim_boundary: Machine-readable school-district and multi-agency PDS deployment templates publish legal-policy examples and operator runbooks as validated guidance, not legal advice, certification, executable emergency-access workflow, or IEEE xAPI conformance expansion.
+  - id: M14
+    title: Secret and confidential-compute provider integration
+    status: completed-metadata-registry-boundary
+    release_label: pds-m14-secret-compute-provider-contract
+    claim_boundary: Kiva defines external secret and confidential-compute provider metadata through a confidential-computation contract, PDS metadata registry API, and memory/PostgreSQL provider-binding persistence layer; this remains control-plane evidence only and is not a production secret-custody service, cryptographic runtime, provider payload store, or external provider security certification.
+  - id: M15
+    title: Learner-principal deployment profile
+    status: completed-learner-principal-deployment-profile-boundary
+    release_label: pds-m15-learner-principal-deployment-profile
+    claim_boundary: Subject-bound token flows exercise existing PDS scopes for the learner's own consent and metadata operations without adding authorization semantics. Production identity-provider integration remains outside this milestone.
+  - id: M17
+    title: Learner-initiated data portability
+    status: completed-governed-portability-boundary
+    release_label: pds-m17-learner-data-portability
+    claim_boundary: Subject-bound, paged export of preserved accepted Statement JSON and PDS metadata with durable success and post-authentication rejection audit evidence. This does not expand the xAPI LRS conformance claim.

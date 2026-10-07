@@ -1,0 +1,310 @@
+description: >
+  Included architecture boundary rules split from the root manifest for
+  focused review. The root manifest remains the executable index.
+
+module_structure_rules:
+  - id: app-root-declares-application-modules
+    path: crates/kiva-server/src/app.rs
+    modules:
+      - { name: confidential, visibility: "pub(crate)" }
+      - { name: pds, visibility: "pub(crate)" }
+  - id: policy-root-declares-policy-modules
+    path: crates/kiva-policy/src/policy/mod.rs
+    modules:
+      - { name: core, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: decision, visibility: private }
+      - { name: delegation, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: confidential-differential-privacy-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/differential_privacy.rs
+    modules:
+      - { name: budget, visibility: private }
+      - { name: errors, visibility: private }
+      - { name: noise, visibility: private }
+      - { name: policy, visibility: private }
+      - { name: release, visibility: private }
+  - id: confidential-root-declares-only-namespace-and-primitive-modules
+    path: crates/kiva-confidential/src/lib.rs
+    modules:
+      - { name: mechanism, visibility: pub }
+      - { name: primitive, visibility: pub }
+  - id: secret-provider-contract-root-owns-provider-vocabulary-only
+    path: crates/kiva-secret-provider-contract/src/lib.rs
+    modules:
+      - { name: kind_registry, visibility: private }
+  - id: confidential-mechanism-root-keeps-family-facades
+    path: crates/kiva-confidential/src/mechanism/mod.rs
+    modules:
+      - { name: additive, visibility: pub }
+      - { name: core, visibility: "pub(crate)" }
+      - { name: differential_privacy, visibility: pub }
+      - { name: fhe, visibility: pub }
+      - { name: frost, visibility: pub }
+      - { name: job, visibility: pub }
+      - { name: provider, visibility: pub }
+      - { name: psi, visibility: pub }
+      - { name: registry, visibility: pub }
+      - { name: shamir, visibility: pub }
+      - { name: tee, visibility: pub }
+      - { name: threshold, visibility: pub }
+      - { name: workflow, visibility: pub }
+  - id: confidential-provider-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/provider.rs
+    modules:
+      - { name: admission, visibility: private }
+      - { name: binding, visibility: private }
+      - { name: contract, visibility: private }
+      - { name: digest, visibility: private }
+      - { name: pipeline, visibility: private }
+      - { name: runtime, visibility: private }
+  - id: server-state-owner-keeps-private-context-modules
+    path: crates/kiva-server/src/core/state.rs
+    modules:
+      - { name: authorization, visibility: private }
+      - { name: http_context, visibility: private }
+      - { name: surface_operation, visibility: private }
+  - id: pds-command-owner-keeps-private-family-modules
+    path: crates/kiva-pds/src/pds/commands.rs
+    modules:
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-event-owner-keeps-private-family-modules
+    path: crates/kiva-pds/src/pds/events.rs
+    modules:
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-application-owner-keeps-private-review-units
+    path: crates/kiva-application/src/pds.rs
+    modules:
+      - { name: capabilities, visibility: private }
+      - { name: commands, visibility: private }
+      - { name: model, visibility: private }
+      - { name: queries, visibility: private }
+      - { name: workflow, visibility: "pub(crate)" }
+  - id: application-root-declares-public-application-modules
+    path: crates/kiva-application/src/lib.rs
+    modules:
+      - { name: confidential, visibility: pub }
+      - { name: operation_catalog, visibility: pub }
+      - { name: pds, visibility: pub }
+      - { name: runtime, visibility: pub }
+  - id: application-runtime-owner-keeps-private-review-units
+    path: crates/kiva-application/src/runtime.rs
+    modules:
+      - { name: workflow, visibility: private }
+  - id: application-runtime-workflow-owner-keeps-private-review-units
+    path: crates/kiva-application/src/runtime/workflow.rs
+    modules:
+      - { name: admission, visibility: private }
+      - { name: audit, visibility: private }
+      - { name: context, visibility: private }
+      - { name: executor, visibility: private }
+      - { name: operation, visibility: private }
+  - id: application-operation-catalog-owner-keeps-private-generated-review-units
+    path: crates/kiva-application/src/operation_catalog.rs
+    modules:
+      - { name: generated, visibility: private }
+  - id: application-operation-catalog-generated-owner-keeps-private-review-units
+    path: crates/kiva-application/src/operation_catalog/generated/mod.rs
+    modules:
+      - { name: operation_ids, visibility: "pub(super)" }
+      - { name: registry, visibility: "pub(super)" }
+      - { name: workflow_metadata, visibility: "pub(super)" }
+  - id: pds-application-capabilities-owner-keeps-private-review-units
+    path: crates/kiva-application/src/pds/capabilities.rs
+    modules:
+      - { name: ports, visibility: private }
+      - { name: projection, visibility: private }
+      - { name: records, visibility: private }
+  - id: pds-application-workflow-owner-keeps-private-review-units
+    path: crates/kiva-application/src/pds/workflow.rs
+    modules:
+      - { name: commands, visibility: private }
+      - { name: queries, visibility: private }
+  - id: pds-application-workflow-command-owner-keeps-private-family-modules
+    path: crates/kiva-application/src/pds/workflow/commands.rs
+    modules:
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-application-model-owner-keeps-private-review-units
+    path: crates/kiva-application/src/pds/model.rs
+    modules:
+      - { name: errors, visibility: private }
+      - { name: records, visibility: private }
+      - { name: snapshot, visibility: private }
+  - id: confidential-application-owner-keeps-private-review-units
+    path: crates/kiva-application/src/confidential.rs
+    modules:
+      - { name: additive, visibility: private }
+      - { name: boundary, visibility: private }
+      - { name: differential_privacy, visibility: private }
+      - { name: family, visibility: private }
+      - { name: jobs, visibility: private }
+      - { name: operation, visibility: private }
+      - { name: participants, visibility: private }
+      - { name: shamir, visibility: private }
+      - { name: threshold, visibility: private }
+      - { name: workflow_kind, visibility: private }
+  - id: pds-server-adapters-owner-keeps-private-review-units
+    path: crates/kiva-server/src/app/pds/server_adapters.rs
+    modules:
+      - { name: pds_records, visibility: private }
+      - { name: projection, visibility: private }
+      - { name: records, visibility: private }
+      - { name: release_artifacts, visibility: private }
+      - { name: xapi, visibility: private }
+  - id: pds-record-adapter-owner-keeps-private-review-units
+    path: crates/kiva-server/src/app/pds/server_adapters/pds_records.rs
+    modules:
+      - { name: outcomes, visibility: private }
+      - { name: reads, visibility: private }
+      - { name: writes, visibility: private }
+  - id: pds-record-write-projector-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+    modules:
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-handler-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/handlers.rs
+    modules:
+      - { name: access, visibility: private }
+      - { name: application, visibility: private }
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+      - { name: prelude, visibility: private }
+      - { name: request, visibility: private }
+  - id: pds-state-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/model/state.rs
+    modules:
+      - { name: access, visibility: private }
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: keys, visibility: private }
+      - { name: ledger, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: confidential-state-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/confidential/model/state.rs
+    modules:
+      - { name: additive, visibility: private }
+      - { name: differential_privacy, visibility: private }
+      - { name: jobs, visibility: private }
+      - { name: keys, visibility: private }
+      - { name: participants, visibility: private }
+      - { name: shamir, visibility: private }
+      - { name: threshold, visibility: private }
+  - id: pds-wire-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/wire.rs
+    modules:
+      - { name: access, visibility: private }
+      - { name: common, visibility: private }
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: inventory, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-wire-lifecycle-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+    modules:
+      - { name: cases, visibility: private }
+      - { name: events, visibility: private }
+      - { name: retention, visibility: private }
+  - id: pds-repository-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/repository.rs
+    modules:
+      - { name: access, visibility: private }
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: pds-postgres-storage-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/pds/storage/postgres.rs
+    modules:
+      - { name: access, visibility: private }
+      - { name: consent, visibility: private }
+      - { name: data_products, visibility: private }
+      - { name: governance, visibility: private }
+      - { name: lifecycle, visibility: private }
+  - id: confidential-additive-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/additive.rs
+    modules:
+      - { name: combine, visibility: private }
+      - { name: envelope, visibility: private }
+      - { name: plan, visibility: private }
+      - { name: replay, visibility: private }
+  - id: confidential-lifecycle-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/lifecycle.rs
+    modules:
+      - { name: key, visibility: private }
+      - { name: participant, visibility: private }
+      - { name: plan, visibility: private }
+      - { name: threshold_release, visibility: private }
+  - id: confidential-frost-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/frost.rs
+    modules:
+      - { name: key_ceremony, visibility: private }
+      - { name: profile, visibility: private }
+      - { name: release, visibility: private }
+      - { name: signature, visibility: private }
+  - id: confidential-frost-key-ceremony-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony.rs
+    modules:
+      - { name: admission, visibility: private }
+      - { name: gate, visibility: private }
+      - { name: record, visibility: private }
+      - { name: transcript, visibility: private }
+  - id: confidential-psi-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/psi.rs
+    modules:
+      - { name: cohort, visibility: private }
+      - { name: digest, visibility: private }
+      - { name: oprf, visibility: private }
+      - { name: release, visibility: private }
+  - id: confidential-psi-oprf-owner-keeps-private-review-units
+    path: crates/kiva-confidential/src/mechanism/core/psi/oprf.rs
+    modules:
+      - { name: element, visibility: private }
+      - { name: intersection, visibility: private }
+      - { name: profile, visibility: private }
+      - { name: transcript, visibility: private }
+  - id: confidential-wire-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/confidential/wire.rs
+    modules:
+      - { name: additive, visibility: private }
+      - { name: differential_privacy, visibility: private }
+      - { name: jobs, visibility: private }
+      - { name: participants, visibility: private }
+      - { name: shamir, visibility: private }
+      - { name: threshold, visibility: private }
+  - id: confidential-profile-error-owner-keeps-private-family-modules
+    path: crates/kiva-confidential/src/mechanism/core/profiles/errors.rs
+    modules:
+      - { name: compat, visibility: private }
+      - { name: additive, visibility: private }
+      - { name: fhe, visibility: private }
+      - { name: frost, visibility: private }
+      - { name: provider, visibility: private }
+      - { name: psi, visibility: private }
+      - { name: shamir, visibility: private }
+      - { name: tee, visibility: private }
+  - id: confidential-response-owner-keeps-private-family-modules
+    path: crates/kiva-server/src/surfaces/confidential/response.rs
+    modules:
+      - { name: common, visibility: private }
+      - { name: differential_privacy, visibility: private }
+      - { name: jobs, visibility: private }
+      - { name: participants, visibility: private }
+      - { name: shamir, visibility: private }
+      - { name: threshold, visibility: private }

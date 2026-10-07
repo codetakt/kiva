@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:projection-normal-form-policy-source:1",
+  "title": "Kiva ProjectionSpec normal-form policy source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "transition_stage",
+    "target_stage",
+    "compatibility_view",
+    "generator",
+    "validator",
+    "schema_registry",
+    "compatibility_view_lifecycle",
+    "drift_policy",
+    "auxiliary_sources",
+    "ci_check"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-projection-normal-form-policy-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "transition_stage": { "const": "normal-form-primary" },
+    "target_stage": { "const": "normal-form-primary" },
+    "compatibility_view": { "const": "spec/architecture/projection-specs.source.yaml" },
+    "generator": { "const": "scripts/ci/generate_projection_auxiliary_ledgers.py" },
+    "validator": { "const": "scripts/ci/validate_projection_normal_form.py" },
+    "schema_registry": { "const": "spec/architecture/source-ledger-schemas.yaml" },
+    "compatibility_view_lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["human_editable", "generated_only", "canonical_source", "review_role"],
+      "properties": {
+        "human_editable": { "const": false },
+        "generated_only": { "const": true },
+        "canonical_source": { "const": false },
+        "review_role": { "const": "generated-compatibility-view" }
+      }
+    },
+    "drift_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enforcement", "synchronized_by", "authoritative_behavior", "retirement_gate"],
+      "properties": {
+        "enforcement": { "const": "compatibility-view-matches-normal-form" },
+        "synchronized_by": { "const": "normal-form-primary-with-projection-spec-compatibility-view" },
+        "authoritative_behavior": { "const": "projection-normal-form-ledgers" },
+        "retirement_gate": {
+          "const": "projection-spec-inline-fields-remain-byte-for-byte-compatibility-view"
+        }
+      }
+    },
+    "promotion_criteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compiler_reads_normal_form_ledgers_first",
+        "inline_projection_fields_are_compatibility_view",
+        "compatibility_view_is_byte_for_byte_current",
+        "source_schema_registry_covers_normal_form"
+      ],
+      "properties": {
+        "compiler_reads_normal_form_ledgers_first": { "const": true },
+        "inline_projection_fields_are_compatibility_view": { "const": true },
+        "compatibility_view_is_byte_for_byte_current": { "const": true },
+        "source_schema_registry_covers_normal_form": { "const": true }
+      }
+    },
+    "auxiliary_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifacts", "runtime", "check_bindings"],
+      "properties": {
+        "artifacts": { "$ref": "#/$defs/source_row" },
+        "runtime": { "$ref": "#/$defs/source_row" },
+        "check_bindings": { "$ref": "#/$defs/source_row" }
+      }
+    },
+    "ci_check": { "$ref": "#/$defs/ci_check" }
+  },
+  "$defs": {
+    "source_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "kind", "schema", "primary_fields"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "schema": { "type": "string", "minLength": 1 },
+        "primary_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "ci_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "check_id"],
+      "properties": {
+        "group": { "const": "openapi-contract" },
+        "check_id": { "const": "projection-normal-form-policy" }
+      }
+    }
+  }
+}

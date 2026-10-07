@@ -1,0 +1,11 @@
+---
+version: 1
+kind: kiva-openapi-rust-dto-map
+status: retired-archive
+description: Retired OpenAPI/Rust DTO archive retained for migration history; active
+  checks read generated-contract and semantic compatibility maps directly.
+source_maps:
+- role: generated-contract-dtos
+  path: spec/openapi/generated-contract-dto-map.yaml
+- role: semantic-compatibility
+  path: spec/openapi/semantic-compatibility-map.yaml

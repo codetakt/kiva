@@ -1,0 +1,28 @@
+//! Fully homomorphic-encryption boundary facade.
+
+pub use super::core::{
+    AcceptedFheRuntimeCiphertextTranscript, AcceptedFheRuntimeEvaluation,
+    FHE_FEASIBILITY_CIPHERTEXT_DOMAIN, FHE_FEASIBILITY_CIPHERTEXT_MODULUS_BITS,
+    FHE_FEASIBILITY_EVALUATION_DOMAIN, FHE_FEASIBILITY_INITIAL_NOISE_BUDGET_BITS,
+    FHE_FEASIBILITY_MAX_PARTICIPANTS, FHE_FEASIBILITY_MAX_PLAINTEXT_VALUE,
+    FHE_FEASIBILITY_PLAINTEXT_MODULUS, FHE_FEASIBILITY_POLYNOMIAL_MODULUS_DEGREE,
+    FHE_FEASIBILITY_PROFILE, FHE_FEASIBILITY_SECURITY_LEVEL_BITS,
+    FHE_FEASIBILITY_SUM_NOISE_COST_BITS, FHE_RUNTIME_CIPHERTEXT_TRANSCRIPT_DOMAIN,
+    FHE_RUNTIME_EVALUATION_DOMAIN, FHE_RUNTIME_PROFILE, FheFeasibilityCiphertextFixture,
+    FheFeasibilityEvaluation, FheFeasibilityNonce, FheFeasibilityOperation,
+    FheFeasibilityParameterSet, FheFeasibilityPlaintext, FheFeasibilityPlan,
+    FheFeasibilityReleaseContext, FheFeasibilityReleaseFacts, FheFeasibilityReleasedAggregate,
+    FheFeasibilitySchemeFamily, FheRuntimeBinding, FheRuntimeCiphertextTranscriptFacts,
+    FheRuntimeCiphertextTranscriptGateContext, FheRuntimeCiphertextTranscriptRecord,
+    FheRuntimeEvaluationRecord, FheRuntimeOperation, FheRuntimeParticipantCiphertext,
+    FheRuntimeParticipantCiphertextStatus, FheRuntimePlan, FheRuntimeReleaseContext,
+    FheRuntimeReleaseFacts, FheRuntimeReleasedAggregateMetadata, FheRuntimeSchemeFamily,
+    accept_fhe_runtime_ciphertext_transcript, accept_fhe_runtime_evaluation,
+    derive_fhe_feasibility_ciphertext_digest, derive_fhe_runtime_ciphertext_transcript_digest,
+    derive_fhe_runtime_evaluation_digest, encrypt_fhe_feasibility_plaintext_fixture,
+    evaluate_fhe_feasibility_sum, release_fhe_feasibility_sum_fixture,
+    release_fhe_runtime_sum_metadata, validate_fhe_feasibility_parameters,
+    validate_fhe_feasibility_release, validate_fhe_runtime_binding,
+    validate_fhe_runtime_ciphertext_transcript_gate_context, validate_fhe_runtime_release,
+    verify_fhe_feasibility_ciphertext_fixture,
+};

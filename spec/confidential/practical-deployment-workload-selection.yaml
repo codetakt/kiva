@@ -1,0 +1,211 @@
+---
+schema_version: 1
+kind: practical-confidential-deployment-selection
+standard: Kiva Architecture
+status: published
+milestone: CC8
+selection_id: kiva-cc8-multi-agency-aggregate-v1
+claim_boundary: >
+  Kiva selects the multi-agency aggregate-insight PDS deployment as the first
+  practical confidential computation profile. This selection fixes workloads,
+  threat model, enabled mechanisms, residual risks, and success metrics, and is
+  now bound to the completed CC9 job lifecycle, CC10 participant/key lifecycle,
+  and CC15 repository-side release-candidate assurance gates. It is not a
+  production security claim by itself.
+selected_deployment_profile:
+  template_id: multi-agency-research-aggregate-v1
+  deployment_kind: multi-agency
+  jurisdiction_profile: public-sector-research-collaboration
+  tenant_partition: tenant:regional-collaboration
+  subject_partition: subject-partition:regional-collaboration:learners
+  legal_basis: legitimate-interest
+  purpose: Cross-agency aggregate research with metadata-only PDS access.
+  completed_assurance_milestones:
+    - CC9
+    - CC10
+    - CC15
+workloads:
+  - id: multi-agency-term-participation-count-v1
+    status: selected-for-practical-profile
+    purpose: >
+      Publish monthly and term-level participation counts across participating
+      agencies without centralizing raw xAPI Statements.
+    input_record_classes:
+      - xapi-statement-metadata
+      - xapi-statement-timestamp
+      - xapi-actor-subject-partition
+      - pds-consent-metadata
+      - pds-data-product-metadata
+    local_preprocessing:
+      raw_xapi_leaves_custodian: false
+      per_custodian_output: bounded distinct learner count for the release window
+      duplicate_rule: one learner counted once per tenant and release window
+    aggregation_function:
+      family: additive-sum
+      expression: sum(per_custodian_distinct_learner_count)
+      field_modulus: 4294967291
+      bounded_input: true
+      requires_all_participants: true
+    release:
+      cadence: monthly-and-school-term
+      minimum_population: 50
+      differential_privacy_profile: kiva-discrete-laplace-add-remove-v1
+      epsilon_microunits_per_release: 250000
+      pds_resource_class: aggregate-insights
+      raw_record_read: false
+    utility_targets:
+      maximum_absolute_count_error_for_acceptance: 10
+      minimum_reporting_cell_population: 50
+      dashboard_refresh_slo_minutes: 60
+  - id: multi-agency-program-completion-rate-v1
+    status: selected-for-practical-profile
+    purpose: >
+      Publish a released completion-rate data product from two governed
+      aggregate counts: eligible learners and completed learners.
+    input_record_classes:
+      - xapi-statement-metadata
+      - xapi-activity-classification
+      - xapi-result-completion-metadata
+      - xapi-actor-subject-partition
+      - pds-consent-metadata
+      - pds-data-product-metadata
+    local_preprocessing:
+      raw_xapi_leaves_custodian: false
+      per_custodian_output: bounded eligible count and bounded completed count
+      duplicate_rule: one learner counted once per activity group and release window
+    aggregation_function:
+      family: paired-additive-sum
+      expressions:
+        - sum(per_custodian_eligible_count)
+        - sum(per_custodian_completed_count)
+      field_modulus: 4294967291
+      bounded_input: true
+      requires_all_participants: true
+    release:
+      cadence: school-term
+      minimum_population: 100
+      differential_privacy_profile: kiva-discrete-laplace-add-remove-v1
+      epsilon_microunits_per_release: 500000
+      pds_resource_class: aggregate-insights
+      raw_record_read: false
+    utility_targets:
+      maximum_rate_error_percentage_points_for_acceptance: 3
+      minimum_reporting_cell_population: 100
+      dashboard_refresh_slo_minutes: 120
+threat_model:
+  adversary_model:
+    - honest-but-curious analyst seeking raw learner records
+    - curious platform operator with metadata-only administrative access
+    - one mistaken or stale participant submission
+    - replayed or duplicate confidential computation submission
+  collusion_assumptions:
+    tolerated:
+      - analyst alone cannot read raw xAPI Statements
+      - platform operator alone cannot approve release
+      - one participant omission or duplicate fails closed
+    not_tolerated:
+      - all custodians colluding to disclose their own raw records outside Kiva
+      - joint policy authority and auditor collusion outside the recorded workflow
+      - malicious-secure PSI adversaries
+      - hardware compromise or vendor quote forgery before CC12
+  role_separation:
+    data_custodian: lead-agency-data-custodian
+    platform_operator: neutral-platform-operator
+    policy_authority: joint-policy-board
+    analyst: approved-research-analyst
+    auditor: independent-public-auditor
+    identity_authority: regional-identity-authority
+  data_minimization_boundary:
+    raw_xapi_statement_json_leaves_custodian: false
+    raw_actor_identifier_leaves_custodian: false
+    submitted_values_are_bounded_counts: true
+    pds_publication_is_metadata_and_aggregate_only: true
+    audit_exports_exclude_raw_payloads: true
+  accepted_residual_risks:
+    - Aggregate outputs can still disclose information if population thresholds or DP budgets are misconfigured.
+    - Current production-upgrade PSI support is review-gated DH-OPRF and not production-claimable before external cryptographic review.
+    - Current portable TEE support is a deployment-bound evidence gate.
+    - Current AWS Nitro TEE support is review-gated and not production-claimable before external security review.
+    - Current FROST threshold-signing support is review-gated and not production-claimable before external cryptographic review.
+    - Current FHE support includes feasibility-only and review-gated runtime boundaries, both disabled for this deployment profile.
+    - External legal, privacy, and cryptographic review remains required before production claims.
+mechanism_selection:
+  enabled_for_first_practical_workload:
+    - additive-secure-aggregation
+    - differential-privacy-release
+    - shamir-vss-admission
+  bounded_assurance_only:
+    - psi-cohort-hash-token
+    - tee-portable-attestation
+  disabled_for_first_practical_workload:
+    - psi-oprf-dh-voprf
+    - threshold-frost-signing
+    - tee-aws-nitro-attestation
+    - fhe-sum-feasibility
+    - fhe-sum-runtime
+  production_promotion_candidates:
+    - mechanism: psi-cohort-hash-token
+      milestone: CC11
+      decision: Superseded by the review-gated DH-OPRF PSI upgrade when stronger non-match privacy is required.
+    - mechanism: psi-oprf-dh-voprf
+      milestone: CC11
+      decision: Enable only after external cryptographic review binds the selected runtime artifact.
+    - mechanism: tee-portable-attestation
+      milestone: CC12
+      decision: Defer until the deployment names a cloud or enclave target and accepts hardware trust.
+    - mechanism: tee-aws-nitro-attestation
+      milestone: CC12
+      decision: Enable only after the Nitro verifier adapter, AWS trust anchors, PCR policy, and external security review evidence are bound.
+    - mechanism: shamir-vss-admission
+      milestone: CC13
+      decision: Defer stronger DKG or threshold signatures until release authority requires cryptographic key custody.
+    - mechanism: threshold-frost-signing
+      milestone: CC13
+      decision: Enable only after the selected FROST runtime artifact, DKG/share-custody procedures, proactive refresh, complaint handling, and external cryptographic review evidence are bound.
+    - mechanism: fhe-sum-feasibility
+      milestone: CC14
+      decision: Superseded by the review-gated FHE runtime boundary when exact homomorphic sums justify runtime, key, and performance costs.
+    - mechanism: fhe-sum-runtime
+      milestone: CC14
+      decision: Enable only after the selected FHE runtime artifact, parameter set, key-custody process, performance evidence, and external cryptographic review are bound.
+success_metrics:
+  privacy:
+    minimum_population: 50
+    maximum_epsilon_microunits_per_month: 1000000
+    raw_record_publication_allowed: false
+  utility:
+    participation_count_absolute_error_target: 10
+    completion_rate_error_percentage_points_target: 3
+    rejected_release_investigation_required: true
+  latency:
+    monthly_release_slo_minutes: 60
+    term_release_slo_minutes: 120
+    metadata_read_p95_milliseconds: 500
+  cost:
+    operator_hours_per_release_target: 2
+    external_review_required_before_production_claim: true
+  operator_effort:
+    key_rotation_drill_days: 90
+    participant_onboarding_hours_target: 4
+    incident_triage_hours_target: 24
+  auditability:
+    release_evidence_coverage_percent: 100
+    metadata_export_retention_days: 540
+    clean_ci_evidence_required: true
+deployment_template_update:
+  catalog: spec/pds/deployment-templates.yaml
+  selected_template_id: multi-agency-research-aggregate-v1
+  required_field: practical_workload_profile
+  required_value: spec/confidential/practical-deployment-workload-selection.yaml
+cc7_package_update:
+  package: spec/confidential/confidential-computation-assurance-package.yaml
+  required_section: practical_deployment_selection
+  selected_profile: spec/confidential/practical-deployment-workload-selection.yaml
+  validator: scripts/ci/validate_practical_deployment_selection.py
+non_claims:
+  production_confidential_computation: false
+  legal_privacy_certification: false
+  ieee_xapi_certification: false
+  malicious_secure_psi: false
+  vendor_tee_quote_verification: false
+  production_fhe: false

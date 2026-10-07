@@ -1,0 +1,40 @@
+schema_version: 1
+kind: kiva-evidence-review-bundle-source
+status: active
+description: >
+  Human-facing evidence bundle that limits routine design review to a small set
+  of generated surfaces. Lower-level generated YAML and Markdown files remain
+  committed evidence, but they are supporting views unless this bundle promotes
+  them.
+review_bundle_model:
+  root_type: EvidenceReviewBundle
+  purpose: Reduce generated-artifact review noise without deleting evidence.
+  primary_review_surface_rule: >
+    Routine design review starts from the primary review surfaces. Supporting
+    generated views are inspected only when a primary surface points to them.
+    Compatibility-retirement history is supporting evidence, not a primary
+    routine review surface.
+primary_review_surfaces:
+  - id: source-registry
+    path: generated/architecture/source-registry.yaml
+    answers: What sources exist, who owns them, and which schemas cover them.
+  - id: operation-kernel
+    path: generated/architecture/operation-kernel.yaml
+    answers: What each HTTP operation executes and which PDS plane/family owns it.
+  - id: assurance-graph
+    path: generated/architecture/assurance-graph.yaml
+    answers: Which public claims are discharged by receipts, capabilities, and verification obligations.
+  - id: confidential-mechanism-profile-index
+    path: generated/confidential/mechanism-profile-index.yaml
+    answers: Which confidential mechanism packages bind capabilities, providers, maturity, assurance, and verification.
+supporting_generated_views:
+  - generated/architecture/compatibility-retirement-plane.yaml
+  - generated/evidence/evidence-set.yaml
+  - generated/evidence/evidence-receipts.yaml
+  - generated/architecture/claim-graph.yaml
+  - generated/verification/verification-obligations.yaml
+  - generated/confidential/capability-binding-index.yaml
+  - generated/confidential/capability-policy-evidence.yaml
+  - generated/architecture/pds-resource-families.yaml
+  - generated/architecture/pds-plane-packages.yaml
+  - generated/route-coverage.evidence.json

@@ -1,0 +1,526 @@
+schema_version: 1
+kind: kiva-pds-resource-family-ledger
+status: active
+generated_from: generated/architecture/surface-catalog.yaml
+projection_basis:
+  root_type: SurfaceOperation
+  projection_role: pds-route-context-and-handler-ownership-projection
+  normal_form: surface_operation_normal_form
+  operation_key_fields:
+  - openapi_contract
+  - operation_id
+  route_key_fields:
+  - openapi_contract
+  - method
+  - path
+  joined_facets:
+  - openapi_contract
+  - method
+  - path
+  - operation_id
+  - required_scopes
+  - application_operation_id
+  - application_surface
+  - workflow_label
+  - rust_workflow_kind
+  - workflow_family
+  - pds_resource_family
+  - pds_route_context
+  operation_count: 78
+description: 'Reviewable ownership ledger for PDS resource families. Each operation keeps the human-owned family and route-context decision here; OpenAPI operationId, request/response schemas, Rust path constants, and handlers are derived by the validator.
+
+  '
+source_contract: spec/openapi/kiva-pds.yaml
+http_operation_catalog: generated/http-operation-catalog.evidence.json
+operation_catalog: generated/architecture/operation-catalog.yaml
+route_file: crates/kiva-server/src/surfaces/pds/routes.rs
+path_constants_file: crates/kiva-server/src/core/paths.rs
+derived_fields:
+- operation_id
+- path_constant
+- handler
+- request_schemas
+- response_schemas
+resource_family_profile_model:
+  root_type: PdsResourceFamilyProfile
+  generated_ledger: generated/architecture/pds-resource-families.yaml
+  source_family_ledger: spec/architecture/pds-resource-families.source.yaml
+  source_policy: spec/architecture/surface-implementation.policy.yaml#/pds_resource_family_projection
+  required_roles:
+  - handler
+  - repository
+  - memory_storage
+  - postgres_storage
+  - wire_projection
+  - openapi_projection
+  rule: 'Each PDS resource family is reviewed as one profile containing operation ownership, route context, implementation files, and the standard server role matrix.
+
+    '
+application_operation_catalog_policy:
+  source_of_truth: surface-catalog-for-pds-operation-lifecycle
+  http_operation_catalog_source: generated-http-operation-catalog-from-openapi
+  pds_operation_lifecycle_coverage: operation-catalog
+  catalog_required_route_contexts:
+  - pds
+  - pds-application
+  catalog_required_methods:
+  - get
+  - post
+  operation_catalog_owns:
+  - workflow_label
+  - rust_workflow_kind
+  - operation_id
+  - required_scopes
+  resource_family_ledger_owns:
+  - resource_family
+  - route_context
+  - implementation_files
+server_resource_family_boilerplate_policy:
+  family_role_matrix:
+    consent: &id001
+    - handler
+    - repository
+    - memory_storage
+    - postgres_storage
+    - wire_projection
+    - openapi_projection
+    data-products: *id001
+    provider-bindings: *id001
+    inventory-export: *id001
+    access: *id001
+    lifecycle: *id001
+    governance: *id001
+  role_prefixes:
+    handler: crates/kiva-server/src/surfaces/pds/handlers/
+    repository: crates/kiva-server/src/surfaces/pds/repository/
+    memory_storage: crates/kiva-server/src/surfaces/pds/storage/memory/
+    postgres_storage: crates/kiva-server/src/surfaces/pds/storage/postgres/
+    wire_projection: crates/kiva-server/src/surfaces/pds/wire/
+    openapi_projection: crates/kiva-server/src/surfaces/pds/wire/openapi/
+server_resource_family_boilerplate_projection:
+  source_policy: server_resource_family_boilerplate_policy
+  families:
+  - family: consent
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/consent.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+      implemented: true
+  - family: data-products
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+      implemented: true
+  - family: provider-bindings
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+      - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+      implemented: true
+  - family: inventory-export
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/handlers/portability.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+      implemented: true
+  - family: access
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/access.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/access.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+      implemented: true
+  - family: lifecycle
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle/cases.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/cases.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/events.rs
+      - crates/kiva-server/src/surfaces/pds/wire/lifecycle/retention.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+      implemented: true
+  - family: governance
+    roles:
+    - role: handler
+      prefix: crates/kiva-server/src/surfaces/pds/handlers/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+      implemented: true
+    - role: repository
+      prefix: crates/kiva-server/src/surfaces/pds/repository/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+      implemented: true
+    - role: memory_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/memory/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/memory/governance.rs
+      implemented: true
+    - role: postgres_storage
+      prefix: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+      implemented: true
+    - role: wire_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/governance.rs
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs
+      implemented: true
+    - role: openapi_projection
+      prefix: crates/kiva-server/src/surfaces/pds/wire/openapi/
+      matched_files:
+      - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs
+      implemented: true
+resource_families:
+- id: consent
+  description: Consent and delegation grant lifecycle.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/consent.rs
+  - crates/kiva-pds/src/pds/events/consent.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/consent.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/consent.rs
+  - crates/kiva-server/src/surfaces/pds/repository/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/consent.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/consent.rs
+  operations:
+  - path: /pds/consent-grants
+    method: get
+    route_context: pds
+  - path: /pds/consent-grants
+    method: post
+    route_context: pds-application
+  - path: /pds/consent-revocations
+    method: post
+    route_context: pds-application
+- id: data-products
+  description: Approved aggregate data-product metadata and policy-gated reads.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/data_products.rs
+  - crates/kiva-pds/src/pds/events/data_products.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-pds/src/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+  operations:
+  - path: /pds/data-product-reads
+    method: post
+    route_context: pds
+  - path: /pds/data-products
+    method: get
+    route_context: pds
+  - path: /pds/data-products
+    method: post
+    route_context: pds-application
+- id: provider-bindings
+  description: Metadata-only secret/confidential-compute provider bindings.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/repository/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/service/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/provider_bindings.rs
+  - crates/kiva-server/src/surfaces/pds/wire/provider_bindings.rs
+  - db/migrations/20260619280000_pds_provider_bindings.sql
+  operations:
+  - path: /pds/provider-bindings
+    method: get
+    route_context: pds
+  - path: /pds/provider-bindings
+    method: post
+    route_context: pds
+- id: inventory-export
+  description: Subject-visible inventory, metadata export, and governed portability projections.
+  implementation_files:
+  - crates/kiva-application/src/pds/model/snapshot.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/data_products.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/portability.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+  - docs/architecture/learner-data-portability-export.md
+  operations:
+  - path: /pds/data-portability-exports
+    method: get
+    route_context: pds-application
+  - path: /pds/metadata-exports
+    method: get
+    route_context: pds-application
+  - path: /pds/record-inventory
+    method: get
+    route_context: pds-application
+- id: access
+  description: Access-decision evaluation and audit-event projections.
+  implementation_files:
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/access.rs
+  - crates/kiva-server/src/surfaces/pds/model/policy_adapter.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/access.rs
+  - crates/kiva-server/src/surfaces/pds/repository/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/access.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/access.rs
+  operations:
+  - path: /pds/access-audit-events
+    method: get
+    route_context: pds
+  - path: /pds/access-checks
+    method: post
+    route_context: pds
+- id: lifecycle
+  description: Lifecycle events, retention policies, and workflow cases.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/lifecycle.rs
+  - crates/kiva-pds/src/pds/events/lifecycle.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/repository/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/cases.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/events.rs
+  - crates/kiva-server/src/surfaces/pds/wire/lifecycle/retention.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/lifecycle.rs
+  operations:
+  - path: /pds/lifecycle-cases
+    method: get
+    route_context: pds
+  - path: /pds/lifecycle-cases
+    method: post
+    route_context: pds-application
+  - path: /pds/lifecycle-events
+    method: get
+    route_context: pds
+  - path: /pds/lifecycle-events
+    method: post
+    route_context: pds-application
+  - path: /pds/retention-policies
+    method: get
+    route_context: pds
+  - path: /pds/retention-policies
+    method: post
+    route_context: pds-application
+- id: governance
+  description: Public-sector deployment governance profiles.
+  implementation_files:
+  - crates/kiva-pds/src/pds/commands/governance.rs
+  - crates/kiva-pds/src/pds/events/governance.rs
+  - crates/kiva-pds/src/pds/requests.rs
+  - crates/kiva-pds/src/pds/responses.rs
+  - crates/kiva-server/src/surfaces/pds/handlers/governance.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/governance.rs
+  - crates/kiva-server/src/surfaces/pds/repository/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/memory/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/mapping/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+  - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/governance.rs
+  - crates/kiva-server/src/surfaces/pds/wire/openapi/governance.rs
+  operations:
+  - path: /pds/governance-profiles
+    method: get
+    route_context: pds
+  - path: /pds/governance-profiles
+    method: post
+    route_context: pds-application

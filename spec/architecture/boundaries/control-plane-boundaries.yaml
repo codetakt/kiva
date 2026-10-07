@@ -1,0 +1,117 @@
+version: 1
+description: >
+  Drift guards for workflow entrypoints, PDS event/projection ownership, and
+  confidential-computation control-plane/data-plane boundaries.
+
+source_groups:
+  - id: application-operation-gateway-entrypoint
+    description: PDS and confidential workflows enter through the shared application operation gateway.
+    paths:
+      - crates/kiva-application/src/runtime/workflow/operation.rs
+      - crates/kiva-application/src/runtime/workflow/operation/gateway.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/queries.rs
+      - crates/kiva-server/src/app/confidential.rs
+      - crates/kiva-application/src/confidential.rs
+      - crates/kiva-application/src/confidential/boundary.rs
+    required_text:
+      - "pub struct ApplicationOperationGateway"
+      - "struct ApplicationOperationKernel"
+      - "pub async fn execute"
+      - "pub async fn execute_plan"
+      - "pub async fn run_admitted_with_runtime_error"
+      - "pub struct ApplicationOperationPlan"
+      - "pub trait ApplicationAdmissionPolicy"
+      - "pub const fn operation_gateway(&self) -> ApplicationOperationGateway"
+      - "ApplicationOperationGateway::new(self.runtime())"
+      - ".begin_workflow()"
+      - "run_confidential_workflow"
+  - id: pds-event-projection-boundary
+    description: PDS writes are admitted as typed domain events and projected through the PDS record port; read models use metadata projections rather than raw xAPI statement JSON.
+    paths:
+      - crates/kiva-pds/src/pds/events.rs
+      - crates/kiva-application/src/pds/capabilities/projection.rs
+      - crates/kiva-application/src/pds/capabilities/records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/reads.rs
+    required_text:
+      - "pub enum PdsDomainEvent"
+      - "pub fn controlling_subject(&self) -> &str"
+      - "pub trait PdsSubjectProjection"
+      - "pub struct PdsSubjectProjectionPort"
+      - "list_metadata_by_actor_ifi"
+      - "PdsSubjectSnapshot"
+      - "pub(super) trait PdsDomainEventProjector"
+      - "fn project_domain_event<'a>"
+      - "Admitted<kiva_pds::PdsDomainEvent, PrincipalBound>"
+      - "project_domain_event_impl"
+  - id: confidential-control-plane-data-plane-boundary
+    description: Confidential provider admission owns Kiva control-plane evidence while external providers own data-plane runtime execution.
+    paths:
+      - crates/kiva-secret-provider-contract/src/lib.rs
+      - crates/kiva-secret-provider-contract/src/kind_registry.rs
+      - crates/kiva-confidential-core/src/lib.rs
+      - crates/kiva-confidential/src/mechanism/provider.rs
+      - crates/kiva-confidential/src/mechanism/provider/admission.rs
+      - crates/kiva-confidential/src/mechanism/provider/binding.rs
+      - crates/kiva-confidential/src/mechanism/provider/contract.rs
+      - crates/kiva-confidential/src/mechanism/provider/digest.rs
+      - crates/kiva-confidential/src/mechanism/provider/runtime.rs
+    required_text:
+      - "pub enum ConfidentialBoundaryPlane"
+      - "KivaControlPlane"
+      - "ExternalDataPlane"
+      - "pub type ControlPlaneEvidence<T>"
+      - "pub type ExternalDataPlaneBoundary<T>"
+      - "pub trait SecretComputeProviderCapabilityProfile"
+      - "pub trait SecretComputeProviderContractProfile"
+      - "impl SecretComputeProviderCapabilityProfile for ConfidentialMechanismDescriptor"
+      - "SecretComputeProviderRuntimeBoundary"
+      - "ControlPlaneEvidence<SecretComputeProviderAdmission>"
+      - "ControlPlaneEvidence<SecretComputeProviderRuntimeBoundaryClaim>"
+      - "ExternalDataPlaneBoundary<SecretComputeProviderRuntimeClass>"
+      - "control_plane_label"
+      - "data_plane_label"
+      - "ExternalReviewedProduction"
+      - "admit_reviewed_production_runtime_boundary"
+
+dependency_rules:
+  - id: application-workflows-enter-through-operation-gateway
+    description: Surface-specific PDS and confidential workflows must not bypass the shared application operation gateway by depending on the private executor.
+    paths:
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow
+      - crates/kiva-application/src/confidential.rs
+      - crates/kiva-application/src/confidential
+      - crates/kiva-server/src/app/confidential.rs
+    forbidden_patterns:
+      - "ApplicationOperationKernel"
+      - "ApplicationWorkflowExecutor"
+      - "workflow_executor"
+  - id: pds-event-projection-stays-metadata-and-domain-event-driven
+    description: PDS event projection and subject projection must not reintroduce raw xAPI JSON statement handling.
+    paths:
+      - crates/kiva-application/src/pds/capabilities/projection.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+      - crates/kiva-server/src/app/pds/server_adapters/pds_records/writes
+    forbidden_patterns:
+      - "serde_json"
+      - "StatementJson"
+      - "raw_statement"
+  - id: confidential-provider-boundary-does-not-store-provider-secrets
+    description: Provider admission and runtime boundary code records metadata, digests, and review gates only.
+    paths:
+      - crates/kiva-secret-provider-contract/src/lib.rs
+      - crates/kiva-confidential/src/mechanism/provider/admission.rs
+      - crates/kiva-confidential/src/mechanism/provider/binding.rs
+      - crates/kiva-confidential/src/mechanism/provider/contract.rs
+      - crates/kiva-confidential/src/mechanism/provider/digest.rs
+      - crates/kiva-confidential/src/mechanism/provider/runtime.rs
+    forbidden_patterns:
+      - "PrivateKey"
+      - "KeyShare"
+      - "ciphertext_payload"
+      - "runtime_payload"
+      - "signed_envelope"
+      - "raw_secret"

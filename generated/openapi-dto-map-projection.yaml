@@ -1,0 +1,310 @@
+schema_version: 1
+kind: kiva-openapi-dto-map-projection
+source_ledger: spec/openapi/dto-boundary-ledger.yaml
+source_dto_maps:
+- path: spec/openapi/generated-contract-dto-map.yaml
+  role: generated-contract-dtos
+  contract_count: 6
+- path: spec/openapi/semantic-compatibility-map.yaml
+  role: semantic-compatibility
+  contract_count: 1
+source_of_truth: openapi-contracts
+contracts:
+- openapi: spec/openapi/kiva-analytics.yaml
+  boundary_status: generated-contract-crate
+  generation_target: crates/kiva-analytics-openapi-contract
+  external_contract_boundary: crates/kiva-analytics-openapi-contract
+  internal_semantic_boundaries:
+  - crates/kiva-application
+  dto_map_contracts:
+  - kiva-analytics-generated-response-contract
+  generated_contract_dto_map_contracts:
+  - kiva-analytics-generated-response-contract
+  semantic_compatibility_map_contracts: []
+  generation_target_schema_count: 3
+  generation_target_schemas:
+  - AnalyticsAggregate
+  - AnalyticsProduct
+  - AnalyticsProductPage
+  generated_slices:
+  - name: generated_response_slice
+    crate: crates/kiva-analytics-openapi-contract
+    coverage: all-success-response-schema-closure
+    schema_count: 3
+    schemas:
+    - AnalyticsAggregate
+    - AnalyticsProduct
+    - AnalyticsProductPage
+- openapi: spec/openapi/kiva-xapi.yaml
+  boundary_status: generated-contract-crate
+  generation_target: crates/kiva-xapi-openapi-contract
+  external_contract_boundary: crates/kiva-xapi-openapi-contract
+  internal_semantic_boundaries:
+  - crates/kiva-xapi
+  - crates/kiva-http-core
+  dto_map_contracts:
+  - kiva-xapi-generated-contract
+  generated_contract_dto_map_contracts:
+  - kiva-xapi-generated-contract
+  semantic_compatibility_map_contracts: []
+  generation_target_schema_count: 26
+  generation_target_schemas:
+  - About
+  - Account
+  - Activity
+  - Actor
+  - ActorStatementObject
+  - Agent
+  - AgentOrIdentifiedGroup
+  - AgentStatementObject
+  - Attachment
+  - Document
+  - ErrorResponse
+  - Group
+  - IdentifiedGroup
+  - Iri
+  - LanguageMap
+  - NonSubStatementObject
+  - Person
+  - Statement
+  - StatementObject
+  - StatementRef
+  - StatementResult
+  - StringIdArray
+  - SubStatement
+  - Timestamp
+  - Uuid
+  - Verb
+  generated_slices: []
+- openapi: spec/openapi/kiva-pds.yaml
+  boundary_status: generated-contract-crate
+  generation_target: crates/kiva-pds-openapi-contract
+  external_contract_boundary: crates/kiva-pds-openapi-contract
+  internal_semantic_boundaries:
+  - crates/kiva-pds
+  dto_map_contracts:
+  - kiva-pds-boundary-types
+  - kiva-pds-generated-request-contract
+  - kiva-pds-generated-response-contract
+  generated_contract_dto_map_contracts:
+  - kiva-pds-generated-request-contract
+  - kiva-pds-generated-response-contract
+  semantic_compatibility_map_contracts:
+  - kiva-pds-boundary-types
+  generation_target_schema_count: 59
+  generation_target_schemas:
+  - AccessAuditEvent
+  - AccessAuditEventList
+  - AccessCheckRequest
+  - AccessCheckResponse
+  - ConfidentialMechanismKind
+  - ConsentGrant
+  - ConsentGrantList
+  - ConsentGrantRequest
+  - ConsentRevocationRequest
+  - ConsentScope
+  - ConsentState
+  - DataClass
+  - DataProduct
+  - DataProductList
+  - DataProductReadRequest
+  - DataProductReadResponse
+  - DataProductRequest
+  - DataProductSourceKind
+  - ErrorResponse
+  - GovernanceProfile
+  - GovernanceProfileKind
+  - GovernanceProfileList
+  - GovernanceProfileRequest
+  - LegalBasis
+  - LifecycleCase
+  - LifecycleCaseList
+  - LifecycleCaseRequest
+  - LifecycleCaseStatus
+  - LifecycleCaseType
+  - LifecycleEvent
+  - LifecycleEventList
+  - LifecycleEventRequest
+  - LifecycleEventType
+  - LifecycleResourceKind
+  - MetadataExport
+  - PdsSubjectAgent
+  - PolicyAction
+  - PolicyDecision
+  - PortabilityExport
+  - PortabilityStatement
+  - PrincipalRole
+  - ProviderBinding
+  - ProviderBindingList
+  - ProviderBindingRequest
+  - RecordInventory
+  - ReleaseArtifactKind
+  - ReleaseArtifactRef
+  - ResourceClass
+  - RetentionPolicy
+  - RetentionPolicyList
+  - RetentionPolicyRequest
+  - SecretComputeProviderCapability
+  - SecretComputeProviderEvidenceGate
+  - SecretComputeProviderKind
+  - SecretComputeProviderProfile
+  - SecretComputeProviderReleaseGate
+  - SecretComputeProviderRuntimeClass
+  - StatementInventoryRecord
+  - TombstonePublicationRule
+  generated_slices:
+  - name: active_generated_slice
+    crate: crates/kiva-pds-openapi-contract
+    coverage: all-request-body-schema-closure
+    schema_count: 27
+    schemas:
+    - AccessCheckRequest
+    - ConfidentialMechanismKind
+    - ConsentGrantRequest
+    - ConsentRevocationRequest
+    - ConsentScope
+    - DataClass
+    - DataProductReadRequest
+    - DataProductRequest
+    - DataProductSourceKind
+    - GovernanceProfileKind
+    - GovernanceProfileRequest
+    - LegalBasis
+    - LifecycleCaseRequest
+    - LifecycleCaseStatus
+    - LifecycleCaseType
+    - LifecycleEventRequest
+    - LifecycleEventType
+    - LifecycleResourceKind
+    - PolicyAction
+    - PrincipalRole
+    - ProviderBindingRequest
+    - ResourceClass
+    - RetentionPolicyRequest
+    - SecretComputeProviderCapability
+    - SecretComputeProviderKind
+    - SecretComputeProviderProfile
+    - TombstonePublicationRule
+  - name: generated_response_slice
+    crate: crates/kiva-pds-openapi-contract
+    coverage: all-success-response-schema-closure
+    schema_count: 48
+    schemas:
+    - AccessAuditEvent
+    - AccessAuditEventList
+    - AccessCheckResponse
+    - ConfidentialMechanismKind
+    - ConsentGrant
+    - ConsentGrantList
+    - ConsentScope
+    - ConsentState
+    - DataClass
+    - DataProduct
+    - DataProductList
+    - DataProductReadResponse
+    - DataProductSourceKind
+    - GovernanceProfile
+    - GovernanceProfileKind
+    - GovernanceProfileList
+    - LegalBasis
+    - LifecycleCase
+    - LifecycleCaseList
+    - LifecycleCaseStatus
+    - LifecycleCaseType
+    - LifecycleEvent
+    - LifecycleEventList
+    - LifecycleEventType
+    - LifecycleResourceKind
+    - MetadataExport
+    - PdsSubjectAgent
+    - PolicyAction
+    - PolicyDecision
+    - PortabilityExport
+    - PortabilityStatement
+    - PrincipalRole
+    - ProviderBinding
+    - ProviderBindingList
+    - RecordInventory
+    - ReleaseArtifactKind
+    - ReleaseArtifactRef
+    - ResourceClass
+    - RetentionPolicy
+    - RetentionPolicyList
+    - SecretComputeProviderCapability
+    - SecretComputeProviderEvidenceGate
+    - SecretComputeProviderKind
+    - SecretComputeProviderProfile
+    - SecretComputeProviderReleaseGate
+    - SecretComputeProviderRuntimeClass
+    - StatementInventoryRecord
+    - TombstonePublicationRule
+- openapi: spec/openapi/kiva-confidential.yaml
+  boundary_status: generated-contract-crate
+  generation_target: crates/kiva-confidential-contract
+  external_contract_boundary: crates/kiva-confidential-contract
+  internal_semantic_boundaries:
+  - crates/kiva-confidential
+  dto_map_contracts:
+  - kiva-confidential-request-types
+  - kiva-confidential-response-types
+  generated_contract_dto_map_contracts:
+  - kiva-confidential-request-types
+  - kiva-confidential-response-types
+  semantic_compatibility_map_contracts: []
+  generation_target_schema_count: 54
+  generation_target_schemas:
+  - AdditiveAggregateRequest
+  - AdditiveAggregateResponse
+  - AdditiveShareCommitmentSlot
+  - AdditiveShareReplayWindow
+  - AuthenticatedAdditiveShareEnvelope
+  - ConfidentialJobAuditEvent
+  - ConfidentialJobAuditEventList
+  - ConfidentialJobMechanism
+  - ConfidentialJobMetadata
+  - ConfidentialJobMetadataList
+  - ConfidentialJobRequest
+  - ConfidentialJobStatus
+  - ConfidentialJobTransitionRequest
+  - ConfidentialParticipantAuditEvent
+  - ConfidentialParticipantAuditEventList
+  - ConfidentialParticipantMetadata
+  - ConfidentialParticipantMetadataList
+  - ConfidentialParticipantRequest
+  - ConfidentialParticipantRole
+  - ConfidentialParticipantStatus
+  - ConfidentialParticipantTransitionRequest
+  - DifferentialPrivacyBudget
+  - DifferentialPrivacyBudgetMetadata
+  - DifferentialPrivacyBudgetMetadataList
+  - DifferentialPrivacyBudgetSpend
+  - DifferentialPrivacyCompositionSummary
+  - DifferentialPrivacyCompositionSummaryList
+  - DifferentialPrivacyRelease
+  - DifferentialPrivacyReleaseMetadata
+  - DifferentialPrivacyReleaseMetadataList
+  - DifferentialPrivacySampledRelease
+  - ReplayRecordMetadata
+  - ReplayRecordMetadataList
+  - SecureAggregateShare
+  - ShamirShare
+  - ShamirThresholdReconstruction
+  - ShamirThresholdReconstructionMetadata
+  - ShamirThresholdReconstructionMetadataList
+  - ShamirThresholdReconstructionResponse
+  - ShareSigningKeyMetadata
+  - ShareSigningKeyMetadataList
+  - ShareSigningKeyRegistration
+  - ShareSigningKeyRevocation
+  - ShareSigningKeyRotation
+  - ShareSubmission
+  - SignedAuthenticatedAdditiveShareEnvelope
+  - SubmittedShareMetadata
+  - SubmittedShareMetadataList
+  - ThresholdReleaseApproval
+  - ThresholdReleaseMetadata
+  - ThresholdReleaseMetadataList
+  - ThresholdReleaseRequest
+  - ThresholdReleaseResponse
+  - VerifiableShamirShare
+  generated_slices: []

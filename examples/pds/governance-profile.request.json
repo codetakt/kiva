@@ -1,0 +1,20 @@
+{
+  "profile_id": "00000000-0000-4000-8000-000000000401",
+  "profile_kind": "school-district",
+  "tenant_partition": "tenant:district-alpha",
+  "subject_partition": "subject-partition:district-alpha:learners",
+  "data_custodian_subject": "school-data-custodian",
+  "platform_operator_subject": "regional-platform-operator",
+  "policy_authority_subject": "district-policy-authority",
+  "analyst_subject": "district-analyst",
+  "auditor_subject": "public-auditor",
+  "identity_authority_subject": "district-identity-authority",
+  "emergency_access_policy": "emergency access requires policy-authority approval and auditor review",
+  "runbook_refs": [
+    "runbook:key-rotation",
+    "runbook:policy-change",
+    "runbook:consent-incident",
+    "runbook:audit-export",
+    "runbook:emergency-access"
+  ]
+}

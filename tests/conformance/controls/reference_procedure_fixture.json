@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "axis": "Suite design",
+  "basis": "Independent bounded reference rules from PDF 4.1.4, 4.1.6 and 5.2.7; no cases/expected assertions are read by the model.",
+  "clock_control": true,
+  "host_clock_shared": false,
+  "canonical_submitted_fixture": "Reference fixture elects to maintain every property of submitted direct Object definitions; independent fixture inventory declared before retrieval.",
+  "policy_inputs": {}
+}

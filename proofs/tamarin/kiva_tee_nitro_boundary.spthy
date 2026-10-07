@@ -1,0 +1,199 @@
+theory Kiva_TEE_Nitro_Boundary
+begin
+
+rule ConfigureNitroPolicy:
+  [ Fr(~job) ]
+  --[
+    NitroPolicyConfigured(
+      ~job,
+      'aws_nitro_enclaves',
+      'verified_nitro_attestation_document_v1',
+      'pcr_policy',
+      'image_digest',
+      'policy_binding',
+      'nonce_digest',
+      'trust_anchor',
+      'verifier_artifact'
+    ),
+    NitroPolicyApproved(~job)
+  ]->
+  [
+    !NitroPolicy(
+      ~job,
+      'aws_nitro_enclaves',
+      'verified_nitro_attestation_document_v1',
+      'pcr_policy',
+      'image_digest',
+      'policy_binding',
+      'nonce_digest',
+      'trust_anchor',
+      'verifier_artifact'
+    )
+  ]
+
+rule AcceptVerifiedNitroDocument:
+  [
+    !NitroPolicy(
+      job,
+      family,
+      format,
+      pcr_policy,
+      image_digest,
+      policy_binding,
+      nonce_digest,
+      trust_anchor,
+      verifier_artifact
+    ),
+    Fr(~document)
+  ]
+  --[
+    NitroSupportedFormat(job, family, format),
+    NitroJobBindingMatched(job, ~document),
+    NitroPcrPolicyMatched(job, pcr_policy),
+    NitroImageDigestMatched(job, image_digest),
+    NitroPolicyBindingMatched(job, policy_binding),
+    NitroNonceMatched(job, nonce_digest),
+    NitroCertificateChainValidated(job, ~document),
+    NitroCoseSignatureValidated(job, ~document),
+    NitroTrustAnchorMatched(job, trust_anchor),
+    NitroVerifierArtifactMatched(job, verifier_artifact),
+    NitroDebugModeRejectedBeforeAccept(job, ~document),
+    NitroExternalSecurityReviewCompleted(job, verifier_artifact),
+    NitroVerifierKeyCurrent(job, verifier_artifact),
+    NitroFreshEvidence(job, ~document),
+    NitroReplayRecordWritten(job, ~document),
+    NitroAttestationAccepted(job, ~document)
+  ]->
+  [ !AcceptedNitroAttestation(job, ~document) ]
+
+rule ProvisionNitroSecret:
+  [ !AcceptedNitroAttestation(job, document) ]
+  --[ NitroSecretProvisioned(job, document) ]->
+  [ !NitroSecretAvailable(job, document) ]
+
+rule ReleaseNitroResult:
+  [
+    !AcceptedNitroAttestation(job, document),
+    !NitroSecretAvailable(job, document),
+    Fr(~authority)
+  ]
+  --[
+    NitroResultReleaseAuthorized(job, document, ~authority),
+    NitroResultReleased(job, document, ~authority)
+  ]->
+  [ !NitroReleasedResult(job, document) ]
+
+rule RejectNitroDebug:
+  [ !NitroPolicy(job, family, format, pcr_policy, image_digest, policy_binding, nonce_digest, trust_anchor, verifier_artifact) ]
+  --[ NitroDebugEvidenceRejected(job, 'debug_document') ]->
+  []
+
+rule RejectNitroReplay:
+  [ !NitroPolicy(job, family, format, pcr_policy, image_digest, policy_binding, nonce_digest, trust_anchor, verifier_artifact) ]
+  --[ NitroReplayRejected(job, 'replayed_document') ]->
+  []
+
+rule RejectNitroRollback:
+  [ !NitroPolicy(job, family, format, pcr_policy, image_digest, policy_binding, nonce_digest, trust_anchor, verifier_artifact) ]
+  --[ NitroRollbackRejected(job, 'rollback_document') ]->
+  []
+
+lemma accepted_nitro_attestation_requires_configured_policy:
+  "All job document #i.
+    NitroAttestationAccepted(job, document) @ #i
+    ==>
+    Ex family format pcr_policy image_digest policy_binding nonce_digest trust_anchor verifier_artifact #j.
+      NitroPolicyConfigured(
+        job,
+        family,
+        format,
+        pcr_policy,
+        image_digest,
+        policy_binding,
+        nonce_digest,
+        trust_anchor,
+        verifier_artifact
+      ) @ #j
+      & #j < #i"
+
+lemma accepted_nitro_attestation_requires_adapter_validation:
+  "All job document #i.
+    NitroAttestationAccepted(job, document) @ #i
+    ==>
+    Ex #j #k #l.
+      NitroCertificateChainValidated(job, document) @ #j
+      & NitroCoseSignatureValidated(job, document) @ #k
+      & NitroFreshEvidence(job, document) @ #l
+      & #j = #i
+      & #k = #i
+      & #l = #i"
+
+lemma accepted_nitro_attestation_requires_measurement_and_nonce:
+  "All job document #i.
+    NitroAttestationAccepted(job, document) @ #i
+    ==>
+    Ex pcr_policy nonce_digest #j #k.
+      NitroPcrPolicyMatched(job, pcr_policy) @ #j
+      & NitroNonceMatched(job, nonce_digest) @ #k
+      & #j = #i
+      & #k = #i"
+
+lemma accepted_nitro_attestation_requires_external_review:
+  "All job document #i.
+    NitroAttestationAccepted(job, document) @ #i
+    ==>
+    Ex verifier_artifact #j.
+      NitroExternalSecurityReviewCompleted(job, verifier_artifact) @ #j
+      & #j = #i"
+
+lemma accepted_nitro_attestation_requires_replay_record:
+  "All job document #i.
+    NitroAttestationAccepted(job, document) @ #i
+    ==>
+    Ex #j.
+      NitroReplayRecordWritten(job, document) @ #j
+      & #j = #i"
+
+lemma nitro_secret_provisioning_requires_accepted_attestation:
+  "All job document #i.
+    NitroSecretProvisioned(job, document) @ #i
+    ==>
+    Ex #j.
+      NitroAttestationAccepted(job, document) @ #j
+      & #j < #i"
+
+lemma nitro_result_release_requires_secret_provisioning:
+  "All job document authority #i.
+    NitroResultReleased(job, document, authority) @ #i
+    ==>
+    Ex #j.
+      NitroSecretProvisioned(job, document) @ #j
+      & #j < #i"
+
+lemma nitro_result_release_requires_accepted_attestation:
+  "All job document authority #i.
+    NitroResultReleased(job, document, authority) @ #i
+    ==>
+    Ex #j.
+      NitroAttestationAccepted(job, document) @ #j
+      & #j < #i"
+
+lemma rejected_debug_nitro_document_is_not_accepted:
+  "All job document #i.
+    NitroDebugEvidenceRejected(job, document) @ #i
+    ==>
+    not(Ex #j. NitroAttestationAccepted(job, document) @ #j)"
+
+lemma rejected_replay_nitro_document_is_not_released:
+  "All job document #i.
+    NitroReplayRejected(job, document) @ #i
+    ==>
+    not(Ex authority #j. NitroResultReleased(job, document, authority) @ #j)"
+
+lemma rejected_rollback_nitro_document_is_not_accepted:
+  "All job document #i.
+    NitroRollbackRejected(job, document) @ #i
+    ==>
+    not(Ex #j. NitroAttestationAccepted(job, document) @ #j)"
+
+end

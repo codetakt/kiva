@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:adl-run-report:1",
+  "title": "Kiva normalized ADL conformance run report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "kind",
+    "status",
+    "role",
+    "generated_at_utc",
+    "kiva",
+    "suite",
+    "expectations",
+    "totals",
+    "results"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "kind": {
+      "const": "adl-lrs-compatibility-run"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "role": {
+      "const": "external-compatibility-evidence-not-normative-source"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "kiva": {
+      "$ref": "#/$defs/revision"
+    },
+    "suite": {
+      "$ref": "#/$defs/suite"
+    },
+    "expectations": {
+      "$ref": "#/$defs/expectations"
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/result"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stringList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "git_revision",
+        "git_dirty"
+      ],
+      "properties": {
+        "git_revision": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "git_dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "upstream",
+        "target_version",
+        "git_revision",
+        "git_dirty",
+        "test_id_scheme",
+        "advertised_tests",
+        "observed_tests",
+        "advertised_observed_delta"
+      ],
+      "properties": {
+        "id": {
+          "const": "adl-lrs-conformance-test-suite-v2-0"
+        },
+        "upstream": {
+          "const": "https://github.com/adlnet/lrs-conformance-test-suite"
+        },
+        "target_version": {
+          "const": "2.0.0"
+        },
+        "git_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "git_dirty": {
+          "type": "boolean"
+        },
+        "test_id_scheme": {
+          "const": "sha256-title-path-occurrence-v1"
+        },
+        "advertised_tests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observed_tests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "advertised_observed_delta": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "suite_revision_matches",
+        "observed_count_matches"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "suite_revision_matches": {
+          "type": "boolean"
+        },
+        "observed_count_matches": {
+          "type": "boolean"
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected",
+        "observed",
+        "actual_pass",
+        "actual_fail",
+        "actual_skip",
+        "expected_pass",
+        "expected_divergence",
+        "expected_skip",
+        "expected_open_defect",
+        "matched",
+        "mismatched",
+        "unknown",
+        "missing"
+      ],
+      "properties": {
+        "expected": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "observed": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "actual_pass": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "actual_fail": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "actual_skip": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "expected_pass": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "expected_divergence": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "expected_skip": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "expected_open_defect": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "matched": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "mismatched": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "unknown": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "missing": {
+          "$ref": "#/$defs/nonNegativeInteger"
+        }
+      }
+    },
+    "nonNegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title_path",
+        "occurrence",
+        "actual",
+        "expected",
+        "verdict",
+        "requirement_refs",
+        "compatibility_refs",
+        "rationale",
+        "error"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^adl-v2-[0-9a-f]{20}$"
+        },
+        "title_path": {
+          "$ref": "#/$defs/stringList"
+        },
+        "occurrence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "actual": {
+          "enum": [
+            "pass",
+            "fail",
+            "skip",
+            "not-run"
+          ]
+        },
+        "expected": {
+          "enum": [
+            "pass",
+            "divergence",
+            "skip",
+            "open-defect",
+            "unknown"
+          ]
+        },
+        "verdict": {
+          "enum": [
+            "matched",
+            "mismatch"
+          ]
+        },
+        "requirement_refs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "compatibility_refs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "rationale": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "error": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    }
+  }
+}

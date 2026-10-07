@@ -1,0 +1,92 @@
+theory Kiva_PDS_Data_Product_Access_Boundary
+begin
+
+rule RegisterSubject:
+  [ Fr(~subject) ]
+  --[ SubjectRegistered(~subject) ]->
+  [ !Subject(~subject) ]
+
+rule RegisterAnalyst:
+  [ Fr(~analyst) ]
+  --[ AnalystRegistered(~analyst) ]->
+  [ !Analyst(~analyst) ]
+
+rule RegisterDataProduct:
+  [
+    !Subject(owner),
+    Fr(~product)
+  ]
+  --[ PdsDataProductRegistered(owner, ~product) ]->
+  [ !RegisteredPdsDataProduct(owner, ~product) ]
+
+rule GrantAggregateInsightConsent:
+  [
+    !Subject(owner),
+    !Analyst(analyst),
+    Fr(~grant)
+  ]
+  --[ ConsentGranted(owner, analyst, 'aggregate_read', ~grant) ]->
+  [ ActiveConsent(owner, analyst, 'aggregate_read', ~grant) ]
+
+rule GrantRawReadConsent:
+  [
+    !Subject(owner),
+    !Analyst(analyst),
+    Fr(~grant)
+  ]
+  --[ ConsentGranted(owner, analyst, 'raw_read', ~grant) ]->
+  [ ActiveConsent(owner, analyst, 'raw_read', ~grant) ]
+
+rule RevokeConsent:
+  [ ActiveConsent(owner, analyst, scope, grant) ]
+  --[ ConsentRevoked(owner, analyst, scope, grant) ]->
+  []
+
+rule AnalystReadsDataProduct:
+  [
+    !Analyst(analyst),
+    !RegisteredPdsDataProduct(owner, product),
+    ActiveConsent(owner, analyst, 'aggregate_read', grant)
+  ]
+  --[ PdsDataProductRead(owner, analyst, product, grant) ]->
+  []
+
+lemma data_product_read_requires_registered_product:
+  "All owner analyst product grant #i.
+    PdsDataProductRead(owner, analyst, product, grant) @ #i
+    ==>
+    Ex #j.
+      PdsDataProductRegistered(owner, product) @ #j
+      & #j < #i"
+
+lemma data_product_read_requires_aggregate_consent:
+  "All owner analyst product grant #i.
+    PdsDataProductRead(owner, analyst, product, grant) @ #i
+    ==>
+    Ex #j.
+      ConsentGranted(owner, analyst, 'aggregate_read', grant) @ #j
+      & #j < #i"
+
+lemma revoked_consent_cannot_authorize_later_data_product_read:
+  "All owner analyst product grant #i #j.
+    ConsentRevoked(owner, analyst, 'aggregate_read', grant) @ #i
+    & PdsDataProductRead(owner, analyst, product, grant) @ #j
+    & #i < #j
+    ==>
+    F"
+
+lemma raw_read_consent_does_not_authorize_data_product_read:
+  "All owner analyst product grant #i #j.
+    ConsentGranted(owner, analyst, 'raw_read', grant) @ #i
+    & PdsDataProductRead(owner, analyst, product, grant) @ #j
+    ==>
+    F"
+
+lemma data_product_read_is_owner_scoped_to_consent:
+  "All product_owner consent_owner analyst product grant #i #j.
+    PdsDataProductRegistered(product_owner, product) @ #i
+    & PdsDataProductRead(consent_owner, analyst, product, grant) @ #j
+    ==>
+    product_owner = consent_owner"
+
+end

@@ -1,0 +1,46 @@
+description: >
+  Four-domain reduction model for Kiva design sources. Detailed ledgers may
+  remain split for review, but each source layer must reduce to exactly one
+  top-level design domain.
+architecture_domain_model:
+  root_type: ArchitectureDomainModel
+  domain_count: 4
+  reduction_rule: every source layer maps to one of contracts, operations, assurance, or governance; compatibility lifecycle ownership reduces to governance.
+  domains:
+    contracts:
+      description: External contracts and generated transport DTO boundary evidence.
+      source_layers:
+        - contract
+      owns:
+        - OpenAPI contracts
+        - generated contract DTO maps
+        - generated schema artifacts
+    operations:
+      description: Public operation algebra, workflow bindings, resource families, and route coverage.
+      source_layers:
+        - operation
+      owns:
+        - SurfaceOperation algebra
+        - application operation catalog
+        - PDS resource-family ledger
+        - route coverage
+    assurance:
+      description: Claims, evidence packages, verification ledgers, and release-readiness gates.
+      source_layers:
+        - assurance
+      owns:
+        - public claim catalog
+        - confidential assurance package
+        - CI evidence checks
+        - formal verification evidence
+    governance:
+      description: Architecture metamodel, projection behavior, executable drift guards, compatibility lifecycle overlays, and CI runtime manifests.
+      source_layers:
+        - governance
+      owns:
+        - architecture policy fragments
+        - ProjectionSpec source-to-projection behavior
+        - compiled architecture IR
+        - boundary hygiene rules
+        - compatibility-surface retirement ledgers
+        - compatibility deletion-readiness evidence

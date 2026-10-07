@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:compatibility-retirement-plane:1",
+  "title": "Kiva compatibility retirement plane",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "description",
+    "generated_from",
+    "generated_artifacts",
+    "policy",
+    "summary",
+    "compatibility_surfaces",
+    "dto_retirement"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-compatibility-retirement-plane" },
+    "status": { "const": "active" },
+    "description": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "generated_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retirement_plane", "markdown"],
+      "properties": {
+        "retirement_plane": { "$ref": "#/$defs/nonEmptyString" },
+        "markdown": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready_to_delete_is_not_delete_authorization",
+        "retained_surfaces_require_owner_action_before_deletion",
+        "dto_semantic_guards_remain_until_contract_and_semantic_maps_are_both_closed"
+      ],
+      "properties": {
+        "ready_to_delete_is_not_delete_authorization": { "const": true },
+        "retained_surfaces_require_owner_action_before_deletion": { "const": true },
+        "dto_semantic_guards_remain_until_contract_and_semantic_maps_are_both_closed": { "const": true }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatibility_surface_count",
+        "owner_action_required_count",
+        "blocked_count",
+        "dto_retirement_row_count"
+      ],
+      "properties": {
+        "compatibility_surface_count": { "type": "integer", "minimum": 0 },
+        "owner_action_required_count": { "type": "integer", "minimum": 0 },
+        "blocked_count": { "type": "integer", "minimum": 0 },
+        "dto_retirement_row_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "compatibility_surfaces": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/compatibilitySurface" }
+    },
+    "dto_retirement": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dtoRetirementRow" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "nullableString": {
+      "anyOf": [
+        { "$ref": "#/$defs/nonEmptyString" },
+        { "type": "null" }
+      ]
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "compatibilitySurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "owner",
+        "status",
+        "next_status",
+        "readiness",
+        "decision",
+        "migration_target",
+        "retirement_milestone",
+        "retirement_condition",
+        "expansion_policy",
+        "blockers",
+        "gate_count"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "owner": { "$ref": "#/$defs/nonEmptyString" },
+        "status": { "enum": ["retained", "deletion-ready", "removed"] },
+        "next_status": { "$ref": "#/$defs/nullableString" },
+        "readiness": { "enum": ["ready-to-delete", "blocked", "removed", "not-applicable"] },
+        "decision": { "enum": ["owner-action-required-before-deletion", "blocked", "closed"] },
+        "migration_target": { "$ref": "#/$defs/nonEmptyString" },
+        "retirement_milestone": { "$ref": "#/$defs/nonEmptyString" },
+        "retirement_condition": { "$ref": "#/$defs/nonEmptyString" },
+        "expansion_policy": { "$ref": "#/$defs/nonEmptyString" },
+        "blockers": { "$ref": "#/$defs/stringArray" },
+        "gate_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "dtoRetirementRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "status", "path", "decision"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "enum": ["active-guard", "retired-archive"] },
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "decision": { "enum": ["retain-until-semantic-compatibility-retirement", "closed"] }
+      }
+    }
+  }
+}

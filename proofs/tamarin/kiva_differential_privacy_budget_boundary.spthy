@@ -1,0 +1,143 @@
+theory Kiva_Differential_Privacy_Budget_Boundary
+begin
+
+rule RegisterBudgetOwner:
+  [ Fr(~owner) ]
+  --[ BudgetOwnerRegistered(~owner) ]->
+  [ !BudgetOwner(~owner) ]
+
+rule RegisterDifferentialPrivacyBudget:
+  [
+    Fr(~budget),
+    !BudgetOwner(owner)
+  ]
+  --[ DifferentialPrivacyBudgetRegistered(~budget, owner) ]->
+  [
+    !DifferentialPrivacyBudget(~budget, owner),
+    DifferentialPrivacyBudgetSpendOpen(~budget, owner)
+  ]
+
+rule RejectForeignBudgetSpend:
+  [
+    !DifferentialPrivacyBudget(budget, owner),
+    Fr(~actor)
+  ]
+  --[
+    DifferentialPrivacyBudgetSpendRejectedForeignSubject(
+      budget, owner, ~actor
+    )
+  ]->
+  []
+
+rule SpendDifferentialPrivacyBudget:
+  [
+    DifferentialPrivacyBudgetSpendOpen(budget, owner),
+    !DifferentialPrivacyBudget(budget, owner)
+  ]
+  --[ DifferentialPrivacyBudgetSpent(budget, owner) ]->
+  [ !DifferentialPrivacyBudgetSpendPersisted(budget, owner) ]
+
+rule PersistComputedNoisedAggregate:
+  [
+    Fr(~workflow),
+    !DifferentialPrivacyBudgetSpendPersisted(budget, owner)
+  ]
+  --[
+    DifferentialPrivacyAggregateComputed(~workflow),
+    DifferentialPrivacyNoiseApplied(~workflow),
+    DifferentialPrivacyReleaseBoundToBudget(~workflow, budget, owner)
+  ]->
+  [ DifferentialPrivacyReleaseReady(~workflow, budget, owner) ]
+
+rule ReleaseDifferentialPrivacyAggregate:
+  [ DifferentialPrivacyReleaseReady(workflow, budget, owner) ]
+  --[ DifferentialPrivacyAggregateReleased(workflow, budget, owner) ]->
+  [ !DifferentialPrivacyReleasedAggregate(workflow, budget, owner) ]
+
+rule RejectReleaseWithoutBudgetSpend:
+  [
+    Fr(~workflow),
+    Fr(~budget),
+    Fr(~owner)
+  ]
+  --[
+    DifferentialPrivacyReleaseRejectedMissingBudgetSpend(
+      ~workflow, ~budget, ~owner
+    )
+  ]->
+  []
+
+rule RejectReleaseWithoutNoise:
+  [
+    Fr(~workflow),
+    !DifferentialPrivacyBudgetSpendPersisted(budget, owner)
+  ]
+  --[ DifferentialPrivacyReleaseRejectedMissingNoise(~workflow, budget, owner) ]->
+  []
+
+lemma budget_registration_requires_owner:
+  "All budget owner #i.
+    DifferentialPrivacyBudgetRegistered(budget, owner) @ #i
+    ==>
+    Ex #j.
+      BudgetOwnerRegistered(owner) @ #j
+      & #j < #i"
+
+lemma budget_spend_requires_registered_budget:
+  "All budget owner #i.
+    DifferentialPrivacyBudgetSpent(budget, owner) @ #i
+    ==>
+    Ex #j.
+      DifferentialPrivacyBudgetRegistered(budget, owner) @ #j
+      & #j < #i"
+
+lemma budget_spend_requires_owner:
+  "All budget owner #i.
+    DifferentialPrivacyBudgetSpent(budget, owner) @ #i
+    ==>
+    Ex #j.
+      BudgetOwnerRegistered(owner) @ #j
+      & #j < #i"
+
+lemma rejected_foreign_budget_spend_is_not_accepted:
+  "All budget owner actor #i #j.
+    DifferentialPrivacyBudgetSpendRejectedForeignSubject(
+      budget, owner, actor
+    ) @ #i
+    & DifferentialPrivacyBudgetSpent(budget, actor) @ #j
+    ==>
+    F"
+
+lemma release_requires_budget_spend:
+  "All workflow budget owner #i.
+    DifferentialPrivacyAggregateReleased(workflow, budget, owner) @ #i
+    ==>
+    Ex #j.
+      DifferentialPrivacyBudgetSpent(budget, owner) @ #j
+      & #j < #i"
+
+lemma release_requires_noise:
+  "All workflow budget owner #i.
+    DifferentialPrivacyAggregateReleased(workflow, budget, owner) @ #i
+    ==>
+    Ex #j.
+      DifferentialPrivacyNoiseApplied(workflow) @ #j
+      & #j < #i"
+
+lemma rejected_missing_budget_spend_release_is_not_released:
+  "All workflow budget owner #i #j.
+    DifferentialPrivacyReleaseRejectedMissingBudgetSpend(
+      workflow, budget, owner
+    ) @ #i
+    & DifferentialPrivacyAggregateReleased(workflow, budget, owner) @ #j
+    ==>
+    F"
+
+lemma rejected_missing_noise_release_is_not_released:
+  "All workflow budget owner #i #j.
+    DifferentialPrivacyReleaseRejectedMissingNoise(workflow, budget, owner) @ #i
+    & DifferentialPrivacyAggregateReleased(workflow, budget, owner) @ #j
+    ==>
+    F"
+
+end

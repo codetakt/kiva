@@ -1,0 +1,12 @@
+{
+  "data_product_id": "00000000-0000-4000-8000-000000000209",
+  "source_kind": "shamir-threshold-reconstruction",
+  "release_id": "7171717171717171717171717171717171717171717171717171717171717171",
+  "title": "Threshold reconstruction metadata",
+  "purpose": "governed threshold reconstruction reporting",
+  "legal_basis": "public-task",
+  "data_classes": [
+    "data-product-metadata",
+    "access-audit-metadata"
+  ]
+}

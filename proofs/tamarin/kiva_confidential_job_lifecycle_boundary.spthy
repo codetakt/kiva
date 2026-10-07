@@ -1,0 +1,109 @@
+theory Kiva_Confidential_Job_Lifecycle_Boundary
+begin
+
+rule CreateJob:
+  [ Fr(~job), Fr(~owner) ]
+  --[
+    JobCreated(~job, ~owner),
+    JobTransitioned(~job, 'draft'),
+    AuditEvent(~job, 'draft')
+  ]->
+  [
+    !JobOwner(~job, ~owner),
+    JobState(~job, 'draft')
+  ]
+
+rule AdmitJob:
+  [ JobState(job, 'draft'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'admitted'),
+    JobAdmitted(job),
+    AuditEvent(job, 'admitted')
+  ]->
+  [ JobState(job, 'admitted') ]
+
+rule StartJob:
+  [ JobState(job, 'admitted'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'running'),
+    JobRunning(job),
+    AuditEvent(job, 'running')
+  ]->
+  [ JobState(job, 'running') ]
+
+rule CompleteComputation:
+  [ JobState(job, 'running'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'awaitingRelease'),
+    JobAwaitingRelease(job),
+    AuditEvent(job, 'awaitingRelease')
+  ]->
+  [ JobState(job, 'awaitingRelease') ]
+
+rule ReleaseJob:
+  [ JobState(job, 'awaitingRelease'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'released'),
+    JobReleased(job),
+    AuditEvent(job, 'released')
+  ]->
+  [ JobState(job, 'released') ]
+
+rule FailRunningJob:
+  [ JobState(job, 'running'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'failed'),
+    JobFailed(job),
+    AuditEvent(job, 'failed')
+  ]->
+  [ JobState(job, 'failed') ]
+
+rule CancelDraftJob:
+  [ JobState(job, 'draft'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'cancelled'),
+    JobCancelled(job),
+    AuditEvent(job, 'cancelled')
+  ]->
+  [ JobState(job, 'cancelled') ]
+
+rule ExpireAdmittedJob:
+  [ JobState(job, 'admitted'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'expired'),
+    JobExpired(job),
+    AuditEvent(job, 'expired')
+  ]->
+  [ JobState(job, 'expired') ]
+
+rule RetireReleasedJob:
+  [ JobState(job, 'released'), !JobOwner(job, owner) ]
+  --[
+    JobTransitioned(job, 'retired'),
+    JobRetired(job),
+    AuditEvent(job, 'retired')
+  ]->
+  [ JobState(job, 'retired') ]
+
+lemma released_requires_awaiting_release:
+  "All job #release.
+    JobReleased(job) @ #release
+    ==> (Ex #awaiting.
+      JobAwaitingRelease(job) @ #awaiting
+      & #awaiting < #release)"
+
+lemma transition_has_audit_event:
+  "All job status #i.
+    JobTransitioned(job, status) @ #i
+    ==> AuditEvent(job, status) @ #i"
+
+lemma released_job_never_runs_again:
+  "All job #release #running.
+    JobReleased(job) @ #release
+    & JobRunning(job) @ #running
+    ==> not(#release < #running)"
+
+lemma raw_payload_is_never_published:
+  "not(Ex payload #i. RawPayloadPublished(payload) @ #i)"
+
+end

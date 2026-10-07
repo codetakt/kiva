@@ -1,0 +1,92 @@
+schema_version: 1
+kind: kiva-confidential-capability-bindings-source
+status: active
+description: >
+  Human-owned CapabilityBinding ledger for confidential-computation mechanisms.
+  A binding connects one maturity mechanism to the HTTP workflow families that
+  expose or orchestrate that capability. Dedicated cryptographic APIs and
+  generic confidential job/participant APIs are represented explicitly so
+  MechanismProfile generation does not hard-code workflow-family knowledge.
+operation_kernel: generated/architecture/operation-kernel.yaml
+taxonomy_source: spec/confidential/capability-taxonomy.source.yaml
+generated_artifacts:
+  binding_index: generated/confidential/capability-binding-index.yaml
+  markdown: docs/architecture/generated/confidential-capability-binding-index.md
+binding_model:
+  root_type: CapabilityBinding
+  operation_ref_source: OperationKernel
+  mechanism_ref_source: spec/confidential/mechanism-maturity.yaml
+  capability_taxonomy_source: spec/confidential/capability-taxonomy.source.yaml
+  rule: >
+    CapabilityBinding owns mechanism-to-operation affinity. MechanismProfile
+    joins through this index; CapabilityTaxonomy owns default workflow-family
+    affinity, and generator-local workflow maps are not sources of truth.
+bindings:
+  - id: additive-secure-aggregation-capability
+    maturity_mechanism: additive-secure-aggregation
+    capability: additive-secure-aggregation
+    boundary_note: >
+      Additive releases use dedicated additive endpoints plus the shared
+      threshold-release approval path.
+  - id: differential-privacy-release-capability
+    maturity_mechanism: differential-privacy-release
+    capability: differential-privacy-release
+    boundary_note: Dedicated DP budget, composition, and release endpoints.
+  - id: shamir-vss-admission-capability
+    maturity_mechanism: shamir-vss-admission
+    capability: threshold-reconstruction
+    boundary_note: Dedicated Shamir threshold reconstruction endpoints.
+  - id: psi-cohort-hash-token-capability
+    maturity_mechanism: psi-cohort-hash-token
+    capability: psi-evaluation
+    boundary_note: >
+      Hash-token PSI is orchestrated through confidential job and participant
+      lifecycle endpoints rather than a dedicated public PSI route.
+  - id: psi-oprf-dh-voprf-capability
+    maturity_mechanism: psi-oprf-dh-voprf
+    capability: psi-evaluation
+    boundary_note: >
+      Review-gated OPRF PSI runtimes bind to generic job and participant
+      lifecycle operations.
+  - id: tee-portable-attestation-capability
+    maturity_mechanism: tee-portable-attestation
+    capability: tee-attestation
+    boundary_note: >
+      Portable TEE attestation is admitted as job evidence and participant
+      metadata, with hardware verification supplied by deployment.
+  - id: tee-aws-nitro-attestation-capability
+    maturity_mechanism: tee-aws-nitro-attestation
+    capability: tee-attestation
+    boundary_note: >
+      Nitro attestation support is review-gated and uses the generic
+      confidential job/participant lifecycle boundary.
+  - id: threshold-frost-signing-capability
+    maturity_mechanism: threshold-frost-signing
+    capability: threshold-signing
+    boundary_note: >
+      FROST signing requires external review, generic lifecycle orchestration,
+      and the shared threshold-release approval path.
+  - id: fhe-sum-feasibility-capability
+    maturity_mechanism: fhe-sum-feasibility
+    capability: fhe-evaluation
+    boundary_note: >
+      Feasibility FHE jobs use generic confidential job and participant
+      lifecycle operations.
+  - id: fhe-sum-runtime-capability
+    maturity_mechanism: fhe-sum-runtime
+    capability: fhe-evaluation
+    boundary_note: >
+      Production FHE runtime bindings stay review-gated while using the generic
+      confidential job/participant lifecycle boundary.
+  - id: confidential-job-lifecycle-capability
+    maturity_mechanism: confidential-job-lifecycle
+    capability: confidential-job-lifecycle
+    boundary_note: Job lifecycle substrate endpoints.
+  - id: confidential-participant-key-lifecycle-capability
+    maturity_mechanism: confidential-participant-key-lifecycle
+    capability: confidential-participant-key-lifecycle
+    boundary_note: Participant and key lifecycle substrate endpoints.
+  - id: secret-compute-provider-contract-capability
+    maturity_mechanism: secret-compute-provider-contract
+    capability: provider-contract
+    boundary_note: Provider contract evidence is bound through generic runtime metadata.

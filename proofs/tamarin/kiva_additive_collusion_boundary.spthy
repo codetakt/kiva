@@ -1,0 +1,203 @@
+theory Kiva_Additive_Collusion_Boundary
+begin
+
+rule OpenTwoPartyAdditiveWorkflow:
+  [
+    Fr(~transcript),
+    Fr(~left_participant),
+    Fr(~right_participant),
+    Fr(~coordinator),
+    Fr(~authority),
+    Fr(~analyst),
+    Fr(~auditor)
+  ]
+  --[
+    AdditiveTranscriptOpened(
+      ~transcript, ~left_participant, ~right_participant
+    ),
+    ShareParticipantRegistered(~left_participant),
+    ShareParticipantRegistered(~right_participant),
+    WorkflowCoordinatorRegistered(~coordinator),
+    PolicyAuthorityRegistered(~authority),
+    AnalystRegistered(~analyst),
+    AuditorRegistered(~auditor),
+    AdditiveDutiesSeparated(
+      ~transcript, ~left_participant, ~right_participant, ~coordinator,
+      ~authority, ~analyst, ~auditor
+    )
+  ]->
+  [
+    !AdditiveTranscript(~transcript, ~left_participant, ~right_participant),
+    !ShareParticipant(~left_participant),
+    !ShareParticipant(~right_participant),
+    !WorkflowCoordinator(~coordinator),
+    !PolicyAuthority(~authority),
+    !Analyst(~analyst),
+    !Auditor(~auditor),
+    CommitSlot(~transcript, ~left_participant),
+    CommitSlot(~transcript, ~right_participant),
+    CoordinatorMaySchedule(~transcript, ~coordinator),
+    AuditorMayReadAdditiveAudit(~transcript, ~auditor)
+  ]
+
+rule CoordinatorSchedulesAdditiveWorkflow:
+  [
+    CoordinatorMaySchedule(transcript, coordinator),
+    !WorkflowCoordinator(coordinator)
+  ]
+  --[ AdditiveWorkflowScheduled(transcript, coordinator) ]->
+  [ AdditiveWorkflowReady(transcript) ]
+
+rule ParticipantSubmitsShare:
+  [
+    CommitSlot(transcript, participant),
+    !ShareParticipant(participant),
+    Fr(~share)
+  ]
+  --[ AdditiveShareAccepted(transcript, participant, ~share) ]->
+  [ !AcceptedAdditiveShare(transcript, participant, ~share) ]
+
+rule ComputeAdditiveAggregate:
+  [
+    AdditiveWorkflowReady(transcript),
+    !AdditiveTranscript(transcript, left_participant, right_participant),
+    !AcceptedAdditiveShare(transcript, left_participant, left_share),
+    !AcceptedAdditiveShare(transcript, right_participant, right_share)
+  ]
+  --[
+    AdditiveAggregateComputed(
+      transcript, left_participant, right_participant, left_share, right_share
+    )
+  ]->
+  [ PendingAdditiveRelease(transcript) ]
+
+rule PolicyAuthorityReleasesAggregate:
+  [
+    PendingAdditiveRelease(transcript),
+    !PolicyAuthority(authority)
+  ]
+  --[ AdditiveAggregateReleased(transcript, authority) ]->
+  [ !ReleasedAdditiveAggregate(transcript) ]
+
+rule AnalystReadsReleasedAggregate:
+  [
+    !ReleasedAdditiveAggregate(transcript),
+    !Analyst(analyst)
+  ]
+  --[ AdditiveAggregateRead(transcript, analyst) ]->
+  []
+
+rule AuditorReadsAdditiveAuditMetadata:
+  [
+    AuditorMayReadAdditiveAudit(transcript, auditor),
+    !Auditor(auditor)
+  ]
+  --[ AdditiveAuditMetadataRead(transcript, auditor) ]->
+  []
+
+lemma additive_workflow_participants_are_distinct:
+  "All transcript left_participant right_participant #i.
+    AdditiveTranscriptOpened(
+      transcript, left_participant, right_participant
+    ) @ #i
+    & left_participant = right_participant
+    ==>
+    F"
+
+lemma aggregate_computation_requires_two_distinct_participants:
+  "All transcript left_participant right_participant left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left_participant, right_participant, left_share, right_share
+    ) @ #i
+    & left_participant = right_participant
+    ==>
+    F"
+
+lemma aggregate_computation_requires_scheduled_workflow:
+  "All transcript left_participant right_participant left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left_participant, right_participant, left_share, right_share
+    ) @ #i
+    ==>
+    Ex coordinator #j.
+      AdditiveWorkflowScheduled(transcript, coordinator) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_left_share:
+  "All transcript left_participant right_participant left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left_participant, right_participant, left_share, right_share
+    ) @ #i
+    ==>
+    Ex #j.
+      AdditiveShareAccepted(transcript, left_participant, left_share) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_right_share:
+  "All transcript left_participant right_participant left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left_participant, right_participant, left_share, right_share
+    ) @ #i
+    ==>
+    Ex #j.
+      AdditiveShareAccepted(transcript, right_participant, right_share) @ #j
+      & #j < #i"
+
+lemma coordinator_cannot_submit_additive_share:
+  "All transcript coordinator share #i #j.
+    WorkflowCoordinatorRegistered(coordinator) @ #i
+    & AdditiveShareAccepted(transcript, coordinator, share) @ #j
+    ==>
+    F"
+
+lemma analyst_cannot_release_additive_aggregate:
+  "All transcript analyst #i #j.
+    AnalystRegistered(analyst) @ #i
+    & AdditiveAggregateReleased(transcript, analyst) @ #j
+    ==>
+    F"
+
+lemma auditor_metadata_access_does_not_release_aggregate:
+  "All transcript auditor #i #j #k.
+    AuditorRegistered(auditor) @ #i
+    & AdditiveAuditMetadataRead(transcript, auditor) @ #j
+    & AdditiveAggregateReleased(transcript, auditor) @ #k
+    ==>
+    F"
+
+lemma release_requires_policy_authority:
+  "All transcript authority #i.
+    AdditiveAggregateReleased(transcript, authority) @ #i
+    ==>
+    Ex #j.
+      PolicyAuthorityRegistered(authority) @ #j
+      & #j < #i"
+
+lemma release_requires_prior_aggregate_computation:
+  "All transcript authority #i.
+    AdditiveAggregateReleased(transcript, authority) @ #i
+    ==>
+    Ex left_participant right_participant left_share right_share #j.
+      AdditiveAggregateComputed(
+        transcript, left_participant, right_participant, left_share, right_share
+      ) @ #j
+      & #j < #i"
+
+lemma share_acceptance_does_not_bypass_release:
+  "All transcript participant share analyst #i #j.
+    AdditiveShareAccepted(transcript, participant, share) @ #i
+    & AdditiveAggregateRead(transcript, analyst) @ #j
+    ==>
+    Ex authority #k.
+      AdditiveAggregateReleased(transcript, authority) @ #k
+      & #k < #j"
+
+lemma aggregate_read_requires_release:
+  "All transcript analyst #i.
+    AdditiveAggregateRead(transcript, analyst) @ #i
+    ==>
+    Ex authority #j.
+      AdditiveAggregateReleased(transcript, authority) @ #j
+      & #j < #i"
+
+end

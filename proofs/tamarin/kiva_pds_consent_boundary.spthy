@@ -1,0 +1,147 @@
+theory Kiva_PDS_Consent_Boundary
+begin
+
+rule RegisterSubject:
+  [ Fr(~subject) ]
+  --[ SubjectRegistered(~subject) ]->
+  [ !Subject(~subject) ]
+
+rule RegisterCustodian:
+  [ Fr(~custodian) ]
+  --[ CustodianRegistered(~custodian) ]->
+  [ !Custodian(~custodian) ]
+
+rule RegisterAnalyst:
+  [ Fr(~analyst) ]
+  --[ AnalystRegistered(~analyst) ]->
+  [ !Analyst(~analyst) ]
+
+rule GrantRawReadConsent:
+  [
+    !Subject(subject),
+    !Custodian(custodian),
+    Fr(~grant)
+  ]
+  --[ ConsentGranted(subject, custodian, 'raw_read', ~grant) ]->
+  [ ActiveConsent(subject, custodian, 'raw_read', ~grant) ]
+
+rule GrantAggregateReadConsent:
+  [
+    !Subject(subject),
+    !Analyst(analyst),
+    Fr(~grant)
+  ]
+  --[ ConsentGranted(subject, analyst, 'aggregate_read', ~grant) ]->
+  [ ActiveConsent(subject, analyst, 'aggregate_read', ~grant) ]
+
+rule AssignCustodialAuthority:
+  [
+    !Subject(subject),
+    !Custodian(custodian),
+    Fr(~authority)
+  ]
+  --[ CustodialAuthorityAssigned(subject, custodian, ~authority) ]->
+  [ ActiveCustodialAuthority(subject, custodian, ~authority) ]
+
+rule RevokeConsent:
+  [ ActiveConsent(subject, principal, scope, grant) ]
+  --[ ConsentRevoked(subject, principal, scope, grant) ]->
+  []
+
+rule CustodianReadsRawRecordByConsent:
+  [
+    !Custodian(custodian),
+    ActiveConsent(subject, custodian, 'raw_read', grant)
+  ]
+  --[
+    DelegatedPdsRead(subject, custodian, 'raw_read', grant),
+    PdsRawRecordRead(subject, custodian)
+  ]->
+  []
+
+rule CustodianReadsRawRecordByAuthority:
+  [
+    !Custodian(custodian),
+    ActiveCustodialAuthority(subject, custodian, authority)
+  ]
+  --[
+    CustodialAuthorityPdsRead(subject, custodian, authority),
+    PdsRawRecordRead(subject, custodian)
+  ]->
+  []
+
+rule AnalystReadsAggregateByConsent:
+  [
+    !Analyst(analyst),
+    ActiveConsent(subject, analyst, 'aggregate_read', grant)
+  ]
+  --[
+    DelegatedPdsRead(subject, analyst, 'aggregate_read', grant),
+    PdsAggregateRead(subject, analyst)
+  ]->
+  []
+
+lemma delegated_pds_read_requires_matching_consent:
+  "All subject principal scope grant #i.
+    DelegatedPdsRead(subject, principal, scope, grant) @ #i
+    ==>
+    Ex #j.
+      ConsentGranted(subject, principal, scope, grant) @ #j
+      & #j < #i"
+
+lemma delegated_pds_read_requires_unrevoked_consent:
+  "All subject principal scope grant #i.
+    DelegatedPdsRead(subject, principal, scope, grant) @ #i
+    ==>
+    not (Ex #j.
+      ConsentRevoked(subject, principal, scope, grant) @ #j
+      & #j < #i)"
+
+lemma aggregate_read_requires_aggregate_scope:
+  "All subject analyst #i.
+    PdsAggregateRead(subject, analyst) @ #i
+    ==>
+    Ex grant #j.
+      ConsentGranted(subject, analyst, 'aggregate_read', grant) @ #j
+      & #j < #i"
+
+lemma raw_record_read_requires_consent_or_custodial_authority:
+  "All subject custodian #i.
+    PdsRawRecordRead(subject, custodian) @ #i
+    ==>
+    (
+      Ex grant #j.
+        ConsentGranted(subject, custodian, 'raw_read', grant) @ #j
+        & #j < #i
+        & not (Ex #k.
+          ConsentRevoked(subject, custodian, 'raw_read', grant) @ #k
+          & #k < #i)
+    )
+    | (
+      Ex authority #j.
+        CustodialAuthorityAssigned(subject, custodian, authority) @ #j
+        & #j < #i
+    )"
+
+lemma analyst_cannot_read_raw_records:
+  "All subject principal #i #j.
+    AnalystRegistered(principal) @ #i
+    & PdsRawRecordRead(subject, principal) @ #j
+    ==>
+    F"
+
+lemma raw_read_scope_does_not_grant_aggregate_read:
+  "All subject principal grant #i #j.
+    ConsentGranted(subject, principal, 'raw_read', grant) @ #i
+    & DelegatedPdsRead(subject, principal, 'aggregate_read', grant) @ #j
+    ==>
+    F"
+
+lemma aggregate_scope_does_not_grant_raw_read:
+  "All subject principal grant #i #j.
+    ConsentGranted(subject, principal, 'aggregate_read', grant) @ #i
+    & DelegatedPdsRead(subject, principal, 'raw_read', grant) @ #j
+    ==>
+    F"
+
+end

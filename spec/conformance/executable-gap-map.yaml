@@ -1,0 +1,11 @@
+schema_version: 1
+standard: IEEE/ISO/IEC 39274-1-1-2025
+requirement_catalog: spec/requirements/ieee-39274-1-1-2025.yaml
+title: Endpoint-profile-sensitive executable conformance gaps
+notes:
+  - >
+    Keep this map for requirements that are intentionally not executable as
+    generic black-box HTTP cases. Endpoint-profile-sensitive 413 and 429 checks
+    now have executable cases gated by deterministic endpoint profiles.
+
+gaps: []

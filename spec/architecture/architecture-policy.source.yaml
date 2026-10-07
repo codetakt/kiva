@@ -1,0 +1,62 @@
+schema_version: 1
+kind: kiva-architecture-policy-source
+status: active
+description: >
+  Canonical architecture policy entrypoint for Kiva's generated design-backbone
+  review projection. DesignUniverse owns the editable metamodel and renders the
+  ArchitectureGraph source-node projection; ProjectionRuntime normal-form
+  ledgers own source-to-projection behavior; included policy fragments own
+  source-layer classification, generated-artifact classification, governance
+  source separation, and design invariants.
+includes:
+  - spec/architecture/policies/source-layer-policy.source.yaml
+  - spec/architecture/policies/artifact-class-policy.source.yaml
+  - spec/architecture/policies/architecture-ir-policy.source.yaml
+  - spec/architecture/policies/operation-kernel-policy.source.yaml
+  - spec/architecture/policies/confidential-assurance-source-policy.source.yaml
+  - spec/architecture/policies/pds-resource-pattern.source.yaml
+  - spec/architecture/policies/control-plane-boundary-policy.source.yaml
+  - spec/architecture/policies/workflow-entrypoint-policy.source.yaml
+  - spec/architecture/policies/http-adapter-boundary-policy.source.yaml
+  - spec/architecture/policies/architecture-domain-model.source.yaml
+policy_sections:
+  - id: source-layer-policy
+    policy_kind: classification
+    owns: source_layers
+    split_candidate: spec/architecture/policies/source-layer-policy.source.yaml
+  - id: artifact-class-policy
+    policy_kind: generated-artifact-classification
+    owns: artifact_class_policy
+    split_candidate: spec/architecture/policies/artifact-class-policy.source.yaml
+  - id: architecture-ir-policy
+    policy_kind: compiled-ir-ownership
+    owns: architecture_ir_policy
+    split_candidate: spec/architecture/policies/architecture-ir-policy.source.yaml
+  - id: operation-kernel-policy
+    policy_kind: operation-kernel
+    owns: operation_kernel_policy
+    split_candidate: spec/architecture/policies/operation-kernel-policy.source.yaml
+  - id: confidential-assurance-source-policy
+    policy_kind: assurance-source-model
+    owns: confidential_assurance_source_model
+    split_candidate: spec/architecture/policies/confidential-assurance-source-policy.source.yaml
+  - id: pds-resource-pattern-policy
+    policy_kind: resource-pattern
+    owns: pds_resource_family_pattern
+    split_candidate: spec/architecture/policies/pds-resource-pattern.source.yaml
+  - id: control-plane-boundary-policy
+    policy_kind: control-data-plane-boundary
+    owns: control_plane_data_plane_boundary
+    split_candidate: spec/architecture/policies/control-plane-boundary-policy.source.yaml
+  - id: workflow-entrypoint-policy
+    policy_kind: workflow-entrypoint
+    owns: workflow_entrypoint_policy
+    split_candidate: spec/architecture/policies/workflow-entrypoint-policy.source.yaml
+  - id: http-adapter-boundary-policy
+    policy_kind: http-adapter-boundary
+    owns: http_adapter_boundary_policy
+    split_candidate: spec/architecture/policies/http-adapter-boundary-policy.source.yaml
+  - id: architecture-domain-model-policy
+    policy_kind: source-domain-reduction
+    owns: architecture_domain_model
+    split_candidate: spec/architecture/policies/architecture-domain-model.source.yaml

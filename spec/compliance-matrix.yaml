@@ -1,0 +1,884 @@
+requirements:
+  - id: xapi-lrs-resources-001
+    standard: IEEE/ISO/IEC 39274-1-1-2025
+    area: xapi
+    requirement: Kiva exposes the required LRS resource families.
+    status: specified
+    evidence:
+      - spec/openapi/kiva-xapi.yaml
+      - crates/kiva-xapi/src/lib.rs
+  - id: xapi-openapi-contract-001
+    standard: IEEE/ISO/IEC 39274-1-1-2025
+    area: xapi
+    requirement: Kiva maintains a machine-readable OpenAPI contract for the xAPI LRS HTTP boundary.
+    status: specified
+    evidence:
+      - spec/openapi/kiva-xapi.yaml
+      - scripts/ci/validate_openapi.py
+  - id: xapi-requirement-traceability-001
+    standard: IEEE/ISO/IEC 39274-1-1-2025
+    area: xapi
+    requirement: Kiva traces OpenAPI operations and schemas to clause-indexed xAPI LRS requirements.
+    status: specified
+    evidence:
+      - spec/requirements/ieee-39274-1-1-2025.yaml
+      - spec/conformance/ieee-source-clause-triage.yaml
+      - spec/openapi/kiva-xapi.yaml
+      - scripts/ci/validate_openapi.py
+      - scripts/ci/audit_requirement_catalog.py
+  - id: architecture-boundary-drift-001
+    standard: Kiva Architecture
+    area: architecture
+    requirement: Kiva keeps server boundary source files, OpenAPI evidence, and design-document anchors synchronized through a machine-readable architecture boundary manifest.
+    status: specified
+    evidence:
+      - spec/architecture/boundaries.yaml
+      - scripts/ci/validate_architecture_boundaries.py
+      - docs/architecture/system-design.md
+      - docs/architecture/server-modular-boundaries.md
+  - id: xapi-conformance-discharge-001
+    standard: IEEE/ISO/IEC 39274-1-1-2025
+    area: xapi
+    requirement: Kiva assigns every xAPI LRS requirement to a conformance discharge mechanism.
+    status: specified
+    evidence:
+      - spec/conformance/xapi-lrs-discharge.yaml
+      - scripts/ci/validate_conformance.py
+      - scripts/ci/generate_conformance_evidence.sh
+  - id: xapi-conformance-claim-001
+    standard: Kiva Architecture
+    area: xapi
+    requirement: Kiva keeps the IEEE xAPI LRS conformance claim boundary separate from certification language and Kiva-specific production security behavior.
+    status: specified
+    evidence:
+      - docs/architecture/conformance-claim.md
+      - scripts/ci/generate_conformance_evidence.sh
+  - id: oauth-oidc-resource-server-binding-001
+    standard: Kiva Architecture
+    area: authorization
+    requirement: >
+      Kiva binds protected xAPI, PDS, and confidential-computation HTTP
+      operations to exact OAuth/OIDC-derived bearer-token scopes at the
+      resource-server boundary, while leaving production IdP/JWKS/introspection
+      integration to deployment adapters.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-xapi.yaml
+      - spec/openapi/kiva-pds.yaml
+      - spec/openapi/kiva-confidential.yaml
+      - scripts/ci/validate_openapi.py
+      - scripts/ci/validate_pds_openapi.py
+      - scripts/ci/validate_confidential_openapi.py
+      - scripts/ci/run_kani_verification.sh
+      - proofs/kani/README.md
+      - proofs/tamarin/kiva_oauth_oidc_boundary.spthy
+      - docs/architecture/oauth-oidc-resource-server-binding.md
+      - docs/architecture/pds-milestones.md
+      - spec/pds/publication-milestones.yaml
+  - id: xapi-conformance-contribution-001
+    standard: Kiva Architecture
+    area: xapi
+    requirement: Kiva maintains a contribution strategy for an upstreamable IEEE/ISO/IEC 39274-1-1-2025 conformance suite.
+    status: specified
+    evidence:
+      - docs/architecture/conformance-suite-contribution.md
+      - spec/conformance/xapi-lrs-discharge.yaml
+  - id: xapi-adl-compatibility-001
+    standard: Kiva Architecture
+    area: xapi
+    requirement: Kiva tracks which IEEE/ISO/IEC 39274-1-1-2025 xAPI LRS requirements are equivalent to, partially covered by, or absent from the ADL xAPI LRS Conformance Test Suite.
+    status: specified
+    evidence:
+      - spec/conformance/adl-compatibility-map.yaml
+      - scripts/ci/report_adl_compatibility.py
+  - id: policy-separation-001
+    standard: Kiva Architecture
+    area: governance
+    requirement: Raw learning records and aggregate insights are distinct policy resources.
+    status: planned
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+  - id: confidential-workflow-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Confidential computation workflows declare participants and release thresholds.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - proofs/tamarin/kiva_confidential_workflow_boundary.spthy
+  - id: confidential-threshold-release-model-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a representative formal model and runtime approval API for
+      two-authority threshold result release in which distinct policy
+      authorities both approve a persisted computed aggregate before a release
+      audit event and analyst threshold aggregate read.
+    status: specified
+    evidence:
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619120000_confidential_threshold_releases.sql
+      - db/migrations/20260619130000_confidential_additive_aggregate_results.sql
+      - spec/openapi/kiva-confidential.yaml
+      - proofs/tamarin/kiva_confidential_workflow_boundary.spthy
+      - scripts/ci/run_postgres_verification.sh
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: pds-data-product-release-admission-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      PDS data-product registration references only available confidential
+      release artifacts for the authenticated owner through a
+      ReleaseArtifactAvailabilityPort boundary. PDS exposes a normalized
+      ReleaseArtifactRef response boundary, while compatibility source-kind and
+      release-id fields remain limited to threshold releases,
+      differential-privacy releases, and Shamir threshold reconstruction
+      metadata.
+    status: specified
+    evidence:
+      - crates/kiva-pds/src/pds/release_artifacts.rs
+      - crates/kiva-release-artifacts/src/lib.rs
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/app/pds.rs
+      - crates/kiva-server/src/app/pds/server_adapters.rs
+      - crates/kiva-server/src/app/pds/server_adapters/records.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-application/src/pds/model.rs
+      - crates/kiva-application/src/pds/model/records.rs
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619170000_pds_data_product_release_refs.sql
+      - db/migrations/20260619220000_pds_shamir_reconstruction_data_products.sql
+      - spec/openapi/kiva-pds.yaml
+      - docs/architecture/pds-shamir-reconstruction-data-products.md
+      - docs/architecture/pds-milestones.md
+      - proofs/kani/README.md
+      - proofs/tamarin/kiva_pds_data_product_release_boundary.spthy
+      - scripts/ci/run_postgres_verification.sh
+  - id: pds-data-product-access-scope-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      PDS access checks that reference a data product require an aggregate
+      insight read, an existing registered data product, and an active
+      aggregate-insight consent grant whose data subject owns the product.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-pds.yaml
+      - docs/architecture/pds-milestones.md
+      - proofs/tamarin/kiva_pds_data_product_access_boundary.spthy
+      - scripts/ci/run_kani_verification.sh
+      - scripts/ci/run_postgres_verification.sh
+  - id: pds-confidential-analytics-read-boundary-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva provides a governed PDS data-product read path for privacy-preserving
+      analytics in which analyst reads require an aggregate-insight consent
+      grant, an existing subject-owned data product backed by an approved
+      confidential release, and a persisted access-audit event; successful
+      reads expose metadata only, and denied reads do not expose data-product,
+      raw xAPI Statement, aggregate, noise, share, signature, or signed-envelope
+      payloads.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-pds.yaml
+      - docs/architecture/pds-milestones.md
+      - proofs/kani/README.md
+      - proofs/tamarin/kiva_pds_data_product_access_boundary.spthy
+      - proofs/tamarin/kiva_pds_data_product_release_boundary.spthy
+      - scripts/ci/run_postgres_verification.sh
+  - id: pds-personal-data-lifecycle-metadata-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva provides subject-scoped PDS lifecycle metadata operations for record
+      inventory, metadata export, lifecycle event registration, consent
+      expiration, renewal linkage, purpose/legal-basis metadata, and declared
+      data-class minimization without mutating accepted xAPI Statements or
+      exposing raw Statement JSON, result payloads, aggregate payloads, noise
+      values, shares, signatures, or signed envelopes.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619190000_pds_lifecycle_metadata.sql
+      - spec/openapi/kiva-pds.yaml
+      - scripts/ci/validate_pds_openapi.py
+      - docs/architecture/pds-milestones.md
+      - scripts/ci/run_postgres_verification.sh
+  - id: pds-operational-lifecycle-workflows-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva represents operational retention schedules, tombstone publication
+      rules, and correction/dispute/tombstone case workflows as subject-scoped
+      PDS metadata with strict status transitions, terminal resolution
+      immutability, metadata export inclusion, and no mutation of accepted xAPI
+      Statements or exposure of raw Statement/confidential-computation
+      payloads.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619230000_pds_operational_lifecycle_workflows.sql
+      - spec/openapi/kiva-pds.yaml
+      - scripts/ci/validate_pds_openapi.py
+      - examples/pds/index.yaml
+      - docs/architecture/pds-operational-lifecycle-workflows.md
+      - docs/architecture/pds-milestones.md
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+  - id: pds-public-sector-governance-profile-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva provides subject-owned public-sector PDS governance profiles for
+      single-operator, school-district, and multi-agency deployments, requiring
+      declared tenant and subject partitioning, separated data-custodian,
+      platform-operator, policy-authority, analyst, auditor, and optional
+      identity-authority subjects, emergency-access policy metadata, and
+      operational runbook references without exposing raw xAPI Statement or
+      confidential-computation payloads.
+    status: specified
+    evidence:
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619200000_pds_public_sector_governance.sql
+      - spec/openapi/kiva-pds.yaml
+      - scripts/ci/validate_pds_openapi.py
+      - docs/architecture/pds-milestones.md
+      - proofs/tamarin/kiva_public_sector_separation_boundary.spthy
+      - scripts/ci/run_kani_verification.sh
+      - scripts/ci/run_postgres_verification.sh
+  - id: pds-integrated-milestones-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva maintains an integrated Personal Data Store milestone plan that
+      consolidates PDS API contracts, policy boundaries, persistence,
+      confidential-release linkage, audit evidence, assurance artifacts, and
+      publication-readiness work into one traceable roadmap.
+    status: specified
+    evidence:
+      - docs/architecture/pds-milestones.md
+      - spec/openapi/kiva-pds.yaml
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - proofs/kani/README.md
+      - proofs/tamarin/README.md
+  - id: pds-publication-readiness-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva packages the current PDS extension boundary for external review
+      with OpenAPI-derived schema artifacts, indexed examples, compatibility
+      guidance that separates PDS from the IEEE xAPI LRS conformance surface,
+      and a reproducible evidence bundle with manifest and checksum
+      validation.
+    status: specified
+    evidence:
+      - spec/openapi/kiva-pds.yaml
+      - examples/pds/index.yaml
+      - generated/pds-openapi-schemas/index.json
+      - scripts/ci/export_pds_openapi_schemas.py
+      - scripts/ci/validate_pds_publication.py
+      - scripts/ci/generate_pds_evidence.sh
+      - scripts/ci/validate_pds_evidence_bundle.py
+      - spec/pds/schemas/pds-evidence-manifest.schema.json
+      - spec/pds/publication-milestones.yaml
+      - docs/architecture/pds-extension-compatibility.md
+      - docs/architecture/pds-milestones.md
+  - id: pds-public-sector-deployment-templates-001
+    standard: Kiva Architecture
+    area: personal-data-store
+    requirement: >
+      Kiva publishes machine-readable school-district and multi-agency PDS
+      deployment templates with legal-policy examples and operator runbooks,
+      validates role separation, runbook completeness, retention schedule
+      consistency, prohibited raw payloads, and PDS OpenAPI operation
+      references, and includes the templates in PDS publication evidence
+      without presenting them as legal advice or IEEE xAPI conformance.
+    status: specified
+    evidence:
+      - spec/pds/deployment-templates.yaml
+      - spec/pds/schemas/pds-deployment-template-catalog.schema.json
+      - scripts/ci/validate_pds_deployment_templates.py
+      - scripts/ci/validate_pds_publication.py
+      - scripts/ci/generate_pds_evidence.sh
+      - scripts/ci/validate_pds_evidence_bundle.py
+      - docs/architecture/pds-public-sector-deployment-templates.md
+      - docs/architecture/pds-extension-compatibility.md
+      - docs/architecture/pds-milestones.md
+  - id: confidential-additive-aggregate-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva defines an n-of-n additive secure aggregation transcript over a fixed finite field for the first cross-institution aggregate workflow.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - spec/confidential/additive-secure-aggregate-vectors.yaml
+      - proofs/kani/README.md
+  - id: confidential-additive-collusion-boundary-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a representative collusion and separation model for the
+      additive aggregate workflow in which aggregate computation requires a
+      scheduled two-party workflow and both participant shares, and
+      coordinator, analyst, and auditor roles do not gain share-submission or
+      aggregate-release authority.
+    status: specified
+    evidence:
+      - proofs/tamarin/kiva_additive_collusion_boundary.spthy
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - scripts/ci/run_tamarin_verification.sh
+  - id: confidential-share-transport-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva models and implements the structural authenticated additive-share and commitment boundary before aggregate computation, including subject-bound submitted-share persistence.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619110000_confidential_additive_share_submissions.sql
+      - proofs/tamarin/kiva_additive_share_transport_boundary.spthy
+      - proofs/kani/README.md
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: confidential-share-replay-window-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva enforces replay-window semantics for authenticated additive-share envelopes before aggregate computation.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - proofs/kani/README.md
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: confidential-share-signature-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva verifies Ed25519 signatures over canonical additive-share envelope payloads using active server-side signing-key registrations before signed aggregate computation, supports subject-owned signing-key rotation and revocation, and excludes revoked signing keys from aggregate verification.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619100000_confidential_additive_share_signing_keys.sql
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: confidential-share-replay-persistence-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva persists accepted additive-share replay records with a database uniqueness boundary per tenant, transcript, and participant.
+    status: specified
+    evidence:
+      - crates/kiva-server/src/lib.rs
+      - db/schema.sql
+      - db/migrations/20260619090000_confidential_additive_share_replay_records.sql
+      - db/migrations/20260619130000_confidential_additive_aggregate_results.sql
+      - proofs/tamarin/kiva_additive_share_transport_boundary.spthy
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/confidential-aggregate-threat-model.md
+  - id: confidential-share-audit-metadata-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: Kiva exposes subject-scoped signing-key state, subject-scoped submitted-share metadata, and transcript-scoped replay-record metadata for confidential additive-share audits without returning share values or signed envelopes.
+    status: specified
+    evidence:
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+  - id: confidential-differential-privacy-sampled-release-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva provides a server-side sampled differential privacy aggregate release
+      boundary for persisted additive aggregate results, using subject-owned
+      epsilon budget accounting, OS randomness, idempotent release persistence,
+      and metadata responses that hide raw aggregate and sampled-noise evidence.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - scripts/ci/validate_confidential_openapi.py
+      - scripts/ci/run_postgres_verification.sh
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: confidential-differential-privacy-composition-summary-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva provides a subject-owned basic sequential composition summary for
+      differential privacy budgets that separates release-attributed epsilon
+      spend from unattributed manual spend without exposing raw aggregate or
+      sampled-noise evidence.
+    status: specified
+    evidence:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - scripts/ci/validate_confidential_openapi.py
+      - scripts/ci/run_kani_verification.sh
+      - scripts/ci/run_postgres_verification.sh
+      - proofs/kani/README.md
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - docs/architecture/additive-secure-aggregate-mechanism.md
+      - docs/architecture/formal-verification-roadmap.md
+  - id: confidential-differential-privacy-assurance-profile-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a machine-readable differential privacy assurance profile
+      that fixes the implemented mechanism, add/remove-one-subject adjacency
+      model, subject-budget accounting scope, deterministic sampler evidence,
+      advanced-composition audit bound, and budget-policy lifecycle boundary.
+    status: specified
+    evidence:
+      - spec/confidential/differential-privacy-assurance.yaml
+      - scripts/ci/validate_differential_privacy_assurance.py
+      - docs/architecture/differential-privacy-assurance.md
+      - docs/architecture/confidential-computation-milestones.md
+      - spec/confidential/computation-milestones.yaml
+      - spec/openapi/kiva-confidential.yaml
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-shamir-vss-assurance-profile-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a machine-readable Shamir VSS assurance profile that fixes
+      the implemented hash-committed share-opening verification profile,
+      threshold reconstruction admission rules, complaint outcomes,
+      metadata-only persistence boundary, and deterministic commitment vectors.
+    status: specified
+    evidence:
+      - spec/confidential/shamir-vss-assurance.yaml
+      - spec/confidential/shamir-threshold-vectors.yaml
+      - scripts/ci/validate_shamir_vss_assurance.py
+      - docs/architecture/shamir-threshold-cryptography.md
+      - docs/operations/shamir-vss-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - spec/openapi/kiva-confidential.yaml
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - proofs/tamarin/kiva_shamir_threshold_boundary.spthy
+      - fstar/Kiva.Confidential.ShamirGate.fst
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-psi-cohort-assurance-profile-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a machine-readable PSI cohort assurance profile and job
+      contract that fix the implemented cross-school hash-token intersection
+      boundary, identifier canonicalization, domain separation, output leakage
+      profile, explicit absence of a dedicated PDS data-product source kind,
+      deterministic vectors, and non-claim language for malicious-secure PSI.
+    status: specified
+    evidence:
+      - spec/confidential/psi-cohort-assurance.yaml
+      - spec/confidential/psi-cohort-job-contract.yaml
+      - spec/confidential/psi-cohort-vectors.yaml
+      - scripts/ci/validate_psi_cohort_assurance.py
+      - docs/architecture/private-set-intersection.md
+      - docs/operations/psi-cohort-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-policy/src/lib.rs
+      - proofs/tamarin/kiva_psi_cohort_boundary.spthy
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-tee-attestation-assurance-profile-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a machine-readable portable TEE attestation assurance
+      profile and job contract that fix the implemented deployment-bound
+      evidence gate, supported portable format, measurement and image
+      provenance binding, policy binding, freshness, rollback and replay
+      rejection, secret-provisioning gate, result-release gate, deterministic
+      vectors, and non-claim language for hardware-vendor quote verification.
+    status: specified
+    evidence:
+      - spec/confidential/tee-attestation-assurance.yaml
+      - spec/confidential/tee-attestation-job-contract.yaml
+      - spec/confidential/tee-attestation-vectors.yaml
+      - scripts/ci/validate_tee_attestation_assurance.py
+      - docs/architecture/tee-attestation-boundary.md
+      - docs/operations/tee-attestation-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - proofs/tamarin/kiva_tee_attestation_boundary.spthy
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-fhe-feasibility-assurance-profile-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a machine-readable FHE sum feasibility assurance profile
+      and job contract that fix the deterministic BFV-style small-sum
+      feasibility boundary, strict parameter set, ciphertext/plaintext
+      boundary, governed release gate, explicit absence of a dedicated FHE PDS
+      source kind, benchmark fixtures, deterministic vectors, and non-claim
+      language for production FHE.
+    status: specified
+    evidence:
+      - spec/confidential/fhe-sum-feasibility-assurance.yaml
+      - spec/confidential/fhe-sum-feasibility-job-contract.yaml
+      - spec/confidential/fhe-sum-feasibility-vectors.yaml
+      - spec/confidential/fhe-sum-feasibility-benchmarks.yaml
+      - scripts/ci/validate_fhe_feasibility_assurance.py
+      - docs/architecture/fhe-feasibility-boundary.md
+      - docs/operations/fhe-feasibility-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - proofs/tamarin/kiva_fhe_feasibility_boundary.spthy
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-computation-assurance-package-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva packages the selected CC1 through CC16 confidential computation and
+      provider-contract boundaries, including the CC15 release-candidate
+      assurance gate, for external engineering review with a machine-readable
+      package manifest, CI
+      validator, OpenAPI and persistence evidence, formal-boundary evidence
+      references, operator runbook coverage, deployment-template mechanism
+      declarations, compliance traceability, and public claim language that
+      separates engineering assurance from legal certification, IEEE xAPI
+      conformance, full formal verification, production MPC,
+      malicious-secure PSI, production FHE, vendor TEE quote verification,
+      and malicious-dealer-robust VSS.
+    status: specified
+    evidence:
+      - spec/confidential/confidential-computation-assurance-package.yaml
+      - spec/confidential/assurance-evidence-registry.yaml
+      - scripts/ci/validate_assurance_evidence_registry.py
+      - scripts/ci/validate_confidential_computation_assurance_package.py
+      - spec/confidential/external-production-assurance-readiness.yaml
+      - scripts/ci/validate_external_production_assurance_readiness.py
+      - docs/architecture/confidential-computation-assurance-package.md
+      - docs/architecture/external-production-assurance-readiness.md
+      - docs/operations/confidential-computation-assurance-runbook.md
+      - docs/operations/external-production-assurance-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/ci-gates.md
+      - spec/pds/deployment-templates.yaml
+      - spec/pds/schemas/pds-deployment-template-catalog.schema.json
+      - scripts/ci/validate_pds_deployment_templates.py
+      - spec/openapi/kiva-confidential.yaml
+      - spec/openapi/kiva-pds.yaml
+      - generated/pds-openapi-schemas/index.json
+      - db/schema.sql
+      - db/migrations/atlas.sum
+      - nix/flake/checks.nix
+      - .github/workflows/ci.yml
+      - .github/workflows/conformance.yml
+      - .github/workflows/verification.yml
+      - .github/workflows/release-evidence.yml
+  - id: confidential-practical-deployment-selection-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva selects the first practical confidential computation deployment
+      profile before stronger production claims, naming the deployment
+      template, concrete aggregate workloads, input record classes,
+      aggregation functions, release cadence, population thresholds, utility
+      targets, adversary model, collusion assumptions, role separation, data
+      minimization boundary, residual risks, mechanism enablement,
+      production-promotion candidates, and success metrics for privacy,
+      utility, latency, cost, operator effort, and auditability.
+    status: specified
+    evidence:
+      - spec/confidential/practical-deployment-workload-selection.yaml
+      - scripts/ci/validate_practical_deployment_selection.py
+      - docs/architecture/practical-confidential-deployment-selection.md
+      - docs/architecture/confidential-computation-milestones.md
+      - spec/confidential/confidential-computation-assurance-package.yaml
+      - scripts/ci/validate_confidential_computation_assurance_package.py
+      - spec/pds/deployment-templates.yaml
+      - spec/pds/schemas/pds-deployment-template-catalog.schema.json
+      - scripts/ci/validate_pds_deployment_templates.py
+      - nix/flake/checks.nix
+  - id: confidential-job-lifecycle-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva implements a durable metadata-only confidential job lifecycle for
+      selected bounded mechanisms, including tenant-scoped job identity,
+      owner binding, mechanism profile, participant set, policy binding,
+      strict draft/admitted/running/awaiting-release/released/failed/cancelled/
+      expired/retired transitions, retry counters, deadlines, admission
+      quotas, bounded running concurrency, PostgreSQL transaction boundaries,
+      idempotent create and transition behavior, metadata-only audit export,
+      Rust tests, Kani harnesses, Tamarin workflow model, OpenAPI contract,
+      and CI-validatable assurance profile.
+    status: specified
+    evidence:
+      - spec/confidential/confidential-job-lifecycle-assurance.yaml
+      - scripts/ci/validate_confidential_job_lifecycle_assurance.py
+      - docs/architecture/confidential-job-lifecycle.md
+      - docs/architecture/confidential-computation-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - db/migrations/20260619250000_confidential_job_lifecycle.sql
+      - db/schema.sql
+      - proofs/tamarin/kiva_confidential_job_lifecycle_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-key-participant-lifecycle-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva implements a durable metadata-only confidential participant and key
+      lifecycle substrate, including tenant-scoped participant identity,
+      owner binding, mechanism roles, authorization scope, key ceremony
+      references, recovery contact references, strict invited/active/
+      suspended/frozen/removed transitions, active-only job and additive key
+      gates, additive signing-key rotation and revocation integration,
+      PostgreSQL transaction boundaries, idempotent registration and
+      transition behavior, metadata-only audit export, Rust tests, Kani
+      harnesses, Tamarin lifecycle model, OpenAPI contract, and CI-validatable
+      assurance profile.
+    status: specified
+    evidence:
+      - spec/confidential/confidential-key-participant-lifecycle-assurance.yaml
+      - scripts/ci/validate_confidential_key_participant_lifecycle_assurance.py
+      - docs/architecture/confidential-key-participant-lifecycle.md
+      - docs/architecture/confidential-computation-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - db/migrations/20260619260000_confidential_participant_lifecycle.sql
+      - db/schema.sql
+      - proofs/tamarin/kiva_confidential_participant_lifecycle_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - scripts/ci/run_postgres_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-production-psi-upgrade-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva selects a DH-OPRF PSI family for the production PSI upgrade and
+      implements a review-gated runtime boundary covering opaque evaluated
+      OPRF elements, n-of-n participant admission, abort handling, replay
+      record shape, non-match suppression, governed release-gate evidence,
+      explicit absence of a dedicated PSI PDS source kind, deterministic
+      vectors, negative Rust tests, benchmark and
+      interop plans, Kani release-gate harnesses, Tamarin boundary model, and
+      CI-validatable assurance profile. Production PSI claims remain blocked
+      until external cryptographic review is completed and bound to the
+      runtime artifact digest.
+    status: specified
+    evidence:
+      - spec/confidential/production-psi-upgrade-assurance.yaml
+      - spec/confidential/psi-oprf-dh-voprf-job-contract.yaml
+      - spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+      - spec/confidential/psi-oprf-dh-voprf-benchmarks.yaml
+      - spec/confidential/psi-oprf-dh-voprf-interop.yaml
+      - scripts/ci/validate_production_psi_upgrade_assurance.py
+      - docs/architecture/production-psi-upgrade.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/psi-oprf-runbook.md
+      - crates/kiva-confidential/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - proofs/tamarin/kiva_psi_oprf_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-vendor-tee-attestation-integration-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva selects AWS Nitro Enclaves as the first concrete vendor TEE target
+      and implements a review-gated verifier-adapter boundary covering
+      normalized attestation claims, certificate-chain and COSE-signature
+      validation facts, trust-anchor binding, PCR0/PCR1/PCR2/PCR3/PCR8
+      measurement policy, nonce freshness, image provenance, policy binding,
+      replay and rollback storage, verifier key epoch rotation, key release,
+      result release, deterministic vectors, negative Rust tests, Kani
+      fail-closed harnesses, Tamarin boundary model, and CI-validatable
+      assurance profile. Hardware-backed production confidential execution
+      claims remain blocked until external security review is completed and
+      bound to the verifier artifact.
+    status: specified
+    evidence:
+      - spec/confidential/tee-nitro-attestation-assurance.yaml
+      - spec/confidential/tee-nitro-attestation-job-contract.yaml
+      - spec/confidential/tee-nitro-attestation-vectors.yaml
+      - scripts/ci/validate_tee_nitro_attestation_assurance.py
+      - docs/architecture/tee-nitro-attestation-integration.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/tee-nitro-runbook.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - proofs/tamarin/kiva_tee_nitro_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-strong-threshold-cryptography-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva implements a review-gated FROST threshold-signing runtime boundary
+      covering metadata-only key-ceremony and signing transcript admission,
+      threshold-at-least-two policy, runtime artifact and external review
+      binding, share-custody evidence, complaint resolution, equivocation
+      rejection, replay storage, threshold signature-share admission, active
+      key epoch, governed key use, deterministic vectors, Rust negative tests,
+      Kani fail-closed harnesses, Tamarin boundary model, and CI-validatable
+      assurance profile. Production threshold-cryptography and
+      malicious-participant-robust claims remain blocked until external
+      cryptographic review is completed and bound to the runtime artifact.
+    status: specified
+    evidence:
+      - spec/confidential/threshold-frost-assurance.yaml
+      - spec/confidential/threshold-frost-job-contract.yaml
+      - spec/confidential/threshold-frost-vectors.yaml
+      - scripts/ci/validate_threshold_frost_assurance.py
+      - docs/architecture/threshold-frost-signing.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/threshold-frost-runbook.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - proofs/tamarin/kiva_threshold_frost_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-production-fhe-integration-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva implements a review-gated FHE sum runtime integration boundary
+      covering metadata-only ciphertext transcript admission, n-of-n
+      participant policy, runtime artifact and parameter-set binding, external
+      review evidence binding, key-custody evidence, ciphertext digest
+      projection, accepted evaluation proof digest binding, active key epoch,
+      governed release treatment, explicit absence of a dedicated FHE PDS source
+      kind, deterministic vectors, Rust negative tests, Kani fail-closed
+      harnesses, Tamarin boundary model, and
+      CI-validatable assurance profile. Production FHE and
+      malicious-participant-robust claims remain blocked until external
+      cryptographic review is completed and bound to the runtime artifact.
+    status: specified
+    evidence:
+      - spec/confidential/fhe-runtime-assurance.yaml
+      - spec/confidential/fhe-runtime-job-contract.yaml
+      - spec/confidential/fhe-runtime-vectors.yaml
+      - scripts/ci/validate_fhe_runtime_assurance.py
+      - docs/architecture/fhe-runtime-integration.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/fhe-runtime-runbook.md
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+      - spec/openapi/kiva-confidential.yaml
+      - proofs/tamarin/kiva_fhe_runtime_boundary.spthy
+      - proofs/kani/README.md
+      - scripts/ci/run_kani_verification.sh
+      - nix/flake/checks.nix
+  - id: confidential-external-production-assurance-readiness-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva defines a CC15 repository-side external production assurance
+      readiness gate for the exact CC8 multi-agency deployment profile and
+      selected mechanism set, including external review inputs, clean-git
+      release-candidate CI requirements, live PostgreSQL conformance
+      evidence, formal verification regression evidence, PDS evidence,
+      release evidence-set validation, vulnerability intake, patch SLAs,
+      cryptographic deprecation, key compromise response, audit export
+      retention, incident disclosure, signed checksum and toolchain evidence,
+      OpenAPI and database migration state, external review outcome binding,
+      and public claim language that forbids production security, legal
+      privacy, IEEE xAPI certification, and complete formal-verification
+      claims until independently obtained.
+    status: specified
+    evidence:
+      - spec/confidential/external-production-assurance-readiness.yaml
+      - scripts/ci/validate_external_production_assurance_readiness.py
+      - docs/architecture/external-production-assurance-readiness.md
+      - docs/operations/external-production-assurance-runbook.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/operations/ci-gates.md
+      - spec/confidential/confidential-computation-assurance-package.yaml
+      - spec/confidential/practical-deployment-workload-selection.yaml
+      - scripts/ci/validate_confidential_computation_assurance_package.py
+      - scripts/ci/validate_release_evidence_set.py
+      - scripts/ci/generate_conformance_evidence.sh
+      - scripts/ci/generate_pds_evidence.sh
+      - .github/workflows/ci.yml
+      - .github/workflows/conformance.yml
+      - .github/workflows/verification.yml
+      - .github/workflows/release-evidence.yml
+      - nix/flake/checks.nix
+  - id: confidential-secret-compute-provider-contract-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva defines a CC16 metadata-only integration contract for external
+      secret, encryption, and confidential-compute providers, including
+      provider identity digest, artifact digest, capability, contract profile,
+      parameter-set digest where required, external review evidence digest
+      before production claims, a production-claim gate, mechanism capability
+      mapping, deterministic binding digest vectors, and a fixed
+      non-production reference primitive provider for tests and verification.
+    status: specified
+    evidence:
+      - spec/confidential/secret-compute-provider-contract.yaml
+      - spec/confidential/assurance-evidence-registry.yaml
+      - scripts/ci/validate_assurance_evidence_registry.py
+      - scripts/ci/validate_secret_compute_provider_contract.py
+      - docs/architecture/secret-compute-provider-integration.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/architecture/pds-milestones.md
+      - crates/kiva-confidential/src/lib.rs
+      - spec/confidential/confidential-computation-assurance-package.yaml
+      - scripts/ci/validate_confidential_computation_assurance_package.py
+      - nix/flake/checks.nix
+  - id: confidential-computation-milestones-001
+    standard: Kiva Architecture
+    area: confidential-computation
+    requirement: >
+      Kiva maintains a dedicated confidential computation milestone ledger that
+      separates implemented additive, differential privacy, Shamir VSS
+      admission, bounded PSI cohort, portable TEE attestation, and FHE
+      feasibility boundaries from future production MPC, malicious-secure PSI,
+      production FHE, vendor TEE quote verification, DKG, and
+      malicious-participant-robust claims.
+    status: specified
+    evidence:
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/architecture/assurance-and-confidential-computation.md
+      - docs/architecture/confidential-aggregate-threat-model.md
+      - docs/architecture/formal-verification-roadmap.md

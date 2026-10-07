@@ -1,0 +1,21 @@
+[package]
+name = "kiva-pds-openapi-contract"
+description = "Generated PDS OpenAPI contract DTO slice for Kiva."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+time.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

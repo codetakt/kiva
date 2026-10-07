@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:analytics:reporting-template-catalog:1",
+  "title": "Kiva analytics reporting template catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "standard", "scope", "status", "templates"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "analytics-reporting-template-catalog" },
+    "standard": { "const": "Kiva Architecture" },
+    "scope": { "$ref": "#/$defs/nonEmptyString" },
+    "status": { "const": "published" },
+    "templates": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/template" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "exactAnalyticsScope": {
+      "type": "array",
+      "prefixItems": [{ "const": "analytics:read" }],
+      "items": false,
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "adapter",
+        "grant_type",
+        "required_scopes",
+        "ignored_scopes_env",
+        "ignored_scopes",
+        "ignored_scopes_grant_authority"
+      ],
+      "properties": {
+        "protocol": { "const": "oauth-oidc" },
+        "adapter": { "const": "kiva-idp-adapter" },
+        "grant_type": { "const": "client-credentials" },
+        "required_scopes": { "$ref": "#/$defs/exactAnalyticsScope" },
+        "ignored_scopes_env": { "const": "KIVA_IDP_IGNORED_SCOPES" },
+        "ignored_scopes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "ignored_scopes_grant_authority": { "const": false }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "operation_id", "purpose"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "operation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "purpose": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "pagination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_page_size", "cursor_opaque", "continue_while_next_cursor"],
+      "properties": {
+        "max_page_size": { "const": 100 },
+        "cursor_opaque": { "const": true },
+        "continue_while_next_cursor": { "const": true }
+      }
+    },
+    "dataProducts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_kinds", "raw_statements_allowed", "individual_level_data_allowed"],
+      "properties": {
+        "release_kinds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["threshold-release", "differential-privacy-release"] }
+        },
+        "raw_statements_allowed": { "const": false },
+        "individual_level_data_allowed": { "const": false }
+      }
+    },
+    "partitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenant_partition", "subject_partition"],
+      "properties": {
+        "tenant_partition": { "$ref": "#/$defs/nonEmptyString" },
+        "subject_partition": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "externalDashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "placement",
+        "hosted_by_kiva",
+        "generic_http_oauth_client",
+        "credential_sharing_allowed",
+        "reidentification_allowed"
+      ],
+      "properties": {
+        "placement": { "const": "external-consumer" },
+        "hosted_by_kiva": { "const": false },
+        "generic_http_oauth_client": { "const": true },
+        "credential_sharing_allowed": { "const": false },
+        "reidentification_allowed": { "const": false }
+      }
+    },
+    "errorHandling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unauthorized_401", "forbidden_403", "not_found_404"],
+      "properties": {
+        "unauthorized_401": { "$ref": "#/$defs/nonEmptyString" },
+        "forbidden_403": { "$ref": "#/$defs/nonEmptyString" },
+        "not_found_404": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "deployment_kind",
+        "status",
+        "intended_use",
+        "client",
+        "operation_sequence",
+        "pagination",
+        "data_products",
+        "partitions",
+        "external_dashboard",
+        "error_handling",
+        "claim_boundary"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "deployment_kind": { "enum": ["school-district", "corporate-training"] },
+        "status": { "const": "published-template" },
+        "intended_use": { "$ref": "#/$defs/stringList" },
+        "client": { "$ref": "#/$defs/client" },
+        "operation_sequence": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/operation" }
+        },
+        "pagination": { "$ref": "#/$defs/pagination" },
+        "data_products": { "$ref": "#/$defs/dataProducts" },
+        "partitions": { "$ref": "#/$defs/partitions" },
+        "external_dashboard": { "$ref": "#/$defs/externalDashboard" },
+        "error_handling": { "$ref": "#/$defs/errorHandling" },
+        "claim_boundary": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

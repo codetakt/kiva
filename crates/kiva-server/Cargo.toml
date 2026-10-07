@@ -1,0 +1,50 @@
+[package]
+name = "kiva-server"
+description = "Kiva HTTP server."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+axum.workspace = true
+getrandom.workspace = true
+http.workspace = true
+kiva-application = { path = "../kiva-application", version = "0.0.0" }
+kiva-analytics-openapi-contract = { path = "../kiva-analytics-openapi-contract", version = "0.0.0" }
+kiva-confidential = { path = "../kiva-confidential", version = "0.0.0" }
+kiva-confidential-contract = { path = "../kiva-confidential-contract", version = "0.0.0" }
+kiva-http-core = { path = "../kiva-http-core", version = "0.0.0" }
+kiva-idp-adapter = { path = "../kiva-idp-adapter", version = "0.0.0" }
+kiva-identity = { path = "../kiva-identity", version = "0.0.0" }
+kiva-pds = { path = "../kiva-pds", version = "0.0.0" }
+kiva-pds-openapi-contract = { path = "../kiva-pds-openapi-contract", version = "0.0.0" }
+kiva-policy = { path = "../kiva-policy", version = "0.0.0" }
+kiva-secret-provider-contract = { path = "../kiva-secret-provider-contract", version = "0.0.0" }
+kiva-xapi = { path = "../kiva-xapi", version = "0.0.0" }
+kiva-xapi-openapi-contract = { path = "../kiva-xapi-openapi-contract", version = "0.0.0" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+time.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+ed25519-dalek.workspace = true
+
+[[bin]]
+name = "kiva-server"
+path = "src/main.rs"
+
+[lints]
+workspace = true

@@ -1,0 +1,229 @@
+theory Kiva_OAuth_OIDC_Boundary
+begin
+
+rule RegisterIssuer:
+  [ Fr(~issuer) ]
+  --[ IssuerRegistered(~issuer) ]->
+  [ !TrustedIssuer(~issuer) ]
+
+rule RegisterLrsAudience:
+  [ Fr(~audience) ]
+  --[ LrsAudienceRegistered(~audience) ]->
+  [ !LrsAudience(~audience) ]
+
+rule RegisterSubject:
+  [ Fr(~subject) ]
+  --[ SubjectRegistered(~subject) ]->
+  [ !Subject(~subject) ]
+
+rule RegisterClient:
+  [ Fr(~client) ]
+  --[ ClientRegistered(~client) ]->
+  [ !Client(~client) ]
+
+rule RegisterClientBinding:
+  [ !Client(client), Fr(~binding_key) ]
+  --[ ClientBindingRegistered(client, ~binding_key) ]->
+  [ !ClientBinding(client, ~binding_key) ]
+
+rule DelegateRawRead:
+  [ !Subject(subject), !Client(client), Fr(~grant) ]
+  --[ Delegated(subject, client, 'raw_read', ~grant) ]->
+  [ ActiveDelegation(subject, client, 'raw_read', ~grant) ]
+
+rule DelegateAggregateRead:
+  [ !Subject(subject), !Client(client), Fr(~grant) ]
+  --[ Delegated(subject, client, 'aggregate_read', ~grant) ]->
+  [ ActiveDelegation(subject, client, 'aggregate_read', ~grant) ]
+
+rule IssueAccessToken:
+  [
+    !TrustedIssuer(issuer),
+    !LrsAudience(audience),
+    !ClientBinding(client, binding_key),
+    ActiveDelegation(subject, client, scope, grant),
+    Fr(~token)
+  ]
+  --[
+    TokenIssued(issuer, audience, subject, client, scope, ~token, grant, binding_key),
+    TokenBound(client, ~token, binding_key)
+  ]->
+  [
+    LiveTokenGrant(subject, client, scope, grant),
+    AccessToken(issuer, audience, subject, client, scope, ~token, grant, binding_key)
+  ]
+
+rule IssueRefreshToken:
+  [
+    !TrustedIssuer(issuer),
+    !LrsAudience(audience),
+    !ClientBinding(client, binding_key),
+    ActiveDelegation(subject, client, scope, grant),
+    Fr(~refresh_token)
+  ]
+  --[
+    RefreshTokenIssued(
+      issuer, audience, subject, client, scope, ~refresh_token, grant, binding_key
+    )
+  ]->
+  [
+    LiveRefreshGrant(subject, client, scope, grant),
+    RefreshToken(
+      issuer, audience, subject, client, scope, ~refresh_token, grant, binding_key
+    )
+  ]
+
+rule ExchangeRefreshTokenForAccessToken:
+  [
+    LiveRefreshGrant(subject, client, scope, grant),
+    RefreshToken(
+      issuer, audience, subject, client, scope, refresh_token, grant, binding_key
+    ),
+    Fr(~token)
+  ]
+  --[
+    RefreshTokenUsed(
+      issuer, audience, subject, client, scope, refresh_token, grant, binding_key
+    ),
+    TokenIssued(issuer, audience, subject, client, scope, ~token, grant, binding_key),
+    AccessTokenIssuedByRefresh(
+      issuer, audience, subject, client, scope, ~token, refresh_token, grant, binding_key
+    ),
+    TokenBound(client, ~token, binding_key)
+  ]->
+  [
+    LiveTokenGrant(subject, client, scope, grant),
+    AccessToken(issuer, audience, subject, client, scope, ~token, grant, binding_key)
+  ]
+
+rule RevokeTokenGrant:
+  [ LiveTokenGrant(subject, client, scope, grant) ]
+  --[ Revoked(subject, client, scope, grant) ]->
+  []
+
+rule RevokeRefreshGrant:
+  [ LiveRefreshGrant(subject, client, scope, grant) ]
+  --[ Revoked(subject, client, scope, grant) ]->
+  []
+
+rule IntrospectAccessTokenAtLrs:
+  [
+    LiveTokenGrant(subject, client, scope, grant),
+    AccessToken(issuer, audience, subject, client, scope, token, grant, binding_key)
+  ]
+  --[
+    TokenIntrospectionActive(
+      issuer, audience, subject, client, scope, token, grant, binding_key
+    )
+  ]->
+  [
+    IntrospectedAccessToken(
+      issuer, audience, subject, client, scope, token, grant, binding_key
+    )
+  ]
+
+rule AcceptAccessTokenAtLrs:
+  [
+    IntrospectedAccessToken(
+      issuer, audience, subject, client, scope, token, grant, binding_key
+    )
+  ]
+  --[
+    BindingVerified(client, token, binding_key),
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key)
+  ]->
+  []
+
+lemma accepted_token_requires_prior_issue:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      TokenIssued(issuer, audience, subject, client, scope, token, grant, binding_key) @ #j
+      & #j < #i"
+
+lemma accepted_token_requires_trusted_issuer_and_lrs_audience:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    (Ex #j. IssuerRegistered(issuer) @ #j & #j < #i)
+    & (Ex #k. LrsAudienceRegistered(audience) @ #k & #k < #i)"
+
+lemma token_issue_requires_unrevoked_delegation:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenIssued(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      Delegated(subject, client, scope, grant) @ #j
+      & #j < #i
+      & not (Ex #k.
+        Revoked(subject, client, scope, grant) @ #k
+        & #j < #k
+        & #k < #i)"
+
+lemma accepted_token_requires_unrevoked_delegation:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      Delegated(subject, client, scope, grant) @ #j
+      & #j < #i
+      & not (Ex #k.
+        Revoked(subject, client, scope, grant) @ #k
+        & #j < #k
+        & #k < #i)"
+
+lemma accepted_token_requires_active_introspection:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      TokenIntrospectionActive(
+        issuer, audience, subject, client, scope, token, grant, binding_key
+      ) @ #j
+      & #j < #i"
+
+lemma accepted_token_requires_registered_client_binding:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      ClientBindingRegistered(client, binding_key) @ #j
+      & #j < #i"
+
+lemma accepted_token_requires_bound_key:
+  "All issuer audience subject client scope token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      TokenBound(client, token, binding_key) @ #j
+      & #j < #i"
+
+lemma accepted_access_token_is_single_use:
+  "All issuer audience subject client scope token grant binding_key #i #j.
+    TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #i
+    & TokenAccepted(issuer, audience, subject, client, scope, token, grant, binding_key) @ #j
+    ==>
+    #i = #j"
+
+lemma refresh_issued_access_token_requires_refresh_token:
+  "All issuer audience subject client scope token refresh_token grant binding_key #i.
+    AccessTokenIssuedByRefresh(
+      issuer, audience, subject, client, scope, token, refresh_token, grant, binding_key
+    ) @ #i
+    ==>
+    Ex #j.
+      RefreshTokenIssued(
+        issuer, audience, subject, client, scope, refresh_token, grant, binding_key
+      ) @ #j
+      & #j < #i"
+
+lemma raw_read_acceptance_requires_raw_read_delegation:
+  "All issuer audience subject client token grant binding_key #i.
+    TokenAccepted(issuer, audience, subject, client, 'raw_read', token, grant, binding_key) @ #i
+    ==>
+    Ex #j.
+      Delegated(subject, client, 'raw_read', grant) @ #j
+      & #j < #i"
+
+end

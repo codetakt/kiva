@@ -1,0 +1,2 @@
+[alias]
+strict = "clippy --workspace --all-targets --all-features -- -D warnings -W clippy::pedantic -W clippy::nursery -W clippy::cargo -A clippy::multiple_crate_versions -A clippy::missing_errors_doc -A clippy::missing_panics_doc -A clippy::module_name_repetitions -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::todo -D clippy::unimplemented -D clippy::dbg_macro"

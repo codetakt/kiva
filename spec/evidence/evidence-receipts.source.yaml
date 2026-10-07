@@ -1,0 +1,22 @@
+schema_version: 1
+kind: kiva-evidence-receipts-source
+status: active
+description: >
+  Source policy for generated EvidenceReceipt and VerificationReceipt materialized views.
+  Receipts bind review rows to execution evidence without making generated
+  indexes claim that an external command was run. AssuranceGraph is the primary
+  review surface that consumes these receipt identities.
+inputs:
+  evidence_set: generated/evidence/evidence-set.yaml
+  verification_obligations: generated/verification/verification-obligations.yaml
+generated_artifacts:
+  receipt_index: generated/evidence/evidence-receipts.yaml
+  markdown: docs/architecture/generated/evidence-receipts.md
+receipt_model:
+  evidence_root_type: EvidenceReceipt
+  verification_root_type: VerificationReceipt
+  generated_status: declared
+  release_rule: >
+    A release can require executed receipts with command output hashes. This
+    generated index establishes stable receipt identities and expected command
+    boundaries; execution-specific receipts can refine the same ids.

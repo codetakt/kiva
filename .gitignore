@@ -1,0 +1,17 @@
+/result
+/result-*
+/target/
+/artifacts/kani/
+__pycache__/
+*.py[cod]
+/.direnv/
+/.pre-commit-config.yaml
+
+# The user-level gitignore on some developer machines ignores all Markdown.
+# Keep repository design documents visible so they are included in flake
+# sources and evidence validators.
+!README.md
+!docs/**/*.md
+!proofs/**/*.md
+!fstar/README.md
+!spec/**/*.md

@@ -1,0 +1,25 @@
+vectors:
+  - id: additive-secure-aggregate-3-party-sum-42
+    mechanism: additive-secure-aggregation
+    field_modulus: 4294967291
+    participant_count: 3
+    release_threshold: 3
+    shares:
+      - participant_index: 1
+        value: 1000000000
+      - participant_index: 2
+        value: 2000000000
+      - participant_index: 3
+        value: 1294967333
+    expected_aggregate: 42
+  - id: additive-secure-aggregate-wraps-modulus
+    mechanism: additive-secure-aggregation
+    field_modulus: 4294967291
+    participant_count: 2
+    release_threshold: 2
+    shares:
+      - participant_index: 1
+        value: 4294967290
+      - participant_index: 2
+        value: 2
+    expected_aggregate: 1

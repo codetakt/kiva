@@ -1,0 +1,130 @@
+description: >
+  Included architecture boundary rules split from the root manifest for
+  focused review. The root manifest remains the executable index.
+
+source_size_rules:
+  - id: composition-and-module-owners-stay-reviewable
+    description: Composition and owner files must remain short enough to review without scanning resource-family bodies.
+    max_lines: 320
+    paths:
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/app.rs
+      - crates/kiva-server/src/app/pds.rs
+      - crates/kiva-server/src/app/confidential.rs
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+      - crates/kiva-server/src/surfaces/pds/repository.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres.rs
+      - crates/kiva-server/src/surfaces/confidential/storage.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres.rs
+      - crates/kiva-confidential/src/mechanism/core.rs
+  - id: core-state-authorization-stays-reviewable
+    description: Typed HTTP-context authorization and surface-profile methods stay isolated from state shape.
+    max_lines: 220
+    paths:
+      - crates/kiva-server/src/core/state/authorization.rs
+      - crates/kiva-server/src/core/state/surface_operation.rs
+  - id: xapi-request-files-stay-reviewable
+    description: xAPI request parsing and validation review units must stay below one focused screenful.
+    max_lines: 320
+    paths:
+      - crates/kiva-server/src/surfaces/xapi/request
+  - id: pds-application-port-files-stay-reviewable
+    description: PDS cross-surface application files must stay focused on one orchestration concern.
+    max_lines: 260
+    paths:
+      - crates/kiva-server/src/app/pds/server_adapters.rs
+      - crates/kiva-server/src/app/pds/server_adapters
+      - crates/kiva-application/src/pds.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/pds/model.rs
+      - crates/kiva-application/src/pds/model
+      - crates/kiva-application/src/pds/capabilities.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow
+      - crates/kiva-application/src/runtime.rs
+      - crates/kiva-application/src/runtime
+  - id: confidential-application-port-files-stay-reviewable
+    description: Confidential application admission files must stay focused on workflow orchestration and server adapters.
+    max_lines: 260
+    paths:
+      - crates/kiva-application/src/confidential.rs
+      - crates/kiva-application/src/confidential/jobs.rs
+      - crates/kiva-application/src/confidential
+      - crates/kiva-server/src/app/confidential.rs
+  - id: application-operation-registry-stays-reviewable
+    description: Declarative operation registry and typed lookup remain split into scan-sized tables.
+    max_lines: 560
+    paths:
+      - crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+      - crates/kiva-application/src/operation_catalog/generated/registry.rs
+  - id: confidential-mechanism-registry-stays-reviewable
+    description: Generated confidential mechanism descriptor registry remains a small scan-sized projection.
+    max_lines: 260
+    paths:
+      - crates/kiva-confidential/src/mechanism/registry.rs
+  - id: pds-persistence-review-files-stay-reviewable
+    description: PDS repository dispatch and memory/PostgreSQL persistence files stay split by resource family.
+    max_lines: 320
+    paths:
+      - crates/kiva-server/src/surfaces/pds/repository
+      - crates/kiva-server/src/surfaces/pds/storage/memory
+      - crates/kiva-server/src/surfaces/pds/storage/mapping
+      - crates/kiva-server/src/surfaces/pds/storage/postgres
+  - id: pds-service-and-handler-files-stay-reviewable
+    description: PDS services and HTTP handlers stay split by resource family.
+    max_lines: 260
+    paths:
+      - crates/kiva-server/src/surfaces/pds/service.rs
+      - crates/kiva-server/src/surfaces/pds/service
+      - crates/kiva-server/src/surfaces/pds/handlers.rs
+      - crates/kiva-server/src/surfaces/pds/handlers
+  - id: pds-state-review-files-stay-reviewable
+    description: PDS server-local state files stay split by resource family.
+    max_lines: 220
+    paths:
+      - crates/kiva-server/src/surfaces/pds/model/state.rs
+      - crates/kiva-server/src/surfaces/pds/model/state
+  - id: confidential-state-review-files-stay-reviewable
+    description: Confidential server-local state files stay split by resource family.
+    max_lines: 260
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/model/state.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state
+  - id: pds-wire-projection-files-stay-reviewable
+    description: PDS wire projection review units stay split by resource family.
+    max_lines: 220
+    paths:
+      - crates/kiva-server/src/surfaces/pds/wire.rs
+      - crates/kiva-server/src/surfaces/pds/wire
+  - id: confidential-core-review-files-stay-reviewable
+    description: Split additive, lifecycle, FROST, and PSI core review files stay focused by protocol concern.
+    max_lines: 320
+    paths:
+      - crates/kiva-confidential/src/mechanism/core/additive
+      - crates/kiva-confidential/src/mechanism/core/lifecycle
+      - crates/kiva-confidential/src/mechanism/core/frost
+      - crates/kiva-confidential/src/mechanism/core/psi
+      - crates/kiva-confidential/src/mechanism/core/tee/portable
+  - id: server-test-helper-files-stay-reviewable
+    description: Server test helpers stay split by resource family instead of returning to one large compatibility file.
+    max_lines: 760
+    paths:
+      - crates/kiva-server/src/tests/helpers
+  - id: server-memory-test-files-stay-reviewable
+    description: PDS and confidential memory tests stay split by resource family and workflow concern.
+    max_lines: 260
+    paths:
+      - crates/kiva-server/src/tests/pds_memory.rs
+      - crates/kiva-server/src/tests/pds_memory
+      - crates/kiva-server/src/tests/confidential_memory.rs
+      - crates/kiva-server/src/tests/confidential_memory
+  - id: confidential-http-projection-files-stay-reviewable
+    description: Confidential wire and response projection review units stay split by resource family.
+    max_lines: 220
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/wire.rs
+      - crates/kiva-server/src/surfaces/confidential/wire
+      - crates/kiva-server/src/surfaces/confidential/response.rs
+      - crates/kiva-server/src/surfaces/confidential/response

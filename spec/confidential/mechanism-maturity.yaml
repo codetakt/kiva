@@ -1,0 +1,124 @@
+kind: kiva-confidential-mechanism-maturity
+version: 1
+milestone_ledger: spec/confidential/computation-milestones.yaml
+status_levels:
+  - specified
+  - implemented
+  - persisted
+  - verified
+  - evidence-bundled
+  - review-gated
+  - external-review-pending
+mechanisms:
+  - id: additive-secure-aggregation
+    milestone: CC1
+    kind: computation-mechanism
+    current_level: evidence-bundled
+    release_artifact_kind: threshold-release
+    production_claim: false
+    claim_boundary: structural n-of-n additive aggregation over Kiva's fixed field.
+  - id: differential-privacy-release
+    milestone: CC2
+    kind: release-gate
+    current_level: evidence-bundled
+    release_artifact_kind: differential-privacy-release
+    production_claim: false
+    claim_boundary: bounded DP release profile with persisted budget accounting and noised aggregate metadata.
+  - id: shamir-vss-admission
+    milestone: CC3
+    kind: threshold-reconstruction
+    current_level: evidence-bundled
+    release_artifact_kind: shamir-threshold-reconstruction
+    production_claim: false
+    claim_boundary: hash-committed Shamir VSS-admission reconstruction metadata.
+  - id: psi-cohort-hash-token
+    milestone: CC4
+    kind: cohort-matching
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: bounded hash-token PSI cohort matching without a dedicated PDS source kind.
+  - id: tee-portable-attestation
+    milestone: CC5
+    kind: attestation-gate
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: portable deployment-bound attestation evidence gate; hardware verifier supplied by deployment.
+  - id: fhe-sum-feasibility
+    milestone: CC6
+    kind: feasibility-fixture
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: deterministic small-sum FHE feasibility profile and governed release checks.
+  - id: selected-mechanism-assurance-package
+    milestone: CC7
+    kind: assurance-package
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: repository-side selected mechanism assurance package for external review.
+  - id: multi-agency-research-aggregate-v1
+    milestone: CC8
+    kind: deployment-profile
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: first practical multi-agency aggregate workload selection.
+  - id: confidential-job-lifecycle
+    milestone: CC9
+    kind: lifecycle
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: durable confidential job lifecycle, quotas, idempotency, and audit metadata.
+  - id: confidential-participant-key-lifecycle
+    milestone: CC10
+    kind: lifecycle
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: metadata-only participant and key lifecycle substrate.
+  - id: psi-oprf-dh-voprf
+    milestone: CC11
+    kind: external-runtime-boundary
+    current_level: external-review-pending
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: review-gated DH-OPRF PSI runtime boundary; production claim pending external cryptographic review.
+  - id: tee-aws-nitro-attestation
+    milestone: CC12
+    kind: external-runtime-boundary
+    current_level: external-review-pending
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: review-gated AWS Nitro verifier boundary; production hardware-backed claim pending external security review.
+  - id: threshold-frost-signing
+    milestone: CC13
+    kind: external-runtime-boundary
+    current_level: external-review-pending
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: review-gated FROST threshold-signing runtime boundary.
+  - id: fhe-sum-runtime
+    milestone: CC14
+    kind: external-runtime-boundary
+    current_level: external-review-pending
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: review-gated FHE sum runtime boundary.
+  - id: external-production-assurance-readiness
+    milestone: CC15
+    kind: readiness-gate
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: repository-side release-candidate readiness; external review outcomes pending.
+  - id: secret-compute-provider-contract
+    milestone: CC16
+    kind: provider-contract
+    current_level: evidence-bundled
+    release_artifact_kind: null
+    production_claim: false
+    claim_boundary: metadata-only provider contract and fixed non-production reference primitive provider.

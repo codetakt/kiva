@@ -1,0 +1,140 @@
+schema_version: 1
+kind: kiva-compatibility-retirement-plane
+status: active
+description: Unified compatibility-retirement review plane joining removed or retained compatibility-surface history, DTO semantic-compatibility retirement, and executable deletion-readiness gates.
+generated_from:
+- spec/architecture/compatibility-surfaces.yaml
+- spec/openapi/dto-boundary-ledger.yaml
+- spec/openapi/semantic-compatibility-retirement.yaml
+- generated/architecture/compatibility-deletion-readiness.yaml
+generated_artifacts:
+  retirement_plane: generated/architecture/compatibility-retirement-plane.yaml
+  markdown: docs/architecture/generated/compatibility-retirement-plane.md
+policy:
+  ready_to_delete_is_not_delete_authorization: true
+  retained_surfaces_require_owner_action_before_deletion: true
+  dto_semantic_guards_remain_until_contract_and_semantic_maps_are_both_closed: true
+summary:
+  compatibility_surface_count: 6
+  owner_action_required_count: 0
+  blocked_count: 0
+  dto_retirement_row_count: 9
+compatibility_surfaces:
+- id: confidential-root-primitive-reexports
+  owner: crates/kiva-confidential/src/lib.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: kiva_confidential::{primitive,mechanism}
+  retirement_milestone: compat-cc-root-reexports
+  retirement_condition: All callers import primitive wrappers from kiva_confidential::primitive and mechanism errors from their owning mechanism modules.
+  expansion_policy: no-new-root-mechanism-reexports
+  blockers: []
+  gate_count: 1
+- id: confidential-integrated-namespace
+  owner: crates/kiva-confidential/src/mechanism/mod.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: kiva_confidential::mechanism::{additive,shamir,threshold,workflow,psi,tee,frost,fhe,provider,registry}
+  retirement_milestone: compat-cc-integrated-namespace
+  retirement_condition: Mechanism callers and evidence references use family-specific mechanism namespaces, the generated mechanism catalog, and SecretComputeProviderRuntimeContract directly.
+  expansion_policy: no-new-public-integrated-entrypoints; new review metadata must flow through spec/confidential/mechanism-catalog.source.yaml and provider runtime contracts
+  blockers: []
+  gate_count: 1
+- id: policy-root-reexports
+  owner: crates/kiva-policy/src/lib.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: kiva_policy::policy
+  retirement_milestone: compat-policy-root-reexports
+  retirement_condition: Policy callers import decisions and compatibility identity types through explicit owning modules.
+  expansion_policy: explicit-policy-module-exports-only
+  blockers: []
+  gate_count: 1
+- id: pds-request-aliases
+  owner: crates/kiva-pds/src/pds/requests.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: kiva_pds::pds::{ConsentGrantCommandInput,ConsentRevocationCommandInput,DataProductRegistrationCommandInput,DataProductReadIntent,ProviderBindingRegistrationCommandInput,AccessCheckIntent,LifecycleEventCommandInput,RetentionPolicyCommandInput,LifecycleCaseCommandInput,GovernanceProfileCommandInput}
+  retirement_milestone: compat-pds-request-aliases
+  retirement_condition: All internal callers import semantically named PDS command-input and intent types; generated OpenAPI request DTOs remain in kiva-pds-openapi-contract.
+  expansion_policy: no-new-pds-request-aliases
+  blockers: []
+  gate_count: 1
+- id: secret-provider-compat-reexports
+  owner: crates/kiva-confidential/src/mechanism/provider.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: kiva_secret_provider_contract
+  retirement_milestone: compat-secret-provider-reexports
+  retirement_condition: Callers import provider-kind, provider-profile, and provider-capability vocabulary from kiva-secret-provider-contract.
+  expansion_policy: no-new-provider-vocabulary-reexports
+  blockers: []
+  gate_count: 1
+- id: server-test-helper-owner
+  owner: crates/kiva-server/src/tests.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  decision: closed
+  migration_target: crates/kiva-server/src/tests/helpers/
+  retirement_milestone: compat-server-test-helper-owner
+  retirement_condition: In-crate tests import helper functions from resource-family helper modules without depending on the compatibility module owner.
+  expansion_policy: no-new-helper-bodies-in-owner
+  blockers: []
+  gate_count: 1
+dto_retirement:
+- id: dto-active-guard.generated_contract_dto_map
+  kind: active-guard
+  status: active
+  path: spec/openapi/generated-contract-dto-map.yaml
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.semantic_compatibility_map
+  kind: active-guard
+  status: active
+  path: spec/openapi/semantic-compatibility-map.yaml
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.dto_map_projection
+  kind: active-guard
+  status: active
+  path: generated/openapi-dto-map-projection.yaml
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.semantic_compatibility_map_validator
+  kind: active-guard
+  status: active
+  path: scripts/ci/validate_openapi_rust_dto_map.py
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.generated_contract_dto_map_generator
+  kind: active-guard
+  status: active
+  path: scripts/ci/generate_generated_contract_dto_map.py
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.boundary_ledger_validator
+  kind: active-guard
+  status: active
+  path: scripts/ci/validate_openapi_dto_boundary_ledger.py
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.dto_map_projection_generator
+  kind: active-guard
+  status: active
+  path: scripts/ci/generate_openapi_dto_map_projection.py
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-active-guard.dto_map_projection_check
+  kind: active-guard
+  status: active
+  path: openapi-dto-map-projection
+  decision: retain-until-semantic-compatibility-retirement
+- id: dto-retired-archive.rust_dto_map_archive
+  kind: retired-archive
+  status: complete
+  path: spec/openapi/rust-dto-map.yaml
+  decision: closed

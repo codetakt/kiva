@@ -1,0 +1,26 @@
+[package]
+name = "kiva-confidential"
+description = "Confidential computation planning types for Kiva."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+ed25519-dalek.workspace = true
+kiva-confidential-core = { path = "../kiva-confidential-core", version = "0.0.0" }
+kiva-secret-provider-contract = { path = "../kiva-secret-provider-contract", version = "0.0.0" }
+serde.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_yaml.workspace = true
+
+[lints]
+workspace = true

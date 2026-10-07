@@ -1,0 +1,164 @@
+schema_version: 1
+kind: kiva-pds-core-planes-source
+status: active
+description: >
+  Minimal PDS design model. Consent, lifecycle, governance, approved products,
+  and confidential-computation integration are reviewed through four stable
+  planes instead of a growing list of feature-specific conceptual roots.
+source_ledgers:
+  milestone_status: spec/pds/publication-milestones.yaml
+  pds_openapi: spec/openapi/kiva-pds.yaml
+  confidential_openapi: spec/openapi/kiva-confidential.yaml
+plane_model:
+  root_type: PdsCorePlane
+  planes:
+    - event
+    - inventory
+    - policy
+    - release
+  invariant_source: spec/pds/invariants.source.yaml
+  state_machine_source: spec/pds/state-machines.source.yaml
+  package_projection: generated/architecture/pds-plane-packages.yaml
+  package_rule: >
+    Each plane packages the invariants that reviewers must check for that
+    plane. The invariant and state-machine ledgers remain the executable rule
+    sources; plane invariant_refs and state_machine_refs are the inverse review
+    indexes and must match them exactly.
+  rule: >
+    PDS implementation claims must map to at least one plane. The xAPI LRS
+    conformance claim remains separate; PDS planes describe Kiva extensions.
+planes:
+  - id: event
+    core_concept: RecordEvent
+    owns:
+      - consent grants and revocations
+      - lifecycle event metadata
+      - retention and case workflow event records
+      - data portability export audit records
+    milestone_refs:
+      - M1
+      - M4
+      - M12
+      - M17
+    resource_family_refs:
+      - consent
+      - lifecycle
+    invariant_refs:
+      - pds-subject-scope
+      - pds-consent-revocation-fail-closed
+      - pds-access-decision-audit-recorded
+      - pds-lifecycle-terminal-immutability
+    state_machine_refs:
+      - consent-grant
+      - lifecycle-case
+    implementation_anchors:
+      - crates/kiva-pds/src/pds/events.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+    required_checks:
+      - pds-openapi-contract
+      - pds-resource-families
+  - id: inventory
+    core_concept: InventoryView
+    owns:
+      - subject-facing record inventory
+      - metadata export
+      - subject-bound data portability export
+      - publication templates and examples
+    milestone_refs:
+      - M4
+      - M7
+      - M13
+      - M15
+      - M17
+    resource_family_refs:
+      - inventory-export
+      - governance
+    invariant_refs:
+      - pds-subject-scope
+      - pds-metadata-only-inventory-export
+      - pds-lifecycle-terminal-immutability
+    state_machine_refs:
+      - lifecycle-case
+    implementation_anchors:
+      - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+      - crates/kiva-server/src/surfaces/pds/handlers.rs
+      - spec/pds/deployment-templates.yaml
+    required_checks:
+      - pds-openapi-contract
+      - pds-openapi-schema-artifacts
+  - id: policy
+    core_concept: PolicyDecision
+    owns:
+      - consent-scoped access checks
+      - access audit
+      - data portability subject binding
+      - public-sector separation of duties
+      - OAuth/OIDC resource-server scope boundary
+      - provider metadata admission policy
+    milestone_refs:
+      - M0
+      - M1
+      - M3
+      - M6
+      - M11
+      - M13
+      - M14
+      - M15
+      - M17
+    resource_family_refs:
+      - access
+      - consent
+      - governance
+      - provider-bindings
+    invariant_refs:
+      - pds-subject-scope
+      - pds-consent-revocation-fail-closed
+      - pds-access-decision-audit-recorded
+      - pds-release-artifact-availability
+      - pds-provider-binding-metadata-only
+    state_machine_refs:
+      - consent-grant
+      - release-artifact-availability
+      - provider-binding-admission
+    implementation_anchors:
+      - crates/kiva-policy/src/policy/mod.rs
+      - crates/kiva-identity/src/lib.rs
+      - crates/kiva-server/src/core/state/authorization.rs
+    required_checks:
+      - pds-openapi-contract
+      - pds-resource-families
+      - secret-compute-provider-contract
+  - id: release
+    core_concept: ReleaseArtifact
+    owns:
+      - approved confidential data products
+      - threshold releases
+      - differential-privacy releases
+      - Shamir reconstruction metadata products
+      - secret/confidential provider binding metadata
+    milestone_refs:
+      - M2
+      - M5
+      - M8
+      - M9
+      - M10
+      - M14
+    resource_family_refs:
+      - data-products
+      - provider-bindings
+    invariant_refs:
+      - pds-subject-scope
+      - pds-release-artifact-availability
+      - pds-provider-binding-metadata-only
+    state_machine_refs:
+      - release-artifact-availability
+      - provider-binding-admission
+    implementation_anchors:
+      - crates/kiva-release-artifacts/src/lib.rs
+      - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+    required_checks:
+      - pds-openapi-contract
+      - confidential-capability-policy-evidence
+      - pds-openapi-schema-artifacts

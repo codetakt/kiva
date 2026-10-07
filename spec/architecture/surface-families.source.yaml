@@ -1,0 +1,218 @@
+schema_version: 1
+kind: kiva-surface-family-source
+status: active
+description: Canonical public HTTP surface-family descriptions shared by xAPI, PDS, and confidential-computation routes.
+implementation_anchor_policy:
+  role: review-anchors-not-assignment-inputs
+  assignment_fields:
+    - source_pds_resource_family
+    - path_prefixes
+  review_anchor_fields:
+    - implementation_files
+  description: >
+    Surface-family ownership is assigned only by PDS resource-family inheritance
+    or OpenAPI path prefixes. implementation_files are review anchors carried
+    into generated ledgers; they do not participate in route classification.
+surface_families:
+- id: analytics.aggregate-products
+  surface: analytics
+  openapi_contract: spec/openapi/kiva-analytics.yaml
+  description: Governed aggregate product metadata and admitted release payloads.
+  path_prefixes:
+  - /analytics/products
+  implementation_files:
+  - crates/kiva-application/src/analytics.rs
+  - crates/kiva-server/src/app/analytics.rs
+  - crates/kiva-server/src/surfaces/analytics/routes.rs
+  - crates/kiva-server/src/surfaces/analytics/handlers.rs
+  - crates/kiva-server/src/surfaces/analytics/wire.rs
+- id: xapi.about
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI About discovery resource.
+  path_prefixes:
+  - /about
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/about.rs
+  - crates/kiva-server/src/surfaces/xapi/response.rs
+- id: xapi.statements
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Statement storage and query resource.
+  path_prefixes:
+  - /statements
+  implementation_files:
+  - crates/kiva-xapi/src/xapi/admission.rs
+  - crates/kiva-xapi/src/xapi/filtering.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/statement_postgres.rs
+- id: xapi.state-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity state document resource.
+  path_prefixes:
+  - /activities/state
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.activity-profile-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity profile document resource.
+  path_prefixes:
+  - /activities/profile
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.activities
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Activity lookup resource.
+  path_prefixes:
+  - /activities
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+  - crates/kiva-server/src/surfaces/xapi/request/query.rs
+- id: xapi.agent-profile-documents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Agent profile document resource.
+  path_prefixes:
+  - /agents/profile
+  implementation_files:
+  - crates/kiva-http-core/src/http/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/documents.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs
+  - crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs
+- id: xapi.agents
+  surface: xapi
+  openapi_contract: spec/openapi/kiva-xapi.yaml
+  description: xAPI Agent/person lookup resource.
+  path_prefixes:
+  - /agents
+  implementation_files:
+  - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+  - crates/kiva-server/src/surfaces/xapi/request/person.rs
+- id: pds.access
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS access-decision and access-audit resources.
+  source_pds_resource_family: access
+- id: pds.consent
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS consent and revocation resources.
+  source_pds_resource_family: consent
+- id: pds.data-products
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS approved data-product resources.
+  source_pds_resource_family: data-products
+- id: pds.governance
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS public-sector governance profile resources.
+  source_pds_resource_family: governance
+- id: pds.inventory-export
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS record-inventory and metadata-export resources.
+  source_pds_resource_family: inventory-export
+- id: pds.lifecycle
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS lifecycle event, retention, and case resources.
+  source_pds_resource_family: lifecycle
+- id: pds.provider-bindings
+  surface: pds
+  openapi_contract: spec/openapi/kiva-pds.yaml
+  description: PDS secret/confidential-compute provider-binding resources.
+  source_pds_resource_family: provider-bindings
+- id: confidential.additive
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Additive secure-aggregation and share-signing resources.
+  path_prefixes:
+  - /confidential/additive-
+  - /confidential/share-signing-
+  implementation_files:
+  - crates/kiva-application/src/confidential/additive.rs
+  - crates/kiva-server/src/app/confidential/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/additive.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/additive.rs
+- id: confidential.threshold-release
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Threshold release request, approval, and release resources.
+  path_prefixes:
+  - /confidential/threshold-
+  implementation_files:
+  - crates/kiva-application/src/confidential/threshold.rs
+  - crates/kiva-server/src/app/confidential/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/threshold.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/threshold.rs
+- id: confidential.shamir
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Shamir threshold reconstruction resources.
+  path_prefixes:
+  - /confidential/shamir-
+  implementation_files:
+  - crates/kiva-application/src/confidential/shamir.rs
+  - crates/kiva-server/src/app/confidential/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/shamir.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/shamir.rs
+- id: confidential.differential-privacy
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Differential privacy budget, composition, and release resources.
+  path_prefixes:
+  - /confidential/differential-privacy-
+  implementation_files:
+  - crates/kiva-application/src/confidential/differential_privacy.rs
+  - crates/kiva-server/src/app/confidential/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/differential_privacy.rs
+- id: confidential.jobs
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Confidential job lifecycle resources.
+  path_prefixes:
+  - /confidential/jobs
+  - /confidential/job-
+  implementation_files:
+  - crates/kiva-application/src/confidential/jobs.rs
+  - crates/kiva-server/src/app/confidential/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/jobs.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/jobs.rs
+- id: confidential.participants
+  surface: confidential
+  openapi_contract: spec/openapi/kiva-confidential.yaml
+  description: Confidential participant lifecycle resources.
+  path_prefixes:
+  - /confidential/participants
+  - /confidential/participant-
+  implementation_files:
+  - crates/kiva-application/src/confidential/participants.rs
+  - crates/kiva-server/src/app/confidential/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/handlers/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/memory/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/storage/postgres/participants.rs
+  - crates/kiva-server/src/surfaces/confidential/wire/participants.rs

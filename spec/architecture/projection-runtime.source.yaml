@@ -1,0 +1,708 @@
+schema_version: 1
+kind: kiva-projection-runtime-source
+status: active
+description: Normalized ProjectionRuntime rows for the ProjectionRuntime normal form.
+generator_plan:
+  order_model: stable-topological-sort
+  rule: Generator order is derived from explicit dependencies; declaration order
+    is used only as the deterministic tie breaker between independent nodes.
+  nodes:
+    - id: design-universe-projections
+      script: scripts/ci/generate_design_universe_projections.py
+      depends_on: []
+    - id: projection-compatibility-view
+      script: scripts/ci/generate_projection_auxiliary_ledgers.py
+      depends_on: []
+    - id: evidence-check-normal-form
+      script: scripts/ci/generate_evidence_check_catalog.py
+      depends_on: []
+    - id: evidence-check-manifest
+      script: scripts/ci/generate_evidence_checks.py
+      depends_on: [evidence-check-normal-form, projection-compatibility-view]
+    - id: http-operation-catalog
+      script: scripts/ci/generate_http_operation_catalog.py
+      depends_on: []
+    - id: pds-openapi-schemas
+      script: scripts/ci/export_pds_openapi_schemas.py
+      depends_on: []
+    - id: generated-contract-dto-map
+      script: scripts/ci/generate_generated_contract_dto_map.py
+      depends_on: []
+    - id: openapi-dto-map-projection
+      script: scripts/ci/generate_openapi_dto_map_projection.py
+      depends_on: [generated-contract-dto-map]
+    - id: surface-catalog-bundle
+      script: scripts/ci/generate_surface_catalog_bundle.py
+      depends_on: [http-operation-catalog]
+    - id: surface-catalog-projections
+      script: scripts/ci/generate_surface_catalog_projections.py
+      depends_on: [surface-catalog-bundle]
+    - id: operation-kernel
+      script: scripts/ci/generate_operation_kernel.py
+      depends_on: [surface-catalog-bundle, http-operation-catalog]
+    - id: pds-plane-packages
+      script: scripts/ci/generate_pds_plane_packages.py
+      depends_on: [surface-catalog-projections]
+    - id: application-operation-catalog
+      script: scripts/ci/generate_application_operation_catalog.py
+      depends_on: [surface-catalog-projections]
+    - id: surface-operation-index
+      script: scripts/ci/generate_surface_operation_index.py
+      depends_on: [surface-catalog-bundle]
+    - id: route-coverage
+      script: scripts/ci/generate_route_coverage.py
+      depends_on: [surface-catalog-bundle]
+    - id: confidential-mechanism-catalog
+      script: scripts/ci/generate_confidential_mechanism_catalog.py
+      depends_on: []
+    - id: provider-kind-registry
+      script: scripts/ci/generate_secret_compute_provider_kind_registry.py
+      depends_on: []
+    - id: confidential-capability-bindings
+      script: scripts/ci/generate_confidential_capability_binding_index.py
+      depends_on: [operation-kernel]
+    - id: verification-obligations
+      script: scripts/ci/generate_verification_obligations.py
+      depends_on: []
+    - id: confidential-mechanism-profiles
+      script: scripts/ci/generate_confidential_mechanism_profile_index.py
+      depends_on: [confidential-mechanism-catalog, confidential-capability-bindings, verification-obligations]
+    - id: confidential-capability-policy-evidence
+      script: scripts/ci/generate_confidential_capability_policy_evidence.py
+      depends_on: [confidential-mechanism-profiles]
+    - id: compiled-architecture
+      script: scripts/ci/generate_compiled_architecture.py
+      depends_on: [design-universe-projections, projection-compatibility-view]
+    - id: design-backbone
+      script: scripts/ci/generate_design_backbone.py
+      depends_on: [compiled-architecture]
+    - id: projection-graph
+      script: scripts/ci/generate_projection_graph.py
+      depends_on: [compiled-architecture, evidence-check-manifest]
+    - id: source-registry
+      script: scripts/ci/generate_source_registry.py
+      depends_on: [compiled-architecture, design-universe-projections]
+    - id: claim-catalog
+      script: scripts/ci/generate_claim_catalog.py
+      depends_on: []
+    - id: claim-readiness-matrix
+      script: scripts/ci/generate_claim_readiness_matrix.py
+      depends_on: [claim-catalog, projection-graph, evidence-check-manifest]
+    - id: evidence-set
+      script: scripts/ci/generate_evidence_set.py
+      depends_on: [claim-readiness-matrix, projection-graph]
+    - id: evidence-receipts
+      script: scripts/ci/generate_evidence_receipts.py
+      depends_on: [evidence-set, verification-obligations]
+    - id: executed-receipt-overlay
+      script: scripts/ci/generate_executed_receipt_overlay.py
+      depends_on: [evidence-receipts, evidence-check-manifest]
+    - id: claim-graph
+      script: scripts/ci/generate_claim_graph.py
+      depends_on: [claim-readiness-matrix, evidence-set, evidence-receipts, executed-receipt-overlay, verification-obligations, confidential-capability-bindings]
+    - id: assurance-graph
+      script: scripts/ci/generate_assurance_graph.py
+      depends_on: [claim-graph]
+    - id: compatibility-deletion-readiness
+      script: scripts/ci/generate_compatibility_deletion_readiness.py
+      depends_on: []
+    - id: compatibility-retirement-plane
+      script: scripts/ci/generate_compatibility_retirement_plane.py
+      depends_on: [compatibility-deletion-readiness, openapi-dto-map-projection]
+projection_spec_source: spec/architecture/projection-specs.source.yaml
+synchronization_policy: normal-form-primary-with-projection-spec-compatibility-view
+runtime:
+- projection_source: pds_plane_packages
+  projection_id: pds-planes-to-plane-package-index
+  projection_kind: generated-ledger
+  source: spec/pds/core-planes.source.yaml
+  strategy: join-operation-owned-pds-plane-facets
+  projection_sources:
+  - spec/pds/core-planes.source.yaml
+  - spec/pds/invariants.source.yaml
+  - spec/pds/state-machines.source.yaml
+  - generated/architecture/pds-resource-families.yaml
+  - scripts/ci/generate_pds_plane_packages.py
+  projection_source_refs:
+  - pds_core_planes
+  - pds_state_machines
+  - pds_resource_families
+  projection_generator: scripts/ci/generate_pds_plane_packages.py
+  validator: scripts/ci/generate_pds_plane_packages.py
+- projection_source: operation_bindings
+  projection_id: surface-catalog-to-application-operation-catalog
+  projection_kind: generated-registry
+  source: generated/architecture/surface-catalog.yaml
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_application_operation_catalog.py
+  projection_source_refs:
+  - surface_catalog
+  projection_generator: scripts/ci/generate_surface_catalog_projections.py
+  validator: ''
+- projection_source: implementation_claims
+  projection_id: claim-catalog-to-public-claim-evidence
+  projection_kind: generated-evidence
+  source: ''
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_claim_catalog.py
+  projection_source_refs:
+  - implementation_claims
+  projection_generator: ''
+  validator: ''
+- projection_source: claim_readiness_matrix
+  projection_id: claim-catalog-and-ci-graph-to-readiness-matrix
+  projection_kind: generated-evidence
+  source: ''
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_claim_readiness_matrix.py
+  projection_source_refs:
+  - implementation_claims
+  - ci_check_manifest
+  - projection_graph
+  projection_generator: ''
+  validator: scripts/ci/generate_claim_readiness_matrix.py
+- projection_source: claim_graph
+  projection_id: generated-claim-evidence-and-verification-to-claim-graph
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/architecture/claim-graph.source.yaml
+  - spec/architecture/schemas/claim-graph.source.schema.json
+  - spec/architecture/schemas/claim-graph.schema.json
+  - scripts/ci/generate_claim_graph.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - claim_readiness_matrix
+  - evidence_set
+  - evidence_receipts
+  - executed_receipt_overlay
+  - verification_obligations
+  - confidential_capability_bindings
+  projection_generator: ''
+  validator: scripts/ci/generate_claim_graph.py
+- projection_source: assurance_graph
+  projection_id: claim-graph-to-assurance-graph
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - generated/architecture/claim-graph.yaml
+  - spec/evidence/assurance-primitive.source.yaml
+  - scripts/ci/generate_assurance_graph.py
+  projection_source_refs:
+  - claim_graph
+  - assurance_primitive_source
+  projection_generator: ''
+  validator: scripts/ci/generate_assurance_graph.py
+- projection_source: evidence_set
+  projection_id: evidence-sources-to-unified-evidence-set
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/evidence/evidence-set.source.yaml
+  - spec/evidence/schemas/evidence-set.schema.json
+  - scripts/ci/generate_evidence_set.py
+  - scripts/ci/kiva_ci/evidence.py
+  - scripts/ci/kiva_ci/projection_graph.py
+  projection_source_refs:
+  - ci_check_manifest
+  - projection_graph
+  - claim_readiness_matrix
+  projection_generator: ''
+  validator: scripts/ci/generate_evidence_set.py
+- projection_source: evidence_receipts
+  projection_id: evidence-set-and-verification-obligations-to-receipt-index
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/evidence/evidence-receipts.source.yaml
+  - spec/evidence/schemas/evidence-receipts.schema.json
+  - scripts/ci/generate_evidence_receipts.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - evidence_set
+  - verification_obligations
+  projection_generator: ''
+  validator: scripts/ci/generate_evidence_receipts.py
+- projection_source: executed_receipt_overlay
+  projection_id: declared-receipts-and-run-reports-to-executed-receipt-overlay
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/evidence/executed-receipts.source.yaml
+  - spec/evidence/schemas/executed-receipts.source.schema.json
+  - spec/evidence/schemas/executed-receipt-overlay.schema.json
+  - scripts/ci/generate_executed_receipt_overlay.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - evidence_receipts
+  - ci_check_manifest
+  projection_generator: ''
+  validator: scripts/ci/generate_executed_receipt_overlay.py
+- projection_source: projection_auxiliary_ledgers
+  projection_id: projection-spec-to-normalized-auxiliary-ledgers
+  projection_kind: generated-source-normal-form
+  source: ''
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_projection_auxiliary_ledgers.py
+  - scripts/ci/run_generators.py
+  - scripts/ci/kiva_ci/projection.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - projection_specs
+  projection_generator: ''
+  validator: scripts/ci/generate_projection_auxiliary_ledgers.py
+- projection_source: projection_normal_form_policy
+  projection_id: projection-normal-form-policy-to-drift-enforcement
+  projection_kind: validated-source-normal-form
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/architecture/projection-normal-form-policy.source.yaml
+  - spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+  - scripts/ci/validate_projection_normal_form.py
+  - scripts/ci/generate_projection_auxiliary_ledgers.py
+  - scripts/ci/kiva_ci/projection.py
+  projection_source_refs:
+  - projection_specs
+  - projection_auxiliary_ledgers
+  projection_generator: ''
+  validator: scripts/ci/validate_projection_normal_form.py
+- projection_source: compiled_architecture
+  projection_id: architecture-graph-and-policy-to-compiled-architecture
+  projection_kind: generated-evidence-index
+  source: spec/architecture/architecture-graph.source.yaml + spec/architecture/projection-specs.source.yaml + spec/architecture/architecture-policy.source.yaml
+  strategy: ''
+  projection_sources:
+  - spec/architecture/architecture-graph.source.yaml
+  - spec/architecture/projection-specs.source.yaml
+  - scripts/ci/generate_compiled_architecture.py
+  - scripts/ci/kiva_ci/architecture.py
+  - scripts/ci/kiva_ci/architecture_compiler.py
+  projection_source_refs:
+  - architecture_policy
+  projection_generator: ''
+  validator: scripts/ci/generate_compiled_architecture.py
+- projection_source: pds_resource_families
+  projection_id: surface-catalog-to-pds-resource-families
+  projection_kind: generated-ledger
+  source: generated/architecture/surface-catalog.yaml
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_surface_catalog_projections.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - surface_catalog
+  projection_generator: scripts/ci/generate_surface_catalog_projections.py
+  validator: scripts/ci/validate_pds_resource_families.py
+- projection_source: surface_families
+  projection_id: surface-catalog-to-surface-families
+  projection_kind: generated-ledger
+  source: generated/architecture/surface-catalog.yaml
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_surface_catalog_projections.py
+  - scripts/ci/validate_surface_families.py
+  projection_source_refs:
+  - surface_catalog
+  projection_generator: scripts/ci/generate_surface_catalog_projections.py
+  validator: scripts/ci/validate_surface_families.py
+- projection_source: surface_catalog
+  projection_id: surface-sources-to-generated-surface-catalog
+  projection_kind: generated-ledger
+  source: split surface source ledgers
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_surface_catalog_bundle.py
+  - scripts/ci/generate_surface_catalog_projections.py
+  projection_source_refs:
+  - surface_operation_overlay
+  - surface_projection_review_policy
+  - surface_operation_model
+  - surface_generation_policy
+  - surface_implementation_policy
+  - pds_resource_family_sources
+  - surface_family_sources
+  projection_generator: scripts/ci/generate_surface_catalog_bundle.py
+  validator: scripts/ci/validate_surface_catalog.py
+- projection_source: operation_kernel
+  projection_id: surface-sources-to-operation-kernel-ir
+  projection_kind: generated-ledger
+  source: split surface source ledgers + generated HTTP operation catalog
+  strategy: ''
+  projection_sources:
+  - spec/architecture/operation-ownership.source.yaml
+  - spec/architecture/surface-projections.yaml
+  - spec/architecture/surface-model.source.yaml
+  - spec/architecture/surface-generation.policy.yaml
+  - spec/architecture/surface-implementation.policy.yaml
+  - spec/architecture/pds-resource-families.source.yaml
+  - spec/architecture/surface-families.source.yaml
+  - scripts/ci/generate_operation_kernel.py
+  - scripts/ci/surface_catalog.py
+  - scripts/ci/surface_catalog_model.py
+  - scripts/ci/surface_catalog_projections.py
+  - scripts/ci/surface_operation_ownership.py
+  - spec/architecture/schemas/operation-kernel.schema.json
+  projection_source_refs:
+  - surface_operation_overlay
+  - surface_projection_review_policy
+  - surface_operation_model
+  - surface_generation_policy
+  - surface_implementation_policy
+  - pds_resource_family_sources
+  - surface_family_sources
+  - http_operation_catalog
+  projection_generator: ''
+  validator: scripts/ci/generate_operation_kernel.py
+- projection_source: openapi_dto_boundary
+  projection_id: openapi-contracts-to-rust-dto-map
+  projection_kind: validated-dto-map
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/openapi/semantic-compatibility-map.yaml
+  - spec/openapi/dto-boundary-ledger.yaml
+  - spec/openapi/dto-boundary-policy.yaml
+  - spec/openapi/semantic-compatibility-retirement.yaml
+  - crates/kiva-xapi-openapi-contract/src/lib.rs
+  - crates/kiva-pds-openapi-contract/src/lib.rs
+  - crates/kiva-confidential-contract/src/lib.rs
+  - scripts/ci/kiva_ci/openapi_dto_map.py
+  - scripts/ci/kiva_ci/dto_boundary_ledger.py
+  - scripts/ci/kiva_ci/ledger.py
+  - scripts/ci/validate_openapi_rust_dto_map.py
+  - scripts/ci/validate_openapi_dto_boundary_ledger.py
+  - scripts/ci/generate_generated_contract_dto_map.py
+  - scripts/ci/generate_openapi_dto_map_projection.py
+  projection_source_refs:
+  - http_contracts
+  projection_generator: ''
+  validator: scripts/ci/validate_openapi_dto_boundary_ledger.py
+- projection_source: architecture_guards
+  projection_id: design-backbone-to-ci-guard-model
+  projection_kind: validated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/architecture/architecture-graph.source.yaml
+  - generated/architecture/compiled-architecture.yaml
+  - spec/architecture/design-backbone.yaml
+  - spec/architecture/boundaries.yaml
+  - scripts/ci/generate_compiled_architecture.py
+  - scripts/ci/generate_design_backbone.py
+  - scripts/ci/validate_design_backbone.py
+  - scripts/ci/validate_architecture_boundaries.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - scripts/ci/kiva_ci/ledger.py
+  - tools/kiva-rust-use-scan/src/main.rs
+  - tools/kiva-rust-use-scan/Cargo.toml
+  projection_source_refs:
+  - ci_check_manifest
+  projection_generator: ''
+  validator: scripts/ci/validate_architecture_boundaries.py
+- projection_source: compatibility_deletion_readiness
+  projection_id: compatibility-surfaces-to-deletion-readiness-report
+  projection_kind: generated-evidence
+  source: spec/architecture/compatibility-surfaces.yaml
+  strategy: ''
+  projection_sources:
+  - spec/architecture/compatibility-surfaces.yaml
+  - scripts/ci/generate_compatibility_deletion_readiness.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - tools/kiva-rust-use-scan/src/main.rs
+  - tools/kiva-rust-use-scan/Cargo.toml
+  projection_source_refs: []
+  projection_generator: ''
+  validator: scripts/ci/generate_compatibility_deletion_readiness.py
+- projection_source: compatibility_retirement_plane
+  projection_id: compatibility-ledgers-to-retirement-plane
+  projection_kind: generated-evidence
+  source: compatibility ledgers + DTO retirement ledgers
+  strategy: ''
+  projection_sources:
+  - spec/architecture/compatibility-surfaces.yaml
+  - spec/openapi/dto-boundary-ledger.yaml
+  - spec/openapi/semantic-compatibility-retirement.yaml
+  - generated/architecture/compatibility-deletion-readiness.yaml
+  - scripts/ci/generate_compatibility_retirement_plane.py
+  - scripts/ci/generate_compatibility_deletion_readiness.py
+  - scripts/ci/kiva_ci/compatibility.py
+  - spec/architecture/schemas/compatibility-retirement-plane.schema.json
+  projection_source_refs:
+  - compatibility_deletion_readiness
+  - openapi_dto_boundary
+  projection_generator: ''
+  validator: scripts/ci/generate_compatibility_retirement_plane.py
+- projection_source: compatibility_exit_gates
+  projection_id: compatibility-surfaces-to-explicit-exit-gates
+  projection_kind: validated-evidence-index
+  source: spec/architecture/compatibility-surfaces.yaml
+  strategy: ''
+  projection_sources:
+  - spec/architecture/compatibility-surfaces.yaml
+  - scripts/ci/validate_compatibility_exit_gates.py
+  projection_source_refs: []
+  projection_generator: ''
+  validator: scripts/ci/validate_compatibility_exit_gates.py
+- projection_source: ci_check_manifest
+  projection_id: evidence-check-source-to-ci-manifest
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/ci/evidence-checks.source.yaml
+  - spec/ci/evidence-check-groups.source.yaml
+  - scripts/ci/kiva-ci
+  - scripts/ci/kiva_ci/cli.py
+  - scripts/ci/kiva_ci/evidence.py
+  - scripts/ci/kiva_ci/manifest.py
+  - scripts/ci/generate_evidence_checks.py
+  projection_source_refs: []
+  projection_generator: ''
+  validator: scripts/ci/generate_evidence_checks.py
+- projection_source: ci_check_normal_form
+  projection_id: ci-check-source-to-catalog-and-gate-plan
+  projection_kind: generated-source-normal-form
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/ci/evidence-checks.source.yaml
+  - spec/ci/evidence-check-groups.source.yaml
+  - scripts/ci/generate_evidence_check_catalog.py
+  - scripts/ci/kiva_ci/projection.py
+  projection_source_refs:
+  - ci_check_manifest
+  projection_generator: ''
+  validator: scripts/ci/generate_evidence_check_catalog.py
+- projection_source: ci_check_normal_form_policy
+  projection_id: evidence-check-normal-form-policy-to-drift-enforcement
+  projection_kind: validated-source-normal-form
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/ci/evidence-check-normal-form-policy.source.yaml
+  - spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+  - scripts/ci/validate_evidence_check_normal_form.py
+  - scripts/ci/generate_evidence_check_catalog.py
+  - scripts/ci/kiva_ci/projection.py
+  projection_source_refs:
+  - ci_check_manifest
+  - ci_check_normal_form
+  projection_generator: ''
+  validator: scripts/ci/validate_evidence_check_normal_form.py
+- projection_source: projection_graph
+  projection_id: architecture-graph-sources-to-projection-graph
+  projection_kind: generated-evidence-index
+  source: spec/architecture/architecture-graph.source.yaml#/sources
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_projection_graph.py
+  - scripts/ci/validate_projection_graph.py
+  projection_source_refs:
+  - compiled_architecture
+  - ci_check_manifest
+  projection_generator: ''
+  validator: scripts/ci/validate_projection_graph.py
+- projection_source: source_ledger_schemas
+  projection_id: source-ledgers-to-schema-validation-registry
+  projection_kind: validated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/architecture/source-ledger-schemas.yaml
+  - spec/architecture/schemas/source-ledger-schemas.schema.json
+  - spec/architecture/schemas/generic-source-ledger.schema.json
+  - spec/architecture/schemas/claim-graph.source.schema.json
+  - spec/architecture/schemas/projection-specs.source.schema.json
+  - spec/architecture/schemas/projection-normal-form-policy.source.schema.json
+  - spec/ci/schemas/evidence-checks.source.schema.json
+  - spec/ci/schemas/evidence-check-groups.source.schema.json
+  - spec/ci/schemas/evidence-check-normal-form-policy.source.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - spec/evidence/schemas/evidence-receipts.source.schema.json
+  - spec/evidence/schemas/executed-receipts.source.schema.json
+  - spec/evidence/schemas/executed-receipt-overlay.schema.json
+  - spec/verification/schemas/verification-obligations.source.schema.json
+  - scripts/ci/validate_source_ledger_schemas.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs: []
+  projection_generator: ''
+  validator: scripts/ci/validate_source_ledger_schemas.py
+- projection_source: source_registry
+  projection_id: compiled-architecture-to-source-registry
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - generated/architecture/compiled-architecture.yaml
+  - spec/architecture/source-ledger-schemas.yaml
+  - spec/architecture/ledger-catalog.source.yaml
+  - scripts/ci/generate_source_registry.py
+  projection_source_refs:
+  - compiled_architecture
+  - source_ledger_schemas
+  - ledger_catalog
+  projection_generator: ''
+  validator: scripts/ci/generate_source_registry.py
+- projection_source: confidential_assurance_model
+  projection_id: confidential-assurance-ledgers-to-release-readiness
+  projection_kind: validated-evidence-package
+  source: ''
+  strategy: ''
+  projection_sources: []
+  projection_source_refs:
+  - confidential_assurance_model
+  projection_generator: ''
+  validator: ''
+- projection_source: confidential_mechanism_catalog
+  projection_id: confidential-mechanism-source-to-catalog-and-registry
+  projection_kind: generated-ledger
+  source: spec/confidential/mechanism-catalog.source.yaml
+  strategy: ''
+  projection_sources:
+  - spec/confidential/mechanism-catalog.source.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/confidential/secret-compute-provider-contract.yaml
+  - scripts/ci/confidential_mechanism_catalog_model.py
+  - scripts/ci/confidential_mechanism_registry_codegen.py
+  - scripts/ci/generate_confidential_mechanism_catalog.py
+  projection_source_refs: []
+  projection_generator: scripts/ci/generate_confidential_mechanism_catalog.py
+  validator: scripts/ci/generate_confidential_mechanism_catalog.py
+- projection_source: confidential_capability_bindings
+  projection_id: confidential-capability-bindings-to-operation-affinity-index
+  projection_kind: generated-evidence-index
+  source: spec/confidential/capability-bindings.source.yaml
+  strategy: ''
+  projection_sources:
+  - spec/confidential/capability-bindings.source.yaml
+  - spec/confidential/capability-taxonomy.source.yaml
+  - spec/confidential/schemas/capability-binding-index.schema.json
+  - spec/confidential/schemas/capability-bindings.source.schema.json
+  - spec/confidential/schemas/capability-taxonomy.source.schema.json
+  - scripts/ci/generate_confidential_capability_binding_index.py
+  - scripts/ci/kiva_ci/ledger.py
+  projection_source_refs:
+  - operation_kernel
+  projection_generator: ''
+  validator: scripts/ci/generate_confidential_capability_binding_index.py
+- projection_source: confidential_mechanism_profile_index
+  projection_id: confidential-mechanism-sources-to-mechanism-profile-index
+  projection_kind: generated-evidence-index
+  source: mechanism catalog + assurance registry + OperationKernel + verified kernels
+  strategy: ''
+  projection_sources:
+  - spec/confidential/mechanism-packages.source.yaml
+  - spec/confidential/mechanism-catalog.yaml
+  - spec/confidential/mechanism-maturity.yaml
+  - spec/confidential/assurance-evidence-registry.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+  - spec/confidential/secret-compute-provider-contract.yaml
+  - generated/architecture/operation-kernel.yaml
+  - generated/confidential/capability-binding-index.yaml
+  - spec/confidential/schemas/mechanism-profile-index.schema.json
+  - scripts/ci/generate_confidential_mechanism_profile_index.py
+  projection_source_refs:
+  - confidential_mechanism_catalog
+  - confidential_capability_bindings
+  - operation_kernel
+  - confidential_assurance_model
+  projection_generator: ''
+  validator: scripts/ci/generate_confidential_mechanism_profile_index.py
+- projection_source: confidential_capability_policy_evidence
+  projection_id: confidential-mechanism-profile-to-capability-policy-evidence
+  projection_kind: generated-evidence-index
+  source: ''
+  strategy: ''
+  projection_sources:
+  - generated/confidential/capability-binding-index.yaml
+  - generated/confidential/mechanism-profile-index.yaml
+  - scripts/ci/generate_confidential_capability_policy_evidence.py
+  projection_source_refs:
+  - confidential_capability_bindings
+  - confidential_mechanism_profile_index
+  projection_generator: ''
+  validator: scripts/ci/generate_confidential_capability_policy_evidence.py
+- projection_source: verification_obligations
+  projection_id: verified-kernels-to-tool-neutral-verification-obligations
+  projection_kind: generated-evidence-index
+  source: spec/verification/verification-obligations.source.yaml
+  strategy: ''
+  projection_sources:
+  - spec/verification/verification-obligations.source.yaml
+  - spec/verification/confidential-verified-kernels.yaml
+  - spec/verification/schemas/verification-obligations.schema.json
+  - scripts/ci/generate_verification_obligations.py
+  projection_source_refs:
+  - confidential_assurance_model
+  projection_generator: ''
+  validator: scripts/ci/generate_verification_obligations.py
+- projection_source: secret_compute_provider_kind_registry
+  projection_id: secret-compute-provider-contract-to-kind-registry
+  projection_kind: generated-registry
+  source: ''
+  strategy: ''
+  projection_sources:
+  - spec/confidential/secret-compute-provider-contract.yaml
+  - crates/kiva-secret-provider-contract/src/lib.rs
+  - scripts/ci/generate_secret_compute_provider_kind_registry.py
+  projection_source_refs: []
+  projection_generator: scripts/ci/generate_secret_compute_provider_kind_registry.py
+  validator: scripts/ci/generate_secret_compute_provider_kind_registry.py
+- projection_source: generated_schema_artifacts
+  projection_id: pds-openapi-to-json-schema-artifacts
+  projection_kind: generated-schema-artifacts
+  source: ''
+  strategy: bundle-plus-thin-schema-refs
+  projection_sources:
+  - spec/openapi/kiva-pds.yaml
+  - scripts/ci/export_pds_openapi_schemas.py
+  projection_source_refs: []
+  projection_generator: ''
+  validator: ''
+- projection_source: http_operation_catalog
+  projection_id: openapi-contracts-to-http-operation-catalog
+  projection_kind: generated-catalog
+  source: ''
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_http_operation_catalog.py
+  projection_source_refs:
+  - http_contracts
+  projection_generator: ''
+  validator: scripts/ci/generate_http_operation_catalog.py
+- projection_source: surface_operation_index
+  projection_id: surface-catalog-to-surface-operation-index
+  projection_kind: generated-evidence
+  source: ''
+  strategy: ''
+  projection_sources:
+  - scripts/ci/generate_surface_operation_index.py
+  projection_source_refs:
+  - surface_catalog
+  projection_generator: ''
+  validator: scripts/ci/generate_surface_operation_index.py
+- projection_source: route_coverage
+  projection_id: surface-catalog-to-route-coverage
+  projection_kind: generated-evidence
+  source: ''
+  strategy: ''
+  projection_sources:
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+  - crates/kiva-server/src/surfaces/pds/routes.rs
+  - crates/kiva-server/src/surfaces/confidential/routes.rs
+  - scripts/ci/generate_route_coverage.py
+  projection_source_refs:
+  - surface_catalog
+  projection_generator: ''
+  validator: scripts/ci/generate_route_coverage.py

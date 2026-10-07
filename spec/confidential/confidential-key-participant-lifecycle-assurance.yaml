@@ -1,0 +1,174 @@
+---
+schema_version: 1
+kind: confidential-key-participant-lifecycle-assurance
+standard: Kiva Architecture
+status: published
+milestone: CC10
+profile_id: kiva-cc10-production-key-participant-lifecycle-v1
+claim_boundary: >
+  Kiva implements a durable metadata-only participant and key lifecycle
+  substrate for confidential computation. The boundary covers participant
+  onboarding, authenticated owner binding, authorization scope metadata,
+  tenant partitioning, mechanism roles, key-ceremony references, recovery
+  contacts, lifecycle transitions, active-only job/key admission, additive
+  signing-key rotation and revocation, PostgreSQL transaction boundaries,
+  metadata-only audit export, Kani lifecycle harnesses, and a representative
+  Tamarin boundary model. It does not claim production PSI OPRF ceremonies,
+  production FHE key management, vendor TEE quote verification, DKG, or
+  malicious-secure multiparty computation.
+participant_model:
+  required_fields:
+    - tenant_id
+    - owner_subject
+    - participant_subject
+    - participant_index
+    - status
+    - mechanism_roles
+    - authorization_scope
+    - key_ceremony_ref
+    - recovery_contact_ref
+    - evidence_refs
+    - created_at
+    - updated_at
+  status_enum:
+    - invited
+    - active
+    - suspended
+    - frozen
+    - removed
+  active_only_operations:
+    - confidential-job-registration
+    - additive-share-signing-key-registration
+    - additive-share-signing-key-rotation
+    - additive-share-submission
+    - additive-aggregate-computation
+  mechanism_roles:
+    - additive-share-contributor
+    - data-custodian
+    - policy-authority
+    - psi-participant
+    - tee-operator
+    - fhe-key-authority
+    - auditor
+  metadata_only_forbidden_fields:
+    - rawInput
+    - rawInputs
+    - share
+    - shares
+    - signedEnvelope
+    - plaintext
+    - secret
+    - signature
+    - noise
+    - noiseValue
+    - privateKey
+    - thresholdShare
+    - oprfSeed
+    - teeQuote
+key_ceremony_model:
+  additive_signing_keys:
+    lifecycle: active-register-rotate-revoke
+    active_participant_required: true
+    owner_subject_binding: oauth-subject
+  psi_tokens_oprf_keys:
+    lifecycle: metadata-only-ceremony-reference
+    production_cryptographic_ceremony_claimed: false
+  shamir_threshold_shares:
+    lifecycle: metadata-only-ceremony-reference
+    production_dkg_claimed: false
+  tee_trust_anchors:
+    lifecycle: metadata-only-ceremony-reference
+    vendor_quote_verification_claimed: false
+  fhe_keys:
+    lifecycle: metadata-only-ceremony-reference
+    production_fhe_key_management_claimed: false
+api_contract:
+  openapi: spec/openapi/kiva-confidential.yaml
+  endpoints:
+    - path: /confidential/participants
+      methods: [get, post]
+      idempotent_write: true
+      scopes:
+        get: ["confidential:read"]
+        post: ["confidential:write"]
+    - path: /confidential/participant-transitions
+      methods: [post]
+      idempotent_write: true
+      scopes:
+        post: ["confidential:write"]
+    - path: /confidential/participant-audit-events
+      methods: [get]
+      metadata_only: true
+      scopes:
+        get: ["confidential:read"]
+    - path: /confidential/additive-share-signing-keys
+      methods: [get, post]
+      active_participant_required_for: [post]
+      scopes:
+        get: ["confidential:read"]
+        post: ["confidential:write"]
+    - path: /confidential/additive-share-signing-key-rotations
+      methods: [post]
+      active_participant_required_for: [post]
+      scopes:
+        post: ["confidential:write"]
+    - path: /confidential/additive-share-signing-key-revocations
+      methods: [post]
+      scopes:
+        post: ["confidential:write"]
+persistence:
+  migration: db/migrations/20260619260000_confidential_participant_lifecycle.sql
+  schema: db/schema.sql
+  atlas_sum: db/migrations/atlas.sum
+  tables:
+    - kiva.confidential_participants
+    - kiva.confidential_participant_audit_events
+  transaction_boundaries:
+    register_participant_and_audit_event: single-postgresql-transaction
+    transition_participant_and_audit_event: select-for-update-single-postgresql-transaction
+    active_participant_gate: fail-closed-before-key-or-job-write
+    idempotent_duplicate_registration: primary-key-conflict-detection
+    idempotent_duplicate_transition: same-state-no-op
+lifecycle_controls:
+  onboarding:
+    initial_status: invited
+    activation_required_for_jobs_and_keys: true
+  suspension:
+    blocks_new_jobs: true
+    blocks_new_keys: true
+    preserves_audit_history: true
+  emergency_freeze:
+    status: frozen
+    blocks_new_jobs: true
+    blocks_new_keys: true
+    recovery_transition: active
+  removal:
+    terminal_for_new_work: true
+    audit_events_retained: true
+  replacement:
+    additive_key_rotation: old-key-revoked-new-key-active
+    stale_participant_blocks_restart: true
+verification:
+  rust_tests:
+    - crates/kiva-confidential/src/lib.rs::confidential_participant_lifecycle_is_strict_and_fail_closed
+    - crates/kiva-server/src/lib.rs::confidential_participant_lifecycle_persists_metadata_and_audit_in_memory
+    - crates/kiva-server/src/lib.rs::confidential_participant_gates_keys_and_jobs_fail_closed_in_memory
+    - crates/kiva-server/src/lib.rs::postgres_confidential_participant_lifecycle_is_idempotent_and_audited
+  kani_harnesses:
+    - kani_harnesses::confidential_participant_lifecycle_matches_strict_transition_table
+    - kani_harnesses::confidential_participant_admission_is_active_only
+  tamarin_models:
+    - proofs/tamarin/kiva_confidential_participant_lifecycle_boundary.spthy
+  validators:
+    - scripts/ci/validate_confidential_key_participant_lifecycle_assurance.py
+    - scripts/ci/validate_confidential_openapi.py
+  docs:
+    - docs/architecture/confidential-key-participant-lifecycle.md
+    - docs/architecture/confidential-computation-milestones.md
+non_claims:
+  production_psi_oprf: false
+  production_fhe_key_management: false
+  vendor_tee_quote_verification: false
+  distributed_key_generation: false
+  malicious_secure_mpc: false
+  raw_payload_audit_export: false

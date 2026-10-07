@@ -1,0 +1,60 @@
+name: xAPI Conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: conformance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NIX_CONFIG: experimental-features = nix-command flakes
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: xAPI Conformance Evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          free-disk: "true"
+          enable-flakehub-cache: "true"
+
+      - name: Build conformance checks
+        run: |
+          nix build \
+            .#checks.x86_64-linux.conformance-plan \
+            .#checks.x86_64-linux.memory-conformance \
+            .#checks.x86_64-linux.postgres-conformance \
+            .#checks.x86_64-linux.postgres-verification \
+            --print-build-logs
+
+      - name: Build static conformance evidence bundle
+        run: |
+          nix build .#conformance-evidence-static \
+            --print-build-logs \
+            --out-link result-conformance-evidence-static
+          mkdir -p artifacts/conformance-evidence-static
+          cp -R --dereference result-conformance-evidence-static/. artifacts/conformance-evidence-static/
+
+      - name: Upload static conformance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-evidence-static
+          path: artifacts/conformance-evidence-static/
+          retention-days: 14

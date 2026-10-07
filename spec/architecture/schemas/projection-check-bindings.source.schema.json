@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:projection-check-bindings-source:1",
+  "title": "Kiva ProjectionCheckBinding source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "status", "projection_spec_source", "synchronization_policy", "bindings"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-projection-check-bindings-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "projection_spec_source": { "type": "string", "minLength": 1 },
+    "synchronization_policy": { "const": "normal-form-primary-with-projection-spec-compatibility-view" },
+    "bindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["projection_source", "projection_id", "projection_kind", "group", "check_id"],
+        "properties": {
+          "projection_source": { "type": "string", "minLength": 1 },
+          "projection_id": { "type": "string", "minLength": 1 },
+          "projection_kind": { "type": "string", "minLength": 1 },
+          "group": { "type": "string", "minLength": 1 },
+          "check_id": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

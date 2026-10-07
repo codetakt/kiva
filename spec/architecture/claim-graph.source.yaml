@@ -1,0 +1,42 @@
+schema_version: 1
+kind: kiva-claim-graph-source
+status: active
+description: >
+  Source policy for the generated ClaimGraph materialized view. ClaimGraph joins
+  public claims, CI evidence rows, declared receipts, verification obligations,
+  and confidential capability bindings for the primary AssuranceGraph review
+  surface without becoming a new source of truth.
+inputs:
+  claim_readiness: generated/claim-readiness-matrix.yaml
+  evidence_set: generated/evidence/evidence-set.yaml
+  evidence_receipts: generated/evidence/evidence-receipts.yaml
+  executed_receipt_overlay: generated/evidence/executed-receipt-overlay.yaml
+  verification_obligations: generated/verification/verification-obligations.yaml
+  capability_bindings: generated/confidential/capability-binding-index.yaml
+generated_artifacts:
+  claim_graph: generated/architecture/claim-graph.yaml
+  markdown: docs/architecture/generated/claim-graph.md
+graph_model:
+  root_type: ClaimGraph
+  primary_review_surface: generated/architecture/assurance-graph.yaml
+  source_rule: >
+    ClaimGraph may only join generated artifacts and source policy. It must not
+    introduce new claim, evidence, or verification semantics.
+  edge_rule: >
+    Claim-to-evidence edges use EvidenceSet receipt ids. Mechanism-to-verification
+    edges use VerificationReceipt ids. Capability-to-operation edges use
+    CapabilityBinding operation references.
+verification_aliases:
+  psi-cohort-hash-token: private-set-intersection
+  psi-oprf-dh-voprf: private-set-intersection
+  tee-portable-attestation: tee-attestation
+  tee-aws-nitro-attestation: tee-attestation
+  fhe-sum-feasibility: fhe
+  fhe-sum-runtime: fhe
+verification_exceptions:
+  - mechanism: confidential-participant-key-lifecycle
+    reason: >
+      Participant/key lifecycle is a metadata substrate covered by dedicated
+      Rust/Kani/Tamarin assurance rows and the confidential job/provider
+      lifecycle review plane, but it does not currently own a separate
+      generated VerificationObligation row.

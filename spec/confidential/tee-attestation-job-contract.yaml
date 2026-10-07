@@ -1,0 +1,59 @@
+---
+schema_version: 1
+kind: tee-attestation-job-contract
+standard: Kiva Architecture
+status: published
+profile: kiva-tee-portable-attestation-v1
+use_case: deployment-bound-confidential-analytics
+claim_boundary: >
+  Kiva admits secrets and releases results only after a deployment-bound
+  portable TEE evidence envelope matches the configured job identity,
+  measurement, image provenance digest, policy binding, validity window,
+  monotonic sequence, and policy approval. This contract does not verify
+  Nitro, SGX, SEV-SNP, or other hardware-vendor quote formats.
+supported_tee:
+  family: deployment-bound-portable
+  hardware_quote_verification: false
+attestation:
+  format: portable-evidence-v1
+  digest: sha256
+  domain: kiva-confidential:tee-attestation-evidence:v1
+  evidence_profile: kiva-tee-portable-attestation-v1
+policy:
+  requires_job_id: true
+  requires_measurement: true
+  requires_image_digest: true
+  requires_policy_binding: true
+  requires_policy_approval: true
+  requires_validity_window: true
+  requires_minimum_sequence: true
+  requires_replay_record: true
+admission:
+  rejects_unsupported_format: true
+  rejects_job_mismatch: true
+  rejects_measurement_mismatch: true
+  rejects_image_digest_mismatch: true
+  rejects_policy_binding_mismatch: true
+  rejects_not_yet_valid_evidence: true
+  rejects_expired_evidence: true
+  rejects_rollback_sequence: true
+  rejects_replayed_evidence: true
+  rejects_digest_mismatch: true
+secrets:
+  provisioned_only_after_attestation: true
+  provisioned_only_after_policy_approval: true
+result_release:
+  requires_accepted_attestation: true
+  requires_job_binding: true
+  requires_policy_approval: true
+audit_metadata:
+  records_measurement: true
+  records_image_digest: true
+  records_policy_binding: true
+  records_evidence_digest: true
+  records_evidence_sequence: true
+non_goals:
+  verifies_vendor_quote: false
+  proves_hardware_side_channel_resistance: false
+  proves_cloud_operator_isolation: false
+  proves_enclave_runtime_correctness: false

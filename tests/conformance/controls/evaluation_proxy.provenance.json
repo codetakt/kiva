@@ -1,0 +1,9 @@
+{
+  "evaluation_date": "2026-10-06",
+  "source_path": "target/lrs-cross-review/20261006-claude-eval/controls/proxy.py",
+  "source_sha256": "08e2b60f2b6d93e4cb2aa6f426e51446241eba36bb0e067cc32a2ba91c7019b3",
+  "imported_path": "tests/conformance/controls/evaluation_proxy.py",
+  "imported_sha256": "08e2b60f2b6d93e4cb2aa6f426e51446241eba36bb0e067cc32a2ba91c7019b3",
+  "change": "byte-identical import; no runtime dependency on review artifacts",
+  "purpose": "bounded single-defect design controls; not an LRS verdict"
+}

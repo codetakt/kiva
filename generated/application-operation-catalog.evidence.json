@@ -1,0 +1,652 @@
+{
+  "generated_from": "generated/architecture/surface-catalog.yaml",
+  "kind": "kiva-application-operation-catalog-evidence",
+  "operation_count": 53,
+  "operations": [
+    {
+      "id": "analytics-list-products",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProducts",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "rust_workflow_kind": "AnalyticsWorkflowKind::ListProducts",
+      "surface": "analytics",
+      "workflow_family": "aggregate-serving",
+      "workflow_label": "analytics.list_products"
+    },
+    {
+      "id": "analytics-read-product",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProduct",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "rust_workflow_kind": "AnalyticsWorkflowKind::ReadProduct",
+      "surface": "analytics",
+      "workflow_family": "aggregate-serving",
+      "workflow_label": "analytics.read_product"
+    },
+    {
+      "id": "analytics-read-aggregate",
+      "openapi_contract": "spec/openapi/kiva-analytics.yaml",
+      "operation_id": "getAnalyticsProductAggregate",
+      "required_scopes": [
+        "analytics:read"
+      ],
+      "rust_workflow_kind": "AnalyticsWorkflowKind::ReadAggregate",
+      "surface": "analytics",
+      "workflow_family": "aggregate-serving",
+      "workflow_label": "analytics.read_aggregate"
+    },
+    {
+      "id": "pds-list-access-audit-events",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsAccessAuditEvents",
+      "required_scopes": [
+        "pds:audit"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListAccessAuditEvents",
+      "surface": "pds",
+      "workflow_label": "pds.list_access_audit_events"
+    },
+    {
+      "id": "pds-evaluate-access-check",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsAccessCheck",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::EvaluateAccessCheck",
+      "surface": "pds",
+      "workflow_label": "pds.evaluate_access_check"
+    },
+    {
+      "id": "pds-list-consent-grants",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsConsentGrants",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListConsentGrants",
+      "surface": "pds",
+      "workflow_label": "pds.list_consent_grants"
+    },
+    {
+      "id": "pds-register-consent-grant",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsConsentGrant",
+      "required_scopes": [
+        "pds:delegate"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterConsentGrant",
+      "surface": "pds",
+      "workflow_label": "pds.register_consent_grant"
+    },
+    {
+      "id": "pds-revoke-consent-grant",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsConsentRevocation",
+      "required_scopes": [
+        "pds:revoke"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RevokeConsentGrant",
+      "surface": "pds",
+      "workflow_label": "pds.revoke_consent_grant"
+    },
+    {
+      "id": "pds-export-portability",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsDataPortabilityExports",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ExportPortability",
+      "surface": "pds",
+      "workflow_label": "pds.export_portability"
+    },
+    {
+      "id": "pds-read-data-product",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsDataProductRead",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ReadDataProduct",
+      "surface": "pds",
+      "workflow_label": "pds.read_data_product"
+    },
+    {
+      "id": "pds-list-data-products",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsDataProducts",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListDataProducts",
+      "surface": "pds",
+      "workflow_label": "pds.list_data_products"
+    },
+    {
+      "id": "pds-register-data-product",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsDataProduct",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterDataProduct",
+      "surface": "pds",
+      "workflow_label": "pds.register_data_product"
+    },
+    {
+      "id": "pds-list-governance-profiles",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsGovernanceProfiles",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListGovernanceProfiles",
+      "surface": "pds",
+      "workflow_label": "pds.list_governance_profiles"
+    },
+    {
+      "id": "pds-register-governance-profile",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsGovernanceProfile",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterGovernanceProfile",
+      "surface": "pds",
+      "workflow_label": "pds.register_governance_profile"
+    },
+    {
+      "id": "pds-list-lifecycle-cases",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsLifecycleCases",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListLifecycleCases",
+      "surface": "pds",
+      "workflow_label": "pds.list_lifecycle_cases"
+    },
+    {
+      "id": "pds-register-lifecycle-case",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsLifecycleCase",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterLifecycleCase",
+      "surface": "pds",
+      "workflow_label": "pds.register_lifecycle_case"
+    },
+    {
+      "id": "pds-list-lifecycle-events",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsLifecycleEvents",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListLifecycleEvents",
+      "surface": "pds",
+      "workflow_label": "pds.list_lifecycle_events"
+    },
+    {
+      "id": "pds-register-lifecycle-event",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsLifecycleEvent",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterLifecycleEvent",
+      "surface": "pds",
+      "workflow_label": "pds.register_lifecycle_event"
+    },
+    {
+      "id": "pds-export-metadata",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsMetadataExports",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ExportMetadata",
+      "surface": "pds",
+      "workflow_label": "pds.export_metadata"
+    },
+    {
+      "id": "pds-list-provider-bindings",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsProviderBindings",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListProviderBindings",
+      "surface": "pds",
+      "workflow_label": "pds.list_provider_bindings"
+    },
+    {
+      "id": "pds-register-provider-binding",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsProviderBinding",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterProviderBinding",
+      "surface": "pds",
+      "workflow_label": "pds.register_provider_binding"
+    },
+    {
+      "id": "pds-read-record-inventory",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsRecordInventory",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ReadRecordInventory",
+      "surface": "pds",
+      "workflow_label": "pds.read_record_inventory"
+    },
+    {
+      "id": "pds-list-retention-policies",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "getPdsRetentionPolicies",
+      "required_scopes": [
+        "pds:read"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::ListRetentionPolicies",
+      "surface": "pds",
+      "workflow_label": "pds.list_retention_policies"
+    },
+    {
+      "id": "pds-register-retention-policy",
+      "openapi_contract": "spec/openapi/kiva-pds.yaml",
+      "operation_id": "postPdsRetentionPolicy",
+      "required_scopes": [
+        "pds:write"
+      ],
+      "rust_workflow_kind": "PdsWorkflowKind::RegisterRetentionPolicy",
+      "surface": "pds",
+      "workflow_label": "pds.register_retention_policy"
+    },
+    {
+      "id": "confidential-release-signed-additive-aggregate",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialAdditiveAggregate",
+      "required_scopes": [
+        "confidential:compute"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.release_signed_additive_aggregate"
+    },
+    {
+      "id": "confidential-list-additive-replay-records",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialAdditiveShareReplayRecords",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListReplayRecords",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.list_replay_records"
+    },
+    {
+      "id": "confidential-revoke-share-signing-key",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKeyRevocation",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RevokeShareSigningKey",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.revoke_share_signing_key"
+    },
+    {
+      "id": "confidential-rotate-share-signing-key",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKeyRotation",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RotateShareSigningKey",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.rotate_share_signing_key"
+    },
+    {
+      "id": "confidential-list-share-signing-keys",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialShareSigningKeys",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListShareSigningKeys",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.list_share_signing_keys"
+    },
+    {
+      "id": "confidential-register-share-signing-key",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShareSigningKey",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RegisterShareSigningKey",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.register_share_signing_key"
+    },
+    {
+      "id": "confidential-list-submitted-shares",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialAdditiveShareSubmissions",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListSubmittedShares",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.list_submitted_shares"
+    },
+    {
+      "id": "confidential-submit-additive-share",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialAdditiveShareSubmission",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::SubmitAdditiveShare",
+      "surface": "confidential",
+      "workflow_family": "additive",
+      "workflow_label": "confidential.submit_additive_share"
+    },
+    {
+      "id": "confidential-spend-differential-privacy-budget",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyBudgetSpend",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.spend_differential_privacy_budget"
+    },
+    {
+      "id": "confidential-list-differential-privacy-budgets",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyBudgets",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.list_differential_privacy_budgets"
+    },
+    {
+      "id": "confidential-register-differential-privacy-budget",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyBudget",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.register_differential_privacy_budget"
+    },
+    {
+      "id": "confidential-list-differential-privacy-composition-summaries",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyCompositionSummaries",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.list_differential_privacy_composition_summaries"
+    },
+    {
+      "id": "confidential-list-differential-privacy-releases",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialDifferentialPrivacyReleases",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListDifferentialPrivacyReleases",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.list_differential_privacy_releases"
+    },
+    {
+      "id": "confidential-release-differential-privacy-aggregate",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacyRelease",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.release_differential_privacy_aggregate"
+    },
+    {
+      "id": "confidential-release-sampled-differential-privacy-aggregate",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialDifferentialPrivacySampledRelease",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate",
+      "surface": "confidential",
+      "workflow_family": "differential_privacy",
+      "workflow_label": "confidential.release_sampled_differential_privacy_aggregate"
+    },
+    {
+      "id": "confidential-list-job-audit-events",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialJobAuditEvents",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListJobAuditEvents",
+      "surface": "confidential",
+      "workflow_family": "job",
+      "workflow_label": "confidential.list_job_audit_events"
+    },
+    {
+      "id": "confidential-transition-job",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialJobTransition",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::TransitionJob",
+      "surface": "confidential",
+      "workflow_family": "job",
+      "workflow_label": "confidential.transition_job"
+    },
+    {
+      "id": "confidential-list-jobs",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialJobs",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListJobs",
+      "surface": "confidential",
+      "workflow_family": "job",
+      "workflow_label": "confidential.list_jobs"
+    },
+    {
+      "id": "confidential-register-job",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialJob",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RegisterJob",
+      "surface": "confidential",
+      "workflow_family": "job",
+      "workflow_label": "confidential.register_job"
+    },
+    {
+      "id": "confidential-list-participant-audit-events",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialParticipantAuditEvents",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListParticipantAuditEvents",
+      "surface": "confidential",
+      "workflow_family": "participant",
+      "workflow_label": "confidential.list_participant_audit_events"
+    },
+    {
+      "id": "confidential-transition-participant",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialParticipantTransition",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::TransitionParticipant",
+      "surface": "confidential",
+      "workflow_family": "participant",
+      "workflow_label": "confidential.transition_participant"
+    },
+    {
+      "id": "confidential-list-participants",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialParticipants",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListParticipants",
+      "surface": "confidential",
+      "workflow_family": "participant",
+      "workflow_label": "confidential.list_participants"
+    },
+    {
+      "id": "confidential-register-participant",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialParticipant",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RegisterParticipant",
+      "surface": "confidential",
+      "workflow_family": "participant",
+      "workflow_label": "confidential.register_participant"
+    },
+    {
+      "id": "confidential-list-shamir-threshold-reconstructions",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialShamirThresholdReconstructions",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListShamirThresholdReconstructions",
+      "surface": "confidential",
+      "workflow_family": "shamir",
+      "workflow_label": "confidential.list_shamir_threshold_reconstructions"
+    },
+    {
+      "id": "confidential-reconstruct-shamir-threshold-secret",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialShamirThresholdReconstruction",
+      "required_scopes": [
+        "confidential:compute"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ReconstructShamirThresholdSecret",
+      "surface": "confidential",
+      "workflow_family": "shamir",
+      "workflow_label": "confidential.reconstruct_shamir_threshold_secret"
+    },
+    {
+      "id": "confidential-approve-threshold-release",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdReleaseApproval",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ApproveThresholdRelease",
+      "surface": "confidential",
+      "workflow_family": "threshold",
+      "workflow_label": "confidential.approve_threshold_release"
+    },
+    {
+      "id": "confidential-list-threshold-release-requests",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "getConfidentialThresholdReleaseRequests",
+      "required_scopes": [
+        "confidential:read"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ListThresholdReleaseRequests",
+      "surface": "confidential",
+      "workflow_family": "threshold",
+      "workflow_label": "confidential.list_threshold_release_requests"
+    },
+    {
+      "id": "confidential-register-threshold-release-request",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdReleaseRequest",
+      "required_scopes": [
+        "confidential:write"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::RegisterThresholdReleaseRequest",
+      "surface": "confidential",
+      "workflow_family": "threshold",
+      "workflow_label": "confidential.register_threshold_release_request"
+    },
+    {
+      "id": "confidential-release-threshold-aggregate",
+      "openapi_contract": "spec/openapi/kiva-confidential.yaml",
+      "operation_id": "postConfidentialThresholdRelease",
+      "required_scopes": [
+        "confidential:release"
+      ],
+      "rust_workflow_kind": "ConfidentialWorkflowKind::ReleaseThresholdAggregate",
+      "surface": "confidential",
+      "workflow_family": "threshold",
+      "workflow_label": "confidential.release_threshold_aggregate"
+    }
+  ],
+  "projection_basis": {
+    "joined_facets": [
+      "openapi_contract",
+      "method",
+      "path",
+      "operation_id",
+      "required_scopes",
+      "application_operation_id",
+      "application_surface",
+      "workflow_label",
+      "rust_workflow_kind",
+      "workflow_family",
+      "pds_resource_family",
+      "pds_route_context"
+    ],
+    "normal_form": "surface_operation_normal_form",
+    "operation_count": 78,
+    "operation_key_fields": [
+      "openapi_contract",
+      "operation_id"
+    ],
+    "projection_role": "workflow-and-scope-binding-projection",
+    "root_type": "SurfaceOperation",
+    "route_key_fields": [
+      "openapi_contract",
+      "method",
+      "path"
+    ]
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:verification:formal-evidence-manifest:1",
+  "title": "Kiva formal verification evidence manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "kind",
+    "status",
+    "generated_at_utc",
+    "git",
+    "release_requirements",
+    "verification",
+    "totals",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "Kiva Architecture"
+    },
+    "kind": {
+      "const": "formal-verification-evidence"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "git": {
+      "$ref": "#/$defs/git"
+    },
+    "release_requirements": {
+      "$ref": "#/$defs/releaseRequirements"
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fstar",
+        "kani",
+        "tamarin"
+      ],
+      "properties": {
+        "fstar": {
+          "$ref": "#/$defs/toolEvidence"
+        },
+        "kani": {
+          "$ref": "#/$defs/toolEvidence"
+        },
+        "tamarin": {
+          "$ref": "#/$defs/toolEvidence"
+        }
+      }
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "artifacts": {
+      "$ref": "#/$defs/artifacts"
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "dirty"
+      ],
+      "properties": {
+        "commit": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "releaseRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_clean_git",
+        "met_clean_git"
+      ],
+      "properties": {
+        "require_clean_git": {
+          "type": "boolean"
+        },
+        "met_clean_git": {
+          "type": "boolean"
+        }
+      }
+    },
+    "toolEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "status",
+        "report_path",
+        "log_path",
+        "tool_version",
+        "suite",
+        "checks",
+        "passed",
+        "failed",
+        "timeout"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "skipped"
+          ]
+        },
+        "report_path": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "log_path": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "tool_version": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "suite": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "checks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled_tools",
+        "skipped_tools",
+        "checks",
+        "passed",
+        "failed",
+        "timeout"
+      ],
+      "properties": {
+        "enabled_tools": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_tools": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "checks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reports",
+        "logs",
+        "metadata"
+      ],
+      "properties": {
+        "reports": {
+          "$ref": "#/$defs/stringList"
+        },
+        "logs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "metadata": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    }
+  }
+}

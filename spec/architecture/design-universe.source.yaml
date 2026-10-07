@@ -1,0 +1,42 @@
+schema_version: 1
+kind: kiva-design-universe-source
+status: active
+description: Compact DesignUniverse root for the architecture metamodel. It declares
+  normalized source-node, package-row, and ledger-row fragments and renders committed
+  ArchitectureGraph, DesignPackage, and LedgerCatalog projections from that single root.
+universe_model:
+  root_type: DesignUniverse
+  primary_edit_entrypoint: true
+  core_model_source: spec/architecture/core-model.source.yaml
+  design_package_projection: spec/architecture/design-packages.source.yaml
+  ledger_catalog_projection: spec/architecture/ledger-catalog.source.yaml
+  source_registry_projection: generated/architecture/source-registry.yaml
+  projection_rule: ArchitectureGraph, DesignPackage, and LedgerCatalog rows are generated
+    source projections from DesignUniverse. They remain committed and schema checked
+    because existing review and CI tooling consumes those paths, but edits start here.
+  architecture_graph_projection: spec/architecture/architecture-graph.source.yaml
+generated_source_projections:
+- id: architecture-graph
+  root_type: ArchitectureGraph
+  output: spec/architecture/architecture-graph.source.yaml
+  generated_by: scripts/ci/generate_design_universe_projections.py
+  validates_with: scripts/ci/validate_ledger_catalog.py
+- id: design-packages
+  root_type: DesignPackage
+  output: spec/architecture/design-packages.source.yaml
+  generated_by: scripts/ci/generate_design_universe_projections.py
+  validates_with: scripts/ci/validate_ledger_catalog.py
+- id: ledger-catalog
+  root_type: LedgerCatalog
+  output: spec/architecture/ledger-catalog.source.yaml
+  generated_by: scripts/ci/generate_design_universe_projections.py
+  validates_with: scripts/ci/validate_ledger_catalog.py
+source_fragments:
+  source_nodes: spec/architecture/design-source-nodes.source.yaml
+  package_rows: spec/architecture/design-package-rows.source.yaml
+  ledger_rows: spec/architecture/design-ledger-rows.source.yaml
+fragment_policy:
+  parent_root_type: DesignUniverse
+  fragments_are_supporting_sources: true
+  projections_are_generated_only: true
+  rule: Human review starts here, then edits the normalized fragment that owns the row.

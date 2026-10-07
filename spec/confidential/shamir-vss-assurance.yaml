@@ -1,0 +1,61 @@
+---
+schema_version: 1
+kind: shamir-vss-assurance-profile
+standard: Kiva Architecture
+status: published
+claim_boundary: >
+  Kiva supports a hash-committed Shamir share-opening profile for threshold
+  reconstruction over the fixed Kiva confidential-computation field. This
+  profile detects tampered or equivocated submitted openings before
+  reconstruction and records metadata-only VSS admission evidence. It is not a
+  distributed key-generation, proactive refresh, threshold signature, threshold
+  decryption, or malicious-dealer proof.
+verification_profile: kiva-shamir-hash-vss-v1
+mechanism:
+  secret_sharing: shamir-threshold
+  field_modulus: 4294967291
+  participant_indexing: one-based-field-points
+  interpolation: lagrange-at-zero
+  commitment_scheme: sha256-share-opening
+  commitment_domain: kiva-confidential:shamir-share-opening:v1
+  commitment_inputs:
+    - domain
+    - transcript_id
+    - participant_index_u128_be
+    - field_value_u64_be
+    - opening_nonce_32
+  minimum_threshold: 2
+admission:
+  requires_threshold_plan: true
+  requires_threshold_at_least_two: true
+  requires_threshold_within_participants: true
+  requires_unique_participant_indexes: true
+  requires_verified_share_openings: true
+  rejects_commitment_mismatch: true
+  excludes_failed_openings_from_reconstruction: true
+complaints:
+  sustained_when_opening_fails_verification: true
+  rejected_when_opening_verifies: true
+  invalid_opening_not_accepted: true
+persistence:
+  persist_reconstruction_metadata: true
+  persist_verification_profile: true
+  persist_verified_share_count: true
+  persist_complaint_count: true
+  persist_share_values: false
+  persist_opening_nonces: false
+  expose_share_values_in_metadata: false
+  expose_opening_nonces_in_metadata: false
+vectors:
+  path: spec/confidential/shamir-threshold-vectors.yaml
+  required_profile: kiva-shamir-hash-vss-v1
+evidence:
+  rust_core: crates/kiva-confidential/src/lib.rs
+  server: crates/kiva-server/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  vectors: spec/confidential/shamir-threshold-vectors.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_shamir_threshold_boundary.spthy
+  fstar_gate: fstar/Kiva.Confidential.ShamirGate.fst
+  design_note: docs/architecture/shamir-threshold-cryptography.md
+  operator_runbook: docs/operations/shamir-vss-runbook.md

@@ -1,0 +1,188 @@
+description: >
+  Included architecture boundary rules split from the root manifest for
+  focused review. The root manifest remains the executable index.
+
+wildcard_import_rules:
+  - id: application-and-core-use-explicit-imports
+    description: Application orchestration and core composition files use explicit imports.
+    paths:
+      - crates/kiva-server/src/app
+      - crates/kiva-server/src/core
+  - id: xapi-request-use-explicit-imports
+    description: xAPI request parsing files use explicit imports because they define the public contract boundary.
+    paths:
+      - crates/kiva-server/src/surfaces/xapi/request
+
+
+doc_anchors:
+  - path: docs/architecture/system-design.md
+    anchors:
+      - "spec/architecture/boundaries.yaml"
+      - "spec/architecture/claim-catalog.yaml"
+      - "docs/architecture/generated/claim-catalog.md"
+      - "crates/kiva-server/src/app/"
+      - "XapiHttpContext"
+      - "PdsHttpContext"
+      - "PdsApplicationHttpContext"
+      - "ConfidentialHttpContext"
+      - "SystemHttpContext"
+      - "core/bootstrap.rs"
+      - "kiva_identity::AuthenticatedPrincipal"
+      - "AuthorizedPrincipal"
+      - "authorize_typed_xapi_request"
+      - "PdsApplicationCapabilities"
+      - "PdsApplicationPorts"
+      - "PdsApplicationPortSet"
+      - "XapiStatementReadPort"
+      - "PdsRecordPort"
+      - "PdsApplicationWorkflow"
+      - "PdsSubjectIdentityMapper"
+      - "PdsSubjectProjectionPort"
+      - "PdsSubjectId"
+      - "crates/kiva-application/src/runtime.rs"
+      - "ApplicationRuntimePort"
+      - "DefaultApplicationRuntime"
+      - "crates/kiva-application/src/pds/"
+      - "crates/kiva-application/src/pds/capabilities/projection.rs"
+      - "crates/kiva-application/src/pds/model/"
+      - "crates/kiva-release-artifacts/src/lib.rs"
+      - "app/pds/server_adapters/"
+      - "app/pds/server_adapters/records.rs"
+      - "crates/kiva-pds/src/pds/commands.rs"
+      - "crates/kiva-pds/src/pds/events.rs"
+      - "json_projection_response"
+      - "StoredStatementMetadata"
+      - "PdsMetadataRecords"
+      - "surfaces/pds/wire/"
+      - "surfaces/pds/model/state/"
+      - "surfaces/confidential/model/state/"
+      - "surfaces/confidential/wire/"
+      - "surfaces/confidential/response/"
+      - "surfaces/xapi/handlers/"
+      - "surfaces/xapi/request/"
+      - "ReleaseArtifactAvailabilityPort"
+      - "ConfidentialApplicationAdapter"
+      - "surfaces/pds/repository/"
+      - "surfaces/pds/storage/postgres/"
+      - "mechanism/core/frost/"
+      - "mechanism/core/psi/"
+      - "mechanism/core/additive/"
+      - "mechanism/core/lifecycle/"
+      - "mechanism/core/profiles/"
+      - "crates/kiva-confidential/src/mechanism/registry.rs"
+      - "crates/kiva-confidential/src/mechanism/provider/"
+      - "CONFIDENTIAL_MECHANISM_REGISTRY"
+      - "spec/openapi/dto-boundary-ledger.yaml"
+      - "crates/kiva-server/src/tests/helpers/"
+      - "spec/confidential/computation-milestones.yaml"
+  - path: docs/architecture/server-modular-boundaries.md
+    anchors:
+      - "spec/architecture/boundaries.yaml"
+      - "spec/architecture/claim-catalog.yaml"
+      - "docs/architecture/generated/claim-catalog.md"
+      - "crates/kiva-server/src/app/"
+      - "XapiHttpContext"
+      - "PdsHttpContext"
+      - "PdsApplicationHttpContext"
+      - "ConfidentialHttpContext"
+      - "SystemHttpContext"
+      - "core/bootstrap.rs"
+      - "kiva_identity::AuthenticatedPrincipal"
+      - "AuthorizedPrincipal"
+      - "authorize_typed_xapi_request"
+      - "PdsApplicationCapabilities"
+      - "PdsApplicationPorts"
+      - "PdsApplicationPortSet"
+      - "XapiStatementReadPort"
+      - "PdsRecordPort"
+      - "PdsApplicationWorkflow"
+      - "PdsSubjectIdentityMapper"
+      - "PdsSubjectProjectionPort"
+      - "PdsSubjectId"
+      - "crates/kiva-application/src/runtime.rs"
+      - "ApplicationRuntimePort"
+      - "DefaultApplicationRuntime"
+      - "crates/kiva-application/src/pds/"
+      - "crates/kiva-application/src/pds/capabilities/"
+      - "crates/kiva-application/src/pds/model/"
+      - "crates/kiva-release-artifacts/src/lib.rs"
+      - "app/pds/server_adapters/"
+      - "crates/kiva-server/src/app/pds/server_adapters/records.rs"
+      - "crates/kiva-pds/src/pds/commands.rs"
+      - "crates/kiva-pds/src/pds/events.rs"
+      - "json_projection_response"
+      - "StoredStatementMetadata"
+      - "PdsMetadataRecords"
+      - "surfaces/pds/wire/"
+      - "surfaces/pds/model/state/"
+      - "surfaces/confidential/model/state/"
+      - "surfaces/confidential/wire/"
+      - "surfaces/confidential/response/"
+      - "surfaces/xapi/handlers/"
+      - "surfaces/xapi/request/"
+      - "ReleaseArtifactAvailabilityPort"
+      - "ConfidentialApplicationAdapter"
+      - "surfaces/pds/repository/"
+      - "surfaces/pds/storage/postgres/"
+      - "mechanism/core/frost/"
+      - "mechanism/core/psi/"
+      - "mechanism/core/additive/"
+      - "mechanism/core/lifecycle/"
+      - "mechanism/core/profiles/"
+      - "crates/kiva-confidential/src/mechanism/registry.rs"
+      - "CONFIDENTIAL_MECHANISM_REGISTRY"
+      - "spec/openapi/dto-boundary-ledger.yaml"
+      - "crates/kiva-server/src/tests/helpers/"
+      - "spec/confidential/computation-milestones.yaml"
+  - path: docs/README.md
+    anchors:
+      - "IEEE/ISO/IEC 39274-1-1-2025"
+      - "Design Source of Truth"
+      - "architecture/design-source-of-truth.md"
+      - "spec/architecture/boundaries.yaml"
+      - "spec/architecture/design-backbone.yaml"
+      - "generated/architecture/surface-catalog.yaml"
+      - "generated/architecture/pds-resource-families.yaml"
+      - "generated/architecture/operation-catalog.yaml"
+      - "spec/architecture/claim-catalog.yaml"
+      - "spec/ci/evidence-checks.yaml"
+      - "Generated implementation claim catalog"
+      - "architecture/generated/claim-catalog.md"
+      - "Generated application operation catalog"
+      - "architecture/generated/application-operation-catalog.md"
+      - "Generated surface operation index"
+      - "architecture/generated/surface-operation-index.md"
+      - "spec/openapi/dto-boundary-ledger.yaml"
+      - "spec/confidential/computation-milestones.yaml"
+  - path: docs/operations/ci-gates.md
+    anchors:
+      - "spec/architecture/boundaries.yaml"
+      - "validate_architecture_boundaries.py"
+
+
+retired_tokens:
+  - ReleaseArtifactRegistry
+  - ReleaseSourceRegistry
+  - surfaces/pds/read_model.rs
+  - release_sources.rs
+
+
+forbidden_source_patterns:
+  - paths:
+      - crates/kiva-server/src/surfaces/xapi/handlers.rs
+      - crates/kiva-server/src/surfaces/xapi/handlers
+      - crates/kiva-server/src/surfaces/pds/handlers.rs
+      - crates/kiva-server/src/surfaces/pds/handlers
+      - crates/kiva-server/src/surfaces/confidential/handlers.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers
+    patterns:
+      - "State<AppState>"
+    regexes:
+      - 'state\.auth\b'
+      - 'state\.limits\b'
+  - paths:
+      - crates/kiva-server/src/surfaces/xapi/routes.rs
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+      - crates/kiva-server/src/surfaces/confidential/routes.rs
+    patterns:
+      - "Router<AppState>"

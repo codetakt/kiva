@@ -1,0 +1,95 @@
+schema_version: 1
+kind: kiva-confidential-computation-milestone-ledger
+standard: Kiva Architecture
+scope: >
+  Kiva confidential-computation milestones. These milestones describe bounded
+  engineering and assurance claims; they do not assert production MPC, FHE,
+  hardware-backed TEE, malicious-secure PSI, or external certification without
+  external review evidence.
+source: docs/architecture/confidential-computation-milestones.md
+milestones:
+  - id: CC0
+    title: Confidential computation claim boundary
+    status: completed-current-boundary
+    release_label: cc0-claim-boundary
+    claim_boundary: Implemented confidential analytics are separated from future production MPC, PSI, FHE, TEE, and malicious-participant robustness claims.
+  - id: CC1
+    title: Additive secure aggregation
+    status: completed-structural-n-of-n-boundary
+    release_label: cc1-additive-secure-aggregation
+    claim_boundary: Signed, replay-protected, n-of-n additive aggregation over Kiva's fixed field; not general MPC.
+  - id: CC2
+    title: Differential privacy assurance
+    status: completed-implemented-dp-release-profile-boundary
+    release_label: cc2-differential-privacy-assurance
+    claim_boundary: Bounded DP release profile with persisted budget accounting, noised aggregate metadata, and CI-checked evidence.
+  - id: CC3
+    title: Threshold cryptography and VSS
+    status: completed-hash-committed-shamir-vss-admission-boundary
+    release_label: cc3-shamir-vss-admission
+    claim_boundary: Hash-committed Shamir VSS-admission reconstruction metadata; not malicious-dealer-robust DKG or production MPC.
+  - id: CC4
+    title: Private set intersection
+    status: completed-bounded-hash-token-cohort-psi-boundary
+    release_label: cc4-psi-cohort-hash-token
+    claim_boundary: Bounded hash-token cohort PSI that releases only n-of-n intersection digests.
+  - id: CC5
+    title: TEE-backed execution
+    status: completed-portable-attestation-evidence-gate
+    release_label: cc5-tee-portable-attestation
+    claim_boundary: Portable deployment-bound TEE evidence gate; hardware quote verification is supplied by deployment.
+  - id: CC6
+    title: FHE feasibility boundary
+    status: completed-deterministic-small-sum-feasibility-profile
+    release_label: cc6-fhe-sum-feasibility
+    claim_boundary: Deterministic small-sum FHE feasibility fixture, strict parameters, and governed release checks.
+  - id: CC7
+    title: Production confidential computation assurance package
+    status: completed-selected-bounded-mechanism-set
+    release_label: cc7-assurance-package
+    claim_boundary: Selected mechanism evidence package for external review; not production certification.
+  - id: CC8
+    title: Practical deployment and workload selection
+    status: completed-multi-agency-aggregate-profile
+    release_label: cc8-practical-deployment-selection
+    claim_boundary: First practical multi-agency aggregate workload, threat model, utility target, and risk acceptance boundary.
+  - id: CC9
+    title: Production confidential job lifecycle
+    status: completed-durable-job-lifecycle-boundary
+    release_label: cc9-confidential-job-lifecycle
+    claim_boundary: Durable job admission, scheduling metadata, idempotency, retries, quotas, and audit export.
+  - id: CC10
+    title: Production key and participant lifecycle
+    status: completed-metadata-only-participant-key-lifecycle-substrate
+    release_label: cc10-participant-key-lifecycle
+    claim_boundary: Metadata-only participant onboarding, key rotation, revocation, recovery, and retirement gates.
+  - id: CC11
+    title: Production PSI upgrade
+    status: completed-review-gated-dh-oprf-runtime-boundary
+    release_label: cc11-production-psi-upgrade
+    claim_boundary: Review-gated DH-OPRF PSI runtime boundary; production privacy claim remains pending external cryptographic review.
+  - id: CC12
+    title: Vendor TEE attestation integration
+    status: completed-review-gated-aws-nitro-verifier-boundary
+    release_label: cc12-aws-nitro-attestation
+    claim_boundary: Review-gated AWS Nitro verifier adapter boundary; hardware-backed production claim remains pending external security review.
+  - id: CC13
+    title: Strong threshold cryptography
+    status: completed-review-gated-frost-threshold-signing-boundary
+    release_label: cc13-threshold-frost-signing
+    claim_boundary: Review-gated FROST threshold-signing runtime boundary; production and malicious-robust threshold claims remain pending external review.
+  - id: CC14
+    title: Production FHE decision and integration
+    status: completed-review-gated-fhe-runtime-boundary
+    release_label: cc14-fhe-runtime
+    claim_boundary: Review-gated FHE sum runtime metadata boundary; production FHE claim remains pending external review.
+  - id: CC15
+    title: External production assurance and operations
+    status: completed-repository-side-release-candidate-readiness
+    release_label: cc15-external-production-assurance
+    claim_boundary: External review input packaging, operational evidence gates, and production claim governance without external certification claims.
+  - id: CC16
+    title: Secret and confidential-compute provider contract
+    status: completed-metadata-only-provider-contract-reference-provider
+    release_label: cc16-secret-compute-provider-contract
+    claim_boundary: Metadata-only external provider contract and fixed non-production reference primitive provider.

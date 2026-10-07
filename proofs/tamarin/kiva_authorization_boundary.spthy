@@ -1,0 +1,56 @@
+theory Kiva_Authorization_Boundary
+begin
+
+rule RegisterCustodian:
+  [ Fr(~principal) ]
+  --[ CustodianRegistered(~principal) ]->
+  [ !Custodian(~principal) ]
+
+rule RegisterAnalyst:
+  [ Fr(~principal) ]
+  --[ AnalystRegistered(~principal) ]->
+  [ !Analyst(~principal) ]
+
+rule IssueCustodianRawReadToken:
+  [ !Custodian(principal), Fr(~token_id) ]
+  --[ TokenIssued(principal, 'raw_read', ~token_id) ]->
+  [ BearerToken(principal, 'raw_read', ~token_id) ]
+
+rule IssueAnalystAggregateReadToken:
+  [ !Analyst(principal), Fr(~token_id) ]
+  --[ TokenIssued(principal, 'aggregate_read', ~token_id) ]->
+  [ BearerToken(principal, 'aggregate_read', ~token_id) ]
+
+rule UseRawRecordReadToken:
+  [ BearerToken(principal, 'raw_read', token_id) ]
+  --[ RawRecordRead(principal, token_id) ]->
+  []
+
+rule UseAggregateReadToken:
+  [ BearerToken(principal, 'aggregate_read', token_id) ]
+  --[ AggregateRead(principal, token_id) ]->
+  []
+
+lemma raw_record_read_requires_raw_read_token:
+  "All principal token_id #i.
+    RawRecordRead(principal, token_id) @ #i
+    ==>
+    Ex #j.
+      TokenIssued(principal, 'raw_read', token_id) @ #j
+      & #j < #i"
+
+lemma raw_record_read_requires_custodian_registration:
+  "All principal token_id #i.
+    RawRecordRead(principal, token_id) @ #i
+    ==>
+    Ex #j.
+      CustodianRegistered(principal) @ #j
+      & #j < #i"
+
+lemma aggregate_read_does_not_imply_raw_record_read:
+  "All principal token_id #i.
+    AggregateRead(principal, token_id) @ #i
+    ==>
+    not (Ex #j. RawRecordRead(principal, token_id) @ #j)"
+
+end

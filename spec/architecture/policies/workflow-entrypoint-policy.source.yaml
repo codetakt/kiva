@@ -1,0 +1,7 @@
+description: Application workflow entrypoint policy.
+workflow_entrypoint_policy:
+  preferred_entrypoint: ApplicationOperationGateway
+  direction: >
+    PDS and confidential workflows should enter through
+    ApplicationOperationGateway, catalog-backed operation metadata, and shared
+    workflow lifecycle handling before crossing repository ports.

@@ -1,0 +1,129 @@
+theory Kiva_PSI_OPRF_Boundary
+begin
+
+rule ConfigureReviewedOprfPsiJob:
+  [ Fr(~job) ]
+  --[
+    PsiOprfJobConfigured(~job, 'kiva_psi_oprf_dh_voprf_review_gated_v1'),
+    PsiOprfRuntimeReviewed(~job)
+  ]->
+  [ !PsiOprfJob(~job), !ReviewedRuntime(~job) ]
+
+rule SubmitLeftOprfElements:
+  [ !PsiOprfJob(job), Fr(~submission) ]
+  --[
+    PsiOprfParticipantAdmitted(job, 'school_a'),
+    PsiOprfElementSubmitted(job, 'school_a', 'match_element', ~submission),
+    PsiOprfElementSubmitted(job, 'school_a', 'left_only_element', ~submission)
+  ]->
+  [
+    PsiOprfLeftMatch(job, 'match_element'),
+    PsiOprfLeftOnly(job, 'left_only_element')
+  ]
+
+rule SubmitRightOprfElements:
+  [ !PsiOprfJob(job), Fr(~submission) ]
+  --[
+    PsiOprfParticipantAdmitted(job, 'school_b'),
+    PsiOprfElementSubmitted(job, 'school_b', 'match_element', ~submission),
+    PsiOprfElementSubmitted(job, 'school_b', 'right_only_element', ~submission)
+  ]->
+  [
+    PsiOprfRightMatch(job, 'match_element'),
+    PsiOprfRightOnly(job, 'right_only_element')
+  ]
+
+rule AbortOprfPsiTranscript:
+  [ Fr(~job), Fr(~participant) ]
+  --[ PsiOprfTranscriptAborted(~job, ~participant) ]->
+  [ OprfAbortEvidence(~job, ~participant) ]
+
+rule ComputeOprfIntersection:
+  [
+    PsiOprfLeftMatch(job, element),
+    PsiOprfRightMatch(job, element),
+    !ReviewedRuntime(job)
+  ]
+  --[ PsiOprfIntersectionComputed(job, element) ]->
+  [ PsiOprfIntersectionResult(job, element) ]
+
+rule AcceptOprfTranscript:
+  [ PsiOprfIntersectionResult(job, element) ]
+  --[
+    PsiOprfTranscriptAccepted(job, element),
+    PsiOprfReplayRecordPersisted(job, element)
+  ]->
+  [ !PersistedPsiOprfResult(job, element) ]
+
+rule RejectOprfReplay:
+  [ !PersistedPsiOprfResult(job, element) ]
+  --[ PsiOprfReplayRejected(job, element) ]->
+  [ ]
+
+rule ReleaseOprfPsiResult:
+  [ !PersistedPsiOprfResult(job, element), !ReviewedRuntime(job), Fr(~authority) ]
+  --[
+    PsiOprfPolicyAuthorized(job, ~authority),
+    PsiOprfResultReleased(job, element, ~authority)
+  ]->
+  [ !ReleasedPsiOprfResult(job, element) ]
+
+rule SuppressLeftOnlyOprfElement:
+  [ PsiOprfLeftOnly(job, element) ]
+  --[ PsiOprfNonMatchSuppressed(job, element) ]->
+  [ ]
+
+rule SuppressRightOnlyOprfElement:
+  [ PsiOprfRightOnly(job, element) ]
+  --[ PsiOprfNonMatchSuppressed(job, element) ]->
+  [ ]
+
+lemma release_requires_reviewed_runtime:
+  "All job element authority #i.
+    PsiOprfResultReleased(job, element, authority) @ #i
+    ==> (Ex #j.
+      PsiOprfRuntimeReviewed(job) @ #j
+      & #j < #i)"
+
+lemma intersection_requires_left_submission:
+  "All job element #i.
+    PsiOprfIntersectionComputed(job, element) @ #i
+    ==> (Ex submission #j.
+      PsiOprfElementSubmitted(job, 'school_a', element, submission) @ #j
+      & #j < #i)"
+
+lemma intersection_requires_right_submission:
+  "All job element #i.
+    PsiOprfIntersectionComputed(job, element) @ #i
+    ==> (Ex submission #j.
+      PsiOprfElementSubmitted(job, 'school_b', element, submission) @ #j
+      & #j < #i)"
+
+lemma accepted_transcript_has_replay_record:
+  "All job element #i.
+    PsiOprfTranscriptAccepted(job, element) @ #i
+    ==> PsiOprfReplayRecordPersisted(job, element) @ #i"
+
+lemma release_requires_policy_authorization:
+  "All job element authority #i.
+    PsiOprfResultReleased(job, element, authority) @ #i
+    ==> PsiOprfPolicyAuthorized(job, authority) @ #i"
+
+lemma left_non_match_is_not_released:
+  "not(Ex job authority #i.
+    PsiOprfResultReleased(job, 'left_only_element', authority) @ #i)"
+
+lemma right_non_match_is_not_released:
+  "not(Ex job authority #i.
+    PsiOprfResultReleased(job, 'right_only_element', authority) @ #i)"
+
+lemma aborted_transcript_is_not_released:
+  "All job participant #abort.
+    PsiOprfTranscriptAborted(job, participant) @ #abort
+    ==> not(Ex element authority #release.
+      PsiOprfResultReleased(job, element, authority) @ #release)"
+
+lemma raw_identifier_is_never_published:
+  "not(Ex identifier #i. RawIdentifierPublished(identifier) @ #i)"
+
+end

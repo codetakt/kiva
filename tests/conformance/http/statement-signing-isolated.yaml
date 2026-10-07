@@ -1,0 +1,194 @@
+suite:
+  id: xapi-lrs-statement-signing-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive signed Statement checks for disposable isolated LRS targets.
+cases:
+  - id: signed-statement-with-rs256-compact-jws-is-accepted
+    requirements:
+      - xapi-lrs-4.2.6-signed-statement-attachment
+      - xapi-lrs-4.2.6-jws-compact
+      - xapi-lrs-4.2.6-jws-payload
+      - xapi-lrs-4.2.6-jws-algorithm
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-signed-rs256
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-signed-rs256
+        - 'Content-Type: application/json'
+        - ''
+        - '{"id":"00000000-0000-4000-8000-000000000901","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-signing@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/signed-rs256"},"version":"2.0.0","attachments":[{"usageType":"http://adlnet.gov/expapi/attachments/signature","display":{"en-US":"Kiva
+          conformance signature"},"description":{"en-US":"Synthetic JWS fixture for xAPI LRS conformance."},"contentType":"application/octet-stream","length":775,"sha2":"31fbc6715b922e60f52c6af28f0eb89b2db503368ca25ec079b3d6a713ecf4cd"}]}'
+        - --kiva-conformance-signed-rs256
+        - 'Content-Type: application/octet-stream'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 31fbc6715b922e60f52c6af28f0eb89b2db503368ca25ec079b3d6a713ecf4cd'
+        - ''
+        - eyJhbGciOiJSUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDkwMSIsImFjdG9yIjp7Im9iamVjdFR5cGUiOiJBZ2VudCIsIm1ib3giOiJtYWlsdG86a2l2YS1jb25mb3JtYW5jZS1zaWduaW5nQGV4YW1wbGUub3JnIn0sInZlcmIiOnsiaWQiOiJodHRwczovL2FkbG5ldC5nb3YvZXhwYXBpL3ZlcmJzL2V4cGVyaWVuY2VkIn0sIm9iamVjdCI6eyJvYmplY3RUeXBlIjoiQWN0aXZpdHkiLCJpZCI6Imh0dHBzOi8vZXhhbXBsZS5vcmcva2l2YS9jb25mb3JtYW5jZS9hY3Rpdml0eS9zaWduZWQtcnMyNTYifSwidmVyc2lvbiI6IjIuMC4wIn0.C-Kjyss2yh4oSXJW2NW463Kml_9FY0D0_HniJC79NKaFIlo3w6ZZEFL5jDkC0u5j_Ixb2-2KgI-YYInOdOxU3m5ibuRKhOYr0m6l_84Ubu66oiZFAfW_3lUDyMOfU9m11yW5lEWgXQ-UfGBdC0aV9AF88FqwQq8aZ-XrMXPj3_5N-ieFJsdLNfenw80JZDjyTvlr16jFDrIW--4BsazKH9OgCLYCveSBlufuPUvslzJrzPdVsfrthHPRyA2cQgp0p9y2UxonDBTIaF5vUG5qvUEpvHkGUbt_xJ59O6tPpLHKEMcoOpp7_bsq1FH7rQBG-DCgCUL3OGSCTQo9o7n87g
+        - --kiva-conformance-signed-rs256--
+        - ''
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /0:
+            present: true
+  - id: signed-statement-rejects-jws-json-serialization
+    requirements:
+      - xapi-lrs-4.2.6-jws-compact
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-signed-json-serialization
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-signed-json-serialization
+        - 'Content-Type: application/json'
+        - ''
+        - '{"id":"00000000-0000-4000-8000-000000000902","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-signing@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/signed-json-serialization"},"version":"2.0.0","attachments":[{"usageType":"http://adlnet.gov/expapi/attachments/signature","display":{"en-US":"Kiva
+          conformance signature"},"description":{"en-US":"Synthetic JWS fixture for xAPI LRS conformance."},"contentType":"application/octet-stream","length":458,"sha2":"189376b634a9bc6c39c09ab1b5f06792df2ba7e78d784969576eb879ae08eacc"}]}'
+        - --kiva-conformance-signed-json-serialization
+        - 'Content-Type: application/octet-stream'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 189376b634a9bc6c39c09ab1b5f06792df2ba7e78d784969576eb879ae08eacc'
+        - ''
+        - '{"payload":"eyJpZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDkwMiIsImFjdG9yIjp7Im9iamVjdFR5cGUiOiJBZ2VudCIsIm1ib3giOiJtYWlsdG86a2l2YS1jb25mb3JtYW5jZS1zaWduaW5nQGV4YW1wbGUub3JnIn0sInZlcmIiOnsiaWQiOiJodHRwczovL2FkbG5ldC5nb3YvZXhwYXBpL3ZlcmJzL2V4cGVyaWVuY2VkIn0sIm9iamVjdCI6eyJvYmplY3RUeXBlIjoiQWN0aXZpdHkiLCJpZCI6Imh0dHBzOi8vZXhhbXBsZS5vcmcva2l2YS9jb25mb3JtYW5jZS9hY3Rpdml0eS9zaWduZWQtanNvbi1zZXJpYWxpemF0aW9uIn0sInZlcnNpb24iOiIyLjAuMCJ9","signatures":[]}'
+        - --kiva-conformance-signed-json-serialization--
+        - ''
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: signed-statement-rejects-invalid-json-jws-payload
+    requirements:
+      - xapi-lrs-4.2.6-jws-payload
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-signed-invalid-payload
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-signed-invalid-payload
+        - 'Content-Type: application/json'
+        - ''
+        - '{"id":"00000000-0000-4000-8000-000000000903","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-signing@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/signed-invalid-payload"},"version":"2.0.0","attachments":[{"usageType":"http://adlnet.gov/expapi/attachments/signature","display":{"en-US":"Kiva
+          conformance signature"},"description":{"en-US":"Synthetic JWS fixture for xAPI LRS conformance."},"contentType":"application/octet-stream","length":788,"sha2":"3b4c2314f1740db8e61323b9792dc266724a6edbe80639c63d632b1836766147"}]}'
+        - --kiva-conformance-signed-invalid-payload
+        - 'Content-Type: application/octet-stream'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 3b4c2314f1740db8e61323b9792dc266724a6edbe80639c63d632b1836766147'
+        - ''
+        - eyJhbGciOiJSUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDkwMyIsJ2FjdG9yJzp7Im9iamVjdFR5cGUiOiJBZ2VudCIsIm1ib3giOiJtYWlsdG86a2l2YS1jb25mb3JtYW5jZS1zaWduaW5nQGV4YW1wbGUub3JnIn0sInZlcmIiOnsiaWQiOiJodHRwczovL2FkbG5ldC5nb3YvZXhwYXBpL3ZlcmJzL2V4cGVyaWVuY2VkIn0sIm9iamVjdCI6eyJvYmplY3RUeXBlIjoiQWN0aXZpdHkiLCJpZCI6Imh0dHBzOi8vZXhhbXBsZS5vcmcva2l2YS9jb25mb3JtYW5jZS9hY3Rpdml0eS9zaWduZWQtaW52YWxpZC1wYXlsb2FkIn0sInZlcnNpb24iOiIyLjAuMCJ9.XnGK78W2mvxKAobRVMSg3M0g1Nu0HUswr15Ecc15TIYCZRoaOGuAths_oqUsONhiZKHfHlnzhGXwg5VzSpDcL8B0b5BbYgn8Ze4UAZNb2blAXuQvV2UzeXxQG8QLVdTSu-GIF-JQTOz3_FiFc-qJWPWDKL3-Rs93LxyVKCgjwDocxKZD0m7L_cf8rfFfbc536_dgNa1_WIk9xloR3gVnulDwiOKDHbv_KMi8sPI843DyBxSZV0h0b1Alo1OXq28WI1ds6nnGJBwt20wxalo7sJ5i_9S0mkdwSrErsdXiqM9AHM6sKC6NAbhVuv_2_w-zfibvo4fn9OiKoujNf6sNKA
+        - --kiva-conformance-signed-invalid-payload--
+        - ''
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: signed-statement-rejects-non-equivalent-jws-payload
+    requirements:
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-signed-non-equivalent
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-signed-non-equivalent
+        - 'Content-Type: application/json'
+        - ''
+        - '{"id":"00000000-0000-4000-8000-000000000904","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-signing@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/signed-received-object"},"version":"2.0.0","attachments":[{"usageType":"http://adlnet.gov/expapi/attachments/signature","display":{"en-US":"Kiva
+          conformance signature"},"description":{"en-US":"Synthetic JWS fixture for xAPI LRS conformance."},"contentType":"application/octet-stream","length":787,"sha2":"2b0fda4d6bd7794af12a35718030ce2f4e57d27ae1b77da1d91cbd40a2fdc6ca"}]}'
+        - --kiva-conformance-signed-non-equivalent
+        - 'Content-Type: application/octet-stream'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 2b0fda4d6bd7794af12a35718030ce2f4e57d27ae1b77da1d91cbd40a2fdc6ca'
+        - ''
+        - eyJhbGciOiJSUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDkwNCIsImFjdG9yIjp7Im9iamVjdFR5cGUiOiJBZ2VudCIsIm1ib3giOiJtYWlsdG86a2l2YS1jb25mb3JtYW5jZS1zaWduaW5nQGV4YW1wbGUub3JnIn0sInZlcmIiOnsiaWQiOiJodHRwczovL2FkbG5ldC5nb3YvZXhwYXBpL3ZlcmJzL2V4cGVyaWVuY2VkIn0sIm9iamVjdCI6eyJvYmplY3RUeXBlIjoiQWN0aXZpdHkiLCJpZCI6Imh0dHBzOi8vZXhhbXBsZS5vcmcva2l2YS9jb25mb3JtYW5jZS9hY3Rpdml0eS9zaWduZWQtcGF5bG9hZC1vYmplY3QifSwidmVyc2lvbiI6IjIuMC4wIn0.Ap3crJCKmw4Ic-cXfrVzUQ7XqRieXiNFsUgYK4nPSJrNNpdKLiCTqMH9bL9dma6S84J6P3SIM-Kt09fZrZqhELuQUXakzKO2o3xDPEgtjY4UAtRkVeQyl5oCvEiF8b23x4zH6fRXlfuboIWAevSpyn3ewN6e2xLNlGzcF21g_JqAUPqiHsJmdkL9LWZ1b4HeDZQK9rD_M5dCaOhVAyULKQtPKT6vQm_dFI2tOedKgKa7cOZzEq2_6eIKI0PuIxejbjryNR2yqUpFNCsx4FS-sGnUXKCVKSYOeO-yvdr0ur7B5hvGFmiwxflyHSuB5XulEXh77hmZLr_VlUOw2LAUDA
+        - --kiva-conformance-signed-non-equivalent--
+        - ''
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: signed-statement-rejects-disallowed-hs256-algorithm
+    requirements:
+      - xapi-lrs-4.2.6-jws-algorithm
+      - xapi-lrs-4.2.6-verify-signature
+      - xapi-lrs-4.2.6-reject-malformed-signature
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: multipart/mixed; boundary=kiva-conformance-signed-hs256
+        X-Experience-API-Version: 2.0.0
+      raw_body_crlf_lines:
+        - --kiva-conformance-signed-hs256
+        - 'Content-Type: application/json'
+        - ''
+        - '{"id":"00000000-0000-4000-8000-000000000905","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-signing@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/signed-hs256"},"version":"2.0.0","attachments":[{"usageType":"http://adlnet.gov/expapi/attachments/signature","display":{"en-US":"Kiva
+          conformance signature"},"description":{"en-US":"Synthetic JWS fixture for xAPI LRS conformance."},"contentType":"application/octet-stream","length":476,"sha2":"4a05cd3df6cee759a00acf8ac5ae52fe0727ae325a45c2a25d5a186dd4c74416"}]}'
+        - --kiva-conformance-signed-hs256
+        - 'Content-Type: application/octet-stream'
+        - 'Content-Transfer-Encoding: binary'
+        - 'X-Experience-API-Hash: 4a05cd3df6cee759a00acf8ac5ae52fe0727ae325a45c2a25d5a186dd4c74416'
+        - ''
+        - eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDkwNSIsImFjdG9yIjp7Im9iamVjdFR5cGUiOiJBZ2VudCIsIm1ib3giOiJtYWlsdG86a2l2YS1jb25mb3JtYW5jZS1zaWduaW5nQGV4YW1wbGUub3JnIn0sInZlcmIiOnsiaWQiOiJodHRwczovL2FkbG5ldC5nb3YvZXhwYXBpL3ZlcmJzL2V4cGVyaWVuY2VkIn0sIm9iamVjdCI6eyJvYmplY3RUeXBlIjoiQWN0aXZpdHkiLCJpZCI6Imh0dHBzOi8vZXhhbXBsZS5vcmcva2l2YS9jb25mb3JtYW5jZS9hY3Rpdml0eS9zaWduZWQtaHMyNTYifSwidmVyc2lvbiI6IjIuMC4wIn0.DDzdptBRhEwKQO4YhHjnFdnUf3HEGJ9AiSHCROt-k9g
+        - --kiva-conformance-signed-hs256--
+        - ''
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true

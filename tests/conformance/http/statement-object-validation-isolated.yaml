@@ -1,0 +1,282 @@
+suite:
+  id: xapi-lrs-statement-object-validation-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Isolated Verb, Activity, SubStatement, timestamp, and Attachment admission checks.
+cases:
+- id: statement-object-model-accepts-valid-shape
+  requirements:
+  - xapi-lrs-4.2.2.2-verb-properties
+  - xapi-lrs-4.2.2.3-activity-properties
+  - xapi-lrs-4.2.2.3-activity-definition-properties
+  - xapi-lrs-4.2.2.6-attachment-properties
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/completed
+        display:
+          en-US: completed
+      object:
+        objectType: Activity
+        id: https://example.org/activities/object-validation-valid
+        definition:
+          type: https://example.org/activity-types/assessment
+          interactionType: choice
+          choices:
+          - id: answer-a
+            description:
+              en-US: Answer A
+      attachments:
+      - usageType: https://example.org/attachment-usage/reference
+        display:
+          en-US: External reference
+        contentType: text/plain
+        length: 5
+        sha2: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+        fileUrl: https://example.org/attachments/reference.txt
+  expect:
+    status: 200
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-rejects-invalid-verb-shape
+  requirements:
+  - xapi-lrs-4.2.2.2-verb-properties
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: relative-verb
+        unsupported: true
+      object:
+        id: https://example.org/activities/invalid-verb
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-rejects-invalid-activity-definition
+  requirements:
+  - xapi-lrs-4.2.2.3-activity-properties
+  - xapi-lrs-4.2.2.3-activity-definition-properties
+  - xapi-lrs-4.2.4.2-interaction-type
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/experienced
+      object:
+        id: https://example.org/activities/invalid-definition
+        definition:
+          interactionType: unsupported
+          choices:
+          - id: answer-a
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-rejects-substatement-managed-property
+  requirements:
+  - xapi-lrs-4.2.2.3-substatement-properties
+  - xapi-lrs-4.2.4.2-no-nested-substatement
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/reported
+      object:
+        objectType: SubStatement
+        id: 00000000-0000-4000-8000-000000000701
+        actor:
+          mbox: mailto:kiva-substatement@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          id: https://example.org/activities/substatement
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-unknown-local-offset-policy
+  requirements:
+  - xapi-lrs-4.2.7-timestamps-utc
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: store-disputed-unknown-local-offset
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          mbox: mailto:kiva-object-validation@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          id: https://example.org/activities/invalid-timestamp
+        timestamp: '2026-07-29T09:00:00-00:00'
+        id: ba014b44-e270-4a53-8c07-bd7867c5d934
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 400
+      checks:
+      - kind: json-shape
+        status: 200
+        shape:
+          type: array
+          min_items: 1
+          max_items: 1
+          items:
+            type: string
+            format: uuid
+            enum:
+            - ba014b44-e270-4a53-8c07-bd7867c5d934
+  - id: read-utc
+    request:
+      method: GET
+      path: /statements
+      headers:
+        X-Experience-API-Version: 2.0.0
+      query:
+        statementId: ba014b44-e270-4a53-8c07-bd7867c5d934
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      checks:
+      - kind: json-time
+        pointer: /timestamp
+        expected: '2026-07-29T09:00:00Z'
+        utc: true
+    when_previous_status: 200
+- id: statement-rejects-invalid-attachment-metadata
+  requirements:
+  - xapi-lrs-4.2.2.6-attachment-properties
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/experienced
+      object:
+        id: https://example.org/activities/invalid-attachment
+      attachments:
+      - usageType: https://example.org/attachment-usage/reference
+        display: {}
+        contentType: invalid
+        length: -1
+        sha2: not-a-sha256-value
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-version-format-validation-policy
+  requirements:
+  - xapi-lrs-4.2.2-statement-version-format
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/experienced
+      object:
+        id: https://example.org/activities/invalid-version
+      version: should fail
+  expect:
+    status: 400
+    status_in:
+    - 200
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-accepts-semantic-version-outside-legacy-adl-range
+  requirements:
+  - xapi-lrs-4.2.2-statement-version-format
+  - xapi-lrs-4.2.4.3-version-retention
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      actor:
+        mbox: mailto:kiva-object-validation@example.org
+      verb:
+        id: https://example.org/verbs/experienced
+      object:
+        id: https://example.org/activities/non-legacy-version
+      version: 1.1.0
+  expect:
+    status: 200
+    headers:
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+    status_in:
+    - 400

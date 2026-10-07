@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:surface-model-source:1",
+  "title": "Kiva SurfaceOperation model source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "surface_operation_algebra", "join_policy"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-surface-operation-model-source" },
+    "status": { "const": "active" },
+    "surface_operation_algebra": {
+      "type": "object",
+      "required": ["root_type", "join_type", "sole_operation_algebra", "canonical_source", "generated_review_surface", "projections"],
+      "properties": {
+        "root_type": { "const": "SurfaceOperation" },
+        "join_type": { "type": "string", "minLength": 1 },
+        "sole_operation_algebra": { "const": true },
+        "canonical_source": { "type": "string", "minLength": 1 },
+        "generated_review_surface": { "type": "string", "minLength": 1 },
+        "projections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "target", "role"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "target": { "type": "string", "minLength": 1 },
+              "role": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "join_policy": { "type": "object", "additionalProperties": true }
+  }
+}

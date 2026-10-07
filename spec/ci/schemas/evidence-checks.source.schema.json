@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:ci:evidence-checks-source:1",
+  "title": "Kiva evidence-check source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "kind",
+    "group_source",
+    "projection_spec_source",
+    "ci_execution_model",
+    "groups"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-ci-evidence-check-source" },
+    "group_source": { "type": "string", "minLength": 1 },
+    "projection_spec_source": { "type": "string", "minLength": 1 },
+    "ci_execution_model": {
+      "type": "object",
+      "required": ["root_type", "primary_entrypoint", "command_registry", "command_source", "command_rule"],
+      "properties": {
+        "root_type": { "const": "RegistryDrivenCommand" },
+        "primary_entrypoint": { "const": "scripts/ci/kiva-ci" },
+        "command_registry": { "const": "scripts/ci/kiva_ci/cli.py" },
+        "command_source": { "const": "spec/ci/evidence-checks.yaml" },
+        "command_rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "checks"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "checks": { "type": "array", "items": { "type": "object" } }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

@@ -1,0 +1,2156 @@
+openapi: 3.1.0
+info:
+  title: Kiva Confidential Computation API
+  version: 0.1.0
+  summary: Kiva confidential additive-share workflow interface contract.
+  description: >
+    Machine-readable API contract for Kiva-specific confidential-computation
+    endpoints. This contract is intentionally separate from the
+    IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS contract.
+  license:
+    name: Apache-2.0
+servers:
+  - url: /
+    description: Kiva platform base resource.
+tags:
+  - name: Confidential Aggregates
+  - name: Confidential Jobs
+  - name: Confidential Participants
+  - name: Differential Privacy Budgets
+  - name: Differential Privacy Releases
+  - name: Share Signing Keys
+  - name: Share Submissions
+  - name: Shamir Threshold Reconstructions
+  - name: Threshold Releases
+security:
+  - bearerAuth: []
+x-kiva-contract:
+  area: confidential-computation
+  status: Kiva platform extension, not part of the IEEE xAPI LRS surface.
+  evidence:
+    - crates/kiva-confidential/src/lib.rs
+    - crates/kiva-confidential/src/mechanism/mod.rs
+    - crates/kiva-confidential/src/mechanism/additive.rs
+    - crates/kiva-confidential/src/mechanism/shamir.rs
+    - crates/kiva-confidential/src/mechanism/threshold.rs
+    - crates/kiva-confidential/src/mechanism/workflow.rs
+    - crates/kiva-confidential/src/mechanism/core.rs
+    - crates/kiva-confidential/src/mechanism/core/profiles.rs
+    - crates/kiva-confidential/src/mechanism/core/lifecycle.rs
+    - crates/kiva-confidential/src/mechanism/core/additive.rs
+    - crates/kiva-confidential/src/mechanism/core/shamir.rs
+    - crates/kiva-confidential/src/mechanism/core/psi.rs
+    - crates/kiva-confidential/src/mechanism/core/tee.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/portable.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/nitro.rs
+    - crates/kiva-confidential/src/mechanism/core/frost.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/feasibility.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/parameters.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/release.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/runtime.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/runtime/profile.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/runtime/evaluation.rs
+    - crates/kiva-confidential/src/mechanism/core/fhe/runtime/release.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/nitro/profile.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/nitro/claims.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs
+    - crates/kiva-confidential/src/mechanism/core/tee/nitro/release.rs
+    - crates/kiva-confidential/src/mechanism/core/tests.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/prelude.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/additive.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/differential_privacy.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/fhe.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/frost.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/lifecycle.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/provider.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/psi.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/shamir.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/tee.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/threshold_release.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/vectors.rs
+    - crates/kiva-confidential/src/mechanism/core/tests/helpers.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/prelude.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/differential_privacy.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/fhe.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/frost.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/jobs.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/participants_and_additive.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/provider_and_plan.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/psi.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/shamir.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/tee.rs
+    - crates/kiva-confidential/src/mechanism/verification/kani_harnesses/threshold_release.rs
+    - crates/kiva-confidential/src/mechanism/job.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy/budget.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy/errors.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy/noise.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy/policy.rs
+    - crates/kiva-confidential/src/mechanism/differential_privacy/release.rs
+    - crates/kiva-confidential/src/mechanism/provider.rs
+    - crates/kiva-secret-provider-contract/src/lib.rs
+    - crates/kiva-confidential/src/mechanism/provider/admission.rs
+    - crates/kiva-confidential/src/mechanism/provider/binding.rs
+    - crates/kiva-confidential/src/mechanism/provider/contract.rs
+    - crates/kiva-confidential/src/mechanism/provider/digest.rs
+    - crates/kiva-confidential/src/mechanism/provider/runtime.rs
+    - crates/kiva-application/src/confidential.rs
+    - crates/kiva-application/src/confidential/jobs.rs
+    - crates/kiva-server/src/app/confidential.rs
+    - crates/kiva-server/src/app/confidential/additive.rs
+    - crates/kiva-server/src/app/confidential/differential_privacy.rs
+    - crates/kiva-server/src/app/confidential/jobs.rs
+    - crates/kiva-server/src/app/confidential/participants.rs
+    - crates/kiva-server/src/app/confidential/shamir.rs
+    - crates/kiva-server/src/app/confidential/threshold.rs
+    - crates/kiva-server/src/core/state.rs
+    - crates/kiva-server/src/core/state/http_context.rs
+    - crates/kiva-server/src/core/request_guards.rs
+    - crates/kiva-server/src/surfaces/confidential/routes.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/additive.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/shamir.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/differential_privacy.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/jobs.rs
+    - crates/kiva-server/src/surfaces/confidential/handlers/participants.rs
+    - crates/kiva-server/src/surfaces/confidential/repository.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/core.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/additive.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/differential_privacy.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/jobs.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/participants.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/shamir.rs
+    - crates/kiva-server/src/surfaces/confidential/repository/threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/model.rs
+    - crates/kiva-server/src/surfaces/confidential/model/differential_privacy_helpers.rs
+    - crates/kiva-server/src/surfaces/confidential/model/filters.rs
+    - crates/kiva-server/src/surfaces/confidential/model/keys.rs
+    - crates/kiva-server/src/surfaces/confidential/model/requests.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/additive.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/differential_privacy.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/jobs.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/keys.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/participants.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/shamir.rs
+    - crates/kiva-server/src/surfaces/confidential/model/state/threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/model/validation.rs
+    - crates/kiva-server/src/surfaces/confidential/storage.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/additive.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/differential_privacy.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/jobs.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/participants.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/release_artifacts.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/shamir.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/memory/threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/additive.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/commands.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy_api.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/jobs.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/lifecycle.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/participants.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/queries.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/release_artifacts.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/shamir.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/shares_threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/postgres/threshold.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/common.rs
+    - crates/kiva-server/src/surfaces/confidential/storage/rows.rs
+    - crates/kiva-server/src/surfaces/confidential/wire.rs
+    - crates/kiva-server/src/tests/confidential_memory.rs
+    - crates/kiva-server/src/tests/confidential_memory
+    - crates/kiva-confidential-contract/src/lib.rs
+    - spec/confidential/computation-milestones.yaml
+    - docs/architecture/additive-secure-aggregate-mechanism.md
+    - docs/architecture/confidential-mechanism-abstraction.md
+    - docs/architecture/shamir-threshold-cryptography.md
+paths:
+  /confidential/additive-aggregates:
+    post:
+      tags: [Confidential Aggregates]
+      operationId: postConfidentialAdditiveAggregate
+      x-kiva-required-scopes: ["confidential:compute"]
+      summary: Verify signed additive shares, persist the computed result, and release an aggregate.
+      requestBody:
+        $ref: "#/components/requestBodies/AdditiveAggregateRequest"
+      responses:
+        "200":
+          description: Aggregate release result and accepted replay records.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdditiveAggregateResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/additive-share-signing-keys:
+    get:
+      tags: [Share Signing Keys]
+      operationId: getConfidentialShareSigningKeys
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-scoped additive-share signing-key metadata.
+      responses:
+        "200":
+          description: Subject-owned signing-key metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareSigningKeyMetadataList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Share Signing Keys]
+      operationId: postConfidentialShareSigningKey
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Register a subject-owned additive-share signing key.
+      requestBody:
+        $ref: "#/components/requestBodies/ShareSigningKeyRegistration"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/additive-share-signing-key-rotations:
+    post:
+      tags: [Share Signing Keys]
+      operationId: postConfidentialShareSigningKeyRotation
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Atomically register a replacement key and revoke the old key.
+      requestBody:
+        $ref: "#/components/requestBodies/ShareSigningKeyRotation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/additive-share-signing-key-revocations:
+    post:
+      tags: [Share Signing Keys]
+      operationId: postConfidentialShareSigningKeyRevocation
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Revoke a subject-owned additive-share signing key.
+      requestBody:
+        $ref: "#/components/requestBodies/ShareSigningKeyRevocation"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /confidential/additive-share-submissions:
+    get:
+      tags: [Share Submissions]
+      operationId: getConfidentialAdditiveShareSubmissions
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-scoped submitted-share metadata for a transcript.
+      parameters:
+        - $ref: "#/components/parameters/TranscriptIdHex"
+      responses:
+        "200":
+          description: Subject-owned submitted-share metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmittedShareMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Share Submissions]
+      operationId: postConfidentialAdditiveShareSubmission
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Submit one signed additive-share envelope.
+      requestBody:
+        $ref: "#/components/requestBodies/ShareSubmission"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/additive-share-replay-records:
+    get:
+      tags: [Share Submissions]
+      operationId: getConfidentialAdditiveShareReplayRecords
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List transcript-scoped accepted replay-record metadata.
+      parameters:
+        - $ref: "#/components/parameters/TranscriptIdHex"
+      responses:
+        "200":
+          description: Accepted replay-record metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReplayRecordMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /confidential/threshold-release-requests:
+    get:
+      tags: [Threshold Releases]
+      operationId: getConfidentialThresholdReleaseRequests
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List threshold-release request metadata.
+      parameters:
+        - $ref: "#/components/parameters/ReleaseIdHexOptional"
+        - $ref: "#/components/parameters/TranscriptIdHexOptional"
+      responses:
+        "200":
+          description: Threshold-release request metadata without aggregate payload values.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThresholdReleaseMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Threshold Releases]
+      operationId: postConfidentialThresholdReleaseRequest
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Register a two-authority release request for a matching computed aggregate.
+      requestBody:
+        $ref: "#/components/requestBodies/ThresholdReleaseRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/threshold-release-approvals:
+    post:
+      tags: [Threshold Releases]
+      operationId: postConfidentialThresholdReleaseApproval
+      x-kiva-required-scopes: ["confidential:release"]
+      summary: Record one authority approval for a threshold-release request.
+      requestBody:
+        $ref: "#/components/requestBodies/ThresholdReleaseApproval"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/threshold-releases:
+    post:
+      tags: [Threshold Releases]
+      operationId: postConfidentialThresholdRelease
+      x-kiva-required-scopes: ["confidential:release"]
+      summary: Release an aggregate after both configured authorities approved it.
+      requestBody:
+        $ref: "#/components/requestBodies/ThresholdReleaseApproval"
+      responses:
+        "200":
+          description: Released aggregate and release metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThresholdReleaseResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/shamir-threshold-reconstructions:
+    get:
+      tags: [Shamir Threshold Reconstructions]
+      operationId: getConfidentialShamirThresholdReconstructions
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned Shamir threshold reconstruction metadata.
+      description: >
+        Lists metadata for persisted Shamir reconstructions without exposing
+        submitted shares or reconstructed values.
+      parameters:
+        - $ref: "#/components/parameters/ReconstructionIdHexOptional"
+        - $ref: "#/components/parameters/TranscriptIdHexOptional"
+      responses:
+        "200":
+          description: Subject-owned Shamir reconstruction metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShamirThresholdReconstructionMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Shamir Threshold Reconstructions]
+      operationId: postConfidentialShamirThresholdReconstruction
+      x-kiva-required-scopes: ["confidential:compute"]
+      summary: Reconstruct and persist a Shamir threshold value.
+      description: >
+        Reconstructs a value from at least threshold unique shares over Kiva's
+        fixed finite field. This is threshold cryptography support for the
+        Kiva confidential extension, not an IEEE xAPI LRS endpoint.
+      requestBody:
+        $ref: "#/components/requestBodies/ShamirThresholdReconstruction"
+      responses:
+        "200":
+          description: Reconstructed value and reconstruction metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShamirThresholdReconstructionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/differential-privacy-budgets:
+    get:
+      tags: [Differential Privacy Budgets]
+      operationId: getConfidentialDifferentialPrivacyBudgets
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned differential privacy budget metadata.
+      parameters:
+        - $ref: "#/components/parameters/BudgetIdHexOptional"
+      responses:
+        "200":
+          description: Subject-owned differential privacy budget metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyBudgetMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Differential Privacy Budgets]
+      operationId: postConfidentialDifferentialPrivacyBudget
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Register a subject-owned differential privacy epsilon budget ledger.
+      requestBody:
+        $ref: "#/components/requestBodies/DifferentialPrivacyBudget"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/differential-privacy-budget-spends:
+    post:
+      tags: [Differential Privacy Budgets]
+      operationId: postConfidentialDifferentialPrivacyBudgetSpend
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Atomically spend epsilon from a subject-owned differential privacy budget.
+      requestBody:
+        $ref: "#/components/requestBodies/DifferentialPrivacyBudgetSpend"
+      responses:
+        "200":
+          description: Updated differential privacy budget metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyBudgetMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/differential-privacy-composition-summaries:
+    get:
+      tags: [Differential Privacy Budgets]
+      operationId: getConfidentialDifferentialPrivacyCompositionSummaries
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned differential privacy sequential-composition summaries.
+      description: >
+        Computes an audit summary from persisted budget and release metadata.
+        The summary reports ledger spend, release-attributed spend, and
+        unattributed spend without exposing raw aggregate or noise evidence.
+      parameters:
+        - $ref: "#/components/parameters/BudgetIdHexOptional"
+      responses:
+        "200":
+          description: Subject-owned differential privacy composition summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyCompositionSummaryList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /confidential/differential-privacy-releases:
+    get:
+      tags: [Differential Privacy Releases]
+      operationId: getConfidentialDifferentialPrivacyReleases
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned differential privacy release metadata.
+      parameters:
+        - $ref: "#/components/parameters/ReleaseIdHexOptional"
+        - $ref: "#/components/parameters/BudgetIdHexOptional"
+        - $ref: "#/components/parameters/TranscriptIdHexOptional"
+      responses:
+        "200":
+          description: Subject-owned noised aggregate release metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyReleaseMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Differential Privacy Releases]
+      operationId: postConfidentialDifferentialPrivacyRelease
+      x-kiva-required-scopes: ["confidential:release"]
+      summary: Validate, account, persist, and release a noised differential privacy aggregate.
+      requestBody:
+        $ref: "#/components/requestBodies/DifferentialPrivacyRelease"
+      responses:
+        "200":
+          description: Noised aggregate release metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyReleaseMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/differential-privacy-sampled-releases:
+    post:
+      tags: [Differential Privacy Releases]
+      operationId: postConfidentialDifferentialPrivacySampledRelease
+      x-kiva-required-scopes: ["confidential:release"]
+      summary: Sample server-side discrete-Laplace noise, account, persist, and release a noised aggregate.
+      description: >
+        Uses the server randomness source to sample integer noise for an
+        already persisted additive aggregate. The request does not carry the
+        raw aggregate or noise sample. The response and metadata expose only
+        the noised aggregate value and accounting parameters.
+      requestBody:
+        $ref: "#/components/requestBodies/DifferentialPrivacySampledRelease"
+      responses:
+        "200":
+          description: Noised aggregate release metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DifferentialPrivacyReleaseMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/jobs:
+    get:
+      tags: [Confidential Jobs]
+      operationId: getConfidentialJobs
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned durable confidential job metadata.
+      parameters:
+        - $ref: "#/components/parameters/JobIdHexOptional"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ConfidentialJobStatus"
+        - name: mechanism
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ConfidentialJobMechanism"
+      responses:
+        "200":
+          description: Metadata-only confidential job list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialJobMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Confidential Jobs]
+      operationId: postConfidentialJob
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Register a durable confidential job in draft state.
+      requestBody:
+        $ref: "#/components/requestBodies/ConfidentialJob"
+      responses:
+        "200":
+          description: Registered or idempotently retrieved confidential job metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialJobMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/job-transitions:
+    post:
+      tags: [Confidential Jobs]
+      operationId: postConfidentialJobTransition
+      x-kiva-required-scopes: ["confidential:write"]
+      x-kiva-conditional-scopes:
+        released: ["confidential:release"]
+      summary: Apply a strict durable confidential job lifecycle transition.
+      requestBody:
+        $ref: "#/components/requestBodies/ConfidentialJobTransition"
+      responses:
+        "200":
+          description: Updated or idempotently unchanged confidential job metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialJobMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/job-audit-events:
+    get:
+      tags: [Confidential Jobs]
+      operationId: getConfidentialJobAuditEvents
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List metadata-only audit events for subject-owned confidential jobs.
+      parameters:
+        - $ref: "#/components/parameters/JobIdHexOptional"
+      responses:
+        "200":
+          description: Metadata-only confidential job audit events.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialJobAuditEventList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /confidential/participants:
+    get:
+      tags: [Confidential Participants]
+      operationId: getConfidentialParticipants
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List subject-owned confidential participant lifecycle metadata.
+      parameters:
+        - name: participantSubject
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+        - name: participantIndex
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/NonZeroUsize"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ConfidentialParticipantStatus"
+      responses:
+        "200":
+          description: Metadata-only confidential participant list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialParticipantMetadataList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Confidential Participants]
+      operationId: postConfidentialParticipant
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Register participant identity, mechanism role, and key-ceremony metadata in invited state.
+      requestBody:
+        $ref: "#/components/requestBodies/ConfidentialParticipant"
+      responses:
+        "200":
+          description: Registered or idempotently retrieved confidential participant metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialParticipantMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/participant-transitions:
+    post:
+      tags: [Confidential Participants]
+      operationId: postConfidentialParticipantTransition
+      x-kiva-required-scopes: ["confidential:write"]
+      summary: Apply a strict confidential participant lifecycle transition.
+      requestBody:
+        $ref: "#/components/requestBodies/ConfidentialParticipantTransition"
+      responses:
+        "200":
+          description: Updated or idempotently unchanged confidential participant metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialParticipantMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /confidential/participant-audit-events:
+    get:
+      tags: [Confidential Participants]
+      operationId: getConfidentialParticipantAuditEvents
+      x-kiva-required-scopes: ["confidential:read"]
+      summary: List metadata-only audit events for subject-owned confidential participants.
+      parameters:
+        - name: participantSubject
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+        - name: participantIndex
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/NonZeroUsize"
+      responses:
+        "200":
+          description: Metadata-only confidential participant audit events.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfidentialParticipantAuditEventList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        OAuth/OIDC-derived bearer token accepted by the Kiva resource server.
+        Each confidential-computation operation declares the exact scope
+        required in x-kiva-required-scopes. Missing or refused tokens fail with
+        401; accepted tokens without the required scope fail with 403.
+  parameters:
+    TranscriptIdHex:
+      name: transcriptId
+      in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/Hex32"
+    TranscriptIdHexOptional:
+      name: transcriptId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Hex32"
+    ReleaseIdHexOptional:
+      name: releaseId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Hex32"
+    ReconstructionIdHexOptional:
+      name: reconstructionId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Hex32"
+    BudgetIdHexOptional:
+      name: budgetId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Hex32"
+    JobIdHexOptional:
+      name: jobId
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Hex32"
+  requestBodies:
+    AdditiveAggregateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AdditiveAggregateRequest"
+    ShareSigningKeyRegistration:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareSigningKeyRegistration"
+    ShareSigningKeyRotation:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareSigningKeyRotation"
+    ShareSigningKeyRevocation:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareSigningKeyRevocation"
+    ShareSubmission:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareSubmission"
+    ThresholdReleaseRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ThresholdReleaseRequest"
+    ThresholdReleaseApproval:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ThresholdReleaseApproval"
+    ShamirThresholdReconstruction:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShamirThresholdReconstruction"
+    DifferentialPrivacyBudget:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DifferentialPrivacyBudget"
+    DifferentialPrivacyBudgetSpend:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DifferentialPrivacyBudgetSpend"
+    DifferentialPrivacyRelease:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DifferentialPrivacyRelease"
+    DifferentialPrivacySampledRelease:
+      description: Server-side sampled differential privacy aggregate release request body.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DifferentialPrivacySampledRelease"
+    ConfidentialJob:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConfidentialJobRequest"
+    ConfidentialJobTransition:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConfidentialJobTransitionRequest"
+    ConfidentialParticipant:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConfidentialParticipantRequest"
+    ConfidentialParticipantTransition:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConfidentialParticipantTransitionRequest"
+  responses:
+    NoContent:
+      description: Request accepted without response content.
+    BadRequest:
+      description: Request failed structural or cryptographic validation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Bearer authorization is required or refused.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The authenticated subject does not own the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The requested confidential resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: The request conflicts with existing confidential state, such as replay or missing computed aggregate evidence.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+    Hex32:
+      type: string
+      pattern: "^[0-9a-fA-F]{64}$"
+    Byte:
+      type: integer
+      minimum: 0
+      maximum: 255
+    ByteArray32:
+      type: array
+      minItems: 32
+      maxItems: 32
+      items:
+        $ref: "#/components/schemas/Byte"
+    ByteArray64:
+      type: array
+      minItems: 64
+      maxItems: 64
+      items:
+        $ref: "#/components/schemas/Byte"
+    NonZeroUsize:
+      type: integer
+      minimum: 1
+    NonZeroU64:
+      type: integer
+      minimum: 1
+      maximum: 18446744073709551615
+    SignedI64:
+      type: integer
+      minimum: -9223372036854775808
+      maximum: 9223372036854775807
+    FieldElement:
+      type: integer
+      minimum: 0
+      maximum: 4294967290
+    AdditiveShareReplayWindow:
+      type: object
+      additionalProperties: false
+      required: [first_sequence, last_sequence]
+      properties:
+        first_sequence:
+          $ref: "#/components/schemas/NonZeroU64"
+        last_sequence:
+          $ref: "#/components/schemas/NonZeroU64"
+    AdditiveShareCommitmentSlot:
+      type: object
+      additionalProperties: false
+      required: [transcript_id, participant_index, commitment, signing_key_id]
+      properties:
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        commitment:
+          $ref: "#/components/schemas/ByteArray32"
+        signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+    SecureAggregateShare:
+      type: object
+      additionalProperties: false
+      required: [participant_index, value]
+      properties:
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        value:
+          $ref: "#/components/schemas/FieldElement"
+    AuthenticatedAdditiveShareEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - transcript_id
+        - share
+        - commitment
+        - signing_key_id
+        - sequence
+        - proof
+      properties:
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        share:
+          $ref: "#/components/schemas/SecureAggregateShare"
+        commitment:
+          $ref: "#/components/schemas/ByteArray32"
+        signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+        sequence:
+          $ref: "#/components/schemas/NonZeroU64"
+        proof:
+          $ref: "#/components/schemas/ByteArray32"
+    SignedAuthenticatedAdditiveShareEnvelope:
+      type: object
+      additionalProperties: false
+      required: [envelope, signature]
+      properties:
+        envelope:
+          $ref: "#/components/schemas/AuthenticatedAdditiveShareEnvelope"
+        signature:
+          $ref: "#/components/schemas/ByteArray64"
+    AdditiveAggregateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - participant_count
+        - transcript_id
+        - slots
+        - replay_window
+      properties:
+        participant_count:
+          $ref: "#/components/schemas/NonZeroUsize"
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        slots:
+          type: array
+          minItems: 2
+          items:
+            $ref: "#/components/schemas/AdditiveShareCommitmentSlot"
+        replay_window:
+          $ref: "#/components/schemas/AdditiveShareReplayWindow"
+        signed_envelopes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignedAuthenticatedAdditiveShareEnvelope"
+          default: []
+    AdditiveAggregateResponse:
+      type: object
+      additionalProperties: false
+      required: [aggregate, acceptedRecords]
+      properties:
+        aggregate:
+          $ref: "#/components/schemas/FieldElement"
+        acceptedRecords:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReplayRecordMetadata"
+    ShareSigningKeyRegistration:
+      type: object
+      additionalProperties: false
+      required: [signing_key_id, participant_index, public_key]
+      properties:
+        signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        public_key:
+          $ref: "#/components/schemas/ByteArray32"
+    ShareSigningKeyRotation:
+      type: object
+      additionalProperties: false
+      required:
+        - old_signing_key_id
+        - new_signing_key_id
+        - participant_index
+        - public_key
+      properties:
+        old_signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+        new_signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        public_key:
+          $ref: "#/components/schemas/ByteArray32"
+    ShareSigningKeyRevocation:
+      type: object
+      additionalProperties: false
+      required: [signing_key_id]
+      properties:
+        signing_key_id:
+          $ref: "#/components/schemas/ByteArray32"
+    ShareSubmission:
+      type: object
+      additionalProperties: false
+      required: [signed_envelope]
+      properties:
+        signed_envelope:
+          $ref: "#/components/schemas/SignedAuthenticatedAdditiveShareEnvelope"
+    ThresholdReleaseRequest:
+      type: object
+      additionalProperties: false
+      description: >
+        Registers governance approval metadata for an aggregate value already
+        computed and persisted by the additive aggregate endpoint.
+      required:
+        - release_id
+        - transcript_id
+        - aggregate
+        - left_authority_subject
+        - right_authority_subject
+      properties:
+        release_id:
+          $ref: "#/components/schemas/ByteArray32"
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        aggregate:
+          $ref: "#/components/schemas/FieldElement"
+        left_authority_subject:
+          type: string
+          minLength: 1
+        right_authority_subject:
+          type: string
+          minLength: 1
+    ThresholdReleaseApproval:
+      type: object
+      additionalProperties: false
+      required: [release_id]
+      properties:
+        release_id:
+          $ref: "#/components/schemas/ByteArray32"
+    ShamirShare:
+      type: object
+      additionalProperties: false
+      required: [participant_index, value]
+      properties:
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        value:
+          $ref: "#/components/schemas/FieldElement"
+    VerifiableShamirShare:
+      type: object
+      additionalProperties: false
+      description: >
+        Opened Shamir share plus its hash commitment and nonce. The server
+        verifies the opening before reconstruction and does not expose this
+        payload through metadata endpoints.
+      required: [share, commitment, opening_nonce]
+      properties:
+        share:
+          $ref: "#/components/schemas/ShamirShare"
+        commitment:
+          $ref: "#/components/schemas/ByteArray32"
+        opening_nonce:
+          $ref: "#/components/schemas/ByteArray32"
+    ShamirThresholdReconstruction:
+      type: object
+      additionalProperties: false
+      description: >
+        Reconstructs a Shamir threshold value from at least threshold unique
+        share openings. Each opening must match its hash commitment before it
+        can contribute to interpolation. Participant indexes are one-based
+        interpolation points over Kiva's fixed finite field.
+      required:
+        - reconstruction_id
+        - transcript_id
+        - participant_count
+        - threshold
+        - share_openings
+      properties:
+        reconstruction_id:
+          $ref: "#/components/schemas/ByteArray32"
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        participant_count:
+          $ref: "#/components/schemas/NonZeroUsize"
+        threshold:
+          $ref: "#/components/schemas/NonZeroUsize"
+        share_openings:
+          type: array
+          minItems: 2
+          items:
+            $ref: "#/components/schemas/VerifiableShamirShare"
+    DifferentialPrivacyBudget:
+      type: object
+      additionalProperties: false
+      description: >
+        Registers a bounded integer epsilon budget ledger for Kiva's
+        add/remove-one-subject discrete-Laplace release profile.
+      required: [budget_id, total_epsilon_microunits]
+      properties:
+        budget_id:
+          $ref: "#/components/schemas/ByteArray32"
+        total_epsilon_microunits:
+          $ref: "#/components/schemas/NonZeroU64"
+    DifferentialPrivacyBudgetSpend:
+      type: object
+      additionalProperties: false
+      required: [budget_id, epsilon_microunits]
+      properties:
+        budget_id:
+          $ref: "#/components/schemas/ByteArray32"
+        epsilon_microunits:
+          $ref: "#/components/schemas/NonZeroU64"
+    DifferentialPrivacyRelease:
+      type: object
+      additionalProperties: false
+      description: >
+        Requests a noised release for an already persisted additive aggregate.
+        The raw aggregate and noise sample are request-side evidence and are
+        not exposed by the release metadata response.
+      required:
+        - release_id
+        - budget_id
+        - transcript_id
+        - aggregate
+        - data_subject_count
+        - minimum_population
+        - epsilon_microunits
+        - l1_sensitivity
+        - noise_value
+      properties:
+        release_id:
+          $ref: "#/components/schemas/ByteArray32"
+        budget_id:
+          $ref: "#/components/schemas/ByteArray32"
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        aggregate:
+          $ref: "#/components/schemas/FieldElement"
+        data_subject_count:
+          $ref: "#/components/schemas/NonZeroUsize"
+        minimum_population:
+          $ref: "#/components/schemas/NonZeroUsize"
+        epsilon_microunits:
+          $ref: "#/components/schemas/NonZeroU64"
+        l1_sensitivity:
+          $ref: "#/components/schemas/NonZeroU64"
+        noise_value:
+          $ref: "#/components/schemas/SignedI64"
+    DifferentialPrivacySampledRelease:
+      type: object
+      additionalProperties: false
+      description: >
+        Requests server-side sampled integer discrete-Laplace-family noise for
+        an already persisted additive aggregate. The request does not carry the
+        raw aggregate or noise sample.
+      required:
+        - release_id
+        - budget_id
+        - transcript_id
+        - data_subject_count
+        - minimum_population
+        - epsilon_microunits
+        - l1_sensitivity
+      properties:
+        release_id:
+          $ref: "#/components/schemas/ByteArray32"
+        budget_id:
+          $ref: "#/components/schemas/ByteArray32"
+        transcript_id:
+          $ref: "#/components/schemas/ByteArray32"
+        data_subject_count:
+          $ref: "#/components/schemas/NonZeroUsize"
+        minimum_population:
+          $ref: "#/components/schemas/NonZeroUsize"
+        epsilon_microunits:
+          $ref: "#/components/schemas/NonZeroU64"
+        l1_sensitivity:
+          $ref: "#/components/schemas/NonZeroU64"
+    ShareSigningKeyMetadataList:
+      type: object
+      additionalProperties: false
+      required: [signingKeys]
+      properties:
+        signingKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShareSigningKeyMetadata"
+    ShareSigningKeyMetadata:
+      type: object
+      additionalProperties: false
+      required: [signingKeyId, participantIndex, publicKey, oauthSubject, status]
+      properties:
+        signingKeyId:
+          $ref: "#/components/schemas/Hex32"
+        participantIndex:
+          $ref: "#/components/schemas/NonZeroUsize"
+        publicKey:
+          $ref: "#/components/schemas/Hex32"
+        oauthSubject:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          enum: [active, revoked]
+        revokedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    SubmittedShareMetadataList:
+      type: object
+      additionalProperties: false
+      required: [submissions]
+      properties:
+        submissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubmittedShareMetadata"
+    SubmittedShareMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - transcriptId
+        - participantIndex
+        - sequence
+        - signingKeyId
+        - oauthSubject
+      properties:
+        transcriptId:
+          $ref: "#/components/schemas/Hex32"
+        participantIndex:
+          $ref: "#/components/schemas/NonZeroUsize"
+        sequence:
+          $ref: "#/components/schemas/NonZeroU64"
+        signingKeyId:
+          $ref: "#/components/schemas/Hex32"
+        oauthSubject:
+          type: string
+          minLength: 1
+    ReplayRecordMetadataList:
+      type: object
+      additionalProperties: false
+      required: [records]
+      properties:
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReplayRecordMetadata"
+    ReplayRecordMetadata:
+      type: object
+      additionalProperties: false
+      required: [transcriptId, participantIndex, sequence, signingKeyId]
+      properties:
+        transcriptId:
+          $ref: "#/components/schemas/Hex32"
+        participantIndex:
+          $ref: "#/components/schemas/NonZeroUsize"
+        sequence:
+          $ref: "#/components/schemas/NonZeroU64"
+        signingKeyId:
+          $ref: "#/components/schemas/Hex32"
+    ThresholdReleaseMetadataList:
+      type: object
+      additionalProperties: false
+      required: [releases]
+      properties:
+        releases:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThresholdReleaseMetadata"
+    ThresholdReleaseMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - releaseId
+        - transcriptId
+        - requesterSubject
+        - authoritySubjects
+        - approvedAuthoritySubjects
+        - status
+        - createdAt
+      properties:
+        releaseId:
+          $ref: "#/components/schemas/Hex32"
+        transcriptId:
+          $ref: "#/components/schemas/Hex32"
+        requesterSubject:
+          type: string
+          minLength: 1
+        authoritySubjects:
+          type: array
+          minItems: 2
+          maxItems: 2
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        approvedAuthoritySubjects:
+          type: array
+          maxItems: 2
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        status:
+          type: string
+          enum: [pending, released]
+        createdAt:
+          type: string
+          format: date-time
+        releasedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+    ShamirThresholdReconstructionMetadataList:
+      type: object
+      additionalProperties: false
+      required: [reconstructions]
+      properties:
+        reconstructions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShamirThresholdReconstructionMetadata"
+    ShamirThresholdReconstructionMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - reconstructionId
+        - transcriptId
+        - ownerSubject
+        - participantCount
+        - threshold
+        - shareCount
+        - verificationProfile
+        - verifiedShareCount
+        - complaintCount
+        - mechanism
+        - createdAt
+      properties:
+        reconstructionId:
+          $ref: "#/components/schemas/Hex32"
+        transcriptId:
+          $ref: "#/components/schemas/Hex32"
+        ownerSubject:
+          type: string
+          minLength: 1
+        participantCount:
+          $ref: "#/components/schemas/NonZeroUsize"
+        threshold:
+          $ref: "#/components/schemas/NonZeroUsize"
+        shareCount:
+          type: integer
+          minimum: 2
+        verificationProfile:
+          type: string
+          enum: [kiva-shamir-hash-vss-v1]
+        verifiedShareCount:
+          type: integer
+          minimum: 2
+        complaintCount:
+          type: integer
+          minimum: 0
+        mechanism:
+          type: string
+          enum: [shamirThreshold]
+        createdAt:
+          type: string
+          format: date-time
+    ShamirThresholdReconstructionResponse:
+      type: object
+      additionalProperties: false
+      required: [reconstruction, reconstructedValue]
+      properties:
+        reconstruction:
+          $ref: "#/components/schemas/ShamirThresholdReconstructionMetadata"
+        reconstructedValue:
+          $ref: "#/components/schemas/FieldElement"
+    DifferentialPrivacyBudgetMetadataList:
+      type: object
+      additionalProperties: false
+      required: [budgets]
+      properties:
+        budgets:
+          type: array
+          items:
+            $ref: "#/components/schemas/DifferentialPrivacyBudgetMetadata"
+    DifferentialPrivacyBudgetMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - budgetId
+        - ownerSubject
+        - totalEpsilonMicrounits
+        - spentEpsilonMicrounits
+        - remainingEpsilonMicrounits
+        - createdAt
+        - updatedAt
+      properties:
+        budgetId:
+          $ref: "#/components/schemas/Hex32"
+        ownerSubject:
+          type: string
+          minLength: 1
+        totalEpsilonMicrounits:
+          $ref: "#/components/schemas/NonZeroU64"
+        spentEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        remainingEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DifferentialPrivacyCompositionSummaryList:
+      type: object
+      additionalProperties: false
+      required: [summaries]
+      properties:
+        summaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/DifferentialPrivacyCompositionSummary"
+    DifferentialPrivacyCompositionSummary:
+      type: object
+      additionalProperties: false
+      description: >
+        Sequential-composition accounting summary for one subject-owned budget.
+        The basic sum remains the enforced budget boundary. The advanced
+        composition fields expose a conservative DRV-style pure-DP upper bound
+        for audit evidence.
+      required:
+        - budgetId
+        - ownerSubject
+        - accountingScope
+        - compositionRule
+        - advancedCompositionRule
+        - advancedCompositionDeltaMicrounits
+        - advancedCompositionEpsilonMicrounits
+        - totalEpsilonMicrounits
+        - budgetSpentEpsilonMicrounits
+        - releaseSpentEpsilonMicrounits
+        - releaseEpsilonSquareSumMicrounits2
+        - unattributedSpentEpsilonMicrounits
+        - remainingEpsilonMicrounits
+        - releaseCount
+        - maxReleaseEpsilonMicrounits
+      properties:
+        budgetId:
+          $ref: "#/components/schemas/Hex32"
+        ownerSubject:
+          type: string
+          minLength: 1
+        accountingScope:
+          type: string
+          enum: [subjectBudget]
+        compositionRule:
+          type: string
+          enum: [basicSequential]
+        advancedCompositionRule:
+          type: string
+          enum: [drvPureDp]
+        advancedCompositionDeltaMicrounits:
+          $ref: "#/components/schemas/NonZeroU64"
+        advancedCompositionEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        totalEpsilonMicrounits:
+          $ref: "#/components/schemas/NonZeroU64"
+        budgetSpentEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        releaseSpentEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        releaseEpsilonSquareSumMicrounits2:
+          type: string
+          pattern: "^[0-9]+$"
+        unattributedSpentEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        remainingEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+        releaseCount:
+          type: integer
+          minimum: 0
+        maxReleaseEpsilonMicrounits:
+          type: integer
+          minimum: 0
+          maximum: 18446744073709551615
+    DifferentialPrivacyReleaseMetadataList:
+      type: object
+      additionalProperties: false
+      required: [releases]
+      properties:
+        releases:
+          type: array
+          items:
+            $ref: "#/components/schemas/DifferentialPrivacyReleaseMetadata"
+    DifferentialPrivacyReleaseMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - releaseId
+        - budgetId
+        - transcriptId
+        - ownerSubject
+        - noisedValue
+        - mechanism
+        - accountingScope
+        - adjacencyModel
+        - epsilonMicrounits
+        - l1Sensitivity
+        - dataSubjectCount
+        - minimumPopulation
+        - createdAt
+      properties:
+        releaseId:
+          $ref: "#/components/schemas/Hex32"
+        budgetId:
+          $ref: "#/components/schemas/Hex32"
+        transcriptId:
+          $ref: "#/components/schemas/Hex32"
+        ownerSubject:
+          type: string
+          minLength: 1
+        noisedValue:
+          $ref: "#/components/schemas/SignedI64"
+        mechanism:
+          type: string
+          enum: [discreteLaplace]
+        accountingScope:
+          type: string
+          enum: [subjectBudget]
+        adjacencyModel:
+          type: string
+          enum: [addRemoveOneSubject]
+        epsilonMicrounits:
+          $ref: "#/components/schemas/NonZeroU64"
+        l1Sensitivity:
+          $ref: "#/components/schemas/NonZeroU64"
+        dataSubjectCount:
+          $ref: "#/components/schemas/NonZeroUsize"
+        minimumPopulation:
+          $ref: "#/components/schemas/NonZeroUsize"
+        createdAt:
+          type: string
+          format: date-time
+    ConfidentialJobMechanism:
+      type: string
+      enum:
+        - additive-secure-aggregation
+        - differential-privacy-release
+        - shamir-vss-admission
+        - threshold-frost-signing
+        - psi-cohort-hash-token
+        - psi-oprf-dh-voprf
+        - tee-portable-attestation
+        - tee-aws-nitro-attestation
+        - fhe-sum-feasibility
+        - fhe-sum-runtime
+    ConfidentialJobStatus:
+      type: string
+      enum:
+        - draft
+        - admitted
+        - running
+        - awaitingRelease
+        - released
+        - failed
+        - cancelled
+        - expired
+        - retired
+    ConfidentialJobRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - job_id
+        - mechanism
+        - mechanism_profile
+        - workload_id
+        - participant_subjects
+        - policy_binding_id
+        - deadline_at
+        - admission_quota_key
+        - evidence_refs
+      properties:
+        job_id:
+          $ref: "#/components/schemas/ByteArray32"
+        mechanism:
+          $ref: "#/components/schemas/ConfidentialJobMechanism"
+        mechanism_profile:
+          type: string
+          minLength: 1
+        workload_id:
+          type: string
+          minLength: 1
+        participant_subjects:
+          type: array
+          minItems: 2
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        policy_binding_id:
+          type: string
+          minLength: 1
+        deadline_at:
+          type: string
+          format: date-time
+        admission_quota_key:
+          type: string
+          minLength: 1
+        max_retry_count:
+          type: integer
+          minimum: 1
+          default: 3
+        evidence_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    ConfidentialJobTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [job_id, target_status]
+      properties:
+        job_id:
+          $ref: "#/components/schemas/ByteArray32"
+        target_status:
+          $ref: "#/components/schemas/ConfidentialJobStatus"
+        reason:
+          type: string
+          minLength: 1
+        evidence_refs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+          default: []
+    ConfidentialJobMetadataList:
+      type: object
+      additionalProperties: false
+      required: [jobs]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfidentialJobMetadata"
+    ConfidentialJobMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - jobId
+        - ownerSubject
+        - mechanism
+        - mechanismProfile
+        - workloadId
+        - participantSubjects
+        - policyBindingId
+        - status
+        - retryCount
+        - maxRetryCount
+        - deadlineAt
+        - admissionQuotaKey
+        - evidenceRefs
+        - createdAt
+        - updatedAt
+      properties:
+        jobId:
+          $ref: "#/components/schemas/Hex32"
+        ownerSubject:
+          type: string
+          minLength: 1
+        mechanism:
+          $ref: "#/components/schemas/ConfidentialJobMechanism"
+        mechanismProfile:
+          type: string
+          minLength: 1
+        workloadId:
+          type: string
+          minLength: 1
+        participantSubjects:
+          type: array
+          minItems: 2
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        policyBindingId:
+          type: string
+          minLength: 1
+        status:
+          $ref: "#/components/schemas/ConfidentialJobStatus"
+        retryCount:
+          type: integer
+          minimum: 0
+        maxRetryCount:
+          type: integer
+          minimum: 1
+        deadlineAt:
+          type: string
+          format: date-time
+        admissionQuotaKey:
+          type: string
+          minLength: 1
+        evidenceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConfidentialJobAuditEventList:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfidentialJobAuditEvent"
+    ConfidentialJobAuditEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - jobId
+        - previousStatus
+        - newStatus
+        - actorSubject
+        - reason
+        - evidenceRefs
+        - createdAt
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        jobId:
+          $ref: "#/components/schemas/Hex32"
+        previousStatus:
+          anyOf:
+            - $ref: "#/components/schemas/ConfidentialJobStatus"
+            - type: "null"
+        newStatus:
+          $ref: "#/components/schemas/ConfidentialJobStatus"
+        actorSubject:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+          minLength: 1
+        evidenceRefs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+    ConfidentialParticipantStatus:
+      type: string
+      enum:
+        - invited
+        - active
+        - suspended
+        - frozen
+        - removed
+    ConfidentialParticipantRole:
+      type: string
+      enum:
+        - additive-share-contributor
+        - data-custodian
+        - policy-authority
+        - psi-participant
+        - tee-operator
+        - fhe-key-authority
+        - auditor
+    ConfidentialParticipantRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - participant_subject
+        - participant_index
+        - mechanism_roles
+        - authorization_scope
+        - key_ceremony_ref
+        - recovery_contact_ref
+        - evidence_refs
+      properties:
+        participant_subject:
+          type: string
+          minLength: 1
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        mechanism_roles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ConfidentialParticipantRole"
+        authorization_scope:
+          type: string
+          minLength: 1
+        key_ceremony_ref:
+          type: string
+          minLength: 1
+        recovery_contact_ref:
+          type: string
+          minLength: 1
+        evidence_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    ConfidentialParticipantTransitionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - participant_subject
+        - participant_index
+        - target_status
+      properties:
+        participant_subject:
+          type: string
+          minLength: 1
+        participant_index:
+          $ref: "#/components/schemas/NonZeroUsize"
+        target_status:
+          $ref: "#/components/schemas/ConfidentialParticipantStatus"
+        reason:
+          type: string
+          minLength: 1
+        evidence_refs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+          default: []
+    ConfidentialParticipantMetadataList:
+      type: object
+      additionalProperties: false
+      required: [participants]
+      properties:
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfidentialParticipantMetadata"
+    ConfidentialParticipantMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - ownerSubject
+        - participantSubject
+        - participantIndex
+        - status
+        - mechanismRoles
+        - authorizationScope
+        - keyCeremonyRef
+        - recoveryContactRef
+        - evidenceRefs
+        - createdAt
+        - updatedAt
+      properties:
+        ownerSubject:
+          type: string
+          minLength: 1
+        participantSubject:
+          type: string
+          minLength: 1
+        participantIndex:
+          $ref: "#/components/schemas/NonZeroUsize"
+        status:
+          $ref: "#/components/schemas/ConfidentialParticipantStatus"
+        mechanismRoles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ConfidentialParticipantRole"
+        authorizationScope:
+          type: string
+          minLength: 1
+        keyCeremonyRef:
+          type: string
+          minLength: 1
+        recoveryContactRef:
+          type: string
+          minLength: 1
+        evidenceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConfidentialParticipantAuditEventList:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfidentialParticipantAuditEvent"
+    ConfidentialParticipantAuditEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventId
+        - participantSubject
+        - participantIndex
+        - previousStatus
+        - newStatus
+        - actorSubject
+        - reason
+        - evidenceRefs
+        - createdAt
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        participantSubject:
+          type: string
+          minLength: 1
+        participantIndex:
+          $ref: "#/components/schemas/NonZeroUsize"
+        previousStatus:
+          anyOf:
+            - $ref: "#/components/schemas/ConfidentialParticipantStatus"
+            - type: "null"
+        newStatus:
+          $ref: "#/components/schemas/ConfidentialParticipantStatus"
+        actorSubject:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+          minLength: 1
+        evidenceRefs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+    ThresholdReleaseResponse:
+      type: object
+      additionalProperties: false
+      required: [release, aggregate]
+      properties:
+        release:
+          $ref: "#/components/schemas/ThresholdReleaseMetadata"
+        aggregate:
+          $ref: "#/components/schemas/FieldElement"

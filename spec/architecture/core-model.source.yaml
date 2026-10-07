@@ -1,0 +1,261 @@
+schema_version: 1
+kind: kiva-architecture-core-model-source
+status: active
+description: >
+  Minimal primary design model for Kiva. Human review starts at
+  DesignUniverse, then follows four roots: HTTP contracts, OperationKernel,
+  AssurancePrimitive, and CapabilityPort. Projection, CI, PDS, and verification
+  ledgers are supporting governance or assurance views over those roots.
+model_contract:
+  primary_model_ids:
+    - http-contract
+    - operation
+    - assurance
+    - confidential-capability
+  supporting_model_ids:
+    - projection
+    - ci-command
+    - pds
+    - verification
+  assurance_primitive_flow:
+    - Claim
+    - Obligation
+    - Discharge
+    - Receipt
+  design_entrypoint_order:
+    - spec/architecture/design-universe.source.yaml
+    - spec/architecture/core-model.source.yaml
+    - spec/architecture/design-source-nodes.source.yaml
+    - spec/architecture/design-package-rows.source.yaml
+    - spec/architecture/design-ledger-rows.source.yaml
+    - spec/openapi/kiva-analytics.yaml
+    - spec/openapi/kiva-xapi.yaml
+    - spec/openapi/kiva-pds.yaml
+    - spec/openapi/kiva-confidential.yaml
+    - spec/architecture/operation-kernel.source.yaml
+    - spec/evidence/assurance-primitive.source.yaml
+    - spec/confidential/mechanism-packages.source.yaml
+    - spec/evidence/review-bundle.source.yaml
+  compatibility_view_rule: >
+    Compatibility views are generated-only or lifecycle-history views retained
+    for drift checks and migration only. They must not be classified as
+    canonical source ledgers in the generated source registry.
+  design_universe_source: spec/architecture/design-universe.source.yaml
+  design_universe_fragments:
+    - spec/architecture/design-source-nodes.source.yaml
+    - spec/architecture/design-package-rows.source.yaml
+    - spec/architecture/design-ledger-rows.source.yaml
+  design_package_source: spec/architecture/design-packages.source.yaml
+  ledger_catalog_source: spec/architecture/ledger-catalog.source.yaml
+primary_models:
+  - id: http-contract
+    root_type: OpenAPI
+    role: external-http-contract
+    source_refs:
+      - spec/openapi/kiva-analytics.yaml
+      - spec/openapi/kiva-xapi.yaml
+      - spec/openapi/kiva-pds.yaml
+      - spec/openapi/kiva-confidential.yaml
+    rule: Public wire shape is owned by OpenAPI only.
+  - id: operation
+    root_type: OperationKernel
+    role: internal-operation-ir
+    entrypoint_source: spec/architecture/operation-kernel.source.yaml
+    source_refs:
+      - spec/architecture/operation-kernel.source.yaml
+    compiled_refs:
+      - generated/architecture/operation-kernel.yaml
+    review_refs:
+      - generated/architecture/operation-catalog.yaml
+      - generated/architecture/pds-resource-families.yaml
+      - generated/architecture/surface-families.yaml
+      - generated/route-coverage.evidence.json
+    required_check: operation-kernel-authority
+    rule: Surface catalogs, route coverage, family ledgers, PDS plane assignments, and workflow catalogs are projections of OperationKernel.
+  - id: assurance
+    root_type: AssurancePrimitive
+    role: evidence-meta-model
+    entrypoint_source: spec/evidence/assurance-primitive.source.yaml
+    primary_review_surface: generated/architecture/assurance-graph.yaml
+    primitive_flow:
+      - Claim
+      - Obligation
+      - Discharge
+      - Receipt
+    source_refs:
+      - spec/evidence/assurance-primitive.source.yaml
+    compiled_refs:
+      - generated/evidence/evidence-set.yaml
+      - generated/evidence/evidence-receipts.yaml
+      - generated/architecture/claim-graph.yaml
+      - generated/architecture/assurance-graph.yaml
+      - generated/verification/verification-obligations.yaml
+    derived_view_refs:
+      - generated/evidence/evidence-set.yaml
+      - generated/evidence/evidence-receipts.yaml
+      - generated/architecture/claim-graph.yaml
+      - generated/verification/verification-obligations.yaml
+    rule: Public claims are discharged through boundary obligations and stable receipts.
+  - id: confidential-capability
+    root_type: CapabilityPort
+    role: confidential-computation-boundary
+    entrypoint_source: spec/confidential/mechanism-packages.source.yaml
+    sealed_provider_boundary: spec/confidential/secret-compute-provider-contract.yaml#/sealed_capability_boundary
+    source_refs:
+      - spec/confidential/mechanism-packages.source.yaml
+    compiled_refs:
+      - generated/confidential/capability-binding-index.yaml
+      - generated/confidential/capability-policy-evidence.yaml
+      - generated/confidential/mechanism-profile-index.yaml
+    rule: PDS and workflow surfaces bind to capabilities; cryptographic mechanisms remain provider-backed implementations.
+supporting_models:
+  - id: projection
+    root_type: ProjectionRuntime
+    role: governance-projection-runtime
+    source_refs:
+      - spec/architecture/projection-normal-form-policy.source.yaml
+      - spec/architecture/projection-artifacts.source.yaml
+      - spec/architecture/projection-runtime.source.yaml
+      - spec/architecture/projection-check-bindings.source.yaml
+    compatibility_refs:
+      - spec/architecture/projection-specs.source.yaml
+    target_stage: normal-form-primary
+    current_stage: normal-form-primary
+    required_check: projection-normal-form-policy
+    rule: Normal-form projection ledgers are primary; ProjectionSpec is a generated-only compatibility view, not a human-edited source.
+  - id: ci-command
+    root_type: RegistryDrivenCommand
+    role: ci-dispatch-model
+    source_refs:
+      - spec/ci/evidence-check-catalog.source.yaml
+      - spec/ci/evidence-gate-plan.source.yaml
+      - spec/ci/evidence-check-groups.source.yaml
+      - scripts/ci/kiva-ci
+      - scripts/ci/kiva_ci/cli.py
+      - scripts/ci/run_generators.py
+    compatibility_refs:
+      - spec/ci/evidence-checks.source.yaml
+    compiled_refs:
+      - spec/ci/evidence-checks.yaml
+    required_check: ci-command-registry
+    rule: kiva-ci commands are derived from primary CheckCatalog and GatePlan rows.
+  - id: pds
+    root_type: PdsCorePlane
+    role: personal-data-store-model
+    parent_model: operation
+    source_refs:
+      - spec/pds/core-planes.source.yaml
+      - spec/pds/invariants.source.yaml
+      - spec/pds/state-machines.source.yaml
+      - spec/pds/publication-milestones.yaml
+    compiled_refs:
+      - generated/architecture/operation-kernel.yaml
+      - generated/architecture/pds-resource-families.yaml
+      - generated/architecture/pds-plane-packages.yaml
+    required_check: pds-core-planes
+    rule: PDS behavior is reviewed through event, inventory, policy, and release planes under OperationKernel.
+  - id: verification
+    root_type: BoundaryProperty
+    role: formal-verification-model
+    source_refs:
+      - spec/verification/verification-obligations.source.yaml
+      - spec/verification/confidential-verified-kernels.yaml
+    compiled_refs:
+      - generated/verification/verification-obligations.yaml
+    rule: Kani, Tamarin, F*, Rust tests, and implementation anchors are discharge methods for boundary properties under AssurancePrimitive.
+review_rules:
+  - id: no_parallel_operation_authority
+    subject: operation
+    enforcement: required
+    validator: scripts/ci/validate_operation_kernel_authority.py
+    rationale: OperationKernel is the only internal operation authority.
+  - id: operation_kernel_entrypoint_owns_split_sources
+    subject: operation
+    enforcement: required
+    validator: scripts/ci/validate_architecture_core_model.py
+    rationale: Split operation ledgers are fragments under one OperationKernel entrypoint.
+  - id: evidence_views_are_not_new_claim_sources
+    subject: assurance
+    enforcement: required
+    validator: scripts/ci/validate_claim_graph.py
+    rationale: Generated evidence views may discharge claims but cannot create claim semantics.
+  - id: evidence_review_bundle_limits_primary_review_surfaces
+    subject: assurance
+    enforcement: required
+    validator: scripts/ci/validate_architecture_core_model.py
+    rationale: Routine review must remain bounded to the declared review bundle.
+  - id: assurance_graph_is_primary_review_surface
+    subject: assurance
+    enforcement: required
+    validator: scripts/ci/generate_assurance_graph.py
+    rationale: Claim, obligation, discharge, and receipt review converge in AssuranceGraph.
+  - id: compatibility_surfaces_require_exit_gates
+    subject: governance
+    enforcement: required
+    validator: scripts/ci/validate_compatibility_exit_gates.py
+    rationale: Compatibility surfaces require an executable retirement path.
+  - id: pds_is_operation_kernel_supporting_plane
+    subject: pds
+    enforcement: required
+    validator: scripts/ci/validate_pds_core_planes.py
+    rationale: PDS behavior extends OperationKernel and is not an independent architecture root.
+  - id: confidential_runtime_claims_require_provider_policy_and_evidence
+    subject: confidential-computation
+    enforcement: required
+    validator: scripts/ci/validate_secret_compute_provider_contract.py
+    rationale: Runtime capability claims require provider admission and evidence.
+  - id: confidential_providers_use_sealed_capability_boundary
+    subject: confidential-computation
+    enforcement: required
+    validator: scripts/ci/validate_secret_compute_provider_contract.py
+    rationale: Provider implementations remain behind the sealed capability boundary.
+  - id: confidential_mechanism_packages_are_primary_edit_entrypoint
+    subject: confidential-computation
+    enforcement: required
+    validator: scripts/ci/validate_architecture_core_model.py
+    rationale: MechanismPackage is the atomic confidential-computation review unit.
+  - id: pds_planes_do_not_expand_xapi_conformance_claim
+    subject: pds
+    enforcement: required
+    validator: scripts/ci/validate_pds_core_planes.py
+    rationale: Kiva PDS extensions remain outside the IEEE xAPI conformance boundary.
+  - id: compatibility_retirement_is_history_not_primary_review_surface
+    subject: governance
+    enforcement: required
+    validator: scripts/ci/generate_compatibility_retirement_plane.py
+    rationale: Retirement history supports review but never becomes design authority.
+  - id: projection_spec_is_generated_only_compatibility_view
+    subject: projection
+    enforcement: required
+    validator: scripts/ci/validate_projection_normal_form.py
+    rationale: ProjectionRuntime normal form owns projection behavior.
+  - id: ci_evidence_check_source_is_generated_only_compatibility_view
+    subject: ci
+    enforcement: required
+    validator: scripts/ci/validate_evidence_check_normal_form.py
+    rationale: CheckCatalog and GatePlan own CI behavior.
+  - id: pds_planes_package_invariants_with_planes
+    subject: pds
+    enforcement: required
+    validator: scripts/ci/validate_pds_core_planes.py
+    rationale: Plane review includes the invariants governing that plane.
+  - id: pds_plane_packages_join_state_resources_and_checks
+    subject: pds
+    enforcement: required
+    validator: scripts/ci/generate_pds_plane_packages.py
+    rationale: Generated plane packages eliminate manual cross-ledger review joins.
+  - id: design_packages_are_first_class_review_units
+    subject: governance
+    enforcement: required
+    validator: scripts/ci/validate_ledger_catalog.py
+    rationale: Each core model has one bounded package review unit.
+  - id: ledger_catalog_joins_source_schema_lifecycle_and_review_surface
+    subject: governance
+    enforcement: required
+    validator: scripts/ci/validate_ledger_catalog.py
+    rationale: Source lifecycle and schema authority are reviewed together.
+  - id: design_universe_is_single_metamodel_root
+    subject: governance
+    enforcement: required
+    validator: scripts/ci/generate_design_universe_projections.py
+    rationale: Normalized design fragments remain children of one DesignUniverse root.

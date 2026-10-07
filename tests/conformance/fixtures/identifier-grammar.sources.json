@@ -1,0 +1,98 @@
+{
+  "source_baseline_date": "2026-10-06",
+  "scope": "Selected generic syntax grammar only; no whole-source or all-edition dependency closure",
+  "source_anchors": [
+    {
+      "path": "target/ieee-pdf-reconciliation/20261005/extracted.txt",
+      "source_sha256": "7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876",
+      "lines": [
+        1794,
+        1816
+      ],
+      "byte_start": 115191,
+      "byte_length": 1983,
+      "sha256": "5746b5f3339b09be3d5a0c7bec7078973074bbaa3c5afdc3ba7d1d0236a92535",
+      "id": "person-array-member-definitions",
+      "physical_page": 31,
+      "printed_page": 30
+    },
+    {
+      "path": "target/ieee-pdf-reconciliation/20261005/extracted.txt",
+      "source_sha256": "7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876",
+      "lines": [
+        2360,
+        2385
+      ],
+      "byte_start": 147367,
+      "byte_length": 2875,
+      "sha256": "44061f2df32339af37f9d542bf02fadb334d55aac5cda2ef9ed0dfb9e46fbddf",
+      "id": "agent-openid-uri-type",
+      "physical_page": 40,
+      "printed_page": 39
+    },
+    {
+      "id": "generic-uri-abnf",
+      "path": "target/lrs-uri-repair/20261006/rfc3986.txt",
+      "section": "Appendix A",
+      "source_sha256": "3102dae4b68cebe40337730312fcb612297b8928547267e8b3d1ee6002b2d683",
+      "lines": [
+        2695,
+        2792
+      ],
+      "byte_start": 117766,
+      "byte_length": 3434,
+      "sha256": "b4d76294b3feee3ab41b8072385eeba0b95c6ea51226baa7e9c69d06e32822b6"
+    },
+    {
+      "id": "generic-iri-abnf",
+      "path": "target/lrs-uri-repair/20261006/rfc3987.txt",
+      "section": "2.2",
+      "source_sha256": "7cc9e3c4e61ea326130d29d959b723209fe3a6c75cdcfb5badbd315d96cd7878",
+      "lines": [
+        351,
+        494
+      ],
+      "byte_start": 16009,
+      "byte_length": 5652,
+      "sha256": "92cc3793de8e7bc94d05df5973669365be0feefe71f7d0ab6b373a77b4022e79"
+    }
+  ],
+  "original_pdf_sha256": "fa57dbaa0fbc0800b8c5a693af884032e782110c1f446ef865797fd0e0811526",
+  "source_urls": {
+    "rfc3986": "https://www.rfc-editor.org/rfc/rfc3986.txt",
+    "rfc3987": "https://www.rfc-editor.org/rfc/rfc3987.txt"
+  },
+  "reading": {
+    "source_reading": "RFC3986 selected component rules and Appendix A; RFC3987 section 2.2",
+    "replay": "Previously inspected rendered PDF Person and Agent tables, bound to unchanged source bytes",
+    "not_read": "Other RFC3987 semantic/equality sections, all updates/errata applicability, every external document"
+  },
+  "expectation_derivation": "Corpus outcomes follow source ABNF, independently of iri-string or Kiva output",
+  "validation_boundary": "No resolution, normalization, scheme-specific policy, mailto address grammar or identity comparison",
+  "corpus_path": "tests/conformance/fixtures/identifier-grammar.json",
+  "corpus_sha256": "130acce6b07ec1314385851d9b896085829a38c033bd8f2731ccf00f63c6056c",
+  "library": {
+    "name": "iri-string",
+    "version": "0.7.14",
+    "registry_checksum": "1663ee7d8cf2900cc1414b1e1eec9f348d6eaa3bcab07579f4726a4b8499f447",
+    "role": "Validation implementation; never the source of expected verdicts"
+  },
+  "bounded_defects": [
+    {
+      "model": "person-openid-unclosed-literal",
+      "field": "openid",
+      "source_rule": "RFC3986 IP-literal requires closing bracket"
+    },
+    {
+      "model": "person-homepage-unclosed-literal",
+      "field": "account.homePage",
+      "source_rule": "RFC3987 adopts the RFC3986 IP-literal rule"
+    },
+    {
+      "model": "person-mbox-malformed-percent",
+      "field": "mbox",
+      "source_rule": "RFC3987 pct-encoded requires two HEXDIGs"
+    }
+  ],
+  "whole_external_grammar_closed": false
+}

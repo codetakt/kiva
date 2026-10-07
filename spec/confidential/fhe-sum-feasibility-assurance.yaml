@@ -1,0 +1,69 @@
+schema_version: 1
+kind: fhe-sum-feasibility-assurance-profile
+status: published
+profile: kiva-fhe-sum-bfv-feasibility-v1
+claim_boundary:
+  deterministic_fixture_only: true
+  production_fhe_encryption: false
+  cryptographic_confidentiality_claim: false
+  supported_operation: sum
+  supported_scheme_family: bfv-style-integer-sum
+  minimum_participants: 2
+  requires_all_participants: true
+parameters:
+  polynomial_modulus_degree: 4096
+  plaintext_modulus: 1048583
+  ciphertext_modulus_bits: 109
+  security_level_bits: 128
+  max_participant_count: 16
+  max_plaintext_value: 65000
+  max_plaintext_sum_below_plaintext_modulus: true
+  rejects_parameter_variants: true
+boundaries:
+  ciphertext_plaintext:
+    ciphertext_digest_public: true
+    public_ciphertext_contract_excludes_plaintext: true
+    fixture_plaintext_private_to_rust_tests: true
+    repository_persistence_not_enabled: true
+  evaluation:
+    operation: sum
+    rejects_missing_participants: true
+    rejects_duplicate_participants: true
+    rejects_plaintext_overflow_or_modular_wrap: true
+  release:
+    requires_completed_evaluation: true
+    requires_policy_approval: true
+    requires_governed_release_treatment: true
+    requires_clear_plaintext_boundary: true
+  pds_boundary:
+    dedicated_data_product_source_kind_implemented: false
+    future_source_kind: fhe-sum-feasibility-result
+    resource_class: aggregate-insights
+    raw_record_read: false
+    raw_ciphertext_or_plaintext_publication: false
+    governed_release_fact_required: true
+    current_release_boundary: rust_feasibility_release_gate
+    pds_openapi_source_kind: absent
+    pds_postgresql_source_kind: absent
+    pds_policy_source_kind: absent
+vectors:
+  path: spec/confidential/fhe-sum-feasibility-vectors.yaml
+benchmarks:
+  path: spec/confidential/fhe-sum-feasibility-benchmarks.yaml
+job_contract:
+  path: spec/confidential/fhe-sum-feasibility-job-contract.yaml
+evidence:
+  rust_core: crates/kiva-confidential/src/lib.rs
+  kani: proofs/kani/README.md
+  tamarin: proofs/tamarin/kiva_fhe_feasibility_boundary.spthy
+  design: docs/architecture/fhe-feasibility-boundary.md
+  runbook: docs/operations/fhe-feasibility-runbook.md
+non_goals:
+  production_bfv_or_ckks_library_integration: false
+  fhe_key_management: false
+  ciphertext_serialization_format: false
+  bootstrapping: false
+  side_channel_resistance: false
+  malicious_participant_robustness: false
+  regulatory_privacy_claim: false
+  dedicated_fhe_pds_data_product_source_kind: false

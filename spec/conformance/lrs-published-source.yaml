@@ -1,0 +1,617 @@
+schema_version: 1
+kind: published-ieee-lrs-source-reconciliation
+date: '2026-10-05'
+scope: IEEE Std 9274.1.1-2023 clause 4, with clauses 1-3 as context; LRS only
+source:
+  designation: IEEE Std 9274.1.1-2023
+  approval_date: '2023-03-30'
+  approval_body: IEEE SA Standards Board
+  acquisition: User-supplied local file 927411-2023.pdf; not a fresh IEEE-site download
+  raw_sha256: fa57dbaa0fbc0800b8c5a693af884032e782110c1f446ef865797fd0e0811526
+  raw_bytes: 1551523
+  pdf_pages: 103
+  encrypted: false
+  private_evidence_root: target/ieee-pdf-reconciliation/20261005/
+  distributable_contents: Provenance, coordinates, bounded excerpts and project judgments; raw PDF, full
+    extracted text and personalized footers remain outside tracked assets
+  identity_anchors:
+    designation_pdf_pages:
+    - 1
+    - 2
+    approval_pdf_page: 2
+derived_text:
+  file: extracted.txt
+  sha256: 7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876
+  converter: Poppler pdftotext 26.06.0
+  settings:
+  - -layout
+  - -enc
+  - UTF-8
+  page_separator: form feed
+  coordinates: pdf_page is the physical 1-based page; printed_page is one less for the read body pages
+public_source:
+  record: spec/conformance/lrs-source-projection.yaml
+  revision: fb8ecb2c1a258e6d3d397805243fd793d47cec5d
+  sha256: 2f43d1a0bccbe24c5adaef0daa3519837c6583ba7c3bfbda86ba964924b1ff0b
+  approved_release_revision: 134afd8c108b4d1b98294a1613db38a6b8fe73d8
+reading:
+  performed_by: Author source reading; no independent standards-editor adjudication
+  identity: Cover, designation, approval and contents structure inspected
+  context:
+    clauses:
+    - '1'
+    - '2'
+    - '3'
+    pdf_pages:
+    - 12
+    - 17
+    printed_pages:
+    - 11
+    - 16
+    method: Layout-preserving extracted text
+  lrs:
+    clauses:
+    - '4'
+    pdf_pages:
+    - 17
+    - 54
+    printed_pages:
+    - 16
+    - 53
+    method: Entire clause 4 read in layout-preserving extracted text; compared with pinned public text
+      and difference candidates
+  visual_pdf_pages:
+  - 25
+  - 26
+  - 30
+  - 36
+  - 38
+  - 49
+  visual_scope: Statement GET tables, State multiple-GET/DELETE table, Activity Profile multiple-GET table,
+    Statement immutability and invalid-IRI requirement, identifier-validation permission
+  not_fully_read:
+  - Clause 5 LRP/LRC duties
+  - Annex A examples
+  - All normative-reference documents and their full boundary vectors
+  comparison_method: Normalized prose search and clause token inventories used only to locate differences;
+    source prose and table differences reviewed in context
+  comparison_limit: Normalization ignores typography, case and token order; matches are not semantic-completeness
+    or exact-equivalence evidence
+word_usage:
+  anchor:
+    clause: '1.3'
+    printed_page: 12
+    pdf_page: 13
+  shall: mandatory
+  should: recommended
+  may: permitted
+  can: capability
+  notes: Informative; footnote 16, printed page 19 / PDF page 20
+reference_policy:
+  anchor:
+    clause: '2'
+    printed_page: 13
+    pdf_page: 14
+  dated: Only the cited edition applies
+  undated: Latest edition including amendments/corrigenda applies
+  inline_duration_reference: ISO 8601:2004(E) sections 4.4.3.2/4.4.3.3 are explicitly specified in clause
+    4.2.7.6; do not silently substitute another duration format
+  this_turn: Reference list read; external document and vector completeness not discharged
+findings:
+- id: state-list-selectors
+  classification: literal-table-conflict
+  anchors:
+  - clause: 4.1.6.2
+    printed_page: 27
+    pdf_page: 28
+  - clause: 4.1.6.2.5
+    printed_page: 29
+    pdf_page: 30
+  actor: LRS
+  action: Select a single State document or list State ids based on stateId presence
+  source_strength: Resource narrative and table requirements under 4.1 / 4.1.6
+  source_fact: The multiple-GET row prohibits stateId in Description but requires it unless since is present
+    in Required; narrative says omission returns ids
+  judgment: Follow resource narrative; omit stateId for list GET
+  test_impact: Keep existing state list cases; no expectation change
+  resolution: Not resolved by the published PDF
+- id: activity-profile-list-scope
+  classification: resource-table-conflict
+  anchors:
+  - clause: 4.1.6.6
+    printed_page: 33
+    pdf_page: 34
+  - clause: 4.1.6.6.5
+    printed_page: 35
+    pdf_page: 36
+  actor: LRS
+  action: List Activity Profile ids for an Activity
+  source_strength: Resource summary and table requirements
+  source_fact: The Activity list table requires agent; resource scope and other method tables use activityId
+  judgment: Use activityId as the Activity Profile list selector
+  test_impact: Keep existing Activity Profile list cases; no expectation change
+  resolution: Not resolved by the published PDF
+- id: formatted-identifiers
+  classification: interpretation-of-format-versus-value
+  anchors:
+  - clause: 4.2.1
+    printed_pages:
+    - 37
+    - 38
+    pdf_pages:
+    - 38
+    - 39
+  - clause: 4.2.4.1
+    printed_page: 48
+    pdf_page: 49
+  actor: LRS
+  action: Reject malformed formatted identifiers while applying the permitted validation boundary
+  source_strength: shall reject invalid IRIs / non-format-following values; may choose not to validate
+    IRIs/UUIDs
+  source_fact: Both provisions are present; the permission is qualified by responsibility for data format,
+    not values
+  judgment: Syntax is mandatory; resolution/existence checks are optional. This is an author interpretation
+  test_impact: Keep syntactic IRI/UUID rejection vectors; no expectation change
+  resolution: Published PDF does not explicitly adjudicate the boundary
+- id: put-single-and-batches
+  classification: general-versus-resource-specific-wording
+  anchors:
+  - clause: 4.1.3.1
+    printed_page: 18
+    pdf_page: 19
+  - clause: 4.1.3.5
+    printed_page: 19
+    pdf_page: 20
+  - clause: 4.1.6.1.1
+    printed_page: 23
+    pdf_page: 24
+  actor: LRS
+  action: Accept Statement requests in supported media types
+  source_strength: shall accept batches in media-type clauses; single Statement in PUT summary/body
+  source_fact: Both the batch acceptance language and the single PUT definition are present
+  judgment: 'Apply specific PUT definition: single PUT and batch POST; PUT batch acceptance remains an
+    interpretation issue'
+  test_impact: Keep current request-body fixtures; no expectation change
+  resolution: Not resolved by the published PDF
+- id: case-equivalence-and-iri-comparison
+  classification: comparison-scope-interpretation
+  anchors:
+  - clause: '4.2'
+    printed_page: 37
+    pdf_page: 38
+  - clause: 4.2.7.1
+    printed_page: 51
+    pdf_page: 52
+  actor: LRS
+  action: Compare logical Statements and IRI identifiers under their respective provisions
+  source_strength: shall exclude Case from Statement equivalence; shall only use allowed RFC 3987 strategies
+    for IRIs
+  source_fact: Both provisions are present without an explicit explanation of their intersecting scopes
+  judgment: Keep current signed-Statement mbox case vector; do not derive unrestricted lowercasing of
+    all IRIs
+  test_impact: Existing signature case retained; full IRI strategy procedure remains open
+  resolution: Not adjudicated by the published PDF
+- id: related-activities-public-correction
+  classification: chapter-4-table-read-through-redundant-chapter-5
+  anchors:
+  - clause: 4.1.6.1.3
+    printed_page: 24
+    pdf_page: 25
+    public_lines:
+    - 305
+    - 315
+  actor: LRS
+  action: Expand an activity query filter when related_activities is true
+  source_strength: GET parameter table requirements
+  source_fact: Chapter 4 repeats Agent-filter prose. PDF 5.1.6.1 gives the Activity-filter definition
+    and 5.1 declares these tables redundant with chapter 4. The pinned public text also contains the Activity-filter
+    definition.
+  judgment: Read chapter 4 through the redundant chapter 5 Activity row. This current PDF-based route
+    supersedes the original public-correction adoption.
+  test_impact: Existing related-activity filter cases already use the correction; no expectation change
+  resolution: In-scope PDF reading; no external overlay required. Official adjudication is not claimed.
+  current_policy: spec/conformance/lrs-interpretation-policy.yaml#related-activities-public-correction
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    lines:
+    - 3375
+    - 3378
+    pdf_page: 54
+    printed_page: 53
+    byte_start: 219292
+    byte_length: 352
+    sha256: 0d0f1079902a40a4a4599414340e74060cd87818014e3796a088fa01164f9b6f
+  - source: ieee-pdf-extracted
+    lines:
+    - 3755
+    - 3765
+    pdf_page: 60
+    printed_page: 59
+    byte_start: 243014
+    byte_length: 1133
+    sha256: 5fb3880e44f546fe03161f83171ae80f17658ff17a34f1b9282cda345613df40
+other_differences: Clause/subclause numbering, expanded abbreviations, internal Annex A.3.4 versus public
+  example link, continuation table headers, informative-note presentation, punctuation, typography and
+  reflow; no additional expectation-changing difference identified in the compared LRS text
+projection_binding_meaning: Coarse correspondence of existing public-source rule groups to published clauses/pages;
+  not an atomic obligation inventory or pass verdict
+projection_bindings:
+- rule: resource-methods-and-parameter-tables
+  clauses:
+  - '4.1'
+  printed_pages:
+  - 17
+  - 17
+  pdf_pages:
+  - 18
+  - 18
+- rule: contextual-http-headers
+  clauses:
+  - 4.1.1
+  printed_pages:
+  - 17
+  - 18
+  pdf_pages:
+  - 18
+  - 19
+- rule: utf8
+  clauses:
+  - 4.1.2
+  printed_pages:
+  - 18
+  - 18
+  pdf_pages:
+  - 19
+  - 19
+- rule: json-and-multipart-transmission
+  clauses:
+  - 4.1.3
+  printed_pages:
+  - 18
+  - 19
+  pdf_pages:
+  - 19
+  - 20
+- rule: document-etags
+  clauses:
+  - 4.1.4
+  printed_pages:
+  - 20
+  - 20
+  pdf_pages:
+  - 21
+  - 21
+- rule: document-conflict-explanation
+  clauses:
+  - 4.1.4
+  printed_pages:
+  - 20
+  - 20
+  pdf_pages:
+  - 21
+  - 21
+- rule: error-codes-and-extension-exception
+  clauses:
+  - 4.1.5
+  printed_pages:
+  - 21
+  - 22
+  pdf_pages:
+  - 22
+  - 23
+- rule: resources-and-unknown-identities
+  clauses:
+  - 4.1.6
+  printed_pages:
+  - 22
+  - 23
+  pdf_pages:
+  - 23
+  - 24
+- rule: statement-storage-put-post
+  clauses:
+  - 4.1.6.1.1
+  - 4.1.6.1.2
+  printed_pages:
+  - 23
+  - 24
+  pdf_pages:
+  - 24
+  - 25
+- rule: statement-query-table
+  clauses:
+  - 4.1.6.1.3
+  printed_pages:
+  - 24
+  - 26
+  pdf_pages:
+  - 25
+  - 27
+- rule: single-query-limits-and-empty-result
+  clauses:
+  - 4.1.6.1.3
+  printed_pages:
+  - 26
+  - 26
+  pdf_pages:
+  - 27
+  - 27
+- rule: consistent-through
+  clauses:
+  - 4.1.6.1.3
+  printed_pages:
+  - 26
+  - 26
+  pdf_pages:
+  - 27
+  - 27
+- rule: retrieval-attachments-and-last-modified
+  clauses:
+  - 4.1.6.1.3
+  printed_pages:
+  - 26
+  - 26
+  pdf_pages:
+  - 27
+  - 27
+- rule: exact-format
+  clauses:
+  - 4.1.6.1.3
+  printed_pages:
+  - 26
+  - 26
+  pdf_pages:
+  - 27
+  - 27
+- rule: reference-filter-expansion
+  clauses:
+  - 4.1.6.1.4
+  printed_pages:
+  - 26
+  - 26
+  pdf_pages:
+  - 27
+  - 27
+- rule: canonical-language-selection
+  clauses:
+  - 4.1.6.1.5
+  printed_pages:
+  - 27
+  - 27
+  pdf_pages:
+  - 28
+  - 28
+- rule: voided-visibility
+  clauses:
+  - 4.1.6.1.6
+  printed_pages:
+  - 27
+  - 27
+  pdf_pages:
+  - 28
+  - 28
+- rule: state-document-resource
+  clauses:
+  - 4.1.6.2
+  printed_pages:
+  - 27
+  - 29
+  pdf_pages:
+  - 28
+  - 30
+- rule: person-response
+  clauses:
+  - 4.1.6.3
+  printed_pages:
+  - 30
+  - 30
+  pdf_pages:
+  - 31
+  - 31
+- rule: activity-response
+  clauses:
+  - 4.1.6.4
+  printed_pages:
+  - 30
+  - 31
+  pdf_pages:
+  - 31
+  - 32
+- rule: agent-profile-resource
+  clauses:
+  - 4.1.6.5
+  printed_pages:
+  - 31
+  - 33
+  pdf_pages:
+  - 32
+  - 34
+- rule: activity-profile-resource
+  clauses:
+  - 4.1.6.6
+  printed_pages:
+  - 33
+  - 35
+  pdf_pages:
+  - 34
+  - 36
+- rule: about-resource
+  clauses:
+  - 4.1.6.7
+  printed_pages:
+  - 35
+  - 35
+  pdf_pages:
+  - 36
+  - 36
+- rule: version-negotiation
+  clauses:
+  - 4.1.7
+  printed_pages:
+  - 35
+  - 36
+  pdf_pages:
+  - 36
+  - 37
+- rule: authentication-decisions
+  clauses:
+  - 4.1.8
+  printed_pages:
+  - 36
+  - 36
+  pdf_pages:
+  - 37
+  - 37
+- rule: immutable-components
+  clauses:
+  - '4.2'
+  printed_pages:
+  - 36
+  - 37
+  pdf_pages:
+  - 37
+  - 38
+- rule: generic-table-enforcement
+  clauses:
+  - 4.2.1
+  printed_pages:
+  - 37
+  - 38
+  pdf_pages:
+  - 38
+  - 39
+- rule: statement-and-nested-tables
+  clauses:
+  - 4.2.2
+  printed_pages:
+  - 38
+  - 46
+  pdf_pages:
+  - 39
+  - 47
+- rule: attachment-metadata-table
+  clauses:
+  - 4.2.2.6
+  printed_pages:
+  - 46
+  - 47
+  pdf_pages:
+  - 47
+  - 48
+- rule: metadata-recommendations
+  clauses:
+  - 4.2.3
+  printed_pages:
+  - 47
+  - 48
+  pdf_pages:
+  - 48
+  - 49
+- rule: rejection-exceptions
+  clauses:
+  - 4.2.4.1
+  printed_pages:
+  - 48
+  - 48
+  pdf_pages:
+  - 49
+  - 49
+- rule: specific-processing
+  clauses:
+  - 4.2.4.2
+  printed_pages:
+  - 48
+  - 49
+  pdf_pages:
+  - 49
+  - 50
+- rule: optional-response-behavior-and-version
+  clauses:
+  - 4.2.4.3
+  printed_pages:
+  - 49
+  - 50
+  pdf_pages:
+  - 50
+  - 51
+- rule: voiding-state
+  clauses:
+  - 4.2.5
+  printed_pages:
+  - 50
+  - 50
+  pdf_pages:
+  - 51
+  - 51
+- rule: signature-validation
+  clauses:
+  - 4.2.6
+  printed_pages:
+  - 50
+  - 51
+  pdf_pages:
+  - 51
+  - 52
+- rule: iri-comparison
+  clauses:
+  - 4.2.7.1
+  printed_pages:
+  - 51
+  - 51
+  pdf_pages:
+  - 52
+  - 52
+- rule: extensions
+  clauses:
+  - 4.2.7.2
+  printed_pages:
+  - 51
+  - 52
+  pdf_pages:
+  - 52
+  - 53
+- rule: language-map-tags
+  clauses:
+  - 4.2.7.3
+  printed_pages:
+  - 52
+  - 52
+  pdf_pages:
+  - 53
+  - 53
+- rule: uuid-standard-form
+  clauses:
+  - 4.2.7.4
+  printed_pages:
+  - 52
+  - 52
+  pdf_pages:
+  - 53
+  - 53
+- rule: timestamp-conversion-and-precision
+  clauses:
+  - 4.2.7.5
+  printed_pages:
+  - 52
+  - 52
+  pdf_pages:
+  - 53
+  - 53
+- rule: duration-format-and-comparison
+  clauses:
+  - 4.2.7.6
+  printed_pages:
+  - 52
+  - 53
+  pdf_pages:
+  - 53
+  - 54
+- rule: arbitrary-document-data
+  clauses:
+  - 4.2.7.7
+  printed_pages:
+  - 53
+  - 53
+  pdf_pages:
+  - 54
+  - 54

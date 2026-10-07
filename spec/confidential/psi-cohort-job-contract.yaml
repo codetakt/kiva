@@ -1,0 +1,94 @@
+---
+schema_version: 1
+kind: psi-cohort-job-contract
+profile: kiva-psi-cohort-hash-v1
+use_case: cross-school-cohort-matching
+status: implemented-core-contract
+claim_boundary: >
+  Kiva computes an n-of-n intersection over pre-tokenized, domain-separated
+  cohort identifier digests. Kiva does not accept raw cohort identifiers in
+  this job contract and exposes only digests present in every participant set.
+  This is not OPRF PSI, Diffie-Hellman PSI, malicious-secure PSI, or general
+  record linkage.
+protocol:
+  family: hash-token-n-of-n-intersection
+  digest: sha256
+  profile_domain: kiva-confidential:psi-cohort-identifier:v1
+  participant_model: cross-school-custodians
+  minimum_participants: 2
+  requires_all_participants: true
+canonicalization:
+  rule: trim-and-ascii-lowercase
+  reject_empty_identifier: true
+  reject_ascii_control_identifier: true
+  raw_identifiers_admitted_to_kiva: false
+domain_separation:
+  inputs:
+    - profile_domain
+    - job_id_32
+    - namespace_len_u128_be
+    - namespace_utf8
+    - canonical_identifier_len_u128_be
+    - canonical_identifier_utf8
+request:
+  required_fields:
+    - job_id
+    - namespace
+    - participant_count
+    - participants
+  participant_required_fields:
+    - participant_index
+    - identifier_digests
+  forbidden_fields:
+    - rawIdentifier
+    - raw_identifier
+    - identifier
+    - identifiers
+    - studentId
+    - student_id
+    - email
+response:
+  required_fields:
+    - job_id
+    - profile
+    - participant_count
+    - intersection_digests
+    - intersection_count
+  forbidden_fields:
+    - nonMatchingDigests
+    - non_matching_digests
+    - participantInputs
+    - participant_inputs
+    - rawIdentifier
+    - raw_identifier
+    - identifier
+    - identifiers
+    - studentId
+    - student_id
+    - email
+leakage_profile:
+  reveals:
+    - intersection digest values
+    - intersection cardinality
+    - participant count
+  does_not_reveal:
+    - raw identifiers
+    - non-matching digests
+    - per-participant dataset contents
+    - which non-matches belonged to which participant
+pds:
+  dedicated_data_product_source_kind_implemented: false
+  future_source_kind: private-set-intersection-result
+  resource_class: aggregate-insights
+  raw_record_read: false
+  data_product_admission_requires: []
+  current_release_boundary: rust_core_result_only
+evidence:
+  core: crates/kiva-confidential/src/lib.rs
+  policy: crates/kiva-policy/src/lib.rs
+  vectors: spec/confidential/psi-cohort-vectors.yaml
+  assurance_profile: spec/confidential/psi-cohort-assurance.yaml
+  validator: scripts/ci/validate_psi_cohort_assurance.py
+  tamarin_model: proofs/tamarin/kiva_psi_cohort_boundary.spthy
+  design_note: docs/architecture/private-set-intersection.md
+  operator_runbook: docs/operations/psi-cohort-runbook.md

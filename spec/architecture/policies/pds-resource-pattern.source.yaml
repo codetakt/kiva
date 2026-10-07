@@ -1,0 +1,68 @@
+description: PDS resource-family dependency path policy.
+pds_resource_family_pattern:
+  description: >
+    New PDS resource families should follow the same dependency direction as
+    existing consent, lifecycle, governance, data-product, access, and
+    provider-binding resources.
+  path:
+    - OpenAPI DTO
+    - kiva-pds command or query input
+    - admission or policy boundary
+    - service or application workflow
+    - repository facade
+    - memory and PostgreSQL storage
+    - wire projection
+    - evidence and boundary anchors
+  domain_event_flow:
+    root_type: PdsDomainEventFlow
+    flow_expression: Command -> PdsDomainEvent -> admitted write port -> ledger state -> storage projection
+    event_count: 7
+    event_enum: crates/kiva-pds/src/pds/events.rs
+    admission_owner: crates/kiva-application/src/pds/workflow/commands.rs
+    write_port_owner: crates/kiva-application/src/pds/capabilities/records.rs
+    projector_owner: crates/kiva-server/src/app/pds/server_adapters/pds_records/writes.rs
+    projection_owner: crates/kiva-server/src/surfaces/pds/model/projection.rs
+    ledger_owner: crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+    ledger_projection_anchor: PdsLedgerEventState
+    events:
+      - family: consent
+        variants:
+          - ConsentGrantRegistrationRequested
+          - ConsentGrantRevocationRequested
+        projector_methods:
+          - register_consent_grant_impl
+          - revoke_consent_grant_impl
+        ledger_kinds:
+          - ConsentGrantRegistered
+          - ConsentGrantRevoked
+      - family: data-products
+        variants:
+          - DataProductRegistrationRequested
+        projector_methods:
+          - register_data_product_impl
+        ledger_kinds:
+          - DataProductRegistered
+      - family: lifecycle
+        variants:
+          - LifecycleEventRecordingRequested
+          - RetentionPolicyRegistrationRequested
+          - LifecycleCaseUpsertRequested
+        projector_methods:
+          - register_lifecycle_event_impl
+          - register_retention_policy_impl
+          - register_lifecycle_case_impl
+        ledger_kinds:
+          - LifecycleEventRegistered
+          - RetentionPolicyRegistered
+          - LifecycleCaseOpened
+          - LifecycleCaseTransitioned
+      - family: governance
+        variants:
+          - GovernanceProfileRegistrationRequested
+        projector_methods:
+          - register_governance_profile_impl
+        ledger_kinds:
+          - GovernanceProfileRegistered
+    excluded_ledger_only_events:
+      - kind: AccessDecisionRecorded
+        reason: access audit decisions are repository-side ledger entries, not admitted PdsDomainEvent command variants

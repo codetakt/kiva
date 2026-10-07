@@ -1,0 +1,2825 @@
+schema_version: 1
+kind: kiva-operation-kernel-ir
+status: active
+description: First-class OperationKernel IR joining HTTP contract identity, SurfaceOperation semantics, workflow ownership, resource-family assignment, and requirement evidence for every public operation.
+generated_from:
+- spec/architecture/surface-projections.yaml
+- spec/architecture/operation-ownership.source.yaml
+- spec/architecture/pds-resource-families.source.yaml
+- spec/architecture/surface-families.source.yaml
+- spec/pds/core-planes.source.yaml
+- generated/http-operation-catalog.evidence.json
+generated_artifacts:
+  operation_kernel: generated/architecture/operation-kernel.yaml
+  markdown: docs/architecture/generated/operation-kernel.md
+projection_basis:
+  root_type: OperationKernel
+  source_root_type: SurfaceOperation
+  source_normal_form: surface_operation_normal_form
+  source_algebra: SurfaceOperation
+  join_type: SurfaceOperation + HttpOperationEvidence + SurfaceFamilyAssignment + Optional<PdsResourceFamilyAssignment>
+  rule: Every public HTTP operation has exactly one OperationKernel row; workflow, PDS family, PDS core planes, route, scope, and requirement evidence are projections, not parallel sources of truth.
+operation_count: 78
+application_operation_count: 53
+pds_resource_operation_count: 21
+operations:
+- id: analytics.getAnalyticsProducts
+  operation_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    operation_id: getAnalyticsProducts
+  route_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    method: get
+    path: /analytics/products
+  http_contract:
+    method: get
+    path: /analytics/products
+    operation_id: getAnalyticsProducts
+    required_scopes:
+    - analytics:read
+    requirements: []
+    tags:
+    - Analytics
+    summary: List governed aggregate products
+  application_operation:
+    id: analytics-list-products
+    surface: analytics
+    workflow_label: analytics.list_products
+    rust_workflow_kind: AnalyticsWorkflowKind::ListProducts
+    workflow_family: aggregate-serving
+  resource_family:
+    surface_family: analytics.aggregate-products
+    surface: analytics
+    description: Governed aggregate product metadata and admitted release payloads.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: analytics.getAnalyticsProduct
+  operation_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    operation_id: getAnalyticsProduct
+  route_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    method: get
+    path: /analytics/products/{dataProductId}
+  http_contract:
+    method: get
+    path: /analytics/products/{dataProductId}
+    operation_id: getAnalyticsProduct
+    required_scopes:
+    - analytics:read
+    requirements: []
+    tags:
+    - Analytics
+    summary: Read governed aggregate product metadata
+  application_operation:
+    id: analytics-read-product
+    surface: analytics
+    workflow_label: analytics.read_product
+    rust_workflow_kind: AnalyticsWorkflowKind::ReadProduct
+    workflow_family: aggregate-serving
+  resource_family:
+    surface_family: analytics.aggregate-products
+    surface: analytics
+    description: Governed aggregate product metadata and admitted release payloads.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: analytics.getAnalyticsProductAggregate
+  operation_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    operation_id: getAnalyticsProductAggregate
+  route_key:
+    openapi_contract: spec/openapi/kiva-analytics.yaml
+    method: get
+    path: /analytics/products/{dataProductId}/aggregate
+  http_contract:
+    method: get
+    path: /analytics/products/{dataProductId}/aggregate
+    operation_id: getAnalyticsProductAggregate
+    required_scopes:
+    - analytics:read
+    requirements: []
+    tags:
+    - Analytics
+    summary: Read an admitted aggregate release payload
+  application_operation:
+    id: analytics-read-aggregate
+    surface: analytics
+    workflow_label: analytics.read_aggregate
+    rust_workflow_kind: AnalyticsWorkflowKind::ReadAggregate
+    workflow_family: aggregate-serving
+  resource_family:
+    surface_family: analytics.aggregate-products
+    surface: analytics
+    description: Governed aggregate product metadata and admitted release payloads.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getAbout
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getAbout
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /about
+  http_contract:
+    method: get
+    path: /about
+    operation_id: getAbout
+    required_scopes: []
+    requirements:
+    - xapi-lrs-4.1.6.7-about-version
+    - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+    tags:
+    - About
+    summary: Return LRS metadata and supported xAPI versions.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.about
+    surface: xapi
+    description: xAPI About discovery resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headAbout
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headAbout
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /about
+  http_contract:
+    method: head
+    path: /about
+    operation_id: headAbout
+    required_scopes: []
+    requirements:
+    - xapi-lrs-4.1.6.7-about-version
+    - xapi-lrs-4.1.6.7-about-version-header-not-rejected
+    tags:
+    - About
+    summary: Return LRS metadata headers without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.about
+    surface: xapi
+    description: xAPI About discovery resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getActivity
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getActivity
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /activities
+  http_contract:
+    method: get
+    path: /activities
+    operation_id: getActivity
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.4-activity-fallback
+    - xapi-lrs-4.1.6.4-activity-complete
+    tags:
+    - Activities
+    summary: Fetch an Activity object.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activities
+    surface: xapi
+    description: xAPI Activity lookup resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headActivity
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headActivity
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /activities
+  http_contract:
+    method: head
+    path: /activities
+    operation_id: headActivity
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.4-activity-fallback
+    - xapi-lrs-4.1.6.4-activity-complete
+    tags:
+    - Activities
+    summary: Fetch Activity metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activities
+    surface: xapi
+    description: xAPI Activity lookup resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getActivityProfiles
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getActivityProfiles
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /activities/profile
+  http_contract:
+    method: get
+    path: /activities/profile
+    operation_id: getActivityProfiles
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+    tags:
+    - Activities
+    - Documents
+    summary: Fetch an Activity Profile document or Activity Profile ids.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activity-profile-documents
+    surface: xapi
+    description: xAPI Activity profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.putActivityProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: putActivityProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: put
+    path: /activities/profile
+  http_contract:
+    method: put
+    path: /activities/profile
+    operation_id: putActivityProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.4-put-conflict
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    tags:
+    - Activities
+    - Documents
+    summary: Store a single Activity Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activity-profile-documents
+    surface: xapi
+    description: xAPI Activity profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.postActivityProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: postActivityProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: post
+    path: /activities/profile
+  http_contract:
+    method: post
+    path: /activities/profile
+    operation_id: postActivityProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    - xapi-lrs-4.1.6.6-activity-profile-post-json-merge
+    - xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid
+    - xapi-lrs-4.1.6.6-activity-profile-post-merge-success
+    tags:
+    - Activities
+    - Documents
+    summary: Merge or store a single Activity Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activity-profile-documents
+    surface: xapi
+    description: xAPI Activity profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.deleteActivityProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: deleteActivityProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: delete
+    path: /activities/profile
+  http_contract:
+    method: delete
+    path: /activities/profile
+    operation_id: deleteActivityProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    tags:
+    - Activities
+    - Documents
+    summary: Delete a single Activity Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activity-profile-documents
+    surface: xapi
+    description: xAPI Activity profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headActivityProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headActivityProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /activities/profile
+  http_contract:
+    method: head
+    path: /activities/profile
+    operation_id: headActivityProfile
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.6-activity-profile-get-last-modified
+    tags:
+    - Activities
+    - Documents
+    summary: Fetch Activity Profile metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.activity-profile-documents
+    surface: xapi
+    description: xAPI Activity profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getStateDocuments
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getStateDocuments
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /activities/state
+  http_contract:
+    method: get
+    path: /activities/state
+    operation_id: getStateDocuments
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.2-state-get-last-modified
+    tags:
+    - State
+    - Documents
+    summary: Fetch a State document or State document ids.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.state-documents
+    surface: xapi
+    description: xAPI Activity state document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.putStateDocument
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: putStateDocument
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: put
+    path: /activities/state
+  http_contract:
+    method: put
+    path: /activities/state
+    operation_id: putStateDocument
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.4-put-conflict
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    tags:
+    - State
+    - Documents
+    summary: Store a single State document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.state-documents
+    surface: xapi
+    description: xAPI Activity state document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.postStateDocument
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: postStateDocument
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: post
+    path: /activities/state
+  http_contract:
+    method: post
+    path: /activities/state
+    operation_id: postStateDocument
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    - xapi-lrs-4.1.6.2-state-post-json-merge
+    - xapi-lrs-4.1.6.2-state-post-merge-reject-invalid
+    - xapi-lrs-4.1.6.2-state-post-merge-success
+    tags:
+    - State
+    - Documents
+    summary: Merge or store a single State document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.state-documents
+    surface: xapi
+    description: xAPI Activity state document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.deleteStateDocuments
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: deleteStateDocuments
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: delete
+    path: /activities/state
+  http_contract:
+    method: delete
+    path: /activities/state
+    operation_id: deleteStateDocuments
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    tags:
+    - State
+    - Documents
+    summary: Delete one State document or all State documents in a context.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.state-documents
+    surface: xapi
+    description: xAPI Activity state document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headStateDocuments
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headStateDocuments
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /activities/state
+  http_contract:
+    method: head
+    path: /activities/state
+    operation_id: headStateDocuments
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.2-state-get-last-modified
+    tags:
+    - State
+    - Documents
+    summary: Fetch State document metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.state-documents
+    surface: xapi
+    description: xAPI Activity state document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getAgentPerson
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getAgentPerson
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /agents
+  http_contract:
+    method: get
+    path: /agents
+    operation_id: getAgentPerson
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.3-agents-person-fallback
+    - xapi-lrs-4.1.6.3-person-arrays
+    tags:
+    - Agents
+    summary: Return a Person object for a specified Agent.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agents
+    surface: xapi
+    description: xAPI Agent/person lookup resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headAgentPerson
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headAgentPerson
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /agents
+  http_contract:
+    method: head
+    path: /agents
+    operation_id: headAgentPerson
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.3-agents-person-fallback
+    tags:
+    - Agents
+    summary: Fetch Person metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agents
+    surface: xapi
+    description: xAPI Agent/person lookup resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getAgentProfiles
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getAgentProfiles
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /agents/profile
+  http_contract:
+    method: get
+    path: /agents/profile
+    operation_id: getAgentProfiles
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+    tags:
+    - Agents
+    - Documents
+    summary: Fetch an Agent Profile document or Agent Profile ids.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agent-profile-documents
+    surface: xapi
+    description: xAPI Agent profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.putAgentProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: putAgentProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: put
+    path: /agents/profile
+  http_contract:
+    method: put
+    path: /agents/profile
+    operation_id: putAgentProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.4-put-conflict
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    tags:
+    - Agents
+    - Documents
+    summary: Store a single Agent Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agent-profile-documents
+    surface: xapi
+    description: xAPI Agent profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.postAgentProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: postAgentProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: post
+    path: /agents/profile
+  http_contract:
+    method: post
+    path: /agents/profile
+    operation_id: postAgentProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    - xapi-lrs-4.1.6-document-no-prior-knowledge
+    - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+    - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+    - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+    tags:
+    - Agents
+    - Documents
+    summary: Merge or store a single Agent Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agent-profile-documents
+    surface: xapi
+    description: xAPI Agent profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.deleteAgentProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: deleteAgentProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: delete
+    path: /agents/profile
+  http_contract:
+    method: delete
+    path: /agents/profile
+    operation_id: deleteAgentProfile
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.4-if-match
+    - xapi-lrs-4.1.4-precondition-failed
+    tags:
+    - Agents
+    - Documents
+    summary: Delete a single Agent Profile document.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agent-profile-documents
+    surface: xapi
+    description: xAPI Agent profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headAgentProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headAgentProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /agents/profile
+  http_contract:
+    method: head
+    path: /agents/profile
+    operation_id: headAgentProfile
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.4-etag-on-document-get
+    - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+    tags:
+    - Agents
+    - Documents
+    summary: Fetch Agent Profile metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.agent-profile-documents
+    surface: xapi
+    description: xAPI Agent profile document resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.getStatements
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: getStatements
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: get
+    path: /statements
+  http_contract:
+    method: get
+    path: /statements
+    operation_id: getStatements
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+    - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+    - xapi-lrs-4.1.6.1-statement-get-empty-result
+    - xapi-lrs-4.1.6.1-statement-consistent-through
+    - xapi-lrs-4.1.6.1-statement-get-attachments-true
+    - xapi-lrs-4.1.6.1-statement-get-attachments-false
+    - xapi-lrs-4.1.6.1-statement-last-modified
+    - xapi-lrs-4.1.6.1-statement-format-exact
+    - xapi-lrs-4.1.6.1-statementref-filtering
+    - xapi-lrs-4.1.6.1-statement-query-filters
+    - xapi-lrs-4.1.6.1-statement-query-related-agents
+    - xapi-lrs-4.1.6.1-statement-query-related-activities
+    - xapi-lrs-4.1.6.1-statement-query-time-order-limit
+    - xapi-lrs-4.1.6.1-canonical-language-map-one-language
+    - xapi-lrs-4.1.6.1-canonical-accept-language
+    - xapi-lrs-4.1.6.1-voided-not-returned
+    - xapi-lrs-4.1.6.1-voided-targeting-returned
+    tags:
+    - Statements
+    summary: Fetch one Statement or a StatementResult.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.statements
+    surface: xapi
+    description: xAPI Statement storage and query resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.putStatement
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: putStatement
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: put
+    path: /statements
+  http_contract:
+    method: put
+    path: /statements
+    operation_id: putStatement
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.3-json-statement-batches
+    - xapi-lrs-4.1.3-attachment-transmission-criteria
+    - xapi-lrs-4.1.3-multipart-first-json
+    - xapi-lrs-4.1.3-multipart-attachment-headers
+    - xapi-lrs-4.1.3-attachment-header-property-match
+    - xapi-lrs-4.1.3-multipart-accept-valid
+    - xapi-lrs-4.1.3-multipart-reject-unmatched
+    - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+    - xapi-lrs-4.2-statement-immutability-preserve
+    - xapi-lrs-4.2-statement-immutability-ignore-excluded
+    tags:
+    - Statements
+    summary: Store a single Statement with a client-supplied id.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.statements
+    surface: xapi
+    description: xAPI Statement storage and query resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.postStatements
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: postStatements
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: post
+    path: /statements
+  http_contract:
+    method: post
+    path: /statements
+    operation_id: postStatements
+    required_scopes:
+    - xapi:write
+    requirements:
+    - xapi-lrs-4.1.3-json-statement-batches
+    - xapi-lrs-4.1.3-attachment-transmission-criteria
+    - xapi-lrs-4.1.3-multipart-first-json
+    - xapi-lrs-4.1.3-multipart-attachment-headers
+    - xapi-lrs-4.1.3-attachment-header-property-match
+    - xapi-lrs-4.1.3-multipart-accept-valid
+    - xapi-lrs-4.1.3-multipart-reject-unmatched
+    - xapi-lrs-4.1.5-batch-rejection
+    - xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification
+    - xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id
+    tags:
+    - Statements
+    summary: Store a Statement or a Statement batch.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.statements
+    surface: xapi
+    description: xAPI Statement storage and query resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: xapi.headStatements
+  operation_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    operation_id: headStatements
+  route_key:
+    openapi_contract: spec/openapi/kiva-xapi.yaml
+    method: head
+    path: /statements
+  http_contract:
+    method: head
+    path: /statements
+    operation_id: headStatements
+    required_scopes:
+    - xapi:read
+    requirements:
+    - xapi-lrs-4.1.6.1-statement-consistent-through
+    tags:
+    - Statements
+    summary: Fetch Statement metadata without a response body.
+  application_operation: null
+  resource_family:
+    surface_family: xapi.statements
+    surface: xapi
+    description: xAPI Statement storage and query resource.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsAccessAuditEvents
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsAccessAuditEvents
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/access-audit-events
+  http_contract:
+    method: get
+    path: /pds/access-audit-events
+    operation_id: getPdsAccessAuditEvents
+    required_scopes:
+    - pds:audit
+    requirements: []
+    tags:
+    - Access Decisions
+    summary: List subject-scoped PDS access-audit events without raw payloads.
+  application_operation:
+    id: pds-list-access-audit-events
+    surface: pds
+    workflow_label: pds.list_access_audit_events
+    rust_workflow_kind: PdsWorkflowKind::ListAccessAuditEvents
+  resource_family:
+    surface_family: pds.access
+    surface: pds
+    description: PDS access-decision and access-audit resources.
+    pds_resource_family: access
+    pds_route_context: pds
+    pds_planes:
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsAccessCheck
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsAccessCheck
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/access-checks
+  http_contract:
+    method: post
+    path: /pds/access-checks
+    operation_id: postPdsAccessCheck
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Access Decisions
+    summary: Evaluate the PDS policy boundary and persist an access-audit event.
+  application_operation:
+    id: pds-evaluate-access-check
+    surface: pds
+    workflow_label: pds.evaluate_access_check
+    rust_workflow_kind: PdsWorkflowKind::EvaluateAccessCheck
+  resource_family:
+    surface_family: pds.access
+    surface: pds
+    description: PDS access-decision and access-audit resources.
+    pds_resource_family: access
+    pds_route_context: pds
+    pds_planes:
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsConsentGrants
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsConsentGrants
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/consent-grants
+  http_contract:
+    method: get
+    path: /pds/consent-grants
+    operation_id: getPdsConsentGrants
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Consent Grants
+    summary: List subject-scoped consent and delegation grants.
+  application_operation:
+    id: pds-list-consent-grants
+    surface: pds
+    workflow_label: pds.list_consent_grants
+    rust_workflow_kind: PdsWorkflowKind::ListConsentGrants
+  resource_family:
+    surface_family: pds.consent
+    surface: pds
+    description: PDS consent and revocation resources.
+    pds_resource_family: consent
+    pds_route_context: pds
+    pds_planes:
+    - event
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsConsentGrant
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsConsentGrant
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/consent-grants
+  http_contract:
+    method: post
+    path: /pds/consent-grants
+    operation_id: postPdsConsentGrant
+    required_scopes:
+    - pds:delegate
+    requirements: []
+    tags:
+    - Consent Grants
+    summary: Register an active consent/delegation grant owned by the authenticated subject.
+  application_operation:
+    id: pds-register-consent-grant
+    surface: pds
+    workflow_label: pds.register_consent_grant
+    rust_workflow_kind: PdsWorkflowKind::RegisterConsentGrant
+  resource_family:
+    surface_family: pds.consent
+    surface: pds
+    description: PDS consent and revocation resources.
+    pds_resource_family: consent
+    pds_route_context: pds-application
+    pds_planes:
+    - event
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsConsentRevocation
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsConsentRevocation
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/consent-revocations
+  http_contract:
+    method: post
+    path: /pds/consent-revocations
+    operation_id: postPdsConsentRevocation
+    required_scopes:
+    - pds:revoke
+    requirements: []
+    tags:
+    - Consent Grants
+    summary: Revoke a consent/delegation grant owned by the authenticated subject.
+  application_operation:
+    id: pds-revoke-consent-grant
+    surface: pds
+    workflow_label: pds.revoke_consent_grant
+    rust_workflow_kind: PdsWorkflowKind::RevokeConsentGrant
+  resource_family:
+    surface_family: pds.consent
+    surface: pds
+    description: PDS consent and revocation resources.
+    pds_resource_family: consent
+    pds_route_context: pds-application
+    pds_planes:
+    - event
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsDataPortabilityExports
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsDataPortabilityExports
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/data-portability-exports
+  http_contract:
+    method: get
+    path: /pds/data-portability-exports
+    operation_id: getPdsDataPortabilityExports
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: Export the authenticated subject's accepted Statements and PDS metadata.
+  application_operation:
+    id: pds-export-portability
+    surface: pds
+    workflow_label: pds.export_portability
+    rust_workflow_kind: PdsWorkflowKind::ExportPortability
+  resource_family:
+    surface_family: pds.inventory-export
+    surface: pds
+    description: PDS record-inventory and metadata-export resources.
+    pds_resource_family: inventory-export
+    pds_route_context: pds-application
+    pds_planes:
+    - inventory
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsDataProductRead
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsDataProductRead
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/data-product-reads
+  http_contract:
+    method: post
+    path: /pds/data-product-reads
+    operation_id: postPdsDataProductRead
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Data Products
+    summary: Read an approved data product through the PDS policy boundary.
+  application_operation:
+    id: pds-read-data-product
+    surface: pds
+    workflow_label: pds.read_data_product
+    rust_workflow_kind: PdsWorkflowKind::ReadDataProduct
+  resource_family:
+    surface_family: pds.data-products
+    surface: pds
+    description: PDS approved data-product resources.
+    pds_resource_family: data-products
+    pds_route_context: pds
+    pds_planes:
+    - release
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsDataProducts
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsDataProducts
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/data-products
+  http_contract:
+    method: get
+    path: /pds/data-products
+    operation_id: getPdsDataProducts
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Data Products
+    summary: List approved data products registered by the authenticated subject.
+  application_operation:
+    id: pds-list-data-products
+    surface: pds
+    workflow_label: pds.list_data_products
+    rust_workflow_kind: PdsWorkflowKind::ListDataProducts
+  resource_family:
+    surface_family: pds.data-products
+    surface: pds
+    description: PDS approved data-product resources.
+    pds_resource_family: data-products
+    pds_route_context: pds
+    pds_planes:
+    - release
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsDataProduct
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsDataProduct
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/data-products
+  http_contract:
+    method: post
+    path: /pds/data-products
+    operation_id: postPdsDataProduct
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Data Products
+    summary: Register an approved aggregate data product for a confidential release.
+  application_operation:
+    id: pds-register-data-product
+    surface: pds
+    workflow_label: pds.register_data_product
+    rust_workflow_kind: PdsWorkflowKind::RegisterDataProduct
+  resource_family:
+    surface_family: pds.data-products
+    surface: pds
+    description: PDS approved data-product resources.
+    pds_resource_family: data-products
+    pds_route_context: pds-application
+    pds_planes:
+    - release
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsGovernanceProfiles
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsGovernanceProfiles
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/governance-profiles
+  http_contract:
+    method: get
+    path: /pds/governance-profiles
+    operation_id: getPdsGovernanceProfiles
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Governance
+    summary: List public-sector governance profiles owned by the authenticated subject.
+  application_operation:
+    id: pds-list-governance-profiles
+    surface: pds
+    workflow_label: pds.list_governance_profiles
+    rust_workflow_kind: PdsWorkflowKind::ListGovernanceProfiles
+  resource_family:
+    surface_family: pds.governance
+    surface: pds
+    description: PDS public-sector governance profile resources.
+    pds_resource_family: governance
+    pds_route_context: pds
+    pds_planes:
+    - inventory
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsGovernanceProfile
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsGovernanceProfile
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/governance-profiles
+  http_contract:
+    method: post
+    path: /pds/governance-profiles
+    operation_id: postPdsGovernanceProfile
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Governance
+    summary: Register a strict public-sector governance deployment profile.
+  application_operation:
+    id: pds-register-governance-profile
+    surface: pds
+    workflow_label: pds.register_governance_profile
+    rust_workflow_kind: PdsWorkflowKind::RegisterGovernanceProfile
+  resource_family:
+    surface_family: pds.governance
+    surface: pds
+    description: PDS public-sector governance profile resources.
+    pds_resource_family: governance
+    pds_route_context: pds-application
+    pds_planes:
+    - inventory
+    - policy
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsLifecycleCases
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsLifecycleCases
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/lifecycle-cases
+  http_contract:
+    method: get
+    path: /pds/lifecycle-cases
+    operation_id: getPdsLifecycleCases
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: List correction, dispute, and tombstone workflow cases.
+  application_operation:
+    id: pds-list-lifecycle-cases
+    surface: pds
+    workflow_label: pds.list_lifecycle_cases
+    rust_workflow_kind: PdsWorkflowKind::ListLifecycleCases
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsLifecycleCase
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsLifecycleCase
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/lifecycle-cases
+  http_contract:
+    method: post
+    path: /pds/lifecycle-cases
+    operation_id: postPdsLifecycleCase
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: Open or advance a correction, dispute, or tombstone workflow case.
+  application_operation:
+    id: pds-register-lifecycle-case
+    surface: pds
+    workflow_label: pds.register_lifecycle_case
+    rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleCase
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds-application
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsLifecycleEvents
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsLifecycleEvents
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/lifecycle-events
+  http_contract:
+    method: get
+    path: /pds/lifecycle-events
+    operation_id: getPdsLifecycleEvents
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: List subject-scoped lifecycle events.
+  application_operation:
+    id: pds-list-lifecycle-events
+    surface: pds
+    workflow_label: pds.list_lifecycle_events
+    rust_workflow_kind: PdsWorkflowKind::ListLifecycleEvents
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsLifecycleEvent
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsLifecycleEvent
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/lifecycle-events
+  http_contract:
+    method: post
+    path: /pds/lifecycle-events
+    operation_id: postPdsLifecycleEvent
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: Register a subject-owned lifecycle event for PDS metadata.
+  application_operation:
+    id: pds-register-lifecycle-event
+    surface: pds
+    workflow_label: pds.register_lifecycle_event
+    rust_workflow_kind: PdsWorkflowKind::RegisterLifecycleEvent
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds-application
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsMetadataExports
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsMetadataExports
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/metadata-exports
+  http_contract:
+    method: get
+    path: /pds/metadata-exports
+    operation_id: getPdsMetadataExports
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: Export subject-owned PDS metadata without raw xAPI or confidential payloads.
+  application_operation:
+    id: pds-export-metadata
+    surface: pds
+    workflow_label: pds.export_metadata
+    rust_workflow_kind: PdsWorkflowKind::ExportMetadata
+  resource_family:
+    surface_family: pds.inventory-export
+    surface: pds
+    description: PDS record-inventory and metadata-export resources.
+    pds_resource_family: inventory-export
+    pds_route_context: pds-application
+    pds_planes:
+    - inventory
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsProviderBindings
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsProviderBindings
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/provider-bindings
+  http_contract:
+    method: get
+    path: /pds/provider-bindings
+    operation_id: getPdsProviderBindings
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Provider Bindings
+    summary: List secret/confidential-compute provider binding metadata.
+  application_operation:
+    id: pds-list-provider-bindings
+    surface: pds
+    workflow_label: pds.list_provider_bindings
+    rust_workflow_kind: PdsWorkflowKind::ListProviderBindings
+  resource_family:
+    surface_family: pds.provider-bindings
+    surface: pds
+    description: PDS secret/confidential-compute provider-binding resources.
+    pds_resource_family: provider-bindings
+    pds_route_context: pds
+    pds_planes:
+    - policy
+    - release
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsProviderBinding
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsProviderBinding
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/provider-bindings
+  http_contract:
+    method: post
+    path: /pds/provider-bindings
+    operation_id: postPdsProviderBinding
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Provider Bindings
+    summary: Register admitted provider binding metadata for PDS experiments.
+  application_operation:
+    id: pds-register-provider-binding
+    surface: pds
+    workflow_label: pds.register_provider_binding
+    rust_workflow_kind: PdsWorkflowKind::RegisterProviderBinding
+  resource_family:
+    surface_family: pds.provider-bindings
+    surface: pds
+    description: PDS secret/confidential-compute provider-binding resources.
+    pds_resource_family: provider-bindings
+    pds_route_context: pds
+    pds_planes:
+    - policy
+    - release
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsRecordInventory
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsRecordInventory
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/record-inventory
+  http_contract:
+    method: get
+    path: /pds/record-inventory
+    operation_id: getPdsRecordInventory
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: List subject-visible xAPI record metadata and registered data products.
+  application_operation:
+    id: pds-read-record-inventory
+    surface: pds
+    workflow_label: pds.read_record_inventory
+    rust_workflow_kind: PdsWorkflowKind::ReadRecordInventory
+  resource_family:
+    surface_family: pds.inventory-export
+    surface: pds
+    description: PDS record-inventory and metadata-export resources.
+    pds_resource_family: inventory-export
+    pds_route_context: pds-application
+    pds_planes:
+    - inventory
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.getPdsRetentionPolicies
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: getPdsRetentionPolicies
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: get
+    path: /pds/retention-policies
+  http_contract:
+    method: get
+    path: /pds/retention-policies
+    operation_id: getPdsRetentionPolicies
+    required_scopes:
+    - pds:read
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: List subject-owned operational retention policies.
+  application_operation:
+    id: pds-list-retention-policies
+    surface: pds
+    workflow_label: pds.list_retention_policies
+    rust_workflow_kind: PdsWorkflowKind::ListRetentionPolicies
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: pds.postPdsRetentionPolicy
+  operation_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    operation_id: postPdsRetentionPolicy
+  route_key:
+    openapi_contract: spec/openapi/kiva-pds.yaml
+    method: post
+    path: /pds/retention-policies
+  http_contract:
+    method: post
+    path: /pds/retention-policies
+    operation_id: postPdsRetentionPolicy
+    required_scopes:
+    - pds:write
+    requirements: []
+    tags:
+    - Lifecycle
+    summary: Register a subject-owned operational retention policy.
+  application_operation:
+    id: pds-register-retention-policy
+    surface: pds
+    workflow_label: pds.register_retention_policy
+    rust_workflow_kind: PdsWorkflowKind::RegisterRetentionPolicy
+  resource_family:
+    surface_family: pds.lifecycle
+    surface: pds
+    description: PDS lifecycle event, retention, and case resources.
+    pds_resource_family: lifecycle
+    pds_route_context: pds-application
+    pds_planes:
+    - event
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialAdditiveAggregate
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialAdditiveAggregate
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/additive-aggregates
+  http_contract:
+    method: post
+    path: /confidential/additive-aggregates
+    operation_id: postConfidentialAdditiveAggregate
+    required_scopes:
+    - confidential:compute
+    requirements: []
+    tags:
+    - Confidential Aggregates
+    summary: Verify signed additive shares, persist the computed result, and release an aggregate.
+  application_operation:
+    id: confidential-release-signed-additive-aggregate
+    surface: confidential
+    workflow_label: confidential.release_signed_additive_aggregate
+    rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialAdditiveShareReplayRecords
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialAdditiveShareReplayRecords
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/additive-share-replay-records
+  http_contract:
+    method: get
+    path: /confidential/additive-share-replay-records
+    operation_id: getConfidentialAdditiveShareReplayRecords
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Share Submissions
+    summary: List transcript-scoped accepted replay-record metadata.
+  application_operation:
+    id: confidential-list-additive-replay-records
+    surface: confidential
+    workflow_label: confidential.list_replay_records
+    rust_workflow_kind: ConfidentialWorkflowKind::ListReplayRecords
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialShareSigningKeyRevocation
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialShareSigningKeyRevocation
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/additive-share-signing-key-revocations
+  http_contract:
+    method: post
+    path: /confidential/additive-share-signing-key-revocations
+    operation_id: postConfidentialShareSigningKeyRevocation
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Share Signing Keys
+    summary: Revoke a subject-owned additive-share signing key.
+  application_operation:
+    id: confidential-revoke-share-signing-key
+    surface: confidential
+    workflow_label: confidential.revoke_share_signing_key
+    rust_workflow_kind: ConfidentialWorkflowKind::RevokeShareSigningKey
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialShareSigningKeyRotation
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialShareSigningKeyRotation
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/additive-share-signing-key-rotations
+  http_contract:
+    method: post
+    path: /confidential/additive-share-signing-key-rotations
+    operation_id: postConfidentialShareSigningKeyRotation
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Share Signing Keys
+    summary: Atomically register a replacement key and revoke the old key.
+  application_operation:
+    id: confidential-rotate-share-signing-key
+    surface: confidential
+    workflow_label: confidential.rotate_share_signing_key
+    rust_workflow_kind: ConfidentialWorkflowKind::RotateShareSigningKey
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialShareSigningKeys
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialShareSigningKeys
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/additive-share-signing-keys
+  http_contract:
+    method: get
+    path: /confidential/additive-share-signing-keys
+    operation_id: getConfidentialShareSigningKeys
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Share Signing Keys
+    summary: List subject-scoped additive-share signing-key metadata.
+  application_operation:
+    id: confidential-list-share-signing-keys
+    surface: confidential
+    workflow_label: confidential.list_share_signing_keys
+    rust_workflow_kind: ConfidentialWorkflowKind::ListShareSigningKeys
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialShareSigningKey
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialShareSigningKey
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/additive-share-signing-keys
+  http_contract:
+    method: post
+    path: /confidential/additive-share-signing-keys
+    operation_id: postConfidentialShareSigningKey
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Share Signing Keys
+    summary: Register a subject-owned additive-share signing key.
+  application_operation:
+    id: confidential-register-share-signing-key
+    surface: confidential
+    workflow_label: confidential.register_share_signing_key
+    rust_workflow_kind: ConfidentialWorkflowKind::RegisterShareSigningKey
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialAdditiveShareSubmissions
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialAdditiveShareSubmissions
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/additive-share-submissions
+  http_contract:
+    method: get
+    path: /confidential/additive-share-submissions
+    operation_id: getConfidentialAdditiveShareSubmissions
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Share Submissions
+    summary: List subject-scoped submitted-share metadata for a transcript.
+  application_operation:
+    id: confidential-list-submitted-shares
+    surface: confidential
+    workflow_label: confidential.list_submitted_shares
+    rust_workflow_kind: ConfidentialWorkflowKind::ListSubmittedShares
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialAdditiveShareSubmission
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialAdditiveShareSubmission
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/additive-share-submissions
+  http_contract:
+    method: post
+    path: /confidential/additive-share-submissions
+    operation_id: postConfidentialAdditiveShareSubmission
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Share Submissions
+    summary: Submit one signed additive-share envelope.
+  application_operation:
+    id: confidential-submit-additive-share
+    surface: confidential
+    workflow_label: confidential.submit_additive_share
+    rust_workflow_kind: ConfidentialWorkflowKind::SubmitAdditiveShare
+    workflow_family: additive
+  resource_family:
+    surface_family: confidential.additive
+    surface: confidential
+    description: Additive secure-aggregation and share-signing resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialDifferentialPrivacyBudgetSpend
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/differential-privacy-budget-spends
+  http_contract:
+    method: post
+    path: /confidential/differential-privacy-budget-spends
+    operation_id: postConfidentialDifferentialPrivacyBudgetSpend
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Differential Privacy Budgets
+    summary: Atomically spend epsilon from a subject-owned differential privacy budget.
+  application_operation:
+    id: confidential-spend-differential-privacy-budget
+    surface: confidential
+    workflow_label: confidential.spend_differential_privacy_budget
+    rust_workflow_kind: ConfidentialWorkflowKind::SpendDifferentialPrivacyBudget
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialDifferentialPrivacyBudgets
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialDifferentialPrivacyBudgets
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/differential-privacy-budgets
+  http_contract:
+    method: get
+    path: /confidential/differential-privacy-budgets
+    operation_id: getConfidentialDifferentialPrivacyBudgets
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Differential Privacy Budgets
+    summary: List subject-owned differential privacy budget metadata.
+  application_operation:
+    id: confidential-list-differential-privacy-budgets
+    surface: confidential
+    workflow_label: confidential.list_differential_privacy_budgets
+    rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyBudgets
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialDifferentialPrivacyBudget
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialDifferentialPrivacyBudget
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/differential-privacy-budgets
+  http_contract:
+    method: post
+    path: /confidential/differential-privacy-budgets
+    operation_id: postConfidentialDifferentialPrivacyBudget
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Differential Privacy Budgets
+    summary: Register a subject-owned differential privacy epsilon budget ledger.
+  application_operation:
+    id: confidential-register-differential-privacy-budget
+    surface: confidential
+    workflow_label: confidential.register_differential_privacy_budget
+    rust_workflow_kind: ConfidentialWorkflowKind::RegisterDifferentialPrivacyBudget
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialDifferentialPrivacyCompositionSummaries
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/differential-privacy-composition-summaries
+  http_contract:
+    method: get
+    path: /confidential/differential-privacy-composition-summaries
+    operation_id: getConfidentialDifferentialPrivacyCompositionSummaries
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Differential Privacy Budgets
+    summary: List subject-owned differential privacy sequential-composition summaries.
+  application_operation:
+    id: confidential-list-differential-privacy-composition-summaries
+    surface: confidential
+    workflow_label: confidential.list_differential_privacy_composition_summaries
+    rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyCompositionSummaries
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialDifferentialPrivacyReleases
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialDifferentialPrivacyReleases
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/differential-privacy-releases
+  http_contract:
+    method: get
+    path: /confidential/differential-privacy-releases
+    operation_id: getConfidentialDifferentialPrivacyReleases
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Differential Privacy Releases
+    summary: List subject-owned differential privacy release metadata.
+  application_operation:
+    id: confidential-list-differential-privacy-releases
+    surface: confidential
+    workflow_label: confidential.list_differential_privacy_releases
+    rust_workflow_kind: ConfidentialWorkflowKind::ListDifferentialPrivacyReleases
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialDifferentialPrivacyRelease
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialDifferentialPrivacyRelease
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/differential-privacy-releases
+  http_contract:
+    method: post
+    path: /confidential/differential-privacy-releases
+    operation_id: postConfidentialDifferentialPrivacyRelease
+    required_scopes:
+    - confidential:release
+    requirements: []
+    tags:
+    - Differential Privacy Releases
+    summary: Validate, account, persist, and release a noised differential privacy aggregate.
+  application_operation:
+    id: confidential-release-differential-privacy-aggregate
+    surface: confidential
+    workflow_label: confidential.release_differential_privacy_aggregate
+    rust_workflow_kind: ConfidentialWorkflowKind::ReleaseDifferentialPrivacyAggregate
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialDifferentialPrivacySampledRelease
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialDifferentialPrivacySampledRelease
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/differential-privacy-sampled-releases
+  http_contract:
+    method: post
+    path: /confidential/differential-privacy-sampled-releases
+    operation_id: postConfidentialDifferentialPrivacySampledRelease
+    required_scopes:
+    - confidential:release
+    requirements: []
+    tags:
+    - Differential Privacy Releases
+    summary: Sample server-side discrete-Laplace noise, account, persist, and release a noised aggregate.
+  application_operation:
+    id: confidential-release-sampled-differential-privacy-aggregate
+    surface: confidential
+    workflow_label: confidential.release_sampled_differential_privacy_aggregate
+    rust_workflow_kind: ConfidentialWorkflowKind::ReleaseSampledDifferentialPrivacyAggregate
+    workflow_family: differential_privacy
+  resource_family:
+    surface_family: confidential.differential-privacy
+    surface: confidential
+    description: Differential privacy budget, composition, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialJobAuditEvents
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialJobAuditEvents
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/job-audit-events
+  http_contract:
+    method: get
+    path: /confidential/job-audit-events
+    operation_id: getConfidentialJobAuditEvents
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Confidential Jobs
+    summary: List metadata-only audit events for subject-owned confidential jobs.
+  application_operation:
+    id: confidential-list-job-audit-events
+    surface: confidential
+    workflow_label: confidential.list_job_audit_events
+    rust_workflow_kind: ConfidentialWorkflowKind::ListJobAuditEvents
+    workflow_family: job
+  resource_family:
+    surface_family: confidential.jobs
+    surface: confidential
+    description: Confidential job lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialJobTransition
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialJobTransition
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/job-transitions
+  http_contract:
+    method: post
+    path: /confidential/job-transitions
+    operation_id: postConfidentialJobTransition
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Confidential Jobs
+    summary: Apply a strict durable confidential job lifecycle transition.
+  application_operation:
+    id: confidential-transition-job
+    surface: confidential
+    workflow_label: confidential.transition_job
+    rust_workflow_kind: ConfidentialWorkflowKind::TransitionJob
+    workflow_family: job
+  resource_family:
+    surface_family: confidential.jobs
+    surface: confidential
+    description: Confidential job lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialJobs
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialJobs
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/jobs
+  http_contract:
+    method: get
+    path: /confidential/jobs
+    operation_id: getConfidentialJobs
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Confidential Jobs
+    summary: List subject-owned durable confidential job metadata.
+  application_operation:
+    id: confidential-list-jobs
+    surface: confidential
+    workflow_label: confidential.list_jobs
+    rust_workflow_kind: ConfidentialWorkflowKind::ListJobs
+    workflow_family: job
+  resource_family:
+    surface_family: confidential.jobs
+    surface: confidential
+    description: Confidential job lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialJob
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialJob
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/jobs
+  http_contract:
+    method: post
+    path: /confidential/jobs
+    operation_id: postConfidentialJob
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Confidential Jobs
+    summary: Register a durable confidential job in draft state.
+  application_operation:
+    id: confidential-register-job
+    surface: confidential
+    workflow_label: confidential.register_job
+    rust_workflow_kind: ConfidentialWorkflowKind::RegisterJob
+    workflow_family: job
+  resource_family:
+    surface_family: confidential.jobs
+    surface: confidential
+    description: Confidential job lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialParticipantAuditEvents
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialParticipantAuditEvents
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/participant-audit-events
+  http_contract:
+    method: get
+    path: /confidential/participant-audit-events
+    operation_id: getConfidentialParticipantAuditEvents
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Confidential Participants
+    summary: List metadata-only audit events for subject-owned confidential participants.
+  application_operation:
+    id: confidential-list-participant-audit-events
+    surface: confidential
+    workflow_label: confidential.list_participant_audit_events
+    rust_workflow_kind: ConfidentialWorkflowKind::ListParticipantAuditEvents
+    workflow_family: participant
+  resource_family:
+    surface_family: confidential.participants
+    surface: confidential
+    description: Confidential participant lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialParticipantTransition
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialParticipantTransition
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/participant-transitions
+  http_contract:
+    method: post
+    path: /confidential/participant-transitions
+    operation_id: postConfidentialParticipantTransition
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Confidential Participants
+    summary: Apply a strict confidential participant lifecycle transition.
+  application_operation:
+    id: confidential-transition-participant
+    surface: confidential
+    workflow_label: confidential.transition_participant
+    rust_workflow_kind: ConfidentialWorkflowKind::TransitionParticipant
+    workflow_family: participant
+  resource_family:
+    surface_family: confidential.participants
+    surface: confidential
+    description: Confidential participant lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialParticipants
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialParticipants
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/participants
+  http_contract:
+    method: get
+    path: /confidential/participants
+    operation_id: getConfidentialParticipants
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Confidential Participants
+    summary: List subject-owned confidential participant lifecycle metadata.
+  application_operation:
+    id: confidential-list-participants
+    surface: confidential
+    workflow_label: confidential.list_participants
+    rust_workflow_kind: ConfidentialWorkflowKind::ListParticipants
+    workflow_family: participant
+  resource_family:
+    surface_family: confidential.participants
+    surface: confidential
+    description: Confidential participant lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialParticipant
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialParticipant
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/participants
+  http_contract:
+    method: post
+    path: /confidential/participants
+    operation_id: postConfidentialParticipant
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Confidential Participants
+    summary: Register participant identity, mechanism role, and key-ceremony metadata in invited state.
+  application_operation:
+    id: confidential-register-participant
+    surface: confidential
+    workflow_label: confidential.register_participant
+    rust_workflow_kind: ConfidentialWorkflowKind::RegisterParticipant
+    workflow_family: participant
+  resource_family:
+    surface_family: confidential.participants
+    surface: confidential
+    description: Confidential participant lifecycle resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialShamirThresholdReconstructions
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialShamirThresholdReconstructions
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/shamir-threshold-reconstructions
+  http_contract:
+    method: get
+    path: /confidential/shamir-threshold-reconstructions
+    operation_id: getConfidentialShamirThresholdReconstructions
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Shamir Threshold Reconstructions
+    summary: List subject-owned Shamir threshold reconstruction metadata.
+  application_operation:
+    id: confidential-list-shamir-threshold-reconstructions
+    surface: confidential
+    workflow_label: confidential.list_shamir_threshold_reconstructions
+    rust_workflow_kind: ConfidentialWorkflowKind::ListShamirThresholdReconstructions
+    workflow_family: shamir
+  resource_family:
+    surface_family: confidential.shamir
+    surface: confidential
+    description: Shamir threshold reconstruction resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialShamirThresholdReconstruction
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialShamirThresholdReconstruction
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/shamir-threshold-reconstructions
+  http_contract:
+    method: post
+    path: /confidential/shamir-threshold-reconstructions
+    operation_id: postConfidentialShamirThresholdReconstruction
+    required_scopes:
+    - confidential:compute
+    requirements: []
+    tags:
+    - Shamir Threshold Reconstructions
+    summary: Reconstruct and persist a Shamir threshold value.
+  application_operation:
+    id: confidential-reconstruct-shamir-threshold-secret
+    surface: confidential
+    workflow_label: confidential.reconstruct_shamir_threshold_secret
+    rust_workflow_kind: ConfidentialWorkflowKind::ReconstructShamirThresholdSecret
+    workflow_family: shamir
+  resource_family:
+    surface_family: confidential.shamir
+    surface: confidential
+    description: Shamir threshold reconstruction resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialThresholdReleaseApproval
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialThresholdReleaseApproval
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/threshold-release-approvals
+  http_contract:
+    method: post
+    path: /confidential/threshold-release-approvals
+    operation_id: postConfidentialThresholdReleaseApproval
+    required_scopes:
+    - confidential:release
+    requirements: []
+    tags:
+    - Threshold Releases
+    summary: Record one authority approval for a threshold-release request.
+  application_operation:
+    id: confidential-approve-threshold-release
+    surface: confidential
+    workflow_label: confidential.approve_threshold_release
+    rust_workflow_kind: ConfidentialWorkflowKind::ApproveThresholdRelease
+    workflow_family: threshold
+  resource_family:
+    surface_family: confidential.threshold-release
+    surface: confidential
+    description: Threshold release request, approval, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.getConfidentialThresholdReleaseRequests
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: getConfidentialThresholdReleaseRequests
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: get
+    path: /confidential/threshold-release-requests
+  http_contract:
+    method: get
+    path: /confidential/threshold-release-requests
+    operation_id: getConfidentialThresholdReleaseRequests
+    required_scopes:
+    - confidential:read
+    requirements: []
+    tags:
+    - Threshold Releases
+    summary: List threshold-release request metadata.
+  application_operation:
+    id: confidential-list-threshold-release-requests
+    surface: confidential
+    workflow_label: confidential.list_threshold_release_requests
+    rust_workflow_kind: ConfidentialWorkflowKind::ListThresholdReleaseRequests
+    workflow_family: threshold
+  resource_family:
+    surface_family: confidential.threshold-release
+    surface: confidential
+    description: Threshold release request, approval, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialThresholdReleaseRequest
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialThresholdReleaseRequest
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/threshold-release-requests
+  http_contract:
+    method: post
+    path: /confidential/threshold-release-requests
+    operation_id: postConfidentialThresholdReleaseRequest
+    required_scopes:
+    - confidential:write
+    requirements: []
+    tags:
+    - Threshold Releases
+    summary: Register a two-authority release request for a matching computed aggregate.
+  application_operation:
+    id: confidential-register-threshold-release-request
+    surface: confidential
+    workflow_label: confidential.register_threshold_release_request
+    rust_workflow_kind: ConfidentialWorkflowKind::RegisterThresholdReleaseRequest
+    workflow_family: threshold
+  resource_family:
+    surface_family: confidential.threshold-release
+    surface: confidential
+    description: Threshold release request, approval, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml
+- id: confidential.postConfidentialThresholdRelease
+  operation_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    operation_id: postConfidentialThresholdRelease
+  route_key:
+    openapi_contract: spec/openapi/kiva-confidential.yaml
+    method: post
+    path: /confidential/threshold-releases
+  http_contract:
+    method: post
+    path: /confidential/threshold-releases
+    operation_id: postConfidentialThresholdRelease
+    required_scopes:
+    - confidential:release
+    requirements: []
+    tags:
+    - Threshold Releases
+    summary: Release an aggregate after both configured authorities approved it.
+  application_operation:
+    id: confidential-release-threshold-aggregate
+    surface: confidential
+    workflow_label: confidential.release_threshold_aggregate
+    rust_workflow_kind: ConfidentialWorkflowKind::ReleaseThresholdAggregate
+    workflow_family: threshold
+  resource_family:
+    surface_family: confidential.threshold-release
+    surface: confidential
+    description: Threshold release request, approval, and release resources.
+    pds_resource_family: null
+    pds_route_context: null
+    pds_planes: []
+  evidence_refs:
+    http_operation_catalog: generated/http-operation-catalog.evidence.json
+    surface_catalog: generated/architecture/surface-catalog.yaml
+    surface_family_ledger: generated/architecture/surface-families.yaml
+    pds_resource_family_ledger: generated/architecture/pds-resource-families.yaml

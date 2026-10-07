@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:requirement-catalog-audit-report:1",
+  "title": "Kiva IEEE xAPI LRS requirement catalog audit report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "status",
+    "requirement_catalog",
+    "source",
+    "totals",
+    "levels",
+    "projections",
+    "source_triage",
+    "clauses",
+    "issues"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "requirement_catalog": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "levels": {
+      "$ref": "#/$defs/counts"
+    },
+    "projections": {
+      "$ref": "#/$defs/counts"
+    },
+    "source_triage": {
+      "$ref": "#/$defs/sourceTriage"
+    },
+    "clauses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/clause"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "document",
+        "reference_root",
+        "reference_path",
+        "reference_checked",
+        "source_document_exists",
+        "git_commit",
+        "git_dirty"
+      ],
+      "properties": {
+        "repository": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "document": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "reference_root": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "reference_path": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "reference_checked": {
+          "type": "boolean"
+        },
+        "source_document_exists": {
+          "type": "boolean"
+        },
+        "git_commit": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "git_dirty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirements",
+        "clauses",
+        "source_clauses",
+        "source_clauses_with_requirements",
+        "source_clauses_triaged_without_requirements"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "clauses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_clauses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_clauses_with_requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_clauses_triaged_without_requirements": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "sourceTriage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "checked"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "checked": {
+          "type": "boolean"
+        },
+        "triaged_clauses": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "clause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clause",
+        "title",
+        "line_start",
+        "line_end",
+        "requirements",
+        "triage"
+      ],
+      "properties": {
+        "clause": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "title": {
+          "type": "string"
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "triage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/triage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "triage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "rationale",
+        "covered_by"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "composite-processing-section",
+            "data-model-subsection",
+            "non-normative-guidance",
+            "parent-section",
+            "recommendation",
+            "security-guidance"
+          ]
+        },
+        "rationale": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "covered_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    }
+  }
+}

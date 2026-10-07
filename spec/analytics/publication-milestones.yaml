@@ -1,0 +1,33 @@
+schema_version: 1
+kind: kiva-analytics-publication-milestone-ledger
+status: active
+standard: Kiva Architecture
+scope: >
+  Kiva analytics-serving boundary milestones. These milestones do not extend
+  the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance claim.
+source: docs/architecture/analytics-claim-boundary.md
+milestones:
+  - id: BI0
+    title: Analytics claim boundary
+    status: completed-boundary-definition
+    release_label: analytics-bi0-boundary
+    claim_boundary: >
+      Analytics serving is defined as governed reads over approved PDS data
+      products and confidential releases, separate from the xAPI LRS surface;
+      no analytics serving API is implemented by this milestone.
+  - id: BI1
+    title: Governed aggregate serving API
+    status: completed-governed-serving
+    release_label: analytics-bi1-serving-api
+    claim_boundary: >
+      A dedicated analytics HTTP surface serves only approved aggregate data
+      products and confidential releases with tenant and subject scope,
+      cursor pagination, exact authorization scopes, and auditable reads.
+  - id: BI2
+    title: Reference reporting deployment
+    status: completed-validated-reference-deployments
+    release_label: analytics-bi2-reference-reporting
+    claim_boundary: >
+      Validated school and corporate-training templates document external
+      reporting consumers over the BI1 API; Kiva does not host or claim a BI
+      dashboard product, extend the xAPI LRS claim, or provide legal advice.

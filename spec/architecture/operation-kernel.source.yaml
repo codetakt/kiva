@@ -1,0 +1,43 @@
+schema_version: 1
+kind: kiva-operation-kernel-source
+status: active
+description: >
+  Thin human review entrypoint for OperationKernel. The split operation,
+  surface, generation, implementation, PDS-family, and cross-surface family
+  ledgers remain the editable fragments, but reviewers enter through this
+  source instead of treating each fragment as a separate design root.
+operation_kernel_model:
+  root_type: OperationKernelSource
+  primary_review_surface: generated/architecture/operation-kernel.yaml
+  generated_markdown: docs/architecture/generated/operation-kernel.md
+  operation_flow:
+    - OpenAPI
+    - SurfaceOperation
+    - WorkflowOwnership
+    - ResourceFamily
+    - RouteCoverage
+  split_source_rule: >
+    Split ledgers are OperationKernel fragments. They do not create parallel
+    operation authority and must project through generated/architecture/operation-kernel.yaml.
+included_ledgers:
+  - spec/architecture/operation-ownership.source.yaml
+  - spec/architecture/surface-projections.yaml
+  - spec/architecture/surface-model.source.yaml
+  - spec/architecture/surface-generation.policy.yaml
+  - spec/architecture/surface-implementation.policy.yaml
+  - spec/architecture/pds-resource-families.source.yaml
+  - spec/architecture/surface-families.source.yaml
+pds_supporting_plane:
+  root_type: PdsCorePlane
+  source: spec/pds/core-planes.source.yaml
+  state_machine_source: spec/pds/state-machines.source.yaml
+  parent_model: OperationKernel
+  rule: PDS event, inventory, policy, release, and their state machines are OperationKernel supporting planes.
+review_surfaces:
+  primary:
+    - generated/architecture/operation-kernel.yaml
+  supporting:
+    - generated/architecture/operation-catalog.yaml
+    - generated/architecture/pds-resource-families.yaml
+    - generated/architecture/surface-families.yaml
+    - generated/route-coverage.evidence.json

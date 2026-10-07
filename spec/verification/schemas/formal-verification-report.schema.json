@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:verification:formal-report:1",
+  "title": "Kiva formal verification report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "kind",
+    "status",
+    "generated_at_utc",
+    "tool_version",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "Kiva Architecture"
+    },
+    "kind": {
+      "enum": [
+        "fstar-verification",
+        "kani-verification",
+        "tamarin-verification"
+      ]
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tool_version": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "suite": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "run_id": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "solver": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "unwind": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "harnesses": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "passed",
+          "failed",
+          "timeout"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "target",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "target": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "timeout"
+          ]
+        }
+      }
+    }
+  }
+}

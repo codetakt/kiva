@@ -1,0 +1,819 @@
+suite:
+  id: xapi-lrs-statement-query-filter-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive Statement query filter checks for disposable isolated LRS targets.
+cases:
+  - id: statement-query-filters-agent-verb-activity-registration
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-filters
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-matching-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001001
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001001
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-filter@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/completed
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-filter-target
+            context:
+              registration: 10000000-0000-4000-8000-000000000001
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: put-nonmatching-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001002
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001002
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-filter-other@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/completed
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-filter-target
+            context:
+              registration: 10000000-0000-4000-8000-000000000001
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-combined-filters
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-filter@example.org"}'
+            verb: https://adlnet.gov/expapi/verbs/completed
+            activity: https://example.org/kiva/conformance/activity/query-filter-target
+            registration: 10000000-0000-4000-8000-000000000001
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements/0/id:
+                equals: 00000000-0000-4000-8000-000000001001
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001002
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+  - id: statement-query-agent-matches-object-and-group-member
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-filters
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-agent-object-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001011
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001011
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-object-actor@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/interacted
+            object:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-agent-target@example.org
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: put-group-member-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001012
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001012
+            actor:
+              objectType: Group
+              member:
+                - objectType: Agent
+                  mbox: mailto:kiva-conformance-query-agent-target@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-agent-group-member
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-agent-matches-object-agent
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-agent-target@example.org"}'
+            verb: https://adlnet.gov/expapi/verbs/interacted
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001011
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-agent-matches-group-member
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-agent-target@example.org"}'
+            verb: https://adlnet.gov/expapi/verbs/experienced
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001012
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+  - id: statement-query-related-agent-and-activity-filters
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-related-agents
+      - xapi-lrs-4.1.6.1-statement-query-related-activities
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-related-agent-and-activity-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001021
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001021
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-related-actor@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-related-primary
+            context:
+              instructor:
+                objectType: Agent
+                mbox: mailto:kiva-conformance-query-related-agent@example.org
+              contextActivities:
+                parent:
+                  - objectType: Activity
+                    id: https://example.org/kiva/conformance/activity/query-related-context
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-agent-without-related-agents
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-related-agent@example.org"}'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001021
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-agent-with-related-agents
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-related-agent@example.org"}'
+            related_agents: 'true'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001021
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-activity-without-related-activities
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/query-related-context
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001021
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-activity-with-related-activities
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/query-related-context
+            related_activities: 'true'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001021
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+  - id: statement-query-related-substatement-agent-and-activity-filters
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-related-agents
+      - xapi-lrs-4.1.6.1-statement-query-related-activities
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-substatement-related-agent-and-activity-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001022
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001022
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-substatement-top@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: SubStatement
+              actor:
+                objectType: Agent
+                mbox: mailto:kiva-conformance-query-substatement-agent@example.org
+              verb:
+                id: https://adlnet.gov/expapi/verbs/experienced
+              object:
+                objectType: Activity
+                id: https://example.org/kiva/conformance/activity/query-substatement-activity
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-substatement-agent-without-related-agents
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-substatement-agent@example.org"}'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001022
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-substatement-agent-with-related-agents
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-substatement-agent@example.org"}'
+            related_agents: 'true'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001022
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-substatement-activity-without-related-activities
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/query-substatement-activity
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001022
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-substatement-activity-with-related-activities
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/query-substatement-activity
+            related_activities: 'true'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000001022
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+  - id: statement-query-time-order-and-limit
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-query-time-order-limit
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-first-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001031
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001031
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-time@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-time-first
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: get-first-stored
+        request:
+          method: GET
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001031
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          capture:
+            first_stored:
+              pointer: /stored
+      - id: put-second-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000001032
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000001032
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-query-time@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/query-time-second
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-default-descending-limit-one
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-time@example.org"}'
+            limit: '1'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements/0/id:
+                equals: 00000000-0000-4000-8000-000000001032
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001031
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-ascending-limit-zero
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-time@example.org"}'
+            ascending: 'true'
+            limit: '0'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements/0/id:
+                equals: 00000000-0000-4000-8000-000000001031
+              /statements/1/id:
+                equals: 00000000-0000-4000-8000-000000001032
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: false
+      - id: query-until-first-stored
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-time@example.org"}'
+            until: '{{first_stored}}'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements/0/id:
+                equals: 00000000-0000-4000-8000-000000001031
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001032
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: query-since-first-stored
+        request:
+          method: GET
+          path: /statements
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-query-time@example.org"}'
+            since: '{{first_stored}}'
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements/0/id:
+                equals: 00000000-0000-4000-8000-000000001032
+              /statements:
+                not_contains:
+                  id: 00000000-0000-4000-8000-000000001031
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true

@@ -1,0 +1,505 @@
+description: >
+  Source-group boundary anchors split by architectural area.
+
+source_groups:
+  - id: openapi-dto-boundary-ledger
+    description: OpenAPI remains the HTTP contract source of truth while generated Rust DTO boundary state and retired DTO archives are tracked explicitly.
+    paths:
+      - spec/openapi/dto-boundary-ledger.yaml
+      - spec/openapi/dto-boundary-policy.yaml
+      - spec/openapi/semantic-compatibility-retirement.yaml
+      - spec/openapi/rust-dto-map.yaml
+      - spec/openapi/generated-contract-dto-map.yaml
+      - spec/openapi/semantic-compatibility-map.yaml
+      - scripts/ci/kiva_ci/openapi_dto_map.py
+      - scripts/ci/kiva_ci/dto_boundary_ledger.py
+      - scripts/ci/generate_generated_contract_dto_map.py
+      - scripts/ci/validate_openapi_rust_dto_map.py
+      - scripts/ci/validate_openapi_dto_boundary_ledger.py
+      - docs/architecture/system-design.md
+    required_text:
+      - "kind: kiva-openapi-dto-boundary-ledger"
+      - "canonical_name: openapi-dto-boundary-ledger"
+      - "canonical_path: spec/openapi/dto-boundary-ledger.yaml"
+      - "legacy_path: spec/openapi/dto-generation-plan.yaml"
+      - "source_of_truth: openapi-contracts"
+      - "generated_contract_dto_map:"
+      - "generated_contract_dto_map_generator:"
+      - "boundary_ledger_validator:"
+      - "semantic_compatibility_map:"
+      - "generated_contract_dto_map_contracts:"
+      - "semantic_compatibility_map_contracts:"
+      - "target_state:"
+      - "external_http_dtos: generated-contract-crates"
+      - "internal_domain_types: handwritten-domain-and-application-types"
+      - "external_contract_boundary:"
+      - "internal_semantic_boundaries:"
+      - "active_guards:"
+      - "retired_archives:"
+      - "rust_dto_map_archive:"
+      - "status: complete"
+      - "path: spec/openapi/rust-dto-map.yaml"
+      - "active_external_guard_after_retirement:"
+      - "completion_milestones:"
+      - "generated-contract-crate-parity"
+      - "generated-boundary-adoption"
+      - "boundary_status:"
+      - "boundary_type:"
+      - "target_boundary_type:"
+      - "boundary_parity_policy:"
+      - "remaining_compatibility_work_queue:"
+      - "generated_request_parsing"
+      - "generated_response_projection"
+      - "generated_request_parsing_target:"
+      - "generated_response_projection_target:"
+      - "completion_order: []"
+      - "items: []"
+      - "GeneratedContractBoundary"
+      - "CompatibilityHttpBoundary"
+      - "dto_map_contracts:"
+      - "all-request-body-schema-closure"
+      - "crates/kiva-xapi-openapi-contract"
+      - "generated-rust-contract-crates"
+      - "openapi-generated-contract-dto-map"
+      - "openapi-semantic-compatibility-map"
+      - "generate_generated_contract_dto_map.py"
+      - "validate_openapi_rust_dto_map.py"
+      - "validate_openapi_dto_boundary_ledger.py"
+      - "runtime_adoption_gate"
+  - id: server-test-helper-families
+    description: In-crate server test helpers are split directly by family.
+    paths:
+      - crates/kiva-server/src/tests/helpers/state.rs
+      - crates/kiva-server/src/tests/helpers/confidential.rs
+      - crates/kiva-server/src/tests/helpers/confidential_openapi.rs
+      - crates/kiva-server/src/tests/helpers/pds.rs
+      - crates/kiva-server/src/tests/helpers/fixtures.rs
+      - crates/kiva-server/src/tests/helpers/request_dsl.rs
+    required_text:
+      - "pub(in crate::tests) fn empty_query"
+      - "pub(in crate::tests) fn expect_status"
+      - "pub(in crate::tests) async fn create_pds_consent_grant"
+      - "pub(in crate::tests) async fn register_confidential_signing_keys"
+      - "pub(in crate::tests) fn confidential_headers_for"
+  - id: ci-evidence-check-manifest
+    description: Long OpenAPI and assurance validator lists are declared in one CI manifest and executed through a runner.
+    paths:
+      - spec/ci/evidence-checks.yaml
+      - scripts/ci/run_evidence_checks.py
+      - scripts/ci/run_design_review_suite.py
+      - scripts/ci/generate_projection_graph.py
+      - scripts/ci/validate_projection_graph.py
+      - scripts/ci/kiva_ci/evidence.py
+      - scripts/ci/kiva_ci/openapi.py
+      - scripts/ci/kiva_ci/projection_graph.py
+      - scripts/ci/validate_confidential_verified_kernels.py
+      - spec/verification/confidential-verified-kernels.yaml
+      - nix/flake/checks.nix
+      - docs/operations/ci-gates.md
+    required_text:
+      - "kind: kiva-ci-evidence-check-manifest"
+      - "required_groups:"
+      - "required_checks:"
+      - "check_kind:"
+      - "inputs:"
+      - "derived_input_policy:"
+      - "outputs:"
+      - "mutates_repository:"
+      - "requires_network:"
+      - "artifact_class:"
+      - "claim_boundary:"
+      - "nix_gate:"
+      - "openapi-contract"
+      - "confidential-computation-assurance"
+      - "args:"
+      - "collect_http_operations"
+      - "kiva-confidential-verified-kernel-ledger"
+      - "validate_confidential_verified_kernels.py"
+      - "def run_group("
+      - "validate_evidence_check_manifest_metadata"
+      - "run_evidence_checks.py"
+      - "run_design_review_suite.py"
+      - "generate_projection_graph.py"
+      - "validate_projection_graph.py"
+      - "derived_inputs_by_check"
+      - "derived_projection_inputs"
+      - "EVIDENCE_ARTIFACT_CLASSES"
+  - id: application-operation-catalog
+    description: Application workflow labels, OpenAPI operationIds, and OAuth scopes are drift-checked from one catalog.
+    paths:
+      - crates/kiva-application/src/operation_catalog.rs
+      - crates/kiva-application/src/operation_catalog/generated/mod.rs
+      - crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+      - crates/kiva-application/src/operation_catalog/generated/registry.rs
+      - crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+      - docs/architecture/generated/application-operation-catalog.md
+      - generated/application-operation-catalog.evidence.json
+      - docs/architecture/generated/http-operation-catalog.md
+      - generated/http-operation-catalog.evidence.json
+      - docs/architecture/generated/surface-operation-index.md
+      - generated/surface-operation-index.evidence.json
+      - scripts/ci/application_operation_catalog_codegen.py
+      - scripts/ci/generate_application_operation_catalog.py
+      - scripts/ci/generate_http_operation_catalog.py
+      - scripts/ci/generate_projection_graph.py
+      - scripts/ci/generate_surface_catalog_bundle.py
+      - scripts/ci/generate_surface_catalog_projections.py
+      - scripts/ci/generate_surface_operation_index.py
+      - scripts/ci/generate_openapi_dto_map_projection.py
+      - scripts/ci/generate_projection_graph.py
+      - scripts/ci/surface_catalog.py
+      - scripts/ci/surface_catalog_model.py
+      - scripts/ci/surface_catalog_projections.py
+      - scripts/ci/surface_operation_ownership.py
+      - crates/kiva-server/src/core/state/generated_surface_profiles.rs
+      - scripts/ci/kiva_ci/openapi.py
+      - scripts/ci/validate_surface_catalog.py
+      - scripts/ci/kiva_ci/assertions.py
+      - spec/architecture/boundaries.yaml
+      - generated/architecture/surface-catalog.yaml
+      - generated/architecture/surface-families.yaml
+      - spec/architecture/surface-families.source.yaml
+      - spec/architecture/operation-ownership.source.yaml
+      - spec/architecture/surface-projections.yaml
+      - spec/architecture/surface-model.source.yaml
+      - spec/architecture/surface-generation.policy.yaml
+      - spec/architecture/surface-implementation.policy.yaml
+      - generated/architecture/operation-catalog.yaml
+      - spec/ci/evidence-checks.yaml
+      - spec/openapi/kiva-pds.yaml
+      - spec/openapi/kiva-confidential.yaml
+      - scripts/ci/validate_architecture_boundaries.py
+      - scripts/ci/validate_surface_families.py
+      - docs/architecture/system-design.md
+      - docs/architecture/server-modular-boundaries.md
+    required_text:
+      - "operation_catalogs:"
+      - "kind: kiva-application-operation-catalog"
+      - "APPLICATION_OPERATION_SPECS"
+      - "ApplicationOperationId"
+      - "application_operation_spec_by_catalog_id"
+      - "application_operation_specs"
+      - "ApplicationWorkflowSpec"
+      - "Generated from `generated/architecture/surface-catalog.yaml`"
+      - "render_operation_catalog"
+      - "render_operation_catalog_markdown"
+      - "render_operation_catalog_evidence"
+      - "render_operation_ids"
+      - "render_workflow_metadata"
+      - "kiva-application-operation-catalog-evidence"
+      - "generate_application_operation_catalog.py"
+      - "generate_http_operation_catalog.py"
+      - "generate_surface_catalog_bundle.py"
+      - "generate_surface_catalog_projections.py"
+      - "generate_surface_operation_index.py"
+      - "collect_http_operations"
+      - "render_surface_profile_registry"
+      - "rust_surface_profile_registry"
+      - "rust_registry_path:"
+      - "rust_operation_ids_path:"
+      - "rust_workflow_metadata_path:"
+      - "workflow_family:"
+      - "workflow_label:"
+      - "rust_workflow_kind:"
+      - "operation_id:"
+      - "required_scopes:"
+      - "def parse_rust_operation_registry("
+      - "def validate_operation_catalogs("
+      - "kiva-http-operation-catalog-evidence"
+      - "kind: kiva-surface-operation-catalog"
+      - "kind: kiva-operation-ownership-source"
+      - "kind: kiva-surface-projection-policy"
+      - "kind: kiva-surface-operation-model-source"
+      - "kind: kiva-surface-generation-policy"
+      - "kind: kiva-surface-implementation-policy"
+      - "kind: kiva-surface-family-source"
+      - "kind: kiva-surface-family-ledger"
+      - "split_policy_sources:"
+      - "kiva-surface-operation-index-evidence"
+      - "validate_surface_catalog.py"
+      - "validate_surface_families.py"
+      - "source_ledgers:"
+      - "surface_operation_algebra:"
+      - "entries:"
+      - "project_application_operation_catalog"
+      - "project_surface_entries_from_ownership"
+      - "project_surface_family_ledger"
+      - "join_policy:"
+      - "surface_catalog"
+  - id: implementation-claim-catalog
+    description: Public implementation claims are linked to repository evidence and generated review artifacts.
+    paths:
+      - spec/architecture/claim-catalog.yaml
+      - scripts/ci/generate_claim_catalog.py
+      - scripts/ci/generate_claim_readiness_matrix.py
+      - docs/architecture/generated/claim-catalog.md
+      - docs/architecture/generated/claim-readiness-matrix.md
+      - generated/claim-catalog.evidence.json
+      - generated/claim-readiness-matrix.yaml
+      - generated/claim-readiness-matrix.evidence.json
+      - spec/ci/evidence-checks.yaml
+      - spec/ci/projection-graph.yaml
+      - nix/flake/checks.nix
+      - docs/architecture/system-design.md
+    required_text:
+      - "kind: kiva-architecture-claim-catalog"
+      - "kiva-architecture-claim-catalog-evidence"
+      - "generate_claim_catalog.py"
+      - "generate_claim_readiness_matrix.py"
+      - "kind: kiva-claim-readiness-matrix"
+      - "readiness_requirement:"
+      - "evidence_mode: projection-backed"
+      - "evidence_mode: path-only"
+      - "minimum_projection_matches"
+      - "minimum_evidence_check_matches"
+      - "provider-binding registry metadata"
+      - "claim_count"
+      - "claim-catalog"
+      - "claim-readiness-matrix"
+      - "--check"
+  - id: architecture-design-backbone
+    description: Contract, claim, operation, milestone, boundary, and generated-artifact ownership is declared in one backbone ledger.
+    paths:
+      - spec/architecture/architecture-graph.source.yaml
+      - spec/architecture/architecture-policy.source.yaml
+      - spec/architecture/design-backbone.yaml
+      - docs/architecture/design-source-of-truth.md
+      - docs/README.md
+      - docs/architecture/system-design.md
+      - spec/architecture/policies/architecture-ir-policy.source.yaml
+      - spec/architecture/policies/operation-kernel-policy.source.yaml
+      - spec/architecture/policies/http-adapter-boundary-policy.source.yaml
+      - spec/openapi/dto-boundary-ledger.yaml
+      - scripts/ci/export_pds_openapi_schemas.py
+      - scripts/ci/generate_http_operation_catalog.py
+      - scripts/ci/generate_design_backbone.py
+      - scripts/ci/generate_surface_catalog_bundle.py
+      - scripts/ci/generate_surface_catalog_projections.py
+      - scripts/ci/generate_surface_operation_index.py
+      - scripts/ci/surface_catalog.py
+      - scripts/ci/surface_catalog_model.py
+      - scripts/ci/surface_catalog_projections.py
+      - scripts/ci/surface_operation_ownership.py
+      - crates/kiva-server/src/core/state/generated_surface_profiles.rs
+      - scripts/ci/kiva_ci/openapi.py
+      - scripts/ci/kiva_ci/architecture.py
+      - scripts/ci/kiva_ci/architecture_compiler.py
+      - scripts/ci/kiva_ci/compatibility.py
+      - scripts/ci/kiva_ci/projection_graph.py
+      - scripts/ci/validate_surface_catalog.py
+      - scripts/ci/validate_architecture_boundaries.py
+      - scripts/ci/validate_design_backbone.py
+      - scripts/ci/validate_projection_graph.py
+      - generated/architecture/pds-resource-families.yaml
+      - spec/architecture/pds-resource-families.source.yaml
+      - generated/architecture/surface-families.yaml
+      - spec/architecture/surface-families.source.yaml
+      - generated/architecture/surface-catalog.yaml
+      - spec/architecture/operation-ownership.source.yaml
+      - spec/architecture/surface-projections.yaml
+      - spec/architecture/surface-model.source.yaml
+      - spec/architecture/surface-generation.policy.yaml
+      - spec/architecture/surface-implementation.policy.yaml
+      - scripts/ci/validate_pds_resource_families.py
+      - scripts/ci/validate_surface_families.py
+      - scripts/ci/kiva_ci/manifest.py
+      - scripts/ci/kiva_ci/assertions.py
+      - generated/openapi-dto-map-projection.yaml
+      - generated/pds-openapi-schemas/index.json
+      - generated/surface-operation-index.evidence.json
+    required_text:
+      - "kind: kiva-architecture-design-backbone"
+      - "kind: kiva-architecture-graph-source"
+      - "kind: kiva-architecture-policy-source"
+      - "architecture_policy_source:"
+      - "policy_sections:"
+      - "architecture_ir_policy:"
+      - "operation_kernel_policy:"
+      - "artifact_class_policy:"
+      - "artifact_catalog:"
+      - "generated_from:"
+      - "architecture-graph-review-projection"
+      - "generate_design_backbone.py"
+      - "architecture-graph-sources-to-projection-graph"
+      - "source_kind: canonical"
+      - "source_layers:"
+      - "confidential_assurance_source_model:"
+      - "http_operation_catalog:"
+      - "openapi_dto_boundary:"
+      - "surface_operation_overlay:"
+      - "surface_projection_review_policy:"
+      - "surface_operation_model:"
+      - "surface_generation_policy:"
+      - "surface_implementation_policy:"
+      - "pds_resource_family_sources:"
+      - "surface_family_sources:"
+      - "surface_catalog:"
+      - "ci_check_manifest:"
+      - "projection_graph:"
+      - "projection_sources:"
+      - "projection_source_refs:"
+      - "projection_checks:"
+      - "surface_operation_algebra:"
+      - "resource_family_profile_model:"
+      - "split_policy_sources:"
+      - "operation-ownership.source.yaml"
+      - "surface_operation_index:"
+      - "surface_families:"
+      - "surface_family_ledger"
+      - "rust_surface_profile_registry"
+      - "kind: kiva-surface-operation-catalog"
+      - "kiva-pds-resource-family-ledger"
+      - "kiva-surface-family-ledger"
+      - "bundle-plus-thin-schema-refs"
+      - "ApplicationOperationGateway"
+      - "OpenAPI DTO -> kiva-pds command/query"
+      - "control-plane/data-plane"
+      - "provider-binding registry metadata"
+      - "validate_design_backbone.py"
+      - "validate_pds_resource_families.py"
+      - "validate_surface_catalog.py"
+      - "generate_http_operation_catalog.py"
+      - "generate_projection_graph.py"
+      - "generate_surface_catalog_bundle.py"
+      - "generate_surface_catalog_projections.py"
+      - "generate_surface_operation_index.py"
+      - "collect_operations_by_id"
+      - "project_pds_resource_family_ledger"
+      - "project_surface_family_ledger"
+      - "validate_surface_source_model"
+      - "validate_projection_graph.py"
+      - "render_projection_graph"
+      - "resolve_projection_sources"
+      - "classified_source_map"
+      - "artifact_catalog_from_sources"
+      - "artifact_class_policy_from_architecture_policy"
+      - "compiled_architecture_sources"
+      - "NoAliasDumper"
+      - "dump_yaml"
+      - "def validate_design_backbone("
+      - "validate_architecture_graph_source"
+      - "validate_surface_operation_algebra"
+      - "def validate_resource_families("
+      - "validate_surface_family_ledger"
+  - id: pds-resource-family-ledger
+    description: PDS resource families map OpenAPI operations to schemas, route contexts, handlers, and implementation files.
+    paths:
+      - generated/architecture/pds-resource-families.yaml
+      - spec/architecture/pds-resource-families.source.yaml
+      - generated/architecture/surface-catalog.yaml
+      - spec/architecture/operation-ownership.source.yaml
+      - spec/architecture/surface-projections.yaml
+      - spec/architecture/surface-model.source.yaml
+      - spec/architecture/surface-generation.policy.yaml
+      - spec/architecture/surface-implementation.policy.yaml
+      - scripts/ci/generate_surface_catalog_bundle.py
+      - scripts/ci/generate_surface_catalog_projections.py
+      - scripts/ci/surface_catalog.py
+      - scripts/ci/surface_catalog_model.py
+      - scripts/ci/surface_catalog_projections.py
+      - scripts/ci/surface_operation_ownership.py
+      - scripts/ci/validate_pds_resource_families.py
+      - spec/openapi/kiva-pds.yaml
+      - spec/ci/evidence-checks.yaml
+      - crates/kiva-server/src/surfaces/pds/routes.rs
+      - crates/kiva-server/src/core/paths.rs
+      - spec/architecture/design-backbone.yaml
+      - nix/flake/checks.nix
+      - docs/architecture/design-source-of-truth.md
+    required_text:
+      - "kind: kiva-pds-resource-family-ledger"
+      - "kind: kiva-pds-resource-family-source"
+      - "resource_families:"
+      - "route_context: pds"
+      - "route_context: pds-application"
+      - "application_operation_catalog_policy:"
+      - "http_operation_catalog:"
+      - "surface_operation_algebra:"
+      - "project_pds_resource_family_ledger"
+      - "server_resource_family_boilerplate_policy:"
+      - "family_role_matrix:"
+      - "PDS_PROVIDER_BINDINGS_PATH"
+      - "def validate_resource_families("
+      - "collect_http_operation_catalog_entries"
+      - "collect_pds_openapi_operations"
+      - "pds-resource-families"
+  - id: surface-family-ledger
+    description: xAPI, PDS, and confidential-computation HTTP operations are owned by exactly one cross-surface family.
+    paths:
+      - generated/architecture/surface-families.yaml
+      - spec/architecture/surface-families.source.yaml
+      - generated/architecture/surface-catalog.yaml
+      - spec/architecture/operation-ownership.source.yaml
+      - spec/architecture/surface-projections.yaml
+      - spec/architecture/surface-model.source.yaml
+      - spec/architecture/surface-generation.policy.yaml
+      - spec/architecture/surface-implementation.policy.yaml
+      - spec/architecture/pds-resource-families.source.yaml
+      - scripts/ci/generate_surface_catalog_bundle.py
+      - scripts/ci/generate_surface_catalog_projections.py
+      - scripts/ci/surface_catalog.py
+      - scripts/ci/surface_catalog_model.py
+      - scripts/ci/surface_catalog_projections.py
+      - scripts/ci/surface_operation_ownership.py
+      - scripts/ci/validate_surface_catalog.py
+      - scripts/ci/validate_surface_families.py
+      - spec/ci/evidence-checks.yaml
+      - spec/architecture/design-backbone.yaml
+    required_text:
+      - "kind: kiva-surface-family-source"
+      - "kind: kiva-surface-family-ledger"
+      - "surface_families:"
+      - "surface_family_projection:"
+      - "surface_family_ledger"
+      - "route_ownership: exactly-one-surface-family"
+      - "prefix_assignment: longest-path-prefix-wins"
+      - "source_pds_resource_family"
+      - "project_surface_family_ledger"
+      - "validate_surface_family_ledger"
+      - "surface-families"
+  - id: milestone-ledgers
+    description: Milestone status is backed by machine-readable ledgers.
+    paths:
+      - spec/analytics/publication-milestones.yaml
+      - spec/pds/publication-milestones.yaml
+      - spec/confidential/computation-milestones.yaml
+      - spec/confidential/mechanism-maturity.yaml
+      - docs/architecture/pds-milestones.md
+      - docs/architecture/confidential-computation-milestones.md
+      - docs/architecture/analytics-claim-boundary.md
+    required_text:
+      - "schema_version: 1"
+      - "kind: kiva-analytics-publication-milestone-ledger"
+      - "kind: kiva-confidential-computation-milestone-ledger"
+      - "kind: pds-publication-milestone-mirror"
+      - "spec/pds/publication-milestones.yaml"
+      - "spec/confidential/computation-milestones.yaml"
+      - "spec/analytics/publication-milestones.yaml"
+  - id: compatibility-surface-ledger
+    description: Compatibility surfaces are explicitly retained and expansion-gated.
+    paths:
+      - spec/architecture/compatibility-surfaces.yaml
+      - scripts/ci/kiva_ci/compatibility.py
+      - tools/kiva-rust-use-scan/src/main.rs
+      - tools/kiva-rust-use-scan/Cargo.toml
+      - docs/architecture/compatibility-surfaces.md
+      - docs/architecture/system-design.md
+      - docs/architecture/server-modular-boundaries.md
+    required_text:
+      - "kind: kiva-architecture-compatibility-surface-ledger"
+      - "new_root_reexports_require_entry: true"
+      - "compatibility_entries_require_migration_target: true"
+      - "compatibility_entries_require_retirement_milestone: true"
+      - "compatibility_entries_require_retirement_condition: true"
+      - "compatibility_entries_require_retirement_check: true"
+      - "compatibility_entries_require_allowed_owner_exports: true"
+      - "compatibility_entries_require_forbidden_call_site_check: true"
+      - "allowed_owner_exports:"
+      - "forbidden_call_site_check:"
+      - "rust-use-absent"
+      - "kiva-rust-use-scan"
+      - "no-new-root-mechanism-reexports"
+      - "retirement_milestone:"
+      - "retirement_condition:"
+      - "retirement_check:"
+      - "Compatibility Surfaces"

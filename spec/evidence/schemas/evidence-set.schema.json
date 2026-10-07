@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:evidence:evidence-set:1",
+  "title": "Kiva EvidenceSet",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "generated_from",
+    "source_model",
+    "assurance_meta_model",
+    "projection_policy",
+    "group_count",
+    "check_count",
+    "ready_claim_match_count",
+    "groups"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-evidence-set" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "generated_from": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "generated_artifacts": { "type": "object" },
+    "source_model": { "type": "object" },
+    "assurance_meta_model": {
+      "type": "object",
+      "required": ["root_type", "primitive_flow", "bindings", "rule"],
+      "properties": {
+        "root_type": { "const": "AssurancePrimitive" },
+        "primitive_flow": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "Claim" },
+            { "const": "Obligation" },
+            { "const": "Discharge" },
+            { "const": "Receipt" }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "bindings": {
+          "type": "object",
+          "required": ["claim", "obligation", "discharge", "receipt"],
+          "properties": {
+            "claim": { "type": "string", "minLength": 1 },
+            "obligation": { "type": "string", "minLength": 1 },
+            "discharge": { "type": "string", "minLength": 1 },
+            "receipt": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "projection_policy": { "type": "object" },
+    "group_count": { "type": "integer", "minimum": 1 },
+    "check_count": { "type": "integer", "minimum": 1 },
+    "ready_claim_match_count": { "type": "integer", "minimum": 0 },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "claim_boundary", "nix_gate", "check_count", "checks"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "claim_boundary": { "type": "string", "minLength": 1 },
+          "nix_gate": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "check_count": { "type": "integer", "minimum": 1 },
+          "checks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "receipt_id",
+                "check_kind",
+                "artifact_class",
+                "script",
+                "ci_command",
+                "effective_inputs",
+                "derived_input_policy",
+                "outputs",
+                "ready_claims"
+              ],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "receipt_id": { "type": "string", "minLength": 1 },
+                "check_kind": { "type": "string", "minLength": 1 },
+                "artifact_class": { "type": "string", "minLength": 1 },
+                "script": { "type": "string", "minLength": 1 },
+                "ci_command": {
+                  "type": "object",
+                  "required": ["entrypoint", "family", "name"],
+                  "properties": {
+                    "entrypoint": { "const": "scripts/ci/kiva-ci" },
+                    "family": { "enum": ["generate", "validate"] },
+                    "name": { "type": "string", "minLength": 1 }
+                  },
+                  "additionalProperties": true
+                },
+                "effective_inputs": { "type": "array", "items": { "type": "string" } },
+                "derived_input_policy": {
+                  "enum": ["explicit-inputs", "projection-graph"]
+                },
+                "outputs": { "type": "array", "items": { "type": "string" } },
+                "ready_claims": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "boundary", "claim_maturity"],
+                    "properties": {
+                      "id": { "type": "string", "minLength": 1 },
+                      "boundary": { "type": "string", "minLength": 1 },
+                      "claim_maturity": { "type": "string", "minLength": 1 }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

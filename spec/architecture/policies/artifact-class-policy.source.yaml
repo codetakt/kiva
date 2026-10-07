@@ -1,0 +1,33 @@
+description: Generated artifact classification policy.
+artifact_class_policy:
+  description: >
+    Declarative source/projection-kind to generated artifact class policy.
+    Generators must not infer artifact classes from ad hoc source-name or
+    path string matching.
+  default_artifact_class: generated-ledger
+  source_overrides:
+    architecture_guards: architecture-guard
+    projection_graph: architecture-guard
+    implementation_claims: claim-catalog
+    claim_readiness_matrix: claim-catalog
+    confidential_mechanism_catalog: confidential-mechanism
+  projection_kind_artifact_classes:
+    generated-schema-artifacts: schema-artifact
+    validated-dto-map: dto-boundary
+    generated-catalog: generated-catalog
+    generated-registry: generated-ledger
+    generated-ledger: generated-ledger
+    generated-evidence: generated-evidence
+    generated-evidence-index: generated-evidence
+    validated-evidence-index: architecture-guard
+    validated-evidence-package: generated-evidence
+  review_policy:
+    editable_sources: source-yaml-openapi-rust
+    generated_artifacts: committed-and-regenerated-by-ci
+    human_review_scope: canonical-sources-and-code-diffs
+    ci_review_scope: generated-ledgers-evidence-and-drift-checks
+    release_evidence_scope: claim-readiness-and-evidence-bundles
+    rule: >
+      Review source YAML, OpenAPI contracts, and Rust implementation directly;
+      review generated artifacts through generator checks, drift checks, and
+      release evidence reports.

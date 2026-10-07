@@ -1,0 +1,1535 @@
+{
+  "$defs": {
+    "AccessAuditEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/PolicyAction"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataProductId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "decision": {
+          "$ref": "#/$defs/PolicyDecision"
+        },
+        "denyReason": {
+          "type": "string"
+        },
+        "eventId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "grantId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "requesterSubject": {
+          "type": "string"
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceClass"
+        },
+        "role": {
+          "$ref": "#/$defs/PrincipalRole"
+        }
+      },
+      "required": [
+        "eventId",
+        "requesterSubject",
+        "role",
+        "resource",
+        "action",
+        "decision",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "AccessAuditEventList": {
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "items": {
+            "$ref": "#/$defs/AccessAuditEvent"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "events"
+      ],
+      "type": "object"
+    },
+    "AccessCheckRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/PolicyAction"
+        },
+        "data_product_id": {
+          "$ref": "#/$defs/Uuid",
+          "description": "Optional PDS data product reference for aggregate insight reads. The referenced product must exist and be owned by the data subject represented by the active aggregate-insight consent grant.\n"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceClass"
+        },
+        "role": {
+          "$ref": "#/$defs/PrincipalRole"
+        }
+      },
+      "required": [
+        "role",
+        "resource",
+        "action"
+      ],
+      "type": "object"
+    },
+    "AccessCheckResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "$ref": "#/$defs/PolicyDecision"
+        },
+        "denyReason": {
+          "type": "string"
+        },
+        "eventId": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "eventId",
+        "decision"
+      ],
+      "type": "object"
+    },
+    "ConfidentialMechanismKind": {
+      "enum": [
+        "additive-n-of-n",
+        "private-set-intersection",
+        "private-set-intersection-oprf-dh",
+        "shamir-threshold",
+        "threshold-frost-signing",
+        "trusted-execution-environment",
+        "trusted-execution-environment-aws-nitro",
+        "fhe-sum-feasibility",
+        "fhe-sum-runtime"
+      ],
+      "type": "string"
+    },
+    "ConsentGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "grantId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "granteeSubject": {
+          "type": "string"
+        },
+        "legalBasis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "renewedFromGrantId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "revokedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/ConsentScope"
+        },
+        "state": {
+          "$ref": "#/$defs/ConsentState"
+        }
+      },
+      "required": [
+        "grantId",
+        "dataSubject",
+        "granteeSubject",
+        "scope",
+        "state",
+        "purpose",
+        "legalBasis",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "ConsentGrantList": {
+      "additionalProperties": false,
+      "properties": {
+        "grants": {
+          "items": {
+            "$ref": "#/$defs/ConsentGrant"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "grants"
+      ],
+      "type": "object"
+    },
+    "ConsentGrantRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "grantee_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "legal_basis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "purpose": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "renewed_from_grant_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/ConsentScope"
+        }
+      },
+      "required": [
+        "grant_id",
+        "grantee_subject",
+        "scope",
+        "purpose",
+        "legal_basis"
+      ],
+      "type": "object"
+    },
+    "ConsentRevocationRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "grant_id": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "grant_id"
+      ],
+      "type": "object"
+    },
+    "ConsentScope": {
+      "enum": [
+        "raw-records",
+        "personal-data",
+        "aggregate-insights"
+      ],
+      "type": "string"
+    },
+    "ConsentState": {
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "type": "string"
+    },
+    "DataClass": {
+      "enum": [
+        "statement-metadata",
+        "consent-metadata",
+        "data-product-metadata",
+        "access-audit-metadata",
+        "lifecycle-metadata"
+      ],
+      "type": "string"
+    },
+    "DataProduct": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataClasses": {
+          "items": {
+            "$ref": "#/$defs/DataClass"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "dataProductId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "legalBasis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "ownerSubject": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "releaseArtifact": {
+          "$ref": "#/$defs/ReleaseArtifactRef"
+        },
+        "releaseId": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "sourceKind": {
+          "$ref": "#/$defs/DataProductSourceKind"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataProductId",
+        "ownerSubject",
+        "sourceKind",
+        "releaseId",
+        "releaseArtifact",
+        "title",
+        "purpose",
+        "legalBasis",
+        "dataClasses",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "DataProductList": {
+      "additionalProperties": false,
+      "properties": {
+        "dataProducts": {
+          "items": {
+            "$ref": "#/$defs/DataProduct"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataProducts"
+      ],
+      "type": "object"
+    },
+    "DataProductReadRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "data_product_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "grant_id": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "grant_id",
+        "data_product_id"
+      ],
+      "type": "object"
+    },
+    "DataProductReadResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "dataProduct": {
+          "$ref": "#/$defs/DataProduct"
+        },
+        "decision": {
+          "$ref": "#/$defs/PolicyDecision"
+        },
+        "denyReason": {
+          "type": "string"
+        },
+        "eventId": {
+          "$ref": "#/$defs/Uuid"
+        }
+      },
+      "required": [
+        "eventId",
+        "decision"
+      ],
+      "type": "object"
+    },
+    "DataProductRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "data_classes": {
+          "items": {
+            "$ref": "#/$defs/DataClass"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "data_product_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "legal_basis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "purpose": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "release_id": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "source_kind": {
+          "$ref": "#/$defs/DataProductSourceKind"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "data_product_id",
+        "source_kind",
+        "release_id",
+        "title",
+        "purpose",
+        "legal_basis",
+        "data_classes"
+      ],
+      "type": "object"
+    },
+    "DataProductSourceKind": {
+      "enum": [
+        "threshold-release",
+        "differential-privacy-release",
+        "shamir-threshold-reconstruction"
+      ],
+      "type": "string"
+    },
+    "ErrorResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "type": "object"
+    },
+    "GovernanceProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "analystSubject": {
+          "type": "string"
+        },
+        "auditorSubject": {
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataCustodianSubject": {
+          "type": "string"
+        },
+        "emergencyAccessPolicy": {
+          "type": "string"
+        },
+        "identityAuthoritySubject": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platformOperatorSubject": {
+          "type": "string"
+        },
+        "policyAuthoritySubject": {
+          "type": "string"
+        },
+        "profileId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "profileKind": {
+          "$ref": "#/$defs/GovernanceProfileKind"
+        },
+        "profileOwnerSubject": {
+          "type": "string"
+        },
+        "runbookRefs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "subjectPartition": {
+          "type": "string"
+        },
+        "tenantPartition": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "profileId",
+        "profileOwnerSubject",
+        "profileKind",
+        "tenantPartition",
+        "subjectPartition",
+        "dataCustodianSubject",
+        "platformOperatorSubject",
+        "policyAuthoritySubject",
+        "analystSubject",
+        "auditorSubject",
+        "emergencyAccessPolicy",
+        "runbookRefs",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "GovernanceProfileKind": {
+      "enum": [
+        "single-operator",
+        "school-district",
+        "multi-agency"
+      ],
+      "type": "string"
+    },
+    "GovernanceProfileList": {
+      "additionalProperties": false,
+      "properties": {
+        "profiles": {
+          "items": {
+            "$ref": "#/$defs/GovernanceProfile"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "profiles"
+      ],
+      "type": "object"
+    },
+    "GovernanceProfileRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "analyst_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "auditor_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "data_custodian_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "emergency_access_policy": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "identity_authority_subject": {
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platform_operator_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "policy_authority_subject": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "profile_kind": {
+          "$ref": "#/$defs/GovernanceProfileKind"
+        },
+        "runbook_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "subject_partition": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tenant_partition": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "profile_kind",
+        "tenant_partition",
+        "subject_partition",
+        "data_custodian_subject",
+        "platform_operator_subject",
+        "policy_authority_subject",
+        "analyst_subject",
+        "auditor_subject",
+        "emergency_access_policy",
+        "runbook_refs"
+      ],
+      "type": "object"
+    },
+    "Hex32": {
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "type": "string"
+    },
+    "LegalBasis": {
+      "enum": [
+        "consent",
+        "public-task",
+        "legitimate-interest",
+        "contract",
+        "legal-obligation"
+      ],
+      "type": "string"
+    },
+    "LifecycleCase": {
+      "additionalProperties": false,
+      "properties": {
+        "caseId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "caseType": {
+          "$ref": "#/$defs/LifecycleCaseType"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "resolution": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resourceId": {
+          "type": "string"
+        },
+        "resourceKind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        },
+        "retentionPolicyId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/LifecycleCaseStatus"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tombstonePublication": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TombstonePublicationRule"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "caseId",
+        "dataSubject",
+        "caseType",
+        "resourceKind",
+        "resourceId",
+        "status",
+        "summary",
+        "createdAt",
+        "updatedAt"
+      ],
+      "type": "object"
+    },
+    "LifecycleCaseList": {
+      "additionalProperties": false,
+      "properties": {
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/LifecycleCase"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "cases"
+      ],
+      "type": "object"
+    },
+    "LifecycleCaseRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "case_type": {
+          "$ref": "#/$defs/LifecycleCaseType"
+        },
+        "resolution": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resource_kind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        },
+        "retention_policy_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "status": {
+          "$ref": "#/$defs/LifecycleCaseStatus"
+        },
+        "summary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tombstone_publication": {
+          "$ref": "#/$defs/TombstonePublicationRule"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_type",
+        "resource_kind",
+        "resource_id",
+        "status",
+        "summary"
+      ],
+      "type": "object"
+    },
+    "LifecycleCaseStatus": {
+      "enum": [
+        "open",
+        "under-review",
+        "resolved",
+        "rejected",
+        "tombstoned"
+      ],
+      "type": "string"
+    },
+    "LifecycleCaseType": {
+      "enum": [
+        "correction",
+        "dispute",
+        "tombstone"
+      ],
+      "type": "string"
+    },
+    "LifecycleEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "eventId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "eventType": {
+          "$ref": "#/$defs/LifecycleEventType"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "resourceId": {
+          "type": "string"
+        },
+        "resourceKind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        }
+      },
+      "required": [
+        "eventId",
+        "dataSubject",
+        "eventType",
+        "resourceKind",
+        "resourceId",
+        "reason",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "LifecycleEventList": {
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "items": {
+            "$ref": "#/$defs/LifecycleEvent"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "events"
+      ],
+      "type": "object"
+    },
+    "LifecycleEventRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "event_type": {
+          "$ref": "#/$defs/LifecycleEventType"
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "resource_kind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "resource_kind",
+        "resource_id",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "LifecycleEventType": {
+      "enum": [
+        "exported",
+        "retention-reviewed",
+        "correction-requested",
+        "dispute-opened",
+        "tombstone-recorded"
+      ],
+      "type": "string"
+    },
+    "LifecycleResourceKind": {
+      "enum": [
+        "xapi-statement",
+        "consent-grant",
+        "data-product",
+        "metadata-export"
+      ],
+      "type": "string"
+    },
+    "MetadataExport": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/PdsSubjectAgent"
+        },
+        "actorIfi": {
+          "type": "string"
+        },
+        "consentGrants": {
+          "items": {
+            "$ref": "#/$defs/ConsentGrant"
+          },
+          "type": "array"
+        },
+        "dataProducts": {
+          "items": {
+            "$ref": "#/$defs/DataProduct"
+          },
+          "type": "array"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "governanceProfiles": {
+          "items": {
+            "$ref": "#/$defs/GovernanceProfile"
+          },
+          "type": "array"
+        },
+        "lifecycleCases": {
+          "items": {
+            "$ref": "#/$defs/LifecycleCase"
+          },
+          "type": "array"
+        },
+        "lifecycleEvents": {
+          "items": {
+            "$ref": "#/$defs/LifecycleEvent"
+          },
+          "type": "array"
+        },
+        "recordInventory": {
+          "$ref": "#/$defs/RecordInventory"
+        },
+        "retentionPolicies": {
+          "items": {
+            "$ref": "#/$defs/RetentionPolicy"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataSubject",
+        "actor",
+        "actorIfi",
+        "generatedAt",
+        "recordInventory",
+        "consentGrants",
+        "dataProducts",
+        "lifecycleEvents",
+        "retentionPolicies",
+        "lifecycleCases",
+        "governanceProfiles"
+      ],
+      "type": "object"
+    },
+    "PdsSubjectAgent": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "additionalProperties": false,
+          "properties": {
+            "homePage": {
+              "format": "uri",
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "homePage",
+            "name"
+          ],
+          "type": "object"
+        },
+        "objectType": {
+          "const": "Agent",
+          "type": "string"
+        }
+      },
+      "required": [
+        "objectType",
+        "account"
+      ],
+      "type": "object"
+    },
+    "PolicyAction": {
+      "enum": [
+        "write",
+        "read",
+        "delegate",
+        "revoke",
+        "compute",
+        "release",
+        "audit"
+      ],
+      "type": "string"
+    },
+    "PolicyDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "type": "string"
+    },
+    "PortabilityExport": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/PdsSubjectAgent"
+        },
+        "actorIfi": {
+          "type": "string"
+        },
+        "auditReference": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "consentGrants": {
+          "items": {
+            "$ref": "#/$defs/ConsentGrant"
+          },
+          "type": "array"
+        },
+        "dataProducts": {
+          "items": {
+            "$ref": "#/$defs/DataProduct"
+          },
+          "type": "array"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "governanceProfiles": {
+          "items": {
+            "$ref": "#/$defs/GovernanceProfile"
+          },
+          "type": "array"
+        },
+        "lifecycleCases": {
+          "items": {
+            "$ref": "#/$defs/LifecycleCase"
+          },
+          "type": "array"
+        },
+        "lifecycleEvents": {
+          "items": {
+            "$ref": "#/$defs/LifecycleEvent"
+          },
+          "type": "array"
+        },
+        "nextCursor": {
+          "type": "string"
+        },
+        "retentionPolicies": {
+          "items": {
+            "$ref": "#/$defs/RetentionPolicy"
+          },
+          "type": "array"
+        },
+        "statements": {
+          "items": {
+            "$ref": "#/$defs/PortabilityStatement"
+          },
+          "maxItems": 100,
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataSubject",
+        "actor",
+        "actorIfi",
+        "generatedAt",
+        "auditReference",
+        "statements",
+        "consentGrants",
+        "dataProducts",
+        "lifecycleEvents",
+        "retentionPolicies",
+        "lifecycleCases",
+        "governanceProfiles"
+      ],
+      "type": "object"
+    },
+    "PortabilityStatement": {
+      "additionalProperties": false,
+      "properties": {
+        "statement": {
+          "additionalProperties": true,
+          "description": "Stored accepted Statement JSON without typed DTO reprojection.",
+          "type": "object"
+        },
+        "statementId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "storedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "voided": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "statementId",
+        "storedAt",
+        "voided",
+        "statement"
+      ],
+      "type": "object"
+    },
+    "PrincipalRole": {
+      "enum": [
+        "data-subject",
+        "data-custodian",
+        "policy-authority",
+        "analyst",
+        "auditor",
+        "computation-participant"
+      ],
+      "type": "string"
+    },
+    "ProviderBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactDigest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "bindingDigest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "bindingId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "capability": {
+          "$ref": "#/$defs/SecretComputeProviderCapability"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "evidenceGate": {
+          "$ref": "#/$defs/SecretComputeProviderEvidenceGate"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/ConfidentialMechanismKind"
+        },
+        "ownerSubject": {
+          "type": "string"
+        },
+        "parameterSetDigest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "productionClaimRequested": {
+          "type": "boolean"
+        },
+        "productionReady": {
+          "type": "boolean"
+        },
+        "profile": {
+          "$ref": "#/$defs/SecretComputeProviderProfile"
+        },
+        "providerIdDigest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "providerKind": {
+          "$ref": "#/$defs/SecretComputeProviderKind"
+        },
+        "releaseGate": {
+          "$ref": "#/$defs/SecretComputeProviderReleaseGate"
+        },
+        "reviewEvidenceDigest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "runtimeClass": {
+          "$ref": "#/$defs/SecretComputeProviderRuntimeClass"
+        }
+      },
+      "required": [
+        "bindingId",
+        "ownerSubject",
+        "mechanism",
+        "providerKind",
+        "capability",
+        "profile",
+        "providerIdDigest",
+        "artifactDigest",
+        "productionClaimRequested",
+        "bindingDigest",
+        "evidenceGate",
+        "releaseGate",
+        "runtimeClass",
+        "productionReady",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "ProviderBindingList": {
+      "additionalProperties": false,
+      "properties": {
+        "providerBindings": {
+          "items": {
+            "$ref": "#/$defs/ProviderBinding"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "providerBindings"
+      ],
+      "type": "object"
+    },
+    "ProviderBindingRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_digest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "binding_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "capability": {
+          "$ref": "#/$defs/SecretComputeProviderCapability"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/ConfidentialMechanismKind"
+        },
+        "parameter_set_digest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "production_claim_requested": {
+          "type": "boolean"
+        },
+        "profile": {
+          "$ref": "#/$defs/SecretComputeProviderProfile"
+        },
+        "provider_id_digest": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "provider_kind": {
+          "$ref": "#/$defs/SecretComputeProviderKind"
+        },
+        "review_evidence_digest": {
+          "$ref": "#/$defs/Hex32"
+        }
+      },
+      "required": [
+        "binding_id",
+        "mechanism",
+        "provider_kind",
+        "capability",
+        "profile",
+        "provider_id_digest",
+        "artifact_digest",
+        "production_claim_requested"
+      ],
+      "type": "object"
+    },
+    "RecordInventory": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/PdsSubjectAgent"
+        },
+        "actorIfi": {
+          "type": "string"
+        },
+        "dataProducts": {
+          "items": {
+            "$ref": "#/$defs/DataProduct"
+          },
+          "type": "array"
+        },
+        "dataSubject": {
+          "type": "string"
+        },
+        "statementRecords": {
+          "items": {
+            "$ref": "#/$defs/StatementInventoryRecord"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dataSubject",
+        "actor",
+        "actorIfi",
+        "statementRecords",
+        "dataProducts"
+      ],
+      "type": "object"
+    },
+    "ReleaseArtifactKind": {
+      "enum": [
+        "threshold-release",
+        "differential-privacy-release",
+        "shamir-threshold-reconstruction"
+      ],
+      "type": "string"
+    },
+    "ReleaseArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "$ref": "#/$defs/Hex32"
+        },
+        "kind": {
+          "$ref": "#/$defs/ReleaseArtifactKind"
+        }
+      },
+      "required": [
+        "kind",
+        "artifactId"
+      ],
+      "type": "object"
+    },
+    "ResourceClass": {
+      "enum": [
+        "raw-learning-record",
+        "personal-data-store",
+        "aggregate-insight",
+        "audit-evidence",
+        "confidential-computation"
+      ],
+      "type": "string"
+    },
+    "RetentionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "dataClass": {
+          "$ref": "#/$defs/DataClass"
+        },
+        "description": {
+          "type": "string"
+        },
+        "legalBasis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "ownerSubject": {
+          "type": "string"
+        },
+        "policyId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "resourceKind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        },
+        "retentionPeriodDays": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "reviewIntervalDays": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tombstoneAfterDays": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "tombstonePublication": {
+          "$ref": "#/$defs/TombstonePublicationRule"
+        }
+      },
+      "required": [
+        "policyId",
+        "ownerSubject",
+        "resourceKind",
+        "dataClass",
+        "retentionPeriodDays",
+        "reviewIntervalDays",
+        "tombstonePublication",
+        "legalBasis",
+        "description",
+        "createdAt"
+      ],
+      "type": "object"
+    },
+    "RetentionPolicyList": {
+      "additionalProperties": false,
+      "properties": {
+        "policies": {
+          "items": {
+            "$ref": "#/$defs/RetentionPolicy"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "policies"
+      ],
+      "type": "object"
+    },
+    "RetentionPolicyRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "data_class": {
+          "$ref": "#/$defs/DataClass"
+        },
+        "description": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "legal_basis": {
+          "$ref": "#/$defs/LegalBasis"
+        },
+        "policy_id": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "resource_kind": {
+          "$ref": "#/$defs/LifecycleResourceKind"
+        },
+        "retention_period_days": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "review_interval_days": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tombstone_after_days": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tombstone_publication": {
+          "$ref": "#/$defs/TombstonePublicationRule"
+        }
+      },
+      "required": [
+        "policy_id",
+        "resource_kind",
+        "data_class",
+        "retention_period_days",
+        "review_interval_days",
+        "tombstone_publication",
+        "legal_basis",
+        "description"
+      ],
+      "type": "object"
+    },
+    "SecretComputeProviderCapability": {
+      "enum": [
+        "secret-custody",
+        "tee-attestation",
+        "fhe-evaluation",
+        "psi-evaluation",
+        "threshold-signing",
+        "reference-fixtures"
+      ],
+      "type": "string"
+    },
+    "SecretComputeProviderEvidenceGate": {
+      "enum": [
+        "reference-fixture",
+        "external-non-production",
+        "external-reviewed"
+      ],
+      "type": "string"
+    },
+    "SecretComputeProviderKind": {
+      "enum": [
+        "reference-primitive",
+        "secret-custody",
+        "trusted-execution-environment",
+        "fully-homomorphic-encryption",
+        "private-set-intersection",
+        "threshold-cryptography"
+      ],
+      "type": "string"
+    },
+    "SecretComputeProviderProfile": {
+      "enum": [
+        "kiva-reference-primitives-v1",
+        "kiva-secret-compute-provider-contract-v1"
+      ],
+      "type": "string"
+    },
+    "SecretComputeProviderReleaseGate": {
+      "enum": [
+        "fixture-only",
+        "non-production",
+        "production"
+      ],
+      "type": "string"
+    },
+    "SecretComputeProviderRuntimeClass": {
+      "enum": [
+        "reference",
+        "external-non-production",
+        "external-reviewed-production"
+      ],
+      "type": "string"
+    },
+    "StatementInventoryRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "actorIfi": {
+          "type": "string"
+        },
+        "objectId": {
+          "format": "uri",
+          "type": "string"
+        },
+        "statementId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "storedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "verbId": {
+          "format": "uri",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "statementId",
+        "actorIfi",
+        "verbId",
+        "objectId",
+        "storedAt",
+        "version"
+      ],
+      "type": "object"
+    },
+    "TombstonePublicationRule": {
+      "enum": [
+        "metadata-only",
+        "subject-visible",
+        "public-redacted"
+      ],
+      "type": "string"
+    },
+    "Uuid": {
+      "format": "uuid",
+      "type": "string"
+    }
+  },
+  "$id": "urn:kiva:pds:openapi-component-schemas",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Kiva PDS OpenAPI component schemas"
+}

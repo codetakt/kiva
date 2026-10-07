@@ -1,0 +1,89 @@
+schema_version: 1
+kind: kiva-compatibility-deletion-readiness-report
+status: active
+source_ledger: spec/architecture/compatibility-surfaces.yaml
+summary:
+  entry_count: 6
+  retained_count: 0
+  deletion_ready_count: 0
+  blocked_count: 0
+  removed_count: 6
+entries:
+- id: confidential-root-primitive-reexports
+  owner: crates/kiva-confidential/src/lib.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: kiva_confidential::{primitive,mechanism}
+  retirement_milestone: compat-cc-root-reexports
+  retained_surface_count: 2
+  forbidden_pattern_count: 1
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed
+- id: confidential-integrated-namespace
+  owner: crates/kiva-confidential/src/mechanism/mod.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: kiva_confidential::mechanism::{additive,shamir,threshold,workflow,psi,tee,frost,fhe,provider,registry}
+  retirement_milestone: compat-cc-integrated-namespace
+  retained_surface_count: 1
+  forbidden_pattern_count: 2
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed
+- id: policy-root-reexports
+  owner: crates/kiva-policy/src/lib.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: kiva_policy::policy
+  retirement_milestone: compat-policy-root-reexports
+  retained_surface_count: 1
+  forbidden_pattern_count: 1
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed
+- id: pds-request-aliases
+  owner: crates/kiva-pds/src/pds/requests.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: kiva_pds::pds::{ConsentGrantCommandInput,ConsentRevocationCommandInput,DataProductRegistrationCommandInput,DataProductReadIntent,ProviderBindingRegistrationCommandInput,AccessCheckIntent,LifecycleEventCommandInput,RetentionPolicyCommandInput,LifecycleCaseCommandInput,GovernanceProfileCommandInput}
+  retirement_milestone: compat-pds-request-aliases
+  retained_surface_count: 1
+  forbidden_pattern_count: 10
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed
+- id: secret-provider-compat-reexports
+  owner: crates/kiva-confidential/src/mechanism/provider.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: kiva_secret_provider_contract
+  retirement_milestone: compat-secret-provider-reexports
+  retained_surface_count: 1
+  forbidden_pattern_count: 6
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed
+- id: server-test-helper-owner
+  owner: crates/kiva-server/src/tests.rs
+  status: removed
+  next_status: null
+  readiness: removed
+  migration_target: crates/kiva-server/src/tests/helpers/
+  retirement_milestone: compat-server-test-helper-owner
+  retained_surface_count: 1
+  forbidden_pattern_count: 1
+  blockers: []
+  gates:
+  - id: removed-surface-recorded
+    status: passed

@@ -1,0 +1,66 @@
+name: CI - Core
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-core-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NIX_CONFIG: experimental-features = nix-command flakes
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: Core Checks & Server Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          free-disk: "true"
+          enable-flakehub-cache: "true"
+
+      - name: Pre-commit baseline
+        run: nix build .#checks.x86_64-linux.pre-commit-check --print-build-logs
+
+      - name: Build core checks
+        run: |
+          nix build \
+            .#checks.x86_64-linux.fmt \
+            .#checks.x86_64-linux.clippy \
+            .#checks.x86_64-linux.tests \
+            .#checks.x86_64-linux.docs \
+            .#checks.x86_64-linux.cargo-deny \
+            .#checks.x86_64-linux.database-migrations \
+            .#checks.x86_64-linux.openapi-contract \
+            .#checks.x86_64-linux.confidential-computation-assurance \
+            .#checks.x86_64-linux.pds-publication-readiness \
+            --print-build-logs
+
+      - name: Build server package
+        run: |
+          nix build .#default --print-build-logs --out-link result-server
+          mkdir -p artifacts/server
+          cp -R --dereference result-server/. artifacts/server/
+
+      - name: Upload server package
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiva-server
+          path: artifacts/server/
+          retention-days: 7

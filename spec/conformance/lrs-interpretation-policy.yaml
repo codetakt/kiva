@@ -1,0 +1,581 @@
+schema_version: 1
+profile: xapi-lrs-ieee-2023-interpretation-3
+published_source_record: spec/conformance/lrs-published-source.yaml
+scope: Six published/public LRS issues plus explicit cross-review judgments; classifications are not an
+  exhaustive obligation inventory
+principles:
+  authority: Read the published IEEE 2023 text with its common conditions; public corrections are declared
+    project interpretations until official status is established
+  coherence: Prefer the smallest interpretation that preserves the resource scope, dispatch semantics
+    and explicit requirements together
+  specific_scope: Apply a resource-specific body definition to that method; do not turn a general media-type
+    sentence into a different resource operation
+  strength: Preserve shall/should/may and their conditions; permitted alternatives and recommendations
+    are not unconditional failures
+  independence: Expected outcomes come from source reasoning, never from Kiva observed behavior
+  evidence: Preserve raw outcomes and failures; identify interpretation dependencies, including setup
+    and observation steps
+  reporting: No registered dependency means that the registered judgments were not identified, not definitive
+    conformance
+  identity: Qualify historical execution only when its report, case files and runner contracts are bound
+    to a supplied evidence receipt
+decisions:
+- id: state-list-selectors
+  finding: state-list-selectors
+  status: project-adopted
+  chosen_rule: Omit stateId for list GET/HEAD; supplying it selects a single document. since restricts
+    a list and does not select a single document
+  rationale: Section 4.1.6.2 explicitly defines dispatch by stateId presence; this agrees with the multiple-GET
+    description and multiple-DELETE table. The contradictory required cell would eliminate the list without
+    since The unreconciled required/forbidden condition exists only when both stateId and since are absent;
+    chapter 5 repeats it.
+  rejected_reading: Require stateId for a multiple-document GET without since
+  official_adjudication: not-established
+  request_selectors:
+  - methods:
+    - GET
+    - HEAD
+    path: /activities/state
+    query_absent:
+    - stateId
+    - since
+    expected_statuses:
+    - 200
+  excluded_condition: GET/HEAD with stateId absent AND since absent
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    lines:
+    - 3990
+    - 4003
+    pdf_page: 63
+    printed_page: 62
+    byte_start: 259198
+    byte_length: 1143
+    sha256: 1a790efad447a9a9b429e07a4928e9d19d9c01ae66f6d2608941ee1da4f03cdf
+- id: activity-profile-list-scope
+  finding: activity-profile-list-scope
+  status: project-adopted
+  chosen_rule: Select Activity Profile lists with activityId; omit profileId for the list and use since
+    only as an optional exclusive time filter
+  rationale: PDF 5.1.6.6.5 explicitly requires activityId and makes since optional. Read the chapter 4
+    Agent cell through this redundant table; no condition is excluded.
+  rejected_reading: Require agent to list Activity Profile documents
+  official_adjudication: not-established
+  request_selectors:
+  - methods:
+    - GET
+    - HEAD
+    path: /activities/profile
+    query_absent:
+    - profileId
+    expected_statuses:
+    - 200
+  source_route: in-scope-pdf
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    lines:
+    - 3375
+    - 3378
+    pdf_page: 54
+    printed_page: 53
+    byte_start: 219292
+    byte_length: 352
+    sha256: 0d0f1079902a40a4a4599414340e74060cd87818014e3796a088fa01164f9b6f
+  - source: ieee-pdf-extracted
+    lines:
+    - 4330
+    - 4345
+    pdf_page: 68
+    printed_page: 67
+    byte_start: 277953
+    byte_length: 873
+    sha256: ddee322819417f57f36e39345bb937a91a086cdba775b37388b9e127f6a2a493
+- id: formatted-identifiers
+  finding: formatted-identifiers
+  status: project-adopted
+  chosen_rule: Validate required identifier syntax, including scheme, mailto form and standard UUID string
+    form; do not require resolution, resource existence or real-world identity validation
+  rationale: Explicit format-rejection rules and the phrase data format, not values can both be retained
+    under this reading. The permission is not silently converted into mandatory resolution or a particular
+    UUID variant
+  rejected_reading: Treat the permission as waiving all identifier syntax checks
+  official_adjudication: not-established
+  table_formats:
+  - uuid
+  - iri
+  - irl
+  - uri
+  - mailto
+  - extensions
+  - iri-array
+  explicit_cases:
+  - statement-post-rejects-extension-key-that-is-not-iri
+  - statement-post-rejects-invalid-verb-iri
+  - statement-post-rejects-non-uuid-statement-id
+  query_literals:
+    activityId:
+    - ''
+    - no-scheme
+    - https://invalid host/a
+    registration:
+    - ''
+    - not-a-uuid
+  selector_limit: Table format-value probes only; iri-array selects invalid string content, not null or
+    numeric items. Query literals conservatively retain the source-scope question rather than claim a
+    syntax waiver
+- id: put-single-and-batches
+  finding: put-single-and-batches
+  status: project-adopted
+  chosen_rule: Require valid single-Statement PUT and single/batch POST; do not infer an unconditional
+    PUT-array rejection obligation
+  rationale: Single PUT is explicit in section 4.1.6.1.1 and batch POST is explicit in section 4.1.6.1.2.
+    The general media-type batch wording does not settle the treatment of a PUT array
+  rejected_reading: Declare every implementation accepting a PUT batch nonconformant solely because of
+    the single PUT summary
+  official_adjudication: not-established
+  request_selectors:
+  - methods:
+    - PUT
+    path: /statements
+    body_type: array
+  unresolved_probe: Current cases do not necessarily exercise PUT arrays. A missing probe is reported
+    as not exercised, never as acceptance or rejection established. Multipart PUT batches also require
+    a dedicated probe
+- id: case-equivalence-and-iri-comparison
+  finding: case-equivalence-and-iri-comparison
+  status: project-adopted
+  chosen_rule: Keep JSON keys and vocabulary values case sensitive and permitted RFC3987 comparisons.
+    Exclude only the conflicted signature mbox-case equivalence status leaf from the conformance verdict;
+    record its actual status diagnostically. Other headers and crypto assertions remain required.
+  rationale: RFC 3987 simple comparison and syntax normalization do not authorize unrestricted lowercasing
+    of an IRI path or an email local part. The broad Statement Case exclusion cannot silently override
+    every identifier comparison rule
+  rejected_reading: Lowercase all identifiers or treat JSON property-name case variants as valid
+  official_adjudication: not-established
+  explicit_cases:
+  - signature-equivalence-excludes-case
+  unresolved_probe: Full RFC comparison boundaries and the scope of the Statement Case exclusion remain
+    separate review work
+- id: related-activities-public-correction
+  finding: related-activities-public-correction
+  status: project-adopted
+  chosen_rule: With related_activities=true, apply the Activity filter to Object, contextActivities and
+    contained SubStatements; related_agents separately expands the Agent filter
+  rationale: PDF 5.1 declares its tables redundant with 4.1. PDF 5.1.6.1 defines the Activity filter explicitly;
+    read the chapter 4 duplicated Agent prose through this chapter 5 row. No external overlay is required.
+  rejected_reading: Give related_activities the same Agent-filter meaning as related_agents
+  official_adjudication: not-established
+  request_selectors:
+  - methods:
+    - GET
+    - HEAD
+    path: /statements
+    query_equals:
+      related_activities: 'true'
+  source_route: in-scope-pdf
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    lines:
+    - 3375
+    - 3378
+    pdf_page: 54
+    printed_page: 53
+    byte_start: 219292
+    byte_length: 352
+    sha256: 0d0f1079902a40a4a4599414340e74060cd87818014e3796a088fa01164f9b6f
+  - source: ieee-pdf-extracted
+    lines:
+    - 3755
+    - 3765
+    pdf_page: 60
+    printed_page: 59
+    byte_start: 243014
+    byte_length: 1133
+    sha256: 5fb3880e44f546fe03161f83171ae80f17658ff17a34f1b9282cda345613df40
+  historical_id_note: Stable id retained; prior overlay rationale superseded.
+release_conditions:
+  interpretation_profile: Record this exact profile and its digest in results; changing a decision requires
+    reviewing affected expectations and new evidence
+  projection: Review atomic LRS duties with actor, strength, conditions and actual assertions; broad groups
+    and heading counts alone do not close coverage
+  execution: Discharge applicable controlled-clock, delayed-visibility, policy and normative-reference
+    procedures; distinguish not run from failed
+  oracle_checks: Use positive/negative and preservation checks plus meaningful mutation controls; never
+    loosen an expectation to match Kiva
+  claim: Report success only for the executed scope under the named interpretation profile. A raw all-pass
+    HTTP result alone is not a whole-standard completeness verdict
+additional_judgments:
+- id: state-delete-without-registration
+  finding: R4
+  status: project-adopted
+  public_source_lines:
+  - 498
+  - 508
+  - 514
+  - 525
+  actor: LRS
+  chosen_rule: For State lists and multiple DELETE, absent registration selects every registration in
+    the specified Activity/Agent context; present registration restricts the scope to that registration.
+    Other Agents and Activities remain outside the scope.
+  rationale: The optional qualifier [+ registration if specified] restricts the context only when supplied.
+    Treating absence as an implicit null-registration selector adds a restriction the summary does not
+    state. This is a source judgment rather than an official adjudication. The identical qualifier in
+    the multiple GET summary (line 498) receives the same reading; applying a different default to list
+    and delete would be incoherent.
+  rejected_reading: Interpret omitted registration as listing or deleting only unregistered state
+  official_adjudication: not-established
+  explicit_cases:
+  - state-delete-all-all-registrations
+  - state-delete-all-registered
+  - state-list-scope-all-registrations
+  - state-list-scope-registered
+- id: attachment-return-order
+  finding: R5
+  status: project-adopted
+  public_source_lines:
+  - 351
+  - 384
+  - 837
+  - 880
+  - 1044
+  - 1198
+  actor: LRS
+  chosen_rule: Default/exact returns the ordered Attachment metadata array as received. attachments=true
+    includes all raw data needed for attachments without fileUrl. MIME data-part order is not fixed. Attachment
+    differences do not affect logical equivalence or signature equivalence.
+  rationale: The project reads the explicit Ordered array type at lines 880/1044 as making metadata sequence
+    part of returned data. The Any attachments exemption explicitly governs logical equivalence and preservation
+    as described above (immutability); this judgment does not extend it to retrieval ordering or required
+    MIME completeness. Line 351 only enumerates Agent/Activity/Verb/Group and is not asserted to explicitly
+    cover Attachment Objects. Preserving received Attachment order is a declared project interpretation
+    of the table and retrieval contract, to be adjudicated in this re-review, not an official IEEE resolution.
+    Line 1198 says return serialization may differ for properties excepted by Section 4.2. Reading that
+    exception as incorporating the Any attachments item in line 837 into retrieval is the strongest contrary
+    reading; it could permit metadata array reordering. This candidate retains the ordered-array reading
+    as a declared project interpretation, with this contrary evidence disclosed. The unconditional requirement
+    to return all required raw Attachment parts (line 384) remains independent of the order judgment.
+  rejected_reading: Use the logical-immutability exemption to permit reordered exact response metadata
+    or missing required MIME parts
+  official_adjudication: not-established
+  explicit_cases:
+  - attachment-two-file-urls
+  - attachment-two-multipart
+- id: relevant-types-empty
+  finding: R9
+  status: project-adopted
+  public_source_lines:
+  - 1082
+  - 1083
+  - 1098
+  - 1111
+  - 1124
+  actor: LRS
+  chosen_rule: 'Require 400 for present relevantTypes: []; omission denotes the generic zero-relationship
+    case. A present property requires one or more IRIs.'
+  rationale: The zero-or-more prose covers absence; the optional property table requires one-or-more when
+    present. This coherent reading preserves both texts and supersedes interpretation-1 acceptance/rejection
+    alternatives.
+  rejected_reading: Treat the zero-or-more prose as permission for a present empty array, disregarding
+    the property-specific one-or-more table.
+  official_adjudication: not-established
+  explicit_cases:
+  - context-agent-context-contextAgents-0-relevantTypes-value-0
+  - context-group-context-contextGroups-0-relevantTypes-value-0
+  - context-agent-object-context-contextAgents-0-relevantTypes-value-0
+  - context-group-object-context-contextGroups-0-relevantTypes-value-0
+- id: other-empty-arrays
+  finding: R9
+  status: project-adopted
+  public_source_lines:
+  - 880
+  - 903
+  - 911
+  - 963
+  - 964
+  - 1044
+  - 1081
+  - 1082
+  - 1083
+  actor: LRS
+  chosen_rule: Accept empty arrays where the table specifies an array/list without a minimum cardinality.
+    Anonymous Group still needs member, identified Group still needs its IFI, and required property presence
+    remains independently enforced.
+  rationale: Statement/SubStatement attachments, Group member, Context relationship arrays and Context
+    Activities list values specify no nonempty minimum. CorrectResponsesPattern/components also specify
+    no minimum and their optional interaction semantic validation does not add one. This is a per-table
+    cardinality judgment; [] is not null or a missing property.
+  rejected_reading: Invent a nonempty minimum for every array from ordinary-language list/collection wording
+  official_adjudication: not-established
+  explicit_cases:
+  - context-activities-array-parent-0array
+  - context-activities-array-grouping-0array
+  - context-activities-array-category-0array
+  - context-activities-array-other-0array
+  - statement-root-attachments-empty-array-accepted
+  - identified-group-actor-member-empty-array-accepted
+  - anonymous-group-actor-member-empty-array-accepted
+  - identified-group-authority-member-empty-array-accepted
+  - anonymous-group-authority-member-empty-array-accepted
+  - identified-group-object-member-empty-array-accepted
+  - anonymous-group-object-member-empty-array-accepted
+  - identified-group-context-instructor-member-empty-array-accepted
+  - anonymous-group-context-instructor-member-empty-array-accepted
+  - identified-group-context-team-member-empty-array-accepted
+  - anonymous-group-context-team-member-empty-array-accepted
+  - identified-group-context-contextGroups-0-group-member-empty-array-accepted
+  - anonymous-group-context-contextGroups-0-group-member-empty-array-accepted
+  - interaction-object-definition-correctResponsesPattern-empty-array-accepted
+  - interaction-object-definition-choices-empty-array-accepted
+  - interaction-object-definition-scale-empty-array-accepted
+  - interaction-object-definition-source-empty-array-accepted
+  - interaction-object-definition-target-empty-array-accepted
+  - interaction-object-definition-steps-empty-array-accepted
+  - substatement-object-attachments-empty-array-accepted
+  - context-context-contextAgents-empty-array-accepted
+  - context-context-contextGroups-empty-array-accepted
+  - context-activities-context-contextActivities-parent-empty-array-accepted
+  - context-activities-context-contextActivities-grouping-empty-array-accepted
+  - context-activities-context-contextActivities-category-empty-array-accepted
+  - context-activities-context-contextActivities-other-empty-array-accepted
+  - context-object-context-contextAgents-empty-array-accepted
+  - context-object-context-contextGroups-empty-array-accepted
+  - identified-group-object-actor-member-empty-array-accepted
+  - anonymous-group-object-actor-member-empty-array-accepted
+  - identified-group-object-object-member-empty-array-accepted
+  - anonymous-group-object-object-member-empty-array-accepted
+  - identified-group-object-context-instructor-member-empty-array-accepted
+  - anonymous-group-object-context-instructor-member-empty-array-accepted
+  - identified-group-object-context-team-member-empty-array-accepted
+  - anonymous-group-object-context-team-member-empty-array-accepted
+  - identified-group-object-context-contextGroups-0-group-member-empty-array-accepted
+  - anonymous-group-object-context-contextGroups-0-group-member-empty-array-accepted
+  - interaction-object-object-definition-correctResponsesPattern-empty-array-accepted
+  - interaction-object-object-definition-choices-empty-array-accepted
+  - interaction-object-object-definition-scale-empty-array-accepted
+  - interaction-object-object-definition-source-empty-array-accepted
+  - interaction-object-object-definition-target-empty-array-accepted
+  - interaction-object-object-definition-steps-empty-array-accepted
+  - context-activities-object-context-contextActivities-parent-empty-array-accepted
+  - context-activities-object-context-contextActivities-grouping-empty-array-accepted
+  - context-activities-object-context-contextActivities-category-empty-array-accepted
+  - context-activities-object-context-contextActivities-other-empty-array-accepted
+  table_anchors:
+  - line: 880
+    property: attachments
+    source_sha256: e2f9b83e6b4c9c8071f8ee1768dc5dc0a7ba00b3b8e5764b26e42bb0878515e8
+  - line: 903
+    property: member
+    source_sha256: abeb6d9d7e9eb3ac5371a60bff07964c6bd6ac64cfe80b05d60115686b2ed992
+  - line: 911
+    property: member
+    source_sha256: 3eeaa76241eec6f6024a97e465e23c8447e5b22f3b957c7d7a79904ec270eebd
+  - line: 963
+    property: correctResponsesPattern
+    source_sha256: eb735deed02107260a8c386dac34dc6effffedf0f9434f7df50dc6e47e700fa6
+  - line: 964
+    property: choices, scale, source, target, or steps
+    source_sha256: 7805e76717ab071548155aab7f5c3d6262427ddf86748439b7144b5fb6c63733
+  - line: 1044
+    property: attachments
+    source_sha256: e2f9b83e6b4c9c8071f8ee1768dc5dc0a7ba00b3b8e5764b26e42bb0878515e8
+  - line: 1081
+    property: contextActivities
+    source_sha256: 9c48d610291fc2ad0e77c56744c082eb0929683e8d7e26f51d98bc2b78497c64
+  - line: 1082
+    property: contextAgents
+    source_sha256: 0c3294ebccdfed63673bf124c9fc8f0ce7aabf064c2034a7a3c9aea7f3c57732
+  - line: 1083
+    property: contextGroups
+    source_sha256: ae2d12f3ee231d416041c9b45805a2f00f3539c63e715820a4381dc7cf40683b
+- id: canonical-maintained-inventory
+  finding: R10
+  status: project-adopted
+  public_source_lines:
+  - 353
+  - 406
+  - 407
+  - 408
+  - 409
+  - 1221
+  - 1225
+  actor: LRS
+  chosen_rule: Automated canonical probes check identity and one-language cardinality of returned Activity
+    maps. Which values/maps are available and language preference selection are checked against the declared
+    maintained inventory in canonical-language-negotiation.
+  rationale: The canonical definition is determined by the LRS; definition incorporation is SHOULD and
+    permission-dependent. Submitted metadata alone does not establish the maintained canonical inventory.
+    Direct cardinality remains mandatory when a map is returned.
+  rejected_reading: Assume every submitted definition is the canonical definition
+  official_adjudication: not-established
+  explicit_cases:
+  - statement-get-format-canonical-selects-accept-language
+- id: interaction-common-structure
+  finding: R11
+  status: project-adopted
+  public_source_lines:
+  - 849
+  - 852
+  - 859
+  - 1204
+  actor: LRS
+  chosen_rule: Duplicate properties, null outside extensions, and wrong key case are mandatory rejection
+    at all interaction/component placements. Interaction-specific remaining-property validity stays optional.
+  rationale: Clause 4.2.1 states these unconditional common rules. The later MAY permits optional interaction-specific
+    validation; it does not authorize malformed common JSON structure. All 48 prior optional structural
+    probes now require 400.
+  rejected_reading: Treat optional interaction validation as permission to ignore common null/duplicate/key-case
+    prohibitions
+  official_adjudication: not-established
+  explicit_cases:
+  - interaction-object-definition-interactionType-null
+  - interaction-object-definition-interactionType-key-case
+  - interaction-object-definition-interactionType-duplicate
+  - interaction-object-definition-correctResponsesPattern-null
+  - interaction-object-definition-correctResponsesPattern-key-case
+  - interaction-object-definition-correctResponsesPattern-duplicate
+  - interaction-object-definition-choices-null
+  - interaction-object-definition-choices-key-case
+  - interaction-object-definition-choices-duplicate
+  - interaction-object-definition-scale-null
+  - interaction-object-definition-scale-key-case
+  - interaction-object-definition-scale-duplicate
+  - interaction-object-definition-source-null
+  - interaction-object-definition-source-key-case
+  - interaction-object-definition-source-duplicate
+  - interaction-object-definition-target-null
+  - interaction-object-definition-target-key-case
+  - interaction-object-definition-target-duplicate
+  - interaction-object-definition-steps-null
+  - interaction-object-definition-steps-key-case
+  - interaction-object-definition-steps-duplicate
+  - component-object-definition-choices-0-id-null
+  - component-object-definition-choices-0-id-key-case
+  - component-object-definition-choices-0-id-duplicate
+  - component-object-definition-choices-0-description-null
+  - component-object-definition-choices-0-description-key-case
+  - component-object-definition-choices-0-description-duplicate
+  - interaction-object-object-definition-interactionType-null
+  - interaction-object-object-definition-interactionType-key-case
+  - interaction-object-object-definition-interactionType-duplicate
+  - interaction-object-object-definition-correctResponsesPattern-null
+  - interaction-object-object-definition-correctResponsesPattern-key-case
+  - interaction-object-object-definition-correctResponsesPattern-duplicate
+  - interaction-object-object-definition-choices-null
+  - interaction-object-object-definition-choices-key-case
+  - interaction-object-object-definition-choices-duplicate
+  - interaction-object-object-definition-scale-null
+  - interaction-object-object-definition-scale-key-case
+  - interaction-object-object-definition-scale-duplicate
+  - interaction-object-object-definition-source-null
+  - interaction-object-object-definition-source-key-case
+  - interaction-object-object-definition-source-duplicate
+  - interaction-object-object-definition-target-null
+  - interaction-object-object-definition-target-key-case
+  - interaction-object-object-definition-target-duplicate
+  - interaction-object-object-definition-steps-null
+  - interaction-object-object-definition-steps-key-case
+  - interaction-object-object-definition-steps-duplicate
+  - component-object-object-definition-choices-0-id-null
+  - component-object-object-definition-choices-0-id-key-case
+  - component-object-object-definition-choices-0-id-duplicate
+  - component-object-object-definition-choices-0-description-null
+  - component-object-object-definition-choices-0-description-key-case
+  - component-object-object-definition-choices-0-description-duplicate
+- id: document-post-absent
+  finding: evaluation-C2
+  status: project-adopted
+  official_adjudication: not-established
+  chosen_rule: An otherwise valid application/json POST with no If-Match to an absent document stores
+    it and returns 204. If-Match on an absent document fails with 412.
+  rationale: The POST summary is updates/stores; body is stored/updated; the merge condition refers to
+    any existing document and does not require prior existence. This is a declared reading, not an official
+    adjudication.
+  rejected_reading: Interpret all POST requests as requiring an existing document and return 404 for creation.
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    lines:
+    - 1629
+    - 1657
+    pdf_page: 29
+    printed_page: 28
+    byte_start: 105529
+    byte_length: 1991
+    sha256: e4ccb40df640f53f735f26ef3b119e769692620b01756a6190c56e407a0857b4
+  explicit_cases:
+  - state-post-creates-absent-document
+  - agent-profile-post-creates-absent-document
+  - activity-profile-post-creates-absent-document
+- id: property-order-negated-may-strength
+  finding: evaluation-R7
+  status: project-adopted
+  official_adjudication: not-established
+  chosen_rule: Do not reject solely because Statement property order differs; two distinct raw JSON orders
+    must be accepted.
+  rationale: "Rejection Cases constrains rejection/acceptance. May not is read as negated permission to\
+    \ reject; permission not to reject would impose no constraint. \xA71.3 does not explicitly define\
+    \ this combination, so the prohibition is a disclosed author reading."
+  rejected_reading: Treat may not as a vacuous permission to choose acceptance with no prohibition.
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    pdf_page: 49
+    printed_page: 48
+    byte_start: 200249
+    byte_length: 86
+    sha256: 617c688fd1b1b659bc437f08ca61f60fd3a6cbe55af2fe0bb0803d5528f8a5f2
+  - source: ieee-pdf-extracted
+    pdf_page: 13
+    printed_page: 12
+    byte_start: 40628
+    byte_length: 727
+    sha256: 390226f66f2f10cb3d02f7ba9f903248e07e7a4669a2a36ce5b70d4a6e7dd21e
+  explicit_cases:
+  - statement-member-order-is-unrestricted
+- id: unknown-local-offset-boundary
+  status: project-adopted
+  chosen_rule: For the disputed -00:00 input, permit 200 or 400. If accepted, require the same instant
+    in UTC on readback. Rejection is not an LRS defect for this case.
+  rationale: PDF 5.2.7.5 imposes ISO 8601 and RFC 3339 simultaneously. RFC 3339 4.3 permits -00:00; RFC
+    9557 2.1-2.3 updates those semantics and states that ISO 8601:2000 and later do not permit that offset,
+    without formally deprecating RFC syntax. Neither unconditional acceptance nor unconditional rejection
+    is established for this combined boundary. PDF 4.2.7.5 still requires UTC conversion when input is
+    accepted.
+  rejected_reading: Require acceptance from RFC 3339 alone, or require rejection without addressing the
+    simultaneous references. Neither is claimed as the official resolution.
+  official_adjudication: not-established
+  source_route: explicit-project-interpretation
+  reference_baseline_date: '2026-10-06'
+  explicit_cases:
+  - statement-unknown-local-offset-policy
+  pdf_anchors:
+  - source: ieee-pdf-extracted
+    source_sha256: 7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876
+    lines:
+    - 5441
+    - 5444
+    byte_start: 354586
+    byte_length: 242
+    sha256: a657f744083f4a0a7ede4b1a54e3acc54cb4a9ad480192a7beef99fe58f19ea4
+  - source: ieee-pdf-extracted
+    source_sha256: 7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876
+    lines:
+    - 3326
+    - 3327
+    byte_start: 216544
+    byte_length: 131
+    sha256: b1b7eda71debb438ab86cdaaae29619d7a4fb3fd3cbe3c44e34f0a15b5390cc3
+  external_anchors:
+  - source: target/lrs-evaluation-repair-r1/20261006/sources/rfc9557.txt
+    url: https://www.rfc-editor.org/rfc/rfc9557.txt
+    source_sha256: 87fa632cd75d13aa441859da635ed6618f66d203fe71a30fa85afedbeb149e85
+    sections:
+    - '2.1'
+    - '2.2'
+    - '2.3'
+    lines:
+    - 283
+    - 330
+    byte_start: 12886
+    byte_length: 2206
+    sha256: 07960270b06c9f7d85fd9b83b1cad6fec31fb2f1e09614476043974a577a7916
+  reading_limit: RFC 9557 sections 2.1-2.3 read directly; ISO 8601 original not read. Other syntax boundaries
+    remain pending.

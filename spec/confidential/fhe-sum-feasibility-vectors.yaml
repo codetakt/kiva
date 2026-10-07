@@ -1,0 +1,32 @@
+schema_version: 1
+kind: fhe-sum-feasibility-vectors
+status: published
+vectors:
+  - profile: kiva-fhe-sum-bfv-feasibility-v1
+    ciphertext_domain: kiva-confidential:fhe-sum-feasibility-ciphertext:v1
+    evaluation_domain: kiva-confidential:fhe-sum-feasibility-evaluation:v1
+    scheme_family: bfv-style-integer-sum
+    operation: sum
+    polynomial_modulus_degree: 4096
+    plaintext_modulus: 1048583
+    ciphertext_modulus_bits: 109
+    security_level_bits: 128
+    participant_count: 3
+    max_participant_count: 16
+    max_plaintext_value: 65000
+    job_seed: 91
+    participants:
+      - participant_index: 1
+        plaintext_value: 42
+        nonce_seed: 11
+        expected_ciphertext_digest_hex: 29414cd453e9a6f0f504257cb54ebbdb709fb8f2f3059cb3c5eb1cff1a19c012
+      - participant_index: 2
+        plaintext_value: 57
+        nonce_seed: 12
+        expected_ciphertext_digest_hex: 6116bbc3e861661e44e5e83bd7718f9c96b8df3caf989d0515eb413d282d1e57
+      - participant_index: 3
+        plaintext_value: 100
+        nonce_seed: 13
+        expected_ciphertext_digest_hex: 4024e9f7776976cf5960b93b8591bb99f492980ddb43a9a3a383f7b896d37491
+    expected_sum: 199
+    expected_evaluated_ciphertext_digest_hex: f7c24f6ec408c92b0eae86d11c66a5fc9a57460ecf8a23f19d250f2e8aee4f08

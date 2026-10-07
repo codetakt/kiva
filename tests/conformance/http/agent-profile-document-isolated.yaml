@@ -1,0 +1,221 @@
+suite:
+  id: xapi-lrs-agent-profile-document-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive Agent Profile document checks for disposable isolated LRS targets.
+cases:
+  - id: agent-profile-put-get-without-prior-agent-knowledge
+    requirements:
+      - xapi-lrs-4.1.4-etag-on-document-get
+      - xapi-lrs-4.1.6-document-no-prior-knowledge
+      - xapi-lrs-4.1.6.5-agent-profile-get-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-profile
+        request:
+          method: PUT
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-put-get
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: "2.0.0"
+          body:
+            alpha: one
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+
+      - id: get-profile
+        request:
+          method: GET
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-put-get
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: "2.0.0"
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+            ETag:
+              present: true
+            Last-Modified:
+              present: true
+          json:
+            pointers:
+              /alpha:
+                equals: one
+
+      - id: head-profile
+        request:
+          method: HEAD
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-put-get
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: "2.0.0"
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+            ETag:
+              present: true
+            Last-Modified:
+              present: true
+          body:
+            non_empty: false
+
+  - id: agent-profile-post-json-object-merges-top-level
+    requirements:
+      - xapi-lrs-4.1.6.5-agent-profile-post-json-merge
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-success
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-original
+        request:
+          method: PUT
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-merge
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: "2.0.0"
+          body:
+            alpha: one
+            nested:
+              old: true
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+
+      - id: post-merge
+        request:
+          method: POST
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-merge
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: "2.0.0"
+          body:
+            beta: two
+            nested:
+              new: true
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+
+      - id: get-merged
+        request:
+          method: GET
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-merge
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: "2.0.0"
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+          json:
+            pointers:
+              /alpha:
+                equals: one
+              /beta:
+                equals: two
+              /nested/old:
+                present: false
+              /nested/new:
+                equals: true
+
+  - id: agent-profile-post-invalid-json-merge-preserves-original
+    requirements:
+      - xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-original
+        request:
+          method: PUT
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-invalid-merge
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: "2.0.0"
+          body:
+            alpha: one
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+
+      - id: post-invalid-merge
+        request:
+          method: POST
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-invalid-merge
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: "2.0.0"
+          body:
+            - invalid
+            - merge
+        expect:
+          status: 400
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+
+      - id: get-original
+        request:
+          method: GET
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-agent-profile@example.org"}'
+            profileId: kiva-agent-profile-post-invalid-merge
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: "2.0.0"
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: "2.0.0"
+          json:
+            pointers:
+              /alpha:
+                equals: one

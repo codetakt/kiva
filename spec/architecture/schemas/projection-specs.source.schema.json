@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:projection-specs-source:1",
+  "title": "Kiva ProjectionSpec source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "source_graph", "projections"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-architecture-projection-spec-source" },
+    "status": { "const": "active" },
+    "source_graph": { "type": "string", "minLength": 1 },
+    "projections": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["projection_id", "projection_kind"],
+        "properties": {
+          "projection_id": { "type": "string", "minLength": 1 },
+          "projection_kind": { "type": "string", "minLength": 1 },
+          "projection_checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["group", "check_id"],
+              "properties": {
+                "group": { "type": "string", "minLength": 1 },
+                "check_id": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:evidence:receipts-source:1",
+  "title": "Kiva evidence receipts source",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "kind", "status", "inputs", "generated_artifacts", "receipt_model"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-evidence-receipts-source" },
+    "status": { "const": "active" },
+    "inputs": {
+      "type": "object",
+      "required": ["evidence_set", "verification_obligations"],
+      "properties": {
+        "evidence_set": { "type": "string", "minLength": 1 },
+        "verification_obligations": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "generated_artifacts": { "type": "object" },
+    "receipt_model": { "type": "object" }
+  }
+}

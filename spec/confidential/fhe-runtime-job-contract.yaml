@@ -1,0 +1,91 @@
+---
+schema_version: 1
+kind: fhe-runtime-job-contract
+standard: Kiva Architecture
+status: review-gated
+profile: kiva-fhe-sum-runtime-review-gated-v1
+milestone: CC14
+use_case: governed-fhe-sum-runtime-for-aggregate-insights
+claim_boundary: >
+  Kiva binds FHE sum jobs to a reviewed external runtime. The runtime is
+  responsible for FHE key generation, encryption, evaluation, parameter
+  security, serialization, decryption, and cryptographic proof generation.
+  Kiva defines and verifies metadata-only ciphertext transcript and evaluation
+  record shapes at the Rust assurance boundary, and carries release/audit
+  evidence through the generic confidential-job lifecycle. This contract does
+  not claim a dedicated FHE transcript HTTP API, a dedicated PostgreSQL FHE
+  transcript store, a dedicated FHE PDS data-product source kind, or production
+  FHE before external review.
+runtime_adapter:
+  scheme_family: bfv-integer-sum
+  operation: sum
+  artifact_digest_required: true
+  parameter_set_digest_required: true
+  external_review_evidence_digest_required: true
+  external_review_required_before_production_claim: true
+  performs_key_generation: true
+  performs_encryption: true
+  performs_homomorphic_evaluation: true
+  performs_decryption: true
+  reports_key_custody: true
+  reports_evaluation_proof_digest: true
+ciphertext_transcript:
+  requires_all_participants: true
+  participant_count_must_match_policy: true
+  participants_must_be_active: true
+  key_custody_evidence_required: true
+  parameter_set_digest_must_match_runtime_binding: true
+  transcript_digest_match_required: true
+  replay_record_required: true
+  metadata_only_record_boundary: true
+  generic_confidential_job_evidence_boundary: true
+evaluation:
+  accepted_ciphertext_transcript_required: true
+  evaluated_ciphertext_digest_required: true
+  evaluation_proof_digest_required: true
+  evaluation_digest_match_required: true
+  evaluation_replay_record_required: true
+release:
+  accepted_ciphertext_transcript_required: true
+  completed_evaluation_required: true
+  external_review_required: true
+  active_key_epoch_required: true
+  policy_approval_required: true
+  governed_release_treatment_required: true
+pds:
+  dedicated_data_product_source_kind_implemented: false
+  future_source_kind: fhe-sum-runtime-result
+  resource_class: aggregate-insights
+  raw_record_read: false
+  raw_ciphertext_or_plaintext_publication: false
+  governed_release_fact_required: true
+  current_release_boundary: generic_confidential_job_evidence
+  pds_openapi_source_kind: absent
+  pds_postgresql_source_kind: absent
+  pds_policy_source_kind: absent
+operational_assumptions:
+  runtime_isolated_from_kiva_process: true
+  plaintexts_never_persisted_by_kiva: true
+  decryption_keys_never_persisted_by_kiva: true
+  ciphertext_payloads_are_referenced_by_digest: true
+  participant_replacement_requires_new_key_epoch: true
+  external_review_required_before_production_fhe_claim: true
+evidence:
+  assurance_profile: spec/confidential/fhe-runtime-assurance.yaml
+  vectors: spec/confidential/fhe-runtime-vectors.yaml
+  validator: scripts/ci/validate_fhe_runtime_assurance.py
+  rust_core: crates/kiva-confidential/src/lib.rs
+  openapi: spec/openapi/kiva-confidential.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_model: proofs/tamarin/kiva_fhe_runtime_boundary.spthy
+  design_note: docs/architecture/fhe-runtime-integration.md
+  operator_runbook: docs/operations/fhe-runtime-runbook.md
+non_goals:
+  in_process_fhe_implementation: false
+  fhe_key_management_by_kiva: false
+  ciphertext_wire_format_standardization: false
+  dedicated_fhe_transcript_http_api: false
+  dedicated_fhe_transcript_postgresql_store: false
+  dedicated_fhe_pds_data_product_source_kind: false
+  production_fhe_before_external_review: false
+  malicious_participant_robustness_before_external_review: false

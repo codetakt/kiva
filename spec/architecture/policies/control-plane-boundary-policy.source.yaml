@@ -1,0 +1,15 @@
+description: Control-plane and data-plane ownership policy.
+control_plane_data_plane_boundary:
+  control_plane_owned_by_kiva:
+    - HTTP contracts
+    - provider identity and artifact digests
+    - evidence gates and release gates
+    - provider-binding registry metadata
+    - lifecycle, audit, and release evidence
+  data_plane_not_owned_by_kiva_by_default:
+    - production secret custody
+    - raw provider secrets
+    - ciphertext payload custody
+    - TEE runtime isolation
+    - malicious-secure MPC or PSI execution
+    - production FHE cryptographic security

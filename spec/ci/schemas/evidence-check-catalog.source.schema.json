@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:ci:evidence-check-catalog-source:1",
+  "title": "Kiva CI evidence check catalog source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "status", "compatibility_view", "synchronization_policy", "checks"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-ci-evidence-check-catalog-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "compatibility_view": { "type": "string", "minLength": 1 },
+    "synchronization_policy": { "const": "normal-form-primary-with-evidence-check-compatibility-view" },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["group", "id", "check_kind", "script", "inputs", "outputs", "mutates_repository", "requires_network", "artifact_class"],
+        "properties": {
+          "group": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "minLength": 1 },
+          "check_kind": { "type": "string", "minLength": 1 },
+          "script": { "type": "string", "minLength": 1 },
+          "inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "outputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "mutates_repository": { "type": "boolean" },
+          "requires_network": { "type": "boolean" },
+          "artifact_class": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

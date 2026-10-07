@@ -1,0 +1,1095 @@
+schema_version: 1
+kind: kiva-confidential-mechanism-profile-index
+status: active
+description: Generated MechanismProfile and PackageProfile index joining the authoritative MechanismPackage rows with mechanism, provider, maturity, OperationKernel, assurance, and verification facets.
+generated_from:
+- spec/confidential/mechanism-packages.source.yaml
+- spec/confidential/mechanism-catalog.yaml
+- spec/confidential/mechanism-maturity.yaml
+- spec/confidential/assurance-evidence-registry.yaml
+- spec/verification/confidential-verified-kernels.yaml
+- spec/confidential/secret-compute-provider-contract.yaml
+- generated/architecture/operation-kernel.yaml
+- generated/confidential/capability-binding-index.yaml
+generated_artifacts:
+  profile_index: generated/confidential/mechanism-profile-index.yaml
+  markdown: docs/architecture/generated/confidential-mechanism-profile-index.md
+profile_count: 9
+profiles:
+- id: additive-n-of-n
+  profile_type: MechanismProfile
+  maturity_mechanism: additive-secure-aggregation
+  technique: additive-secure-aggregation
+  provider:
+    kind: reference-primitive
+    boundary_type: ReferencePrimitiveProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: reference-fixtures
+    production_review_required: false
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC1
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: structural n-of-n additive aggregation over Kiva's fixed field.
+  capability_binding:
+    id: additive-secure-aggregation-capability
+    capability: additive-secure-aggregation
+    binding_kind: dedicated-workflow
+    operation_count: 12
+  operation_refs:
+  - id: confidential.postConfidentialAdditiveAggregate
+    operation_id: postConfidentialAdditiveAggregate
+    method: post
+    path: /confidential/additive-aggregates
+    workflow_family: additive
+  - id: confidential.getConfidentialAdditiveShareReplayRecords
+    operation_id: getConfidentialAdditiveShareReplayRecords
+    method: get
+    path: /confidential/additive-share-replay-records
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKeyRevocation
+    operation_id: postConfidentialShareSigningKeyRevocation
+    method: post
+    path: /confidential/additive-share-signing-key-revocations
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKeyRotation
+    operation_id: postConfidentialShareSigningKeyRotation
+    method: post
+    path: /confidential/additive-share-signing-key-rotations
+    workflow_family: additive
+  - id: confidential.getConfidentialShareSigningKeys
+    operation_id: getConfidentialShareSigningKeys
+    method: get
+    path: /confidential/additive-share-signing-keys
+    workflow_family: additive
+  - id: confidential.postConfidentialShareSigningKey
+    operation_id: postConfidentialShareSigningKey
+    method: post
+    path: /confidential/additive-share-signing-keys
+    workflow_family: additive
+  - id: confidential.getConfidentialAdditiveShareSubmissions
+    operation_id: getConfidentialAdditiveShareSubmissions
+    method: get
+    path: /confidential/additive-share-submissions
+    workflow_family: additive
+  - id: confidential.postConfidentialAdditiveShareSubmission
+    operation_id: postConfidentialAdditiveShareSubmission
+    method: post
+    path: /confidential/additive-share-submissions
+    workflow_family: additive
+  - id: confidential.postConfidentialThresholdReleaseApproval
+    operation_id: postConfidentialThresholdReleaseApproval
+    method: post
+    path: /confidential/threshold-release-approvals
+    workflow_family: threshold
+  - id: confidential.getConfidentialThresholdReleaseRequests
+    operation_id: getConfidentialThresholdReleaseRequests
+    method: get
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdReleaseRequest
+    operation_id: postConfidentialThresholdReleaseRequest
+    method: post
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdRelease
+    operation_id: postConfidentialThresholdRelease
+    method: post
+    path: /confidential/threshold-releases
+    workflow_family: threshold
+  assurance_registry_entries: []
+  verification_kernel_refs:
+  - id: additive-share-admission-and-release
+    mechanism: additive-secure-aggregation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+- id: private-set-intersection
+  profile_type: MechanismProfile
+  maturity_mechanism: psi-cohort-hash-token
+  technique: private-set-intersection
+  provider:
+    kind: private-set-intersection
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: psi-evaluation
+    production_review_required: false
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC4
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: bounded hash-token PSI cohort matching without a dedicated PDS source kind.
+  capability_binding:
+    id: psi-cohort-hash-token-capability
+    capability: psi-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries: []
+  verification_kernel_refs:
+  - id: psi-cohort-and-oprf-release
+    mechanism: private-set-intersection
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: private-set-intersection-oprf-dh
+  profile_type: MechanismProfile
+  maturity_mechanism: psi-oprf-dh-voprf
+  technique: private-set-intersection
+  provider:
+    kind: private-set-intersection
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: psi-evaluation
+    production_review_required: true
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC11
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated DH-OPRF PSI runtime boundary; production claim pending external cryptographic review.
+  capability_binding:
+    id: psi-oprf-dh-voprf-capability
+    capability: psi-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries:
+  - id: production-psi-upgrade
+    profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+    evidence_count: 11
+  verification_kernel_refs:
+  - id: psi-cohort-and-oprf-release
+    mechanism: private-set-intersection
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: shamir-threshold
+  profile_type: MechanismProfile
+  maturity_mechanism: shamir-vss-admission
+  technique: threshold-cryptography
+  provider:
+    kind: threshold-cryptography
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: threshold-signing
+    production_review_required: false
+  participant_model:
+    requires_all_participants: false
+  maturity:
+    milestone: CC3
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: hash-committed Shamir VSS-admission reconstruction metadata.
+  capability_binding:
+    id: shamir-vss-admission-capability
+    capability: threshold-reconstruction
+    binding_kind: dedicated-workflow
+    operation_count: 2
+  operation_refs:
+  - id: confidential.getConfidentialShamirThresholdReconstructions
+    operation_id: getConfidentialShamirThresholdReconstructions
+    method: get
+    path: /confidential/shamir-threshold-reconstructions
+    workflow_family: shamir
+  - id: confidential.postConfidentialShamirThresholdReconstruction
+    operation_id: postConfidentialShamirThresholdReconstruction
+    method: post
+    path: /confidential/shamir-threshold-reconstructions
+    workflow_family: shamir
+  assurance_registry_entries: []
+  verification_kernel_refs:
+  - id: shamir-vss-reconstruction
+    mechanism: shamir-vss-admission
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+- id: threshold-frost-signing
+  profile_type: MechanismProfile
+  maturity_mechanism: threshold-frost-signing
+  technique: threshold-cryptography
+  provider:
+    kind: threshold-cryptography
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: threshold-signing
+    production_review_required: true
+  participant_model:
+    requires_all_participants: false
+  maturity:
+    milestone: CC13
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated FROST threshold-signing runtime boundary.
+  capability_binding:
+    id: threshold-frost-signing-capability
+    capability: threshold-signing
+    binding_kind: generic-runtime-orchestration
+    operation_count: 12
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialThresholdReleaseApproval
+    operation_id: postConfidentialThresholdReleaseApproval
+    method: post
+    path: /confidential/threshold-release-approvals
+    workflow_family: threshold
+  - id: confidential.getConfidentialThresholdReleaseRequests
+    operation_id: getConfidentialThresholdReleaseRequests
+    method: get
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdReleaseRequest
+    operation_id: postConfidentialThresholdReleaseRequest
+    method: post
+    path: /confidential/threshold-release-requests
+    workflow_family: threshold
+  - id: confidential.postConfidentialThresholdRelease
+    operation_id: postConfidentialThresholdRelease
+    method: post
+    path: /confidential/threshold-releases
+    workflow_family: threshold
+  assurance_registry_entries:
+  - id: threshold-frost
+    profile: kiva-threshold-frost-ed25519-review-gated-v1
+    evidence_count: 12
+  verification_kernel_refs:
+  - id: threshold-frost-runtime
+    mechanism: threshold-frost-signing
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: trusted-execution-environment
+  profile_type: MechanismProfile
+  maturity_mechanism: tee-portable-attestation
+  technique: trusted-execution-environment
+  provider:
+    kind: trusted-execution-environment
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: tee-attestation
+    production_review_required: true
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC5
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: portable deployment-bound attestation evidence gate; hardware verifier supplied by deployment.
+  capability_binding:
+    id: tee-portable-attestation-capability
+    capability: tee-attestation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries:
+  - id: tee-attestation
+    profile: kiva-tee-portable-attestation-v1
+    evidence_count: 8
+  verification_kernel_refs:
+  - id: tee-attestation-gates
+    mechanism: tee-attestation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: trusted-execution-environment-aws-nitro
+  profile_type: MechanismProfile
+  maturity_mechanism: tee-aws-nitro-attestation
+  technique: trusted-execution-environment
+  provider:
+    kind: trusted-execution-environment
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: tee-attestation
+    production_review_required: true
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC12
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated AWS Nitro verifier boundary; production hardware-backed claim pending external security review.
+  capability_binding:
+    id: tee-aws-nitro-attestation-capability
+    capability: tee-attestation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries:
+  - id: tee-nitro-attestation
+    profile: kiva-tee-aws-nitro-review-gated-v1
+    evidence_count: 9
+  verification_kernel_refs:
+  - id: tee-attestation-gates
+    mechanism: tee-attestation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: fhe-sum-feasibility
+  profile_type: MechanismProfile
+  maturity_mechanism: fhe-sum-feasibility
+  technique: fully-homomorphic-encryption
+  provider:
+    kind: fully-homomorphic-encryption
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: fhe-evaluation
+    production_review_required: false
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC6
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: deterministic small-sum FHE feasibility profile and governed release checks.
+  capability_binding:
+    id: fhe-sum-feasibility-capability
+    capability: fhe-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries:
+  - id: fhe-feasibility
+    profile: kiva-fhe-sum-bfv-feasibility-v1
+    evidence_count: 10
+  verification_kernel_refs:
+  - id: fhe-feasibility-and-runtime
+    mechanism: fhe
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: fhe-sum-runtime
+  profile_type: MechanismProfile
+  maturity_mechanism: fhe-sum-runtime
+  technique: fully-homomorphic-encryption
+  provider:
+    kind: fully-homomorphic-encryption
+    boundary_type: ComputeMechanismProvider
+    sealed_boundary: true
+    gate_sequence:
+    - capability
+    - admission-gate
+    - evidence
+    - runtime-boundary
+    - runtime-binding
+    - release
+    required_capability: fhe-evaluation
+    production_review_required: true
+  participant_model:
+    requires_all_participants: true
+  maturity:
+    milestone: CC14
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated FHE sum runtime boundary.
+  capability_binding:
+    id: fhe-sum-runtime-capability
+    capability: fhe-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  operation_refs:
+  - id: confidential.getConfidentialJobAuditEvents
+    operation_id: getConfidentialJobAuditEvents
+    method: get
+    path: /confidential/job-audit-events
+    workflow_family: job
+  - id: confidential.postConfidentialJobTransition
+    operation_id: postConfidentialJobTransition
+    method: post
+    path: /confidential/job-transitions
+    workflow_family: job
+  - id: confidential.getConfidentialJobs
+    operation_id: getConfidentialJobs
+    method: get
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.postConfidentialJob
+    operation_id: postConfidentialJob
+    method: post
+    path: /confidential/jobs
+    workflow_family: job
+  - id: confidential.getConfidentialParticipantAuditEvents
+    operation_id: getConfidentialParticipantAuditEvents
+    method: get
+    path: /confidential/participant-audit-events
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipantTransition
+    operation_id: postConfidentialParticipantTransition
+    method: post
+    path: /confidential/participant-transitions
+    workflow_family: participant
+  - id: confidential.getConfidentialParticipants
+    operation_id: getConfidentialParticipants
+    method: get
+    path: /confidential/participants
+    workflow_family: participant
+  - id: confidential.postConfidentialParticipant
+    operation_id: postConfidentialParticipant
+    method: post
+    path: /confidential/participants
+    workflow_family: participant
+  assurance_registry_entries:
+  - id: fhe-runtime
+    profile: kiva-fhe-sum-runtime-review-gated-v1
+    evidence_count: 13
+  verification_kernel_refs:
+  - id: fhe-feasibility-and-runtime
+    mechanism: fhe
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+package_count: 13
+package_profiles:
+- id: additive-secure-aggregation-package
+  profile_type: PackageProfile
+  maturity_mechanism: additive-secure-aggregation
+  capability: additive-secure-aggregation
+  provider_kind: reference-primitive
+  mechanism_catalog_id: additive-n-of-n
+  capability_binding:
+    id: additive-secure-aggregation-capability
+    capability: additive-secure-aggregation
+    binding_kind: dedicated-workflow
+    operation_count: 12
+  maturity:
+    milestone: CC1
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: structural n-of-n additive aggregation over Kiva's fixed field.
+  assurance_registry_entry: null
+  verification_family: additive
+  verification_kernel_refs:
+  - id: additive-share-admission-and-release
+    mechanism: additive-secure-aggregation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+- id: differential-privacy-release-package
+  profile_type: PackageProfile
+  maturity_mechanism: differential-privacy-release
+  capability: differential-privacy-release
+  provider_kind: reference-primitive
+  mechanism_catalog_id: null
+  capability_binding:
+    id: differential-privacy-release-capability
+    capability: differential-privacy-release
+    binding_kind: dedicated-workflow
+    operation_count: 7
+  maturity:
+    milestone: CC2
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: bounded DP release profile with persisted budget accounting and noised aggregate metadata.
+  assurance_registry_entry: null
+  verification_family: differential-privacy
+  verification_kernel_refs:
+  - id: differential-privacy-budget-release
+    mechanism: differential-privacy-release
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+- id: shamir-vss-admission-package
+  profile_type: PackageProfile
+  maturity_mechanism: shamir-vss-admission
+  capability: threshold-reconstruction
+  provider_kind: threshold-cryptography
+  mechanism_catalog_id: shamir-threshold
+  capability_binding:
+    id: shamir-vss-admission-capability
+    capability: threshold-reconstruction
+    binding_kind: dedicated-workflow
+    operation_count: 2
+  maturity:
+    milestone: CC3
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: hash-committed Shamir VSS-admission reconstruction metadata.
+  assurance_registry_entry: null
+  verification_family: shamir
+  verification_kernel_refs:
+  - id: shamir-vss-reconstruction
+    mechanism: shamir-vss-admission
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+- id: psi-cohort-hash-token-package
+  profile_type: PackageProfile
+  maturity_mechanism: psi-cohort-hash-token
+  capability: psi-evaluation
+  provider_kind: private-set-intersection
+  mechanism_catalog_id: private-set-intersection
+  capability_binding:
+    id: psi-cohort-hash-token-capability
+    capability: psi-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC4
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: bounded hash-token PSI cohort matching without a dedicated PDS source kind.
+  assurance_registry_entry: null
+  verification_family: psi
+  verification_kernel_refs:
+  - id: psi-cohort-and-oprf-release
+    mechanism: private-set-intersection
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: tee-portable-attestation-package
+  profile_type: PackageProfile
+  maturity_mechanism: tee-portable-attestation
+  capability: tee-attestation
+  provider_kind: trusted-execution-environment
+  mechanism_catalog_id: trusted-execution-environment
+  capability_binding:
+    id: tee-portable-attestation-capability
+    capability: tee-attestation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC5
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: portable deployment-bound attestation evidence gate; hardware verifier supplied by deployment.
+  assurance_registry_entry: tee-attestation
+  verification_family: tee
+  verification_kernel_refs:
+  - id: tee-attestation-gates
+    mechanism: tee-attestation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: fhe-sum-feasibility-package
+  profile_type: PackageProfile
+  maturity_mechanism: fhe-sum-feasibility
+  capability: fhe-evaluation
+  provider_kind: fully-homomorphic-encryption
+  mechanism_catalog_id: fhe-sum-feasibility
+  capability_binding:
+    id: fhe-sum-feasibility-capability
+    capability: fhe-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC6
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: deterministic small-sum FHE feasibility profile and governed release checks.
+  assurance_registry_entry: fhe-feasibility
+  verification_family: fhe
+  verification_kernel_refs:
+  - id: fhe-feasibility-and-runtime
+    mechanism: fhe
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: confidential-job-lifecycle-package
+  profile_type: PackageProfile
+  maturity_mechanism: confidential-job-lifecycle
+  capability: confidential-job-lifecycle
+  provider_kind: secret-custody
+  mechanism_catalog_id: null
+  capability_binding:
+    id: confidential-job-lifecycle-capability
+    capability: confidential-job-lifecycle
+    binding_kind: lifecycle-substrate
+    operation_count: 4
+  maturity:
+    milestone: CC9
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: durable confidential job lifecycle, quotas, idempotency, and audit metadata.
+  assurance_registry_entry: confidential-job-lifecycle
+  verification_family: job-lifecycle
+  verification_kernel_refs:
+  - id: confidential-job-participant-lifecycle
+    mechanism: confidential-job-lifecycle
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: confidential-participant-key-lifecycle-package
+  profile_type: PackageProfile
+  maturity_mechanism: confidential-participant-key-lifecycle
+  capability: confidential-participant-key-lifecycle
+  provider_kind: secret-custody
+  mechanism_catalog_id: null
+  capability_binding:
+    id: confidential-participant-key-lifecycle-capability
+    capability: confidential-participant-key-lifecycle
+    binding_kind: lifecycle-substrate
+    operation_count: 4
+  maturity:
+    milestone: CC10
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: metadata-only participant and key lifecycle substrate.
+  assurance_registry_entry: confidential-key-participant-lifecycle
+  verification_family: participant-lifecycle
+  verification_kernel_refs: []
+- id: psi-oprf-dh-voprf-package
+  profile_type: PackageProfile
+  maturity_mechanism: psi-oprf-dh-voprf
+  capability: psi-evaluation
+  provider_kind: private-set-intersection
+  mechanism_catalog_id: private-set-intersection-oprf-dh
+  capability_binding:
+    id: psi-oprf-dh-voprf-capability
+    capability: psi-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC11
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated DH-OPRF PSI runtime boundary; production claim pending external cryptographic review.
+  assurance_registry_entry: production-psi-upgrade
+  verification_family: psi
+  verification_kernel_refs:
+  - id: psi-cohort-and-oprf-release
+    mechanism: private-set-intersection
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: tee-aws-nitro-attestation-package
+  profile_type: PackageProfile
+  maturity_mechanism: tee-aws-nitro-attestation
+  capability: tee-attestation
+  provider_kind: trusted-execution-environment
+  mechanism_catalog_id: trusted-execution-environment-aws-nitro
+  capability_binding:
+    id: tee-aws-nitro-attestation-capability
+    capability: tee-attestation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC12
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated AWS Nitro verifier boundary; production hardware-backed claim pending external security review.
+  assurance_registry_entry: tee-nitro-attestation
+  verification_family: tee
+  verification_kernel_refs:
+  - id: tee-attestation-gates
+    mechanism: tee-attestation
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: threshold-frost-signing-package
+  profile_type: PackageProfile
+  maturity_mechanism: threshold-frost-signing
+  capability: threshold-signing
+  provider_kind: threshold-cryptography
+  mechanism_catalog_id: threshold-frost-signing
+  capability_binding:
+    id: threshold-frost-signing-capability
+    capability: threshold-signing
+    binding_kind: generic-runtime-orchestration
+    operation_count: 12
+  maturity:
+    milestone: CC13
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated FROST threshold-signing runtime boundary.
+  assurance_registry_entry: threshold-frost
+  verification_family: threshold-frost
+  verification_kernel_refs:
+  - id: threshold-frost-runtime
+    mechanism: threshold-frost-signing
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: fhe-sum-runtime-package
+  profile_type: PackageProfile
+  maturity_mechanism: fhe-sum-runtime
+  capability: fhe-evaluation
+  provider_kind: fully-homomorphic-encryption
+  mechanism_catalog_id: fhe-sum-runtime
+  capability_binding:
+    id: fhe-sum-runtime-capability
+    capability: fhe-evaluation
+    binding_kind: generic-runtime-orchestration
+    operation_count: 8
+  maturity:
+    milestone: CC14
+    level: external-review-pending
+    production_claim: false
+    claim_boundary: review-gated FHE sum runtime boundary.
+  assurance_registry_entry: fhe-runtime
+  verification_family: fhe
+  verification_kernel_refs:
+  - id: fhe-feasibility-and-runtime
+    mechanism: fhe
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+- id: secret-compute-provider-contract-package
+  profile_type: PackageProfile
+  maturity_mechanism: secret-compute-provider-contract
+  capability: provider-contract
+  provider_kind: secret-custody
+  mechanism_catalog_id: null
+  capability_binding:
+    id: secret-compute-provider-contract-capability
+    capability: provider-contract
+    binding_kind: lifecycle-substrate
+    operation_count: 8
+  maturity:
+    milestone: CC16
+    level: evidence-bundled
+    production_claim: false
+    claim_boundary: metadata-only provider contract and fixed non-production reference primitive provider.
+  assurance_registry_entry: secret-compute-provider-contract
+  verification_family: provider-contract
+  verification_kernel_refs:
+  - id: provider-runtime-boundary
+    mechanism: secret-compute-provider-contract
+    required_evidence_kinds:
+    - implementation
+    - rust-test
+    - kani
+    - assurance-registry

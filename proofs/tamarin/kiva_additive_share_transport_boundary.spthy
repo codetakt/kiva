@@ -1,0 +1,304 @@
+theory Kiva_Additive_Share_Transport_Boundary
+begin
+
+rule OpenTwoPartyAdditiveTranscript:
+  [
+    Fr(~transcript),
+    Fr(~left),
+    Fr(~right)
+  ]
+  --[
+    ShareParticipantRegistered(~left),
+    ShareParticipantRegistered(~right),
+    AdditiveTranscriptOpened(~transcript, ~left, ~right),
+    ShareRequired(~transcript, ~left),
+    ShareRequired(~transcript, ~right)
+  ]->
+  [
+    !ShareParticipant(~left),
+    !ShareParticipant(~right),
+    !AdditiveTranscript(~transcript, ~left, ~right),
+    CommitSlot(~transcript, ~left),
+    CommitSlot(~transcript, ~right)
+  ]
+
+rule RegisterShareSigningKey:
+  [
+    !ShareParticipant(participant),
+    Fr(~subject),
+    Fr(~signing_key)
+  ]
+  --[
+    ShareSigningKeyRegistered(participant, ~signing_key),
+    ShareSigningKeySubjectBound(participant, ~signing_key, ~subject),
+    ShareSigningKeyActive(participant, ~signing_key, ~subject)
+  ]->
+  [
+    !ShareSigningKey(participant, ~signing_key),
+    !ShareSigningKeyOwner(participant, ~signing_key, ~subject),
+    ActiveSigningKey(participant, ~signing_key, ~subject)
+  ]
+
+rule RotateShareSigningKey:
+  [
+    !ShareParticipant(participant),
+    ActiveSigningKey(participant, old_signing_key, subject),
+    Fr(~new_signing_key)
+  ]
+  --[
+    ShareSigningKeyRotated(
+      participant, old_signing_key, ~new_signing_key, subject
+    ),
+    ShareSigningKeyRevoked(participant, old_signing_key),
+    ShareSigningKeyRegistered(participant, ~new_signing_key),
+    ShareSigningKeySubjectBound(participant, ~new_signing_key, subject),
+    ShareSigningKeyActive(participant, ~new_signing_key, subject)
+  ]->
+  [
+    !ShareSigningKey(participant, ~new_signing_key),
+    !ShareSigningKeyOwner(participant, ~new_signing_key, subject),
+    ActiveSigningKey(participant, ~new_signing_key, subject)
+  ]
+
+rule RevokeShareSigningKey:
+  [
+    ActiveSigningKey(participant, signing_key, subject)
+  ]
+  --[ ShareSigningKeyRevoked(participant, signing_key) ]->
+  []
+
+rule CommitShare:
+  [
+    CommitSlot(transcript, participant),
+    ActiveSigningKey(participant, signing_key, subject),
+    Fr(~commitment)
+  ]
+  --[ ShareCommitted(transcript, participant, ~commitment, signing_key) ]->
+  [
+    ActiveSigningKey(participant, signing_key, subject),
+    !CommittedShare(transcript, participant, ~commitment, signing_key),
+    SubmitSlot(transcript, participant, ~commitment, signing_key, subject)
+  ]
+
+rule SubmitAuthenticatedShare:
+  [
+    SubmitSlot(transcript, participant, commitment, signing_key, subject),
+    ActiveSigningKey(participant, signing_key, subject),
+    Fr(~share),
+    Fr(~sequence),
+    Fr(~signature)
+  ]
+  --[
+    ShareSubmitted(
+      transcript, participant, commitment, ~share, ~sequence, ~signature,
+      signing_key
+    ),
+    ShareSubmittedBySubject(transcript, participant, signing_key, subject),
+    ShareSignatureVerified(
+      transcript, participant, commitment, ~share, ~signature, signing_key
+    ),
+    ShareReplayRecordPersisted(
+      transcript, participant, ~sequence, signing_key
+    ),
+    ShareAccepted(transcript, participant, commitment, ~share, signing_key)
+  ]->
+  [
+    ActiveSigningKey(participant, signing_key, subject),
+    !SubmittedShare(transcript, participant, signing_key, subject),
+    !AuthenticatedShare(transcript, participant, commitment, ~share, signing_key),
+    !ShareReplayRecord(transcript, participant, ~sequence, signing_key)
+  ]
+
+rule AuditSubmittedShareMetadata:
+  [
+    !SubmittedShare(transcript, participant, signing_key, subject)
+  ]
+  --[
+    SubmittedShareMetadataAudited(transcript, participant, signing_key, subject)
+  ]->
+  []
+
+rule ComputeAdditiveAggregate:
+  [
+    !AdditiveTranscript(transcript, left, right),
+    !AuthenticatedShare(transcript, left, left_commitment, left_share, left_key),
+    !AuthenticatedShare(transcript, right, right_commitment, right_share, right_key)
+  ]
+  --[
+    AdditiveAggregateComputed(transcript, left, right, left_share, right_share)
+  ]->
+  [ !AdditiveAggregateResult(transcript) ]
+
+lemma accepted_share_requires_registered_participant:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex #j.
+      ShareParticipantRegistered(participant) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_required_slot:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex #j.
+      ShareRequired(transcript, participant) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_registered_signing_key:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex #j.
+      ShareSigningKeyRegistered(participant, signing_key) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_active_signing_key:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex subject #j.
+      ShareSigningKeyActive(participant, signing_key, subject) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_subject_bound_submission:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex subject.
+      ShareSubmittedBySubject(transcript, participant, signing_key, subject) @ #i"
+
+lemma accepted_share_requires_subject_bound_signing_key:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex subject #j.
+      ShareSigningKeySubjectBound(participant, signing_key, subject) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_prior_commitment:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex #j.
+      ShareCommitted(transcript, participant, commitment, signing_key) @ #j
+      & #j < #i"
+
+lemma accepted_share_requires_signature_verification:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex signature.
+      ShareSignatureVerified(
+        transcript, participant, commitment, share, signature, signing_key
+      ) @ #i"
+
+lemma accepted_share_requires_persisted_replay_record:
+  "All transcript participant commitment share signing_key #i.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    ==>
+    Ex sequence.
+      ShareReplayRecordPersisted(
+        transcript, participant, sequence, signing_key
+      ) @ #i"
+
+lemma submitted_share_metadata_audit_requires_subject_bound_submission:
+  "All transcript participant signing_key subject #i.
+    SubmittedShareMetadataAudited(
+      transcript, participant, signing_key, subject
+    ) @ #i
+    ==>
+    Ex #j.
+      ShareSubmittedBySubject(
+        transcript, participant, signing_key, subject
+      ) @ #j
+      & #j < #i"
+
+lemma submitted_share_value_not_public:
+  "All transcript participant commitment share sequence signature signing_key #i.
+    ShareSubmitted(
+      transcript, participant, commitment, share, sequence, signature,
+      signing_key
+    ) @ #i
+    ==>
+    not (Ex #j. K(share) @ #j)"
+
+lemma submitted_share_signature_not_public:
+  "All transcript participant commitment share sequence signature signing_key #i.
+    ShareSubmitted(
+      transcript, participant, commitment, share, sequence, signature,
+      signing_key
+    ) @ #i
+    ==>
+    not (Ex #j. K(signature) @ #j)"
+
+lemma accepted_share_is_single_use_per_participant:
+  "All transcript participant commitment1 share1 signing_key1
+       commitment2 share2 signing_key2 #i #j.
+    ShareAccepted(
+      transcript, participant, commitment1, share1, signing_key1
+    ) @ #i
+    & ShareAccepted(
+      transcript, participant, commitment2, share2, signing_key2
+    ) @ #j
+    ==>
+    #i = #j"
+
+lemma revoked_key_cannot_be_accepted_after_revocation:
+  "All transcript participant commitment share signing_key #i #j.
+    ShareAccepted(transcript, participant, commitment, share, signing_key) @ #i
+    & ShareSigningKeyRevoked(participant, signing_key) @ #j
+    ==>
+    #i < #j"
+
+lemma aggregate_computation_requires_opened_transcript:
+  "All transcript left right left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left, right, left_share, right_share
+    ) @ #i
+    ==>
+    Ex #j.
+      AdditiveTranscriptOpened(transcript, left, right) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_left_authenticated_share:
+  "All transcript left right left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left, right, left_share, right_share
+    ) @ #i
+    ==>
+    Ex commitment signing_key #j.
+      ShareAccepted(transcript, left, commitment, left_share, signing_key) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_right_authenticated_share:
+  "All transcript left right left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left, right, left_share, right_share
+    ) @ #i
+    ==>
+    Ex commitment signing_key #j.
+      ShareAccepted(transcript, right, commitment, right_share, signing_key) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_left_persisted_replay_record:
+  "All transcript left right left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left, right, left_share, right_share
+    ) @ #i
+    ==>
+    Ex sequence signing_key #j.
+      ShareReplayRecordPersisted(transcript, left, sequence, signing_key) @ #j
+      & #j < #i"
+
+lemma aggregate_computation_requires_right_persisted_replay_record:
+  "All transcript left right left_share right_share #i.
+    AdditiveAggregateComputed(
+      transcript, left, right, left_share, right_share
+    ) @ #i
+    ==>
+    Ex sequence signing_key #j.
+      ShareReplayRecordPersisted(transcript, right, sequence, signing_key) @ #j
+      & #j < #i"
+
+end

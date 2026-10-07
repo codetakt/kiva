@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:confidential:mechanism-maturity:1",
+  "title": "Kiva confidential mechanism maturity",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["kind", "version", "status_levels", "mechanisms"],
+  "properties": {
+    "kind": { "const": "kiva-confidential-mechanism-maturity" },
+    "version": { "const": 1 },
+    "status_levels": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "mechanisms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "milestone", "kind", "current_level", "production_claim", "claim_boundary"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "milestone": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "current_level": { "type": "string", "minLength": 1 },
+          "release_artifact_kind": { "type": ["string", "null"] },
+          "production_claim": { "type": "boolean" },
+          "claim_boundary": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

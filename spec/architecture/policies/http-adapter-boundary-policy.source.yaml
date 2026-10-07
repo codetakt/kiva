@@ -1,0 +1,24 @@
+description: HTTP adapter boundary policy.
+http_adapter_boundary_policy:
+  root_path: crates/kiva-server/src/surfaces
+  dependency_path: HTTP surface -> OpenAPI DTO -> application command/query -> port -> repository -> storage
+  handler_rule: >
+    Handlers parse and project HTTP DTOs, then call application or service
+    boundaries; handlers must not own domain policy or persistence decisions.
+  conversion_rule: >
+    Request and response conversion lives in surface wire/request modules or
+    generated contract crates, not inside repository or storage code.
+  repository_rule: >
+    Persistence-specific SQLx and memory storage details stay behind
+    repository and storage modules.
+  future_split_rule: >
+    Move storage adapters to dedicated crates only when server adapter growth
+    creates cross-surface coupling or repeated persistence logic.
+  thin_handler_markers:
+    - parse_pds_openapi_body
+    - statement_body_from_openapi_contract
+    - request_models_from_contract
+  adapter_roots:
+    - crates/kiva-server/src/surfaces/xapi
+    - crates/kiva-server/src/surfaces/pds
+    - crates/kiva-server/src/surfaces/confidential

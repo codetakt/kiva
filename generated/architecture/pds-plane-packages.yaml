@@ -1,0 +1,309 @@
+schema_version: 1
+kind: kiva-pds-plane-package-index
+status: active
+description: Generated PdsPlanePackage review view joining operation-owned planes, invariants, state machines, resource families, implementation anchors, and checks.
+generated_from:
+- spec/pds/core-planes.source.yaml
+- spec/pds/invariants.source.yaml
+- spec/pds/state-machines.source.yaml
+- generated/architecture/pds-resource-families.yaml
+generated_artifacts:
+  plane_packages: generated/architecture/pds-plane-packages.yaml
+package_count: 4
+packages:
+- id: event
+  package_type: PdsPlanePackage
+  core_concept: RecordEvent
+  responsibilities:
+  - consent grants and revocations
+  - lifecycle event metadata
+  - retention and case workflow event records
+  - data portability export audit records
+  milestone_refs:
+  - M1
+  - M4
+  - M12
+  - M17
+  invariants:
+  - id: pds-subject-scope
+    rule: PDS repositories and projections must scope records to the authenticated or declared data subject.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-consent-revocation-fail-closed
+    rule: Delegated PDS reads must fail closed when consent is missing, revoked, expired, or out of scope.
+    required_checks:
+    - pds-resource-families
+    - pds-core-planes
+  - id: pds-access-decision-audit-recorded
+    rule: Direct access checks and governed data-product reads must persist an access-audit event and ledger event.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-lifecycle-terminal-immutability
+    rule: Terminal lifecycle case metadata is immutable except for exact idempotent replay.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-schema-artifacts
+  state_machines:
+  - id: consent-grant
+    states:
+    - active
+    - revoked
+    - expired
+    terminal_states:
+    - revoked
+    - expired
+    transition_count: 5
+  - id: lifecycle-case
+    states:
+    - open
+    - under-review
+    - resolved
+    - rejected
+    - tombstoned
+    terminal_states:
+    - resolved
+    - rejected
+    - tombstoned
+    transition_count: 10
+  resource_families:
+  - id: consent
+    description: Consent and delegation grant lifecycle.
+    operation_count: 3
+    implementation_file_count: 13
+  - id: lifecycle
+    description: Lifecycle events, retention policies, and workflow cases.
+    operation_count: 6
+    implementation_file_count: 17
+  implementation_anchors:
+  - crates/kiva-pds/src/pds/events.rs
+  - crates/kiva-application/src/pds/workflow/commands.rs
+  - crates/kiva-server/src/surfaces/pds/model/state/ledger.rs
+  required_checks:
+  - pds-openapi-contract
+  - pds-resource-families
+- id: inventory
+  package_type: PdsPlanePackage
+  core_concept: InventoryView
+  responsibilities:
+  - subject-facing record inventory
+  - metadata export
+  - subject-bound data portability export
+  - publication templates and examples
+  milestone_refs:
+  - M4
+  - M7
+  - M13
+  - M15
+  - M17
+  invariants:
+  - id: pds-subject-scope
+    rule: PDS repositories and projections must scope records to the authenticated or declared data subject.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-metadata-only-inventory-export
+    rule: Inventory and export responses expose metadata projections, not raw xAPI Statement payloads.
+    required_checks:
+    - pds-openapi-schema-artifacts
+    - pds-openapi-contract
+  - id: pds-lifecycle-terminal-immutability
+    rule: Terminal lifecycle case metadata is immutable except for exact idempotent replay.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-schema-artifacts
+  state_machines:
+  - id: lifecycle-case
+    states:
+    - open
+    - under-review
+    - resolved
+    - rejected
+    - tombstoned
+    terminal_states:
+    - resolved
+    - rejected
+    - tombstoned
+    transition_count: 10
+  resource_families:
+  - id: inventory-export
+    description: Subject-visible inventory, metadata export, and governed portability projections.
+    operation_count: 3
+    implementation_file_count: 13
+  - id: governance
+    description: Public-sector deployment governance profiles.
+    operation_count: 2
+    implementation_file_count: 13
+  implementation_anchors:
+  - crates/kiva-server/src/surfaces/pds/wire/inventory.rs
+  - crates/kiva-server/src/surfaces/pds/handlers.rs
+  - spec/pds/deployment-templates.yaml
+  required_checks:
+  - pds-openapi-contract
+  - pds-openapi-schema-artifacts
+- id: policy
+  package_type: PdsPlanePackage
+  core_concept: PolicyDecision
+  responsibilities:
+  - consent-scoped access checks
+  - access audit
+  - data portability subject binding
+  - public-sector separation of duties
+  - OAuth/OIDC resource-server scope boundary
+  - provider metadata admission policy
+  milestone_refs:
+  - M0
+  - M1
+  - M3
+  - M6
+  - M11
+  - M13
+  - M14
+  - M15
+  - M17
+  invariants:
+  - id: pds-subject-scope
+    rule: PDS repositories and projections must scope records to the authenticated or declared data subject.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-consent-revocation-fail-closed
+    rule: Delegated PDS reads must fail closed when consent is missing, revoked, expired, or out of scope.
+    required_checks:
+    - pds-resource-families
+    - pds-core-planes
+  - id: pds-access-decision-audit-recorded
+    rule: Direct access checks and governed data-product reads must persist an access-audit event and ledger event.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-release-artifact-availability
+    rule: PDS data products may reference only available, owner-matching confidential release metadata.
+    required_checks:
+    - confidential-capability-policy-evidence
+    - pds-resource-families
+  - id: pds-provider-binding-metadata-only
+    rule: PDS provider bindings store provider metadata and digests only; raw provider secrets and runtime payloads stay outside PDS.
+    required_checks:
+    - secret-compute-provider-contract
+    - secret-compute-provider-tck
+  state_machines:
+  - id: consent-grant
+    states:
+    - active
+    - revoked
+    - expired
+    terminal_states:
+    - revoked
+    - expired
+    transition_count: 5
+  - id: release-artifact-availability
+    states:
+    - unavailable
+    - available
+    - released
+    terminal_states:
+    - released
+    transition_count: 5
+  - id: provider-binding-admission
+    states:
+    - pending-review
+    - admitted-reference
+    - production-ready
+    terminal_states:
+    - admitted-reference
+    - production-ready
+    transition_count: 5
+  resource_families:
+  - id: access
+    description: Access-decision evaluation and audit-event projections.
+    operation_count: 2
+    implementation_file_count: 12
+  - id: consent
+    description: Consent and delegation grant lifecycle.
+    operation_count: 3
+    implementation_file_count: 13
+  - id: governance
+    description: Public-sector deployment governance profiles.
+    operation_count: 2
+    implementation_file_count: 13
+  - id: provider-bindings
+    description: Metadata-only secret/confidential-compute provider bindings.
+    operation_count: 2
+    implementation_file_count: 13
+  implementation_anchors:
+  - crates/kiva-policy/src/policy/mod.rs
+  - crates/kiva-identity/src/lib.rs
+  - crates/kiva-server/src/core/state/authorization.rs
+  required_checks:
+  - pds-openapi-contract
+  - pds-resource-families
+  - secret-compute-provider-contract
+- id: release
+  package_type: PdsPlanePackage
+  core_concept: ReleaseArtifact
+  responsibilities:
+  - approved confidential data products
+  - threshold releases
+  - differential-privacy releases
+  - Shamir reconstruction metadata products
+  - secret/confidential provider binding metadata
+  milestone_refs:
+  - M2
+  - M5
+  - M8
+  - M9
+  - M10
+  - M14
+  invariants:
+  - id: pds-subject-scope
+    rule: PDS repositories and projections must scope records to the authenticated or declared data subject.
+    required_checks:
+    - pds-resource-families
+    - pds-openapi-contract
+  - id: pds-release-artifact-availability
+    rule: PDS data products may reference only available, owner-matching confidential release metadata.
+    required_checks:
+    - confidential-capability-policy-evidence
+    - pds-resource-families
+  - id: pds-provider-binding-metadata-only
+    rule: PDS provider bindings store provider metadata and digests only; raw provider secrets and runtime payloads stay outside PDS.
+    required_checks:
+    - secret-compute-provider-contract
+    - secret-compute-provider-tck
+  state_machines:
+  - id: release-artifact-availability
+    states:
+    - unavailable
+    - available
+    - released
+    terminal_states:
+    - released
+    transition_count: 5
+  - id: provider-binding-admission
+    states:
+    - pending-review
+    - admitted-reference
+    - production-ready
+    terminal_states:
+    - admitted-reference
+    - production-ready
+    transition_count: 5
+  resource_families:
+  - id: data-products
+    description: Approved aggregate data-product metadata and policy-gated reads.
+    operation_count: 3
+    implementation_file_count: 15
+  - id: provider-bindings
+    description: Metadata-only secret/confidential-compute provider bindings.
+    operation_count: 2
+    implementation_file_count: 13
+  implementation_anchors:
+  - crates/kiva-release-artifacts/src/lib.rs
+  - crates/kiva-server/src/app/pds/server_adapters/release_artifacts.rs
+  - crates/kiva-server/src/surfaces/pds/repository/data_products.rs
+  required_checks:
+  - pds-openapi-contract
+  - confidential-capability-policy-evidence
+  - pds-openapi-schema-artifacts

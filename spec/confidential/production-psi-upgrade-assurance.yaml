@@ -1,0 +1,103 @@
+---
+schema_version: 1
+kind: production-psi-upgrade-assurance
+standard: Kiva Architecture
+status: review-gated
+milestone: CC11
+profile_id: kiva-cc11-production-psi-upgrade-v1
+claim_boundary: >
+  Kiva has selected a DH-OPRF PSI family and implements the internal
+  review-gated runtime boundary needed to admit opaque OPRF transcripts,
+  derive replay metadata, suppress non-matches, handle aborts, and expose
+  release-gate facts through the generic confidential job evidence boundary
+  only after policy approval and external cryptographic review. Kiva does not
+  expose a dedicated DH-OPRF PSI HTTP API, PostgreSQL transcript/result store,
+  or PDS data-product source kind in this profile. This profile is not a
+  production PSI claim until the external review evidence is completed and
+  bound to the deployed runtime artifact.
+selected_protocol:
+  family: dh-oprf-psi
+  suite: ristretto255-sha512-voprf
+  profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+  participant_count: n-of-n
+  runtime_adapter: isolated-reviewed-runtime
+  in_repository_runtime: deterministic-fixture-boundary-only
+assumptions:
+  adversary_model: semi-honest-until-external-review-upgrade
+  malicious_secure_psi_claimed: false
+  low_entropy_identifier_protection_requires_oprf: true
+  raw_identifiers_admitted_to_kiva: false
+  participant_authentication_source: CC10-active-participants
+  abort_model: any-participant-abort-blocks-release
+leakage_profile:
+  reveals:
+    - intersection opaque element values
+    - intersection cardinality
+    - participant count
+    - transcript digest
+  does_not_reveal:
+    - raw identifiers
+    - non-matching elements
+    - per-participant input sets
+    - OPRF private keys
+    - blinding factors
+wire_and_record_boundary:
+  job_contract: spec/confidential/psi-oprf-dh-voprf-job-contract.yaml
+  vectors: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+  benchmarks: spec/confidential/psi-oprf-dh-voprf-benchmarks.yaml
+  interop: spec/confidential/psi-oprf-dh-voprf-interop.yaml
+  replay_record_shape: PsiOprfTranscriptRecord
+  dedicated_http_api: false
+  dedicated_postgresql_store: false
+  generic_confidential_job_evidence_boundary: true
+  replay_rejection:
+    duplicate_job_id: true
+    duplicate_transcript_digest: true
+  result_shape:
+    released_fields:
+      - job_id
+      - participant_count
+      - intersection_elements
+      - transcript_digest
+    forbidden_fields:
+      - rawIdentifier
+      - identifier
+      - nonMatchingElements
+      - participantInputs
+      - oprfPrivateKey
+      - blind
+      - unblindedElement
+pds:
+  dedicated_data_product_source_kind_implemented: false
+  future_source_kind: private-set-intersection-result
+  resource_class: aggregate-insights
+  raw_record_read: false
+  governed_release_fact_required: true
+  generic_confidential_job_evidence_boundary: true
+external_crypto_review:
+  required_before_production_claim: true
+  status: pending
+  production_claim_allowed: false
+  evidence_digest_required: true
+  runtime_artifact_digest_required: true
+verification:
+  rust_tests:
+    - crates/kiva-confidential/src/lib.rs::psi_oprf_intersection_exposes_only_matches_and_records_transcript
+    - crates/kiva-confidential/src/lib.rs::psi_oprf_rejects_abort_duplicate_replay_and_review_pending_release
+    - crates/kiva-confidential/src/lib.rs::validates_bundled_psi_oprf_vectors
+  kani_harnesses:
+    - kani_harnesses::psi_oprf_intersection_exposes_only_common_elements
+    - kani_harnesses::psi_oprf_release_gate_fails_closed
+  tamarin_models:
+    - proofs/tamarin/kiva_psi_oprf_boundary.spthy
+  validators:
+    - scripts/ci/validate_production_psi_upgrade_assurance.py
+  docs:
+    - docs/architecture/production-psi-upgrade.md
+    - docs/architecture/confidential-computation-milestones.md
+    - docs/operations/psi-oprf-runbook.md
+non_claims:
+  production_psi_before_external_review: false
+  malicious_secure_psi: false
+  broad_record_linkage: false
+  raw_identifier_processing_inside_kiva: false

@@ -1,0 +1,34 @@
+---
+schema_version: 1
+kind: psi-oprf-dh-voprf-interop-plan
+profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+status: review-gated
+runtime_adapter_contract:
+  language_boundary: rust
+  input_format: canonical-json
+  output_format: canonical-json
+  suite: ristretto255-sha512-voprf
+  opaque_element_bytes: 32
+  transcript_digest_bytes: 32
+required_implementations:
+  - id: kiva-deterministic-fixture-adapter
+    role: in-repository-boundary-tests
+    production_admissible: false
+  - id: externally-reviewed-dh-oprf-runtime
+    role: production-candidate
+    production_admissible: true
+    required_before_enablement: true
+interop_cases:
+  - id: cc11-fixture-positive
+    vector: spec/confidential/psi-oprf-dh-voprf-vectors.yaml
+    expected: intersection-elements-and-transcript-digest-match
+  - id: cc11-abort-negative
+    expected: aborted-participant-is-not-released
+  - id: cc11-replay-negative
+    expected: duplicate-job-or-transcript-is-rejected
+  - id: cc11-review-pending-negative
+    expected: release-rejected-until-external-review-completed
+wire_compatibility:
+  canonicalization_required_outside_kiva: true
+  raw_identifiers_cross_kiva_boundary: false
+  non_matching_elements_cross_release_boundary: false

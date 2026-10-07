@@ -1,0 +1,51 @@
+schema_version: 1
+kind: kiva-claim-maturity-catalog
+status: active
+description: >
+  Canonical maturity labels for public Kiva implementation claims. These labels
+  prevent control-plane evidence, reference fixtures, and external production
+  data-plane responsibilities from being described as the same claim strength.
+levels:
+  - id: boundary-definition
+    description: >
+      A reviewed architecture and claim boundary with planned milestones but
+      no implemented serving surface. This label makes no runtime capability
+      claim.
+  - id: internal-alignment
+    description: >
+      Internally validated alignment claim backed by repository-local contracts,
+      tests, generated evidence, and CI gates. This is not external
+      certification.
+  - id: control-plane
+    description: >
+      Kiva-owned metadata, admission, lifecycle, audit, and evidence control
+      plane. The claim does not include provider secret custody or production
+      cryptographic data-plane security.
+  - id: governed-serving
+    description: >
+      A tested read-only serving boundary over already approved metadata and
+      admitted aggregate outputs. This label does not claim a hosted BI product,
+      production analytics correctness, or access to source records.
+  - id: reference-fixture
+    description: >
+      Deterministic reference primitive or fixture suitable for experiments,
+      tests, examples, and formal boundary work, with no production security
+      claim.
+  - id: review-gated-external-runtime
+    description: >
+      External runtime or provider integration admitted through typed contracts,
+      review evidence, and release gates before Kiva records a runtime binding.
+  - id: deployment-integration
+    description: >
+      A tested deployment-edge integration that connects Kiva to an external
+      service while preserving the internal fail-closed boundary. This label
+      does not claim that the external service or the complete deployment is
+      production-ready.
+  - id: production-data-plane-external
+    description: >
+      Production data-plane security remains a provider responsibility unless a
+      future milestone explicitly moves that responsibility into Kiva.
+  - id: evidence-gated-release
+    description: >
+      Release-confidence claim based on required evidence sets, formal
+      verification artifacts for selected boundaries, and Nix/CI checks.

@@ -1,0 +1,183 @@
+schema_version: 1
+kind: kiva-confidential-capability-policy-evidence
+status: active
+description: Generated Capability/Policy/Evidence view joining confidential capabilities, provider policies, maturity, operations, assurance, and verification evidence.
+generated_from:
+- generated/confidential/capability-binding-index.yaml
+- generated/confidential/mechanism-profile-index.yaml
+generated_artifacts:
+  capability_policy_evidence: generated/confidential/capability-policy-evidence.yaml
+  markdown: docs/architecture/generated/confidential-capability-policy-evidence.md
+mechanism_count: 9
+mechanisms:
+- mechanism: additive-secure-aggregation
+  profile: additive-n-of-n
+  capability: additive-secure-aggregation
+  binding_kind: dedicated-workflow
+  provider_kind: reference-primitive
+  provider_boundary_type: ReferencePrimitiveProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: false
+  maturity_level: evidence-bundled
+  operation_count: 12
+  assurance_registry_entry_count: 0
+  verification_kernel_count: 1
+- mechanism: fhe-sum-feasibility
+  profile: fhe-sum-feasibility
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: fully-homomorphic-encryption
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: false
+  maturity_level: evidence-bundled
+  operation_count: 8
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1
+- mechanism: fhe-sum-runtime
+  profile: fhe-sum-runtime
+  capability: fhe-evaluation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: fully-homomorphic-encryption
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: true
+  maturity_level: external-review-pending
+  operation_count: 8
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1
+- mechanism: psi-cohort-hash-token
+  profile: private-set-intersection
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: private-set-intersection
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: false
+  maturity_level: evidence-bundled
+  operation_count: 8
+  assurance_registry_entry_count: 0
+  verification_kernel_count: 1
+- mechanism: psi-oprf-dh-voprf
+  profile: private-set-intersection-oprf-dh
+  capability: psi-evaluation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: private-set-intersection
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: true
+  maturity_level: external-review-pending
+  operation_count: 8
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1
+- mechanism: shamir-vss-admission
+  profile: shamir-threshold
+  capability: threshold-reconstruction
+  binding_kind: dedicated-workflow
+  provider_kind: threshold-cryptography
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: false
+  maturity_level: evidence-bundled
+  operation_count: 2
+  assurance_registry_entry_count: 0
+  verification_kernel_count: 1
+- mechanism: tee-aws-nitro-attestation
+  profile: trusted-execution-environment-aws-nitro
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: trusted-execution-environment
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: true
+  maturity_level: external-review-pending
+  operation_count: 8
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1
+- mechanism: tee-portable-attestation
+  profile: trusted-execution-environment
+  capability: tee-attestation
+  binding_kind: generic-runtime-orchestration
+  provider_kind: trusted-execution-environment
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: true
+  maturity_level: evidence-bundled
+  operation_count: 8
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1
+- mechanism: threshold-frost-signing
+  profile: threshold-frost-signing
+  capability: threshold-signing
+  binding_kind: generic-runtime-orchestration
+  provider_kind: threshold-cryptography
+  provider_boundary_type: ComputeMechanismProvider
+  sealed_boundary: true
+  gate_sequence:
+  - capability
+  - admission-gate
+  - evidence
+  - runtime-boundary
+  - runtime-binding
+  - release
+  production_review_required: true
+  maturity_level: external-review-pending
+  operation_count: 12
+  assurance_registry_entry_count: 1
+  verification_kernel_count: 1

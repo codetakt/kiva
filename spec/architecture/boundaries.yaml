@@ -1,0 +1,28 @@
+version: 1
+description: >
+  Machine-readable architecture boundary anchors for the Kiva server modular
+  monolith. This manifest backs the CI drift check and keeps source, contract,
+  and design-document ownership in one place.
+
+includes:
+  - spec/architecture/boundaries/application-workflows.yaml
+  - spec/architecture/boundaries/control-plane-boundaries.yaml
+  - spec/architecture/boundaries/openapi-generated-dtos.yaml
+  - spec/architecture/boundaries/source-groups.yaml
+  - spec/architecture/boundaries/dependency-rules.yaml
+  - spec/architecture/boundaries/module-structure.yaml
+  - spec/architecture/boundaries/route-ownership.yaml
+  - spec/architecture/boundaries/source-size-rules.yaml
+  - spec/architecture/boundaries/hygiene-rules.yaml
+
+openapi_contracts:
+  - spec/openapi/kiva-analytics.yaml
+  - spec/openapi/kiva-xapi.yaml
+  - spec/openapi/kiva-pds.yaml
+  - spec/openapi/kiva-confidential.yaml
+
+operation_catalogs:
+  - generated/architecture/operation-catalog.yaml
+
+compatibility_surface_ledgers:
+  - spec/architecture/compatibility-surfaces.yaml

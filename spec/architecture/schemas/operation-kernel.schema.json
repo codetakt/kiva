@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:operation-kernel:1",
+  "title": "Kiva OperationKernel IR",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "generated_from",
+    "projection_basis",
+    "operation_count",
+    "application_operation_count",
+    "pds_resource_operation_count",
+    "operations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-operation-kernel-ir" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "generated_from": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "generated_artifacts": { "type": "object" },
+    "projection_basis": {
+      "type": "object",
+      "required": ["root_type", "source_root_type", "join_type", "rule"],
+      "properties": {
+        "root_type": { "const": "OperationKernel" },
+        "source_root_type": { "const": "SurfaceOperation" },
+        "source_normal_form": { "type": "string", "minLength": 1 },
+        "source_algebra": { "type": "string", "minLength": 1 },
+        "join_type": { "type": "string", "minLength": 1 },
+        "rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "operation_count": { "type": "integer", "minimum": 1 },
+    "application_operation_count": { "type": "integer", "minimum": 0 },
+    "pds_resource_operation_count": { "type": "integer", "minimum": 0 },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "operation_key",
+          "route_key",
+          "http_contract",
+          "resource_family",
+          "evidence_refs"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "operation_key": { "$ref": "#/$defs/operationKey" },
+          "route_key": { "$ref": "#/$defs/routeKey" },
+          "http_contract": {
+            "type": "object",
+            "required": ["method", "path", "operation_id", "required_scopes", "requirements"],
+            "properties": {
+              "method": { "type": "string", "minLength": 1 },
+              "path": { "type": "string", "minLength": 1 },
+              "operation_id": { "type": "string", "minLength": 1 },
+              "required_scopes": { "type": "array", "items": { "type": "string" } },
+              "requirements": { "type": "array", "items": { "type": "string" } },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "summary": { "type": ["string", "null"] }
+            },
+            "additionalProperties": true
+          },
+          "application_operation": {
+            "type": ["object", "null"],
+            "required": ["id", "surface", "workflow_label", "rust_workflow_kind"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "surface": { "type": "string", "minLength": 1 },
+              "workflow_label": { "type": "string", "minLength": 1 },
+              "rust_workflow_kind": { "type": "string", "minLength": 1 },
+              "workflow_family": { "type": "string" }
+            },
+            "additionalProperties": true
+          },
+          "resource_family": {
+            "type": "object",
+            "required": ["surface_family", "surface", "pds_resource_family", "pds_route_context", "pds_planes"],
+            "properties": {
+              "surface_family": { "type": "string", "minLength": 1 },
+              "surface": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" },
+              "pds_resource_family": { "type": ["string", "null"] },
+              "pds_route_context": { "type": ["string", "null"] },
+              "pds_planes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            },
+            "additionalProperties": true
+          },
+          "evidence_refs": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "operationKey": {
+      "type": "object",
+      "required": ["openapi_contract", "operation_id"],
+      "properties": {
+        "openapi_contract": { "type": "string", "minLength": 1 },
+        "operation_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "routeKey": {
+      "type": "object",
+      "required": ["openapi_contract", "method", "path"],
+      "properties": {
+        "openapi_contract": { "type": "string", "minLength": 1 },
+        "method": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:endpoint-profile:1",
+  "title": "Kiva xAPI LRS conformance endpoint profile fixture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "profiles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "deterministic-too-large-threshold": {
+          "$ref": "#/$defs/tooLargeProfile"
+        },
+        "deterministic-rate-limit-trigger": {
+          "$ref": "#/$defs/rateLimitProfile"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tooLargeProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_request_body_bytes",
+        "probe_body_bytes"
+      ],
+      "properties": {
+        "max_request_body_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "probe_body_bytes": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16777216
+        }
+      }
+    },
+    "rateLimitProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_count",
+        "window_seconds",
+        "path"
+      ],
+      "properties": {
+        "request_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      }
+    }
+  }
+}

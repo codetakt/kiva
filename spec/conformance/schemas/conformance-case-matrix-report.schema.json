@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:case-matrix-report:1",
+  "title": "Kiva xAPI LRS conformance case matrix report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "requirement_catalog",
+    "executable_gap_map",
+    "case_roots",
+    "totals",
+    "suites",
+    "cases",
+    "requirements",
+    "uncovered_requirements",
+    "profile_sensitive_requirements",
+    "unclassified_uncovered_requirements",
+    "endpoint_profile_required_cases"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "requirement_catalog": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "executable_gap_map": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "case_roots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "suites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/suite"
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    },
+    "uncovered_requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    },
+    "profile_sensitive_requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gapRow"
+      }
+    },
+    "unclassified_uncovered_requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    },
+    "endpoint_profile_required_cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "idList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirements",
+        "suites",
+        "cases",
+        "requirements_with_cases",
+        "requirements_without_cases",
+        "profile_sensitive_requirements",
+        "unclassified_uncovered_requirements",
+        "endpoint_profile_required_cases",
+        "destructive_cases",
+        "low_side_effect_cases"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "suites": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cases": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requirements_with_cases": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requirements_without_cases": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "profile_sensitive_requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unclassified_uncovered_requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endpoint_profile_required_cases": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "destructive_cases": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "low_side_effect_cases": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "cases"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "path": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "cases": {
+          "$ref": "#/$defs/idList"
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "suite",
+        "path",
+        "requirements",
+        "safety",
+        "requires_endpoint_profiles"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "suite": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "path": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "safety": {
+          "$ref": "#/$defs/safety"
+        },
+        "requires_endpoint_profiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "deterministic-too-large-threshold",
+              "deterministic-rate-limit-trigger"
+            ]
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destructive",
+        "requires_isolated_lrs"
+      ],
+      "properties": {
+        "destructive": {
+          "type": "boolean"
+        },
+        "requires_isolated_lrs": {
+          "type": "boolean"
+        }
+      }
+    },
+    "requirementRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "clause",
+        "area",
+        "projection",
+        "summary",
+        "cases"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "clause": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "area": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "projection": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "cases": {
+          "$ref": "#/$defs/idList"
+        }
+      }
+    },
+    "gapRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "clause",
+        "area",
+        "projection",
+        "summary",
+        "classification",
+        "required_profile",
+        "rationale"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "clause": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "area": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "projection": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "classification": {
+          "const": "endpoint-profile-sensitive"
+        },
+        "required_profile": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "rationale": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    }
+  }
+}

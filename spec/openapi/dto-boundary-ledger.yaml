@@ -1,0 +1,227 @@
+version: 1
+kind: kiva-openapi-dto-boundary-ledger
+status: complete
+source_of_truth: openapi-contracts
+canonical_name: openapi-dto-boundary-ledger
+canonical_path: spec/openapi/dto-boundary-ledger.yaml
+legacy_path: spec/openapi/dto-generation-plan.yaml
+split_sources:
+  boundary_policy: spec/openapi/dto-boundary-policy.yaml
+  semantic_compatibility_retirement: spec/openapi/semantic-compatibility-retirement.yaml
+target_state:
+  external_http_dtos: generated-contract-crates
+  internal_domain_types: handwritten-domain-and-application-types
+  boundary_model: external_contract_boundary-plus-internal_semantic_boundaries
+  source_of_truth: openapi-contracts
+  completion_rule: all-external-http-dtos-generated-and-adopted; dto-map-archive-retired
+completion_milestones:
+  - id: generated-contract-crate-parity
+    status: complete
+    completion_rule: every-required-contract-has-generated-request-and-response-dtos
+    contract_set: all-openapi-contracts
+  - id: generated-boundary-adoption
+    status: complete
+    completion_rule: server-http-handlers-parse-external-payloads-through-generated-contract-crates
+    contract_set: all-openapi-contracts
+  - id: semantic-compatibility-guard-retirement
+    status: complete
+    completion_rule: semantic-compatibility-dto-map-retired-after-openapi-conformance-and-evidence-gates-pass
+    contract_set: all-openapi-contracts
+boundary_status_policy:
+  semantic-compatibility-boundary-planned-generation:
+    dto_map_contracts: empty
+    active_generated_slice: forbidden
+    dto_maps_must_live_under_generation_target: false
+  active-generated-request-slice:
+    dto_map_contracts: non_empty
+    active_generated_slice: required
+    dto_maps_must_live_under_generation_target: false
+  active-generated-contract-slice:
+    dto_map_contracts: non_empty
+    active_generated_slice: optional
+    dto_maps_must_live_under_generation_target: false
+  generated-contract-crate:
+    dto_map_contracts: non_empty
+    active_generated_slice: optional
+    dto_maps_must_live_under_generation_target: false
+active_guards:
+  generated_contract_dto_map: spec/openapi/generated-contract-dto-map.yaml
+  semantic_compatibility_map: spec/openapi/semantic-compatibility-map.yaml
+  dto_map_projection: generated/openapi-dto-map-projection.yaml
+  semantic_compatibility_map_validator: scripts/ci/validate_openapi_rust_dto_map.py
+  generated_contract_dto_map_generator: scripts/ci/generate_generated_contract_dto_map.py
+  boundary_ledger_validator: scripts/ci/validate_openapi_dto_boundary_ledger.py
+  dto_map_projection_generator: scripts/ci/generate_openapi_dto_map_projection.py
+  dto_map_projection_check: openapi-dto-map-projection
+retired_archives:
+  rust_dto_map_archive:
+    status: complete
+    path: spec/openapi/rust-dto-map.yaml
+    former_role: retired-openapi-rust-dto-map
+    retirement_milestone: semantic-compatibility-guard-retirement
+    completion_rule: generated-boundary-adoption-complete-and-split-dto-map-checks-active
+handler_adoption:
+  status: complete
+  completion_rule: generated-boundary-adoption-is-complete-because-server-http-handlers-parse-external-payloads-through-generated-contract-crates
+  source: contracts[].handler_adoption
+boundary_parity_policy:
+  target_boundary_type: GeneratedContractBoundary
+  contract_set: all-openapi-contracts
+  compatibility_boundary_rule: every CompatibilityHttpBoundary must declare target_boundary_type, runtime_adoption_gate, and generated request/response target flags
+remaining_compatibility_work_queue:
+  source_of_truth: contracts[].handler_adoption
+  completion_order: []
+  items: []
+contracts:
+  - openapi: spec/openapi/kiva-analytics.yaml
+    boundary_type: GeneratedContractBoundary
+    target_boundary_type: GeneratedContractBoundary
+    generation_target: crates/kiva-analytics-openapi-contract
+    external_contract_boundary: crates/kiva-analytics-openapi-contract
+    internal_semantic_boundaries:
+      - crates/kiva-application
+    boundary_status: generated-contract-crate
+    dto_map_contracts:
+      - kiva-analytics-generated-response-contract
+    generated_contract_dto_map_contracts:
+      - kiva-analytics-generated-response-contract
+    semantic_compatibility_map_contracts: []
+    generated_response_slice:
+      crate: crates/kiva-analytics-openapi-contract
+      coverage: all-success-response-schema-closure
+    handler_adoption:
+      adoption_status: generated-request-response-handler-adopted
+      handler_boundaries:
+        - crates/kiva-server/src/surfaces/analytics/handlers.rs
+        - crates/kiva-server/src/surfaces/analytics/wire.rs
+      generated_request_parsing: true
+      generated_response_projection: true
+      generated_request_parsing_target: true
+      generated_response_projection_target: true
+  - openapi: spec/openapi/kiva-xapi.yaml
+    boundary_type: GeneratedContractBoundary
+    target_boundary_type: GeneratedContractBoundary
+    generation_target: crates/kiva-xapi-openapi-contract
+    external_contract_boundary: crates/kiva-xapi-openapi-contract
+    internal_semantic_boundaries:
+      - crates/kiva-xapi
+      - crates/kiva-http-core
+    boundary_status: generated-contract-crate
+    dto_map_contracts:
+      - kiva-xapi-generated-contract
+    generated_contract_dto_map_contracts:
+      - kiva-xapi-generated-contract
+    semantic_compatibility_map_contracts: []
+    handler_adoption:
+      adoption_status: generated-request-response-handler-adopted
+      handler_boundaries:
+        - crates/kiva-server/src/surfaces/xapi/handlers.rs
+        - crates/kiva-server/src/surfaces/xapi/request
+        - crates/kiva-server/src/surfaces/xapi/wire.rs
+        - crates/kiva-server/src/surfaces/xapi/response.rs
+      generated_request_parsing: true
+      generated_response_projection: true
+      generated_request_parsing_target: true
+      generated_response_projection_target: true
+  - openapi: spec/openapi/kiva-pds.yaml
+    boundary_type: GeneratedContractBoundary
+    target_boundary_type: GeneratedContractBoundary
+    generation_target: crates/kiva-pds-openapi-contract
+    external_contract_boundary: crates/kiva-pds-openapi-contract
+    internal_semantic_boundaries:
+      - crates/kiva-pds
+    boundary_status: generated-contract-crate
+    dto_map_contracts:
+      - kiva-pds-boundary-types
+      - kiva-pds-generated-request-contract
+      - kiva-pds-generated-response-contract
+    generated_contract_dto_map_contracts:
+      - kiva-pds-generated-request-contract
+      - kiva-pds-generated-response-contract
+    semantic_compatibility_map_contracts:
+      - kiva-pds-boundary-types
+    active_generated_slice:
+      crate: crates/kiva-pds-openapi-contract
+      coverage: all-request-body-schema-closure
+    generated_response_slice:
+      crate: crates/kiva-pds-openapi-contract
+      coverage: all-success-response-schema-closure
+    handler_adoption:
+      adoption_status: generated-request-response-handler-adopted
+      handler_boundaries:
+        - crates/kiva-server/src/surfaces/pds/handlers
+        - crates/kiva-server/src/surfaces/pds/wire/openapi
+      generated_request_parsing: true
+      generated_response_projection: true
+      generated_request_parsing_target: true
+      generated_response_projection_target: true
+  - openapi: spec/openapi/kiva-confidential.yaml
+    boundary_type: GeneratedContractBoundary
+    target_boundary_type: GeneratedContractBoundary
+    generation_target: crates/kiva-confidential-contract
+    external_contract_boundary: crates/kiva-confidential-contract
+    internal_semantic_boundaries:
+      - crates/kiva-confidential
+    boundary_status: generated-contract-crate
+    dto_map_contracts:
+      - kiva-confidential-request-types
+      - kiva-confidential-response-types
+    generated_contract_dto_map_contracts:
+      - kiva-confidential-request-types
+      - kiva-confidential-response-types
+    semantic_compatibility_map_contracts: []
+    handler_adoption:
+      adoption_status: generated-request-response-handler-adopted
+      handler_boundaries:
+        - crates/kiva-server/src/surfaces/confidential/handlers
+        - crates/kiva-server/src/surfaces/confidential/wire
+        - crates/kiva-server/src/surfaces/confidential/response
+      generated_request_parsing: true
+      generated_response_projection: true
+      generated_request_parsing_target: true
+      generated_response_projection_target: true
+phases:
+  - id: dto-map-parity
+    status: active
+    description: >
+      Keep semantic compatibility DTOs checked against OpenAPI schemas through
+      the split Rust DTO maps until the remaining compatibility guard can be
+      retired.
+  - id: generated-schema-artifacts
+    status: active
+    description: >
+      Keep generated JSON Schema artifacts for publication and evidence
+      bundles without making generated Rust a runtime dependency. PDS schema
+      artifacts use a bundle-plus-thin-schema-refs strategy so schema additions
+      update the bundle and index without copying every component into every
+      individual artifact.
+  - id: generated-rust-contract-crates
+    status: active
+    description: >
+      Generate Rust DTO contract crates from OpenAPI and preserve handwritten
+      application/domain types as internal model projections. Each contract row
+      names the generated external DTO crate separately from the internal
+      semantic boundary crates. The xAPI request and response handlers now pass
+      Statement-family payloads through `crates/kiva-xapi-openapi-contract`
+      before handwritten xAPI normalization and HTTP semantic helpers. The
+      active PDS request and response slices are derived from the OpenAPI
+      request-body and success-response DTO schema closures, so schema
+      membership is not maintained as a parallel handwritten list. The generated
+      DTO map projection manifest records the generated contract crate
+      membership derived from those closures.
+  - id: semantic-compatibility-dto-retirement
+    status: active
+    description: >
+      Retire the remaining semantic compatibility DTO definitions only after
+      generated crates pass the existing OpenAPI, conformance, PDS evidence, and
+      confidential evidence gates.
+invariants:
+  - OpenAPI remains the external HTTP contract source of truth.
+  - GeneratedContractBoundary means both request parsing and response projection use generated contract DTOs.
+  - CompatibilityHttpBoundary means at least one HTTP handler direction still uses a handwritten boundary and must keep a runtime adoption gate.
+  - Every contract targets GeneratedContractBoundary; CompatibilityHttpBoundary is a guarded future migration state, not a terminal architecture.
+  - Generated DTOs must not import server runtime, SQLx, Axum handlers, or repositories.
+  - Internal domain/application records remain separate from generated wire DTOs.
+  - The Rust DTO map is split into generated contract DTO maps and semantic compatibility maps.
+  - Internal PDS command-input and intent types remain semantically named even when deprecated compatibility aliases retain legacy `*Request` names.
+  - Existing conformance and evidence bundles must pass unchanged before replacing handwritten DTOs.

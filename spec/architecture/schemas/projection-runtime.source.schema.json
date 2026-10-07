@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:architecture:projection-runtime-source:1",
+  "title": "Kiva ProjectionRuntime source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "status", "generator_plan", "projection_spec_source", "synchronization_policy", "runtime"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-projection-runtime-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "generator_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order_model", "rule", "nodes"],
+      "properties": {
+        "order_model": { "const": "stable-topological-sort" },
+        "rule": { "type": "string", "minLength": 1 },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "script", "depends_on"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "script": { "type": "string", "minLength": 1 },
+              "depends_on": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "projection_spec_source": { "type": "string", "minLength": 1 },
+    "synchronization_policy": { "const": "normal-form-primary-with-projection-spec-compatibility-view" },
+    "runtime": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["projection_source", "projection_id", "projection_kind", "projection_sources", "projection_source_refs", "projection_generator", "validator"],
+        "properties": {
+          "projection_source": { "type": "string", "minLength": 1 },
+          "projection_id": { "type": "string", "minLength": 1 },
+          "projection_kind": { "type": "string", "minLength": 1 },
+          "source": { "type": "string" },
+          "strategy": { "type": "string" },
+          "projection_sources": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "projection_source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "projection_generator": { "type": "string" },
+          "validator": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

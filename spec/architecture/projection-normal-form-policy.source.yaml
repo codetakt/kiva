@@ -1,0 +1,56 @@
+schema_version: 1
+kind: kiva-projection-normal-form-policy-source
+status: active
+description: Governance policy for the ProjectionSpec auxiliary normal-form migration.
+transition_stage: normal-form-primary
+target_stage: normal-form-primary
+compatibility_view: spec/architecture/projection-specs.source.yaml
+generator: scripts/ci/generate_projection_auxiliary_ledgers.py
+validator: scripts/ci/validate_projection_normal_form.py
+schema_registry: spec/architecture/source-ledger-schemas.yaml
+compatibility_view_lifecycle:
+  human_editable: false
+  generated_only: true
+  canonical_source: false
+  review_role: generated-compatibility-view
+drift_policy:
+  enforcement: compatibility-view-matches-normal-form
+  synchronized_by: normal-form-primary-with-projection-spec-compatibility-view
+  authoritative_behavior: projection-normal-form-ledgers
+  retirement_gate: projection-spec-inline-fields-remain-byte-for-byte-compatibility-view
+promotion_criteria:
+  compiler_reads_normal_form_ledgers_first: true
+  inline_projection_fields_are_compatibility_view: true
+  compatibility_view_is_byte_for_byte_current: true
+  source_schema_registry_covers_normal_form: true
+auxiliary_sources:
+  artifacts:
+    source: spec/architecture/projection-artifacts.source.yaml
+    kind: kiva-projection-artifacts-source
+    schema: spec/architecture/schemas/projection-artifacts.source.schema.json
+    primary_fields:
+      - generated_artifacts
+      - projection_targets
+      - projection_exports
+      - bundle
+      - index
+  runtime:
+    source: spec/architecture/projection-runtime.source.yaml
+    kind: kiva-projection-runtime-source
+    schema: spec/architecture/schemas/projection-runtime.source.schema.json
+    primary_fields:
+      - source
+      - strategy
+      - projection_sources
+      - projection_source_refs
+      - projection_generator
+      - validator
+  check_bindings:
+    source: spec/architecture/projection-check-bindings.source.yaml
+    kind: kiva-projection-check-bindings-source
+    schema: spec/architecture/schemas/projection-check-bindings.source.schema.json
+    primary_fields:
+      - projection_checks
+ci_check:
+  group: openapi-contract
+  check_id: projection-normal-form-policy

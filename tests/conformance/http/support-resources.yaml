@@ -1,0 +1,142 @@
+suite:
+  id: xapi-lrs-support-resources
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Low-side-effect checks that standard xAPI LRS resource families are addressable.
+cases:
+  - id: standard-resource-families-are-addressable
+    requirements:
+      - xapi-lrs-4.1.6-support-resources
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    steps:
+      - id: get-statements-resource
+        request:
+          method: GET
+          path: /statements
+          query:
+            limit: '1'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                present: true
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+      - id: get-state-resource
+        request:
+          method: GET
+          path: /activities/state
+          query:
+            activityId: https://example.org/kiva/conformance/activity/support-resources
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-support-resources@example.org"}'
+            stateId: kiva-support-resources-missing-state
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 404
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+      - id: get-agents-resource
+        request:
+          method: GET
+          path: /agents
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-support-resources@example.org"}'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+          json:
+            pointers:
+              /objectType:
+                equals: Person
+      - id: get-activities-resource
+        request:
+          method: GET
+          path: /activities
+          query:
+            activityId: https://example.org/kiva/conformance/activity/support-resources
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+          json:
+            pointers:
+              /id:
+                equals: https://example.org/kiva/conformance/activity/support-resources
+      - id: get-agent-profile-resource
+        request:
+          method: GET
+          path: /agents/profile
+          query:
+            agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-support-resources@example.org"}'
+            profileId: kiva-support-resources-missing-agent-profile
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 404
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+      - id: get-activity-profile-resource
+        request:
+          method: GET
+          path: /activities/profile
+          query:
+            activityId: https://example.org/kiva/conformance/activity/support-resources
+            profileId: kiva-support-resources-missing-activity-profile
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 404
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+      - id: get-about-resource
+        request:
+          method: GET
+          path: /about
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+          json:
+            pointers:
+              /version:
+                contains: 2.0.0

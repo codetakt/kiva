@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:adl-run-expectations:1",
+  "title": "Kiva ADL conformance run expectations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "suite",
+    "tests"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "kiva-adl-run-expectations"
+    },
+    "status": {
+      "const": "active"
+    },
+    "suite": {
+      "$ref": "#/$defs/suite"
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/testExpectation"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "upstream",
+        "target_version",
+        "git_revision",
+        "test_id_scheme",
+        "expected_observed_tests",
+        "upstream_advertised_tests",
+        "upstream_count_note"
+      ],
+      "properties": {
+        "id": {
+          "const": "adl-lrs-conformance-test-suite-v2-0"
+        },
+        "upstream": {
+          "const": "https://github.com/adlnet/lrs-conformance-test-suite"
+        },
+        "target_version": {
+          "const": "2.0.0"
+        },
+        "git_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "test_id_scheme": {
+          "const": "sha256-title-path-occurrence-v1"
+        },
+        "expected_observed_tests": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "upstream_advertised_tests": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "upstream_count_note": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "testExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title_path",
+        "occurrence",
+        "expected"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^adl-v2-[0-9a-f]{20}$"
+        },
+        "title_path": {
+          "$ref": "#/$defs/stringList"
+        },
+        "occurrence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected": {
+          "enum": [
+            "pass",
+            "divergence",
+            "skip",
+            "open-defect"
+          ]
+        },
+        "requirement_refs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "compatibility_refs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "rationale": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "expected": {
+                "enum": [
+                  "divergence",
+                  "skip"
+                ]
+              }
+            },
+            "required": [
+              "expected"
+            ]
+          },
+          "then": {
+            "required": [
+              "rationale"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "requirement_refs"
+                ]
+              },
+              {
+                "required": [
+                  "compatibility_refs"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected": {
+                "const": "open-defect"
+              }
+            },
+            "required": [
+              "expected"
+            ]
+          },
+          "then": {
+            "required": [
+              "rationale"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

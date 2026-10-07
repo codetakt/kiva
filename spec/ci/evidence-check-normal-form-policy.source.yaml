@@ -1,0 +1,37 @@
+schema_version: 1
+kind: kiva-ci-evidence-normal-form-policy-source
+status: active
+description: Governance policy for the primary CI evidence-check catalog and gate-plan normal form.
+transition_stage: normal-form-primary
+compatibility_view: spec/ci/evidence-checks.source.yaml
+group_source: spec/ci/evidence-check-groups.source.yaml
+generator: scripts/ci/generate_evidence_check_catalog.py
+validator: scripts/ci/validate_evidence_check_normal_form.py
+schema_registry: spec/architecture/source-ledger-schemas.yaml
+compatibility_view_lifecycle:
+  human_editable: false
+  generated_only: true
+  canonical_source: false
+  review_role: generated-compatibility-view
+drift_policy:
+  enforcement: compatibility-view-matches-normal-form
+  synchronized_by: normal-form-primary-with-evidence-check-compatibility-view
+  authoritative_behavior: check-catalog-and-gate-plan
+  retirement_gate: evidence-check-source-groups-remain-byte-for-byte-compatibility-view
+normal_form_sources:
+  check_catalog:
+    source: spec/ci/evidence-check-catalog.source.yaml
+    kind: kiva-ci-evidence-check-catalog-source
+    schema: spec/ci/schemas/evidence-check-catalog.source.schema.json
+    primary_fields:
+      - checks[]
+  gate_plan:
+    source: spec/ci/evidence-gate-plan.source.yaml
+    kind: kiva-ci-evidence-gate-plan-source
+    schema: spec/ci/schemas/evidence-gate-plan.source.schema.json
+    primary_fields:
+      - evidence-check-groups.source.yaml groups[]
+      - groups[].check_order
+ci_check:
+  group: openapi-contract
+  check_id: evidence-check-normal-form-policy

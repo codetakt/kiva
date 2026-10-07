@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:DataProductReadRequest",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/DataProductReadRequest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

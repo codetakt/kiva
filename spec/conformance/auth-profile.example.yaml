@@ -1,0 +1,9 @@
+schema_version: 1
+standard: IEEE/ISO/IEC 39274-1-1-2025
+profiles:
+  statement_writer_a:
+    bearer_token_env: KIVA_CONFORMANCE_WRITER_A_TOKEN
+  statement_reader:
+    bearer_token_env: KIVA_CONFORMANCE_READER_TOKEN
+  invalid_credential:
+    bearer_token_env: KIVA_CONFORMANCE_INVALID_TOKEN

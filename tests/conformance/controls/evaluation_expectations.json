@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "scope": "Exact bounded case-failure sets; these declarations are not a whole-standard oracle. Derived from defect behavior and witness observations; prior executions are cross-checks only.",
+  "models": {
+    "none": {
+      "transport": "reference",
+      "expected_failed_cases": [],
+      "intended_observation": "All bounded source-derived reference witnesses must pass."
+    },
+    "reject-advisory-version": {
+      "transport": "reference",
+      "expected_failed_cases": [],
+      "intended_observation": "A should-not-reject recommendation does not mandate acceptance."
+    },
+    "reject-unknown-local-offset": {
+      "transport": "reference",
+      "expected_failed_cases": [],
+      "intended_observation": "400 is permitted by the declared ISO/RFC boundary; no readback is applicable."
+    },
+    "const-etag": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "activity-profile-captured-stale-etag-delete",
+        "activity-profile-captured-stale-etag-post",
+        "activity-profile-captured-stale-etag-put",
+        "agent-profile-captured-stale-etag-delete",
+        "agent-profile-captured-stale-etag-post",
+        "agent-profile-captured-stale-etag-put",
+        "state-captured-stale-etag-delete",
+        "state-captured-stale-etag-post",
+        "state-captured-stale-etag-put"
+      ],
+      "intended_observation": "A captured earlier ETag must not authorize any later changed document write or delete."
+    },
+    "delete-single-deletes-siblings": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "activity-profile-single-delete-preserves-sibling",
+        "agent-profile-single-delete-preserves-sibling",
+        "state-single-delete-preserves-sibling"
+      ],
+      "intended_observation": "Readback of the sibling must survive the selected single DELETE."
+    },
+    "post-requires-existing": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "activity-profile-post-creates-absent-document",
+        "activity-profile-post-if-match-absent-document",
+        "agent-profile-post-creates-absent-document",
+        "agent-profile-post-if-match-absent-document",
+        "state-post-creates-absent-document",
+        "state-post-if-match-absent-document"
+      ],
+      "intended_observation": "Absent-document POST must create; If-Match on an absent document must return 412, not 404."
+    },
+    "post-ignore-content-type": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "activity-profile-post-respects-sender-media-type",
+        "agent-profile-post-respects-sender-media-type",
+        "state-post-respects-sender-media-type"
+      ],
+      "intended_observation": "Non-JSON sender media type must be rejected for document POST."
+    },
+    "if-match-ignored-when-absent": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "activity-profile-delete-if-match-absent-document",
+        "activity-profile-post-if-match-absent-document",
+        "agent-profile-delete-if-match-absent-document",
+        "agent-profile-post-if-match-absent-document",
+        "state-delete-if-match-absent-document",
+        "state-post-if-match-absent-document"
+      ],
+      "intended_observation": "Failed If-Match on an absent document must return 412 for POST and DELETE."
+    },
+    "dup-batch-partial-store": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "statement-duplicate-id-batch-leaves-no-state"
+      ],
+      "intended_observation": "After the duplicate-id batch rejects, no partial statement is retrievable."
+    },
+    "related-agents-drops-agent-filter": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "agent-filter-actor-account-excludes-unrelated",
+        "agent-filter-actor-excludes-unrelated",
+        "agent-filter-actor-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-actor-openid-excludes-unrelated",
+        "agent-filter-context-contextAgents-0-agent-account-excludes-unrelated",
+        "agent-filter-context-contextAgents-0-agent-excludes-unrelated",
+        "agent-filter-context-contextAgents-0-agent-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-context-contextAgents-0-agent-openid-excludes-unrelated",
+        "agent-filter-context-contextGroups-0-group-account-excludes-unrelated",
+        "agent-filter-context-contextGroups-0-group-excludes-unrelated",
+        "agent-filter-context-contextGroups-0-group-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-context-contextGroups-0-group-openid-excludes-unrelated",
+        "agent-filter-context-instructor-account-excludes-unrelated",
+        "agent-filter-context-instructor-excludes-unrelated",
+        "agent-filter-context-instructor-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-context-instructor-openid-excludes-unrelated",
+        "agent-filter-context-team-account-excludes-unrelated",
+        "agent-filter-context-team-excludes-unrelated",
+        "agent-filter-context-team-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-context-team-openid-excludes-unrelated",
+        "agent-filter-group-member-actor-account-excludes-unrelated",
+        "agent-filter-group-member-actor-account-member-excludes-unrelated",
+        "agent-filter-group-member-actor-excludes-unrelated",
+        "agent-filter-group-member-actor-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-group-member-actor-mbox_sha1sum-member-excludes-unrelated",
+        "agent-filter-group-member-actor-member-excludes-unrelated",
+        "agent-filter-group-member-actor-openid-excludes-unrelated",
+        "agent-filter-group-member-actor-openid-member-excludes-unrelated",
+        "agent-filter-group-member-object-account-excludes-unrelated",
+        "agent-filter-group-member-object-account-member-excludes-unrelated",
+        "agent-filter-group-member-object-excludes-unrelated",
+        "agent-filter-group-member-object-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-group-member-object-mbox_sha1sum-member-excludes-unrelated",
+        "agent-filter-group-member-object-member-excludes-unrelated",
+        "agent-filter-group-member-object-openid-excludes-unrelated",
+        "agent-filter-group-member-object-openid-member-excludes-unrelated",
+        "agent-filter-object-account-excludes-unrelated",
+        "agent-filter-object-actor-account-excludes-unrelated",
+        "agent-filter-object-actor-excludes-unrelated",
+        "agent-filter-object-actor-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-actor-openid-excludes-unrelated",
+        "agent-filter-object-context-contextAgents-0-agent-account-excludes-unrelated",
+        "agent-filter-object-context-contextAgents-0-agent-excludes-unrelated",
+        "agent-filter-object-context-contextAgents-0-agent-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-context-contextAgents-0-agent-openid-excludes-unrelated",
+        "agent-filter-object-context-contextGroups-0-group-account-excludes-unrelated",
+        "agent-filter-object-context-contextGroups-0-group-excludes-unrelated",
+        "agent-filter-object-context-contextGroups-0-group-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-context-contextGroups-0-group-openid-excludes-unrelated",
+        "agent-filter-object-context-instructor-account-excludes-unrelated",
+        "agent-filter-object-context-instructor-excludes-unrelated",
+        "agent-filter-object-context-instructor-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-context-instructor-openid-excludes-unrelated",
+        "agent-filter-object-context-team-account-excludes-unrelated",
+        "agent-filter-object-context-team-excludes-unrelated",
+        "agent-filter-object-context-team-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-context-team-openid-excludes-unrelated",
+        "agent-filter-object-excludes-unrelated",
+        "agent-filter-object-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-object-account-excludes-unrelated",
+        "agent-filter-object-object-excludes-unrelated",
+        "agent-filter-object-object-mbox_sha1sum-excludes-unrelated",
+        "agent-filter-object-object-openid-excludes-unrelated",
+        "agent-filter-object-openid-excludes-unrelated",
+        "statement-related-agents-excludes-unrelated"
+      ],
+      "intended_observation": "Agent expansion must still exclude an unrelated actor."
+    },
+    "ignore-format-on-lists": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "statement-list-format-ids-recursive-0-statement",
+        "statement-list-format-ids-recursive-0-substatement",
+        "statement-list-format-ids-recursive-1-statement",
+        "statement-list-format-ids-recursive-1-substatement",
+        "statement-list-format-ids-recursive-2-statement",
+        "statement-list-format-ids-recursive-2-substatement",
+        "statement-list-format-ids-recursive-3-statement",
+        "statement-list-format-ids-recursive-3-substatement",
+        "statement-list-format-ids-recursive-4-statement",
+        "statement-list-format-ids-recursive-4-substatement",
+        "statement-list-format-ids-recursive-5-statement",
+        "statement-list-format-ids-recursive-5-substatement",
+        "statement-list-format-ids-recursive-6-statement",
+        "statement-list-format-ids-recursive-6-substatement",
+        "statement-list-format-ids-recursive-7-statement",
+        "statement-list-format-ids-recursive-7-substatement",
+        "statement-list-format-ids-recursive-8-statement",
+        "statement-list-format-ids-recursive-8-substatement",
+        "statement-list-format-ids-recursive-9-statement",
+        "statement-list-format-ids-recursive-9-substatement",
+        "statement-list-format-ids-removes-actor-name"
+      ],
+      "intended_observation": "format=ids must omit Actor name in the list response."
+    },
+    "ignore-unknown-params": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "about-unknown-parameter-with-valid-selectors-get",
+        "about-unknown-parameter-with-valid-selectors-head",
+        "activities-unknown-parameter-with-valid-selectors-get",
+        "activities-unknown-parameter-with-valid-selectors-head",
+        "activity-profile-unknown-parameter-with-valid-selectors-delete",
+        "activity-profile-unknown-parameter-with-valid-selectors-get",
+        "activity-profile-unknown-parameter-with-valid-selectors-head",
+        "activity-profile-unknown-parameter-with-valid-selectors-post",
+        "activity-profile-unknown-parameter-with-valid-selectors-put",
+        "agent-profile-unknown-parameter-with-valid-selectors-delete",
+        "agent-profile-unknown-parameter-with-valid-selectors-get",
+        "agent-profile-unknown-parameter-with-valid-selectors-head",
+        "agent-profile-unknown-parameter-with-valid-selectors-post",
+        "agent-profile-unknown-parameter-with-valid-selectors-put",
+        "agents-unknown-parameter-with-valid-selectors-get",
+        "agents-unknown-parameter-with-valid-selectors-head",
+        "state-unknown-parameter-with-valid-selectors-delete",
+        "state-unknown-parameter-with-valid-selectors-get",
+        "state-unknown-parameter-with-valid-selectors-head",
+        "state-unknown-parameter-with-valid-selectors-post",
+        "state-unknown-parameter-with-valid-selectors-put",
+        "statement-unknown-parameter-with-valid-selectors-post",
+        "statement-unknown-parameter-with-valid-selectors-put"
+      ],
+      "intended_observation": "Reject the unknown parameter with independently valid resource selectors."
+    },
+    "ignore-malformed-registration-state": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "state-registration-invalid-with-valid-selectors",
+        "state-registration-invalid-with-valid-selectors-delete",
+        "state-registration-invalid-with-valid-selectors-get",
+        "state-registration-invalid-with-valid-selectors-head",
+        "state-registration-invalid-with-valid-selectors-post"
+      ],
+      "intended_observation": "Reject malformed State registration with valid remaining selectors."
+    },
+    "reject-voided-with-format": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "statement-voided-id-allows-format-canonical",
+        "statement-voided-id-allows-format-exact",
+        "statement-voided-id-allows-format-ids"
+      ],
+      "intended_observation": "A voided identifier can be read in every stated format."
+    },
+    "reject-property-order": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "attachment-attachments-0-fileUrl-omitted-accepted",
+        "attachment-data-sha2-match",
+        "attachment-object-attachments-0-fileUrl-omitted-accepted",
+        "statement-member-order-is-unrestricted"
+      ],
+      "intended_observation": "Rejecting unsorted raw JSON falsely rejects the dedicated order witness and three valid multipart witnesses."
+    },
+    "accept-empty-relevant-types": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "context-agent-context-contextAgents-0-relevantTypes-value-0",
+        "context-agent-object-context-contextAgents-0-relevantTypes-value-0",
+        "context-group-context-contextGroups-0-relevantTypes-value-0",
+        "context-group-object-context-contextGroups-0-relevantTypes-value-0"
+      ],
+      "intended_observation": "A present relevantTypes array must contain at least one value."
+    },
+    "accept-numeric-string": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "statement-score-numeric-string"
+      ],
+      "intended_observation": "A score number cannot be a JSON string."
+    },
+    "accept-data-sha-mismatch": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "attachment-data-sha2-mismatch"
+      ],
+      "intended_observation": "Declared sha2 must match the transmitted data."
+    },
+    "unknown-local-offset-not-normalized": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "statement-unknown-local-offset-policy"
+      ],
+      "intended_observation": "Accepted unknown-local-offset input must read back as the same instant in UTC; retaining the original -00:00 is a single conversion defect."
+    },
+    "accept-invalid-json": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "statement-rejects-invalid-utf8-json",
+        "statement-rejects-truncated-json"
+      ],
+      "intended_observation": "Reject broken JSON and invalid UTF-8 without silently accepting them."
+    },
+    "accept-json-without-file-url": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "attachment-put-reject-json-without-file-url"
+      ],
+      "intended_observation": "JSON without transmitted data requires the omitted fileUrl to cause rejection."
+    },
+    "person-extra-invalid-member": {
+      "transport": "proxy",
+      "expected_failed_cases": [
+        "person-response-all-identifiers-account",
+        "person-response-all-identifiers-mbox",
+        "person-response-all-identifiers-mbox_sha1sum",
+        "person-response-all-identifiers-openid"
+      ],
+      "intended_observation": "Every returned IFI entry is validated, including additional directory enrichment."
+    },
+    "person-valid-enrichment": {
+      "transport": "reference",
+      "expected_failed_cases": [],
+      "intended_observation": "Source-permitted enriched Person arrays include valid mailto, openid URI and account homePage syntax at the same indices as each single-defect control."
+    },
+    "person-openid-unclosed-literal": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "person-response-all-identifiers-account",
+        "person-response-all-identifiers-mbox",
+        "person-response-all-identifiers-mbox_sha1sum",
+        "person-response-all-identifiers-openid"
+      ],
+      "intended_observation": "PDF Person member definitions -> Agent openid URI -> RFC3986 3.2.2 requires a closed IP literal; every queried IFI's malformed enrichment is rejected."
+    },
+    "person-homepage-unclosed-literal": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "person-response-all-identifiers-account",
+        "person-response-all-identifiers-mbox",
+        "person-response-all-identifiers-mbox_sha1sum",
+        "person-response-all-identifiers-openid"
+      ],
+      "intended_observation": "Only the added account homePage has an unterminated IP literal; generic syntax is invalid before IRL semantics or resolution."
+    },
+    "person-mbox-malformed-percent": {
+      "transport": "reference",
+      "expected_failed_cases": [
+        "person-response-all-identifiers-account",
+        "person-response-all-identifiers-mbox",
+        "person-response-all-identifiers-mbox_sha1sum",
+        "person-response-all-identifiers-openid"
+      ],
+      "intended_observation": "Only the added mailbox has a malformed percent triplet; generic IRI syntax requires two hexadecimal digits regardless of mailto-specific semantics."
+    }
+  }
+}

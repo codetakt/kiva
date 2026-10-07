@@ -1,0 +1,30 @@
+description: Compiled architecture IR ownership policy.
+architecture_ir_policy:
+  canonical_ir: generated/architecture/compiled-architecture.yaml
+  compiler: scripts/ci/generate_compiled_architecture.py
+  source_graph: spec/architecture/architecture-graph.source.yaml
+  projection_model_sources:
+    - spec/architecture/projection-artifacts.source.yaml
+    - spec/architecture/projection-runtime.source.yaml
+    - spec/architecture/projection-check-bindings.source.yaml
+  projection_compatibility_view: spec/architecture/projection-specs.source.yaml#/projections
+  policy_source: spec/architecture/architecture-policy.source.yaml
+  rule: >
+    Human review projections, CI projection graphs, claim readiness reports,
+    and generated evidence catalogs must consume the compiled architecture IR
+    rather than recompiling graph, projection normal-form ledgers, and policy
+    sources independently. ProjectionSpec is retained only as a drift-checked
+    compatibility sidecar.
+  required_downstream_projections:
+    - spec/architecture/design-backbone.yaml
+    - spec/ci/projection-graph.yaml
+    - generated/claim-readiness-matrix.yaml
+    - docs/architecture/generated/claim-readiness-matrix.md
+  generated_model_fields:
+    - sources
+    - projection_model
+    - architecture_normal_form
+    - artifact_catalog
+    - policy_sections
+    - source_layers
+    - artifact_class_policy

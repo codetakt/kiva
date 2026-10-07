@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:pds:deployment-template-catalog:1",
+  "title": "Kiva PDS deployment template catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "standard",
+    "scope",
+    "status",
+    "templates"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "pds-deployment-template-catalog"
+    },
+    "standard": {
+      "const": "Kiva Architecture"
+    },
+    "scope": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "status": {
+      "const": "published"
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/template"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "deploymentKind": {
+      "enum": [
+        "single-operator",
+        "learner-principal",
+        "school-district",
+        "multi-agency"
+      ]
+    },
+    "role": {
+      "enum": [
+        "data_custodian",
+        "platform_operator",
+        "policy_authority",
+        "analyst",
+        "auditor",
+        "identity_authority"
+      ]
+    },
+    "legalBasis": {
+      "enum": [
+        "consent",
+        "public-task",
+        "legitimate-interest",
+        "contract",
+        "legal-obligation"
+      ]
+    },
+    "consentScope": {
+      "enum": [
+        "raw-records",
+        "personal-data",
+        "aggregate-insights"
+      ]
+    },
+    "dataClass": {
+      "enum": [
+        "statement-metadata",
+        "consent-metadata",
+        "data-product-metadata",
+        "access-audit-metadata",
+        "lifecycle-metadata"
+      ]
+    },
+    "resourceKind": {
+      "enum": [
+        "xapi-statement",
+        "consent-grant",
+        "data-product",
+        "metadata-export"
+      ]
+    },
+    "tombstonePublication": {
+      "enum": [
+        "metadata-only",
+        "subject-visible",
+        "public-redacted"
+      ]
+    },
+    "runbookRef": {
+      "type": "string",
+      "pattern": "^runbook:[a-z0-9-]+$"
+    },
+    "confidentialMechanism": {
+      "enum": [
+        "additive-secure-aggregation",
+        "differential-privacy-release",
+        "shamir-vss-admission",
+        "threshold-frost-signing",
+        "psi-cohort-hash-token",
+        "psi-oprf-dh-voprf",
+        "tee-portable-attestation",
+        "tee-aws-nitro-attestation",
+        "fhe-sum-feasibility",
+        "fhe-sum-runtime"
+      ]
+    },
+    "confidentialMechanismList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/confidentialMechanism"
+      }
+    },
+    "confidentialMechanisms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "disabled"
+      ],
+      "properties": {
+        "enabled": {
+          "$ref": "#/$defs/confidentialMechanismList"
+        },
+        "disabled": {
+          "$ref": "#/$defs/confidentialMechanismList"
+        }
+      }
+    },
+    "roleSubjects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data_custodian",
+        "platform_operator",
+        "policy_authority",
+        "analyst",
+        "auditor"
+      ],
+      "properties": {
+        "data_custodian": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "platform_operator": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "policy_authority": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "analyst": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "auditor": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "identity_authority": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "governanceProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_kind",
+        "tenant_partition",
+        "subject_partition",
+        "role_subjects",
+        "emergency_access_policy",
+        "runbook_refs"
+      ],
+      "properties": {
+        "profile_kind": {
+          "$ref": "#/$defs/deploymentKind"
+        },
+        "tenant_partition": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "subject_partition": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "role_subjects": {
+          "$ref": "#/$defs/roleSubjects"
+        },
+        "emergency_access_policy": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "runbook_refs": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/runbookRef"
+          }
+        }
+      }
+    },
+    "retentionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_kind",
+        "data_class",
+        "retention_period_days",
+        "review_interval_days",
+        "tombstone_after_days",
+        "tombstone_publication"
+      ],
+      "properties": {
+        "resource_kind": {
+          "$ref": "#/$defs/resourceKind"
+        },
+        "data_class": {
+          "$ref": "#/$defs/dataClass"
+        },
+        "retention_period_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "review_interval_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tombstone_after_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tombstone_publication": {
+          "$ref": "#/$defs/tombstonePublication"
+        }
+      }
+    },
+    "legalPolicyExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "legal_basis",
+        "purpose",
+        "data_classes",
+        "consent_scope",
+        "retention_policy",
+        "permitted_operations",
+        "prohibited_payloads"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "legal_basis": {
+          "$ref": "#/$defs/legalBasis"
+        },
+        "purpose": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "data_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/dataClass"
+          }
+        },
+        "consent_scope": {
+          "$ref": "#/$defs/consentScope"
+        },
+        "retention_policy": {
+          "$ref": "#/$defs/retentionPolicy"
+        },
+        "permitted_operations": {
+          "$ref": "#/$defs/stringList"
+        },
+        "prohibited_payloads": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "operatorRunbook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "owner_role",
+        "approving_roles",
+        "trigger",
+        "steps",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/runbookRef"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "owner_role": {
+          "$ref": "#/$defs/role"
+        },
+        "approving_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/role"
+          }
+        },
+        "trigger": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "evidence": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "deployment_kind",
+        "status",
+        "jurisdiction_profile",
+        "intended_use",
+        "confidential_mechanisms",
+        "governance_profile",
+        "legal_policy_examples",
+        "operator_runbooks",
+        "claim_boundary"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "deployment_kind": {
+          "$ref": "#/$defs/deploymentKind"
+        },
+        "status": {
+          "const": "published-template"
+        },
+        "jurisdiction_profile": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "practical_workload_profile": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "intended_use": {
+          "$ref": "#/$defs/stringList"
+        },
+        "confidential_mechanisms": {
+          "$ref": "#/$defs/confidentialMechanisms"
+        },
+        "governance_profile": {
+          "$ref": "#/$defs/governanceProfile"
+        },
+        "legal_policy_examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/legalPolicyExample"
+          }
+        },
+        "operator_runbooks": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "$ref": "#/$defs/operatorRunbook"
+          }
+        },
+        "claim_boundary": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    }
+  }
+}

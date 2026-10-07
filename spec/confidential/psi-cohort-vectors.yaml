@@ -1,0 +1,42 @@
+---
+schema_version: 1
+description: >
+  Deterministic vectors for Kiva's bounded cross-school cohort PSI profile.
+  Inputs are canonicalized and domain-separated before SHA-256 digesting.
+vectors:
+  - profile: kiva-psi-cohort-hash-v1
+    domain: kiva-confidential:psi-cohort-identifier:v1
+    namespace: district-2026
+    job_seed: 84
+    participant_count: 3
+    participants:
+      - participant_index: 1
+        identifiers:
+          - shared@example.edu
+          - cohort-a@example.edu
+          - a-only@example.edu
+        digest_hex:
+          - 5385b80018346e53b59ea25b5aa6b5c5f99c012a9554e13ccec4796e898a669c
+          - 4754551efe1942b93120e5b1ee7e3d0eed3835d1b7a732e10e25c2d7e68faf63
+          - 3113e1bf23807cd4609b5dd7dcebcccd3c6c03b3bb7b85b76dca02a734bcbf62
+      - participant_index: 2
+        identifiers:
+          - shared@example.edu
+          - cohort-a@example.edu
+          - b-only@example.edu
+        digest_hex:
+          - 5385b80018346e53b59ea25b5aa6b5c5f99c012a9554e13ccec4796e898a669c
+          - 4754551efe1942b93120e5b1ee7e3d0eed3835d1b7a732e10e25c2d7e68faf63
+          - 196aa760fd99cbad0ce4456f0da0f2eb33580caa8349b96a74ea43aa7d560758
+      - participant_index: 3
+        identifiers:
+          - shared@example.edu
+          - cohort-a@example.edu
+          - c-only@example.edu
+        digest_hex:
+          - 5385b80018346e53b59ea25b5aa6b5c5f99c012a9554e13ccec4796e898a669c
+          - 4754551efe1942b93120e5b1ee7e3d0eed3835d1b7a732e10e25c2d7e68faf63
+          - dfa73aa46e00a64130ef2a6a5111953967339687f2a8c971d6f4da5db25972f1
+    expected_intersection_hex:
+      - 4754551efe1942b93120e5b1ee7e3d0eed3835d1b7a732e10e25c2d7e68faf63
+      - 5385b80018346e53b59ea25b5aa6b5c5f99c012a9554e13ccec4796e898a669c

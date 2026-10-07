@@ -1,0 +1,5 @@
+{
+  "$id": "urn:kiva:pds:schema:Hex32",
+  "$ref": "urn:kiva:pds:openapi-component-schemas#/$defs/Hex32",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

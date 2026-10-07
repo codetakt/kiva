@@ -1,0 +1,84 @@
+schema_version: 1
+kind: kiva-confidential-mechanism-catalog-source
+status: active
+description: Human-owned semantic source ledger for Kiva confidential mechanism descriptors. Generated catalog and Rust registry artifacts are projected from this file and checked against provider contract capability algebra and mechanism maturity.
+maturity_ledger: spec/confidential/mechanism-maturity.yaml
+provider_contract: spec/confidential/secret-compute-provider-contract.yaml
+provider_algebra:
+  expression: Mechanism -> Capability -> EvidenceGate -> RuntimeBoundary -> ReleaseGate
+  contract_source: spec/confidential/secret-compute-provider-contract.yaml
+  reference_provider_boundary_type: ReferencePrimitiveProvider
+  compute_provider_boundary_type: ComputeMechanismProvider
+  reference_provider_capability_map: fixture-coverage-map
+  compute_provider_capability_map: external-compute-capability-map
+  mechanism_field: maturity_mechanism
+  provider_kind_field: provider_kind
+  capability_field: required_provider_capability
+  production_gate_field: production_provider_review_required
+generated_artifacts:
+- spec/confidential/mechanism-catalog.yaml
+- crates/kiva-confidential/src/mechanism/registry.rs
+mechanisms:
+- id: additive-n-of-n
+  technique: additive-secure-aggregation
+  provider_kind: reference-primitive
+  required_provider_capability: reference-fixtures
+  production_provider_review_required: false
+  requires_all_participants: true
+  maturity_mechanism: additive-secure-aggregation
+- id: private-set-intersection
+  technique: private-set-intersection
+  provider_kind: private-set-intersection
+  required_provider_capability: psi-evaluation
+  production_provider_review_required: false
+  requires_all_participants: true
+  maturity_mechanism: psi-cohort-hash-token
+- id: private-set-intersection-oprf-dh
+  technique: private-set-intersection
+  provider_kind: private-set-intersection
+  required_provider_capability: psi-evaluation
+  production_provider_review_required: true
+  requires_all_participants: true
+  maturity_mechanism: psi-oprf-dh-voprf
+- id: shamir-threshold
+  technique: threshold-cryptography
+  provider_kind: threshold-cryptography
+  required_provider_capability: threshold-signing
+  production_provider_review_required: false
+  requires_all_participants: false
+  maturity_mechanism: shamir-vss-admission
+- id: threshold-frost-signing
+  technique: threshold-cryptography
+  provider_kind: threshold-cryptography
+  required_provider_capability: threshold-signing
+  production_provider_review_required: true
+  requires_all_participants: false
+  maturity_mechanism: threshold-frost-signing
+- id: trusted-execution-environment
+  technique: trusted-execution-environment
+  provider_kind: trusted-execution-environment
+  required_provider_capability: tee-attestation
+  production_provider_review_required: true
+  requires_all_participants: true
+  maturity_mechanism: tee-portable-attestation
+- id: trusted-execution-environment-aws-nitro
+  technique: trusted-execution-environment
+  provider_kind: trusted-execution-environment
+  required_provider_capability: tee-attestation
+  production_provider_review_required: true
+  requires_all_participants: true
+  maturity_mechanism: tee-aws-nitro-attestation
+- id: fhe-sum-feasibility
+  technique: fully-homomorphic-encryption
+  provider_kind: fully-homomorphic-encryption
+  required_provider_capability: fhe-evaluation
+  production_provider_review_required: false
+  requires_all_participants: true
+  maturity_mechanism: fhe-sum-feasibility
+- id: fhe-sum-runtime
+  technique: fully-homomorphic-encryption
+  provider_kind: fully-homomorphic-encryption
+  required_provider_capability: fhe-evaluation
+  production_provider_review_required: true
+  requires_all_participants: true
+  maturity_mechanism: fhe-sum-runtime

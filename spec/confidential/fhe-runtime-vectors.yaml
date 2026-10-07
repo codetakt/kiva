@@ -1,0 +1,38 @@
+schema_version: 1
+standard: Kiva Confidential Computation
+kind: fhe-runtime-vectors
+summary: >
+  Deterministic metadata-only vectors for the CC14 review-gated FHE sum runtime
+  boundary. These vectors cover transcript digest projection; they do not
+  implement or validate FHE cryptographic soundness, parameter security, key
+  generation, ciphertext serialization, or decryption.
+vectors:
+  - profile: kiva-fhe-sum-runtime-review-gated-v1
+    ciphertext_transcript_domain: "kiva-confidential:fhe-runtime-ciphertext-transcript:v1"
+    evaluation_domain: "kiva-confidential:fhe-runtime-evaluation:v1"
+    scheme_family: bfv-integer-sum
+    operation: sum
+    job_seed: 131
+    participant_count: 3
+    key_epoch: 9
+    runtime_artifact_seed: 171
+    parameter_set_seed: 172
+    review_evidence_seed: 173
+    external_review_completed: true
+    participants:
+      - participant_index: 1
+        ciphertext_seed: 181
+        parameter_set_seed: 172
+        key_custody_seed: 191
+      - participant_index: 2
+        ciphertext_seed: 182
+        parameter_set_seed: 172
+        key_custody_seed: 192
+      - participant_index: 3
+        ciphertext_seed: 183
+        parameter_set_seed: 172
+        key_custody_seed: 193
+    evaluated_ciphertext_seed: 202
+    evaluation_proof_seed: 201
+    expected_ciphertext_transcript_digest_hex: "3461abe5cc95755cf2743600d4beb8f2a44c047f4b318f24b41dca7dea338b66"
+    expected_evaluation_digest_hex: "dbd422da0f1e30359666582345c284023797e6709d8303f34f17191effadbc67"

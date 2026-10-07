@@ -1,0 +1,149 @@
+suite:
+  id: xapi-lrs-statement-query-validation
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Low-side-effect validation checks for Statement query parameters.
+cases:
+  - id: statements-get-rejects-statement-and-voided-statement-id
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000201
+        voidedStatementId: 00000000-0000-4000-8000-000000000202
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statements-get-rejects-single-statement-extra-query
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-get-single-query-limits
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000201
+        limit: '1'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statements-get-rejects-unknown-query-parameter
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-unknown-parameters
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        kivaUnknownParameter: 'true'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statements-get-rejects-case-mismatched-query-parameter
+    requirements:
+      - xapi-lrs-4.1.5-error-most-appropriate
+      - xapi-lrs-4.1.5-parameter-case
+      - xapi-lrs-4.1.6-request-parameter-validation
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        StatementId: 00000000-0000-4000-8000-000000000204
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statements-get-empty-result-returns-statement-result
+    requirements:
+      - xapi-lrs-4.1.6.1-statement-get-empty-result
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        agent: '{"objectType":"Agent","mbox":"mailto:kiva-conformance-empty-result-00000000-0000-4000-8000-000000000203@example.org"}'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /statements:
+            equals: []
+      checks:
+        - kind: header-time
+          header: Last-Modified
+          max_pointer: /statements
+          optional_if_empty: true
+        - kind: json-order
+          pointer: /statements
+          by: stored
+          descending: true

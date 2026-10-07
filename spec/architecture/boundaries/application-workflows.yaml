@@ -1,0 +1,147 @@
+version: 1
+description: >
+  Split architecture boundary fragment for application workflow admission,
+  confidential job lifecycle ownership, and transactional PDS persistence.
+
+source_groups:
+  - id: application-workflow-runtime-slice
+    description: Pure application workflows observe time, identifiers, and workflow boundaries through runtime ports.
+    paths:
+      - crates/kiva-application/src/runtime.rs
+      - crates/kiva-application/src/runtime/workflow.rs
+      - crates/kiva-application/src/runtime/workflow/admission.rs
+      - crates/kiva-application/src/runtime/workflow/audit.rs
+      - crates/kiva-application/src/runtime/workflow/context.rs
+      - crates/kiva-application/src/runtime/workflow/executor.rs
+      - crates/kiva-application/src/runtime/workflow/operation.rs
+      - crates/kiva-application/src/runtime/workflow/operation/gateway.rs
+      - crates/kiva-application/src/pds.rs
+      - crates/kiva-application/src/pds/commands.rs
+      - crates/kiva-application/src/pds/queries.rs
+      - crates/kiva-application/src/pds/workflow.rs
+      - crates/kiva-application/src/pds/workflow/commands.rs
+      - crates/kiva-application/src/pds/workflow/commands/consent.rs
+      - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+      - crates/kiva-application/src/pds/workflow/commands/governance.rs
+      - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+      - crates/kiva-application/src/pds/workflow/queries.rs
+    required_text:
+      - "pub trait ApplicationClock"
+      - "pub trait ApplicationIdGenerator"
+      - "pub trait ApplicationWorkflowBoundary"
+      - "pub trait ApplicationRuntimePort"
+      - "pub enum ApplicationWorkflowAuditStatus"
+      - "pub struct ApplicationWorkflowAuditEvent"
+      - "struct ApplicationWorkflowExecutor"
+      - "pub trait ApplicationOperation"
+      - "pub trait ApplicationAdmissionPolicy"
+      - "struct ApplicationOperationKernel"
+      - "pub struct ApplicationOperationGateway"
+      - "pub struct ApplicationOperationPlan"
+      - "pub struct ApplicationWorkflowFailure"
+      - "enum ApplicationWorkflowExecutionError"
+      - "pub struct ApplicationWorkflowContext"
+      - "pub struct Admitted<T, W = UnscopedAdmission>"
+      - "pub struct PrincipalBound"
+      - "pub struct WorkflowBound"
+      - "admit_workflow"
+      - "admit_principal"
+      - "complete_workflow_boundary"
+      - "fail_workflow_boundary"
+      - "pub struct ApplicationWorkflowKind"
+      - "pub struct ApplicationWorkflowSpec"
+      - "pub(crate) mod workflow"
+      - "pub(crate) enum PdsWorkflowKind"
+      - "workflow_spec()"
+      - "PdsWorkflowKind::RegisterDataProduct"
+      - "run_write_workflow("
+      - "self.operation_gateway()"
+      - "PdsWorkflowKind::RegisterConsentGrant"
+      - "PdsWorkflowKind::RegisterGovernanceProfile"
+      - "admit_domain_event_for_principal("
+      - "execute_principal_bound_domain_event("
+      - "Admitted<kiva_pds::PdsDomainEvent, PrincipalBound>"
+  - id: confidential-job-application-workflow
+    description: Confidential handlers enter through pure application workflow ports before repository execution.
+    paths:
+      - crates/kiva-application/src/confidential.rs
+      - crates/kiva-application/src/confidential/boundary.rs
+      - crates/kiva-application/src/confidential/family.rs
+      - crates/kiva-application/src/confidential/operation.rs
+      - crates/kiva-application/src/confidential/workflow_kind.rs
+      - crates/kiva-application/src/confidential/additive.rs
+      - crates/kiva-application/src/confidential/differential_privacy.rs
+      - crates/kiva-application/src/confidential/jobs.rs
+      - crates/kiva-application/src/confidential/participants.rs
+      - crates/kiva-application/src/confidential/shamir.rs
+      - crates/kiva-application/src/confidential/threshold.rs
+      - crates/kiva-server/src/app/confidential.rs
+      - crates/kiva-server/src/app/confidential/additive.rs
+      - crates/kiva-server/src/app/confidential/differential_privacy.rs
+      - crates/kiva-server/src/app/confidential/participants.rs
+      - crates/kiva-server/src/app/confidential/shamir.rs
+      - crates/kiva-server/src/app/confidential/threshold.rs
+      - crates/kiva-server/src/core/state.rs
+      - crates/kiva-server/src/core/state/http_context.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/jobs.rs
+    required_text:
+      - "pub trait ConfidentialAdditiveRepository"
+      - "pub trait ConfidentialDifferentialPrivacyRepository"
+      - "pub trait ConfidentialJobRepository"
+      - "pub trait ConfidentialParticipantRepository"
+      - "pub trait ConfidentialShamirRepository"
+      - "pub trait ConfidentialThresholdRepository"
+      - "pub trait ConfidentialWorkflowAdmissionRecorder"
+      - "pub enum ConfidentialWorkflowFamily"
+      - "pub enum ConfidentialWorkflowKind"
+      - "pub struct ConfidentialCommand"
+      - "pub enum ConfidentialDomainEvent"
+      - "pub enum ConfidentialOutcome"
+      - "WorkflowAdmitted"
+      - "family: ConfidentialWorkflowFamily"
+      - "fn record_workflow_event<'a>"
+      - "ApplicationOperationGateway"
+      - "ApplicationOperationPlan"
+      - "ApplicationAdmissionPolicy"
+      - "run_confidential_workflow"
+      - "context.admit_workflow"
+      - "Admitted<ConfidentialWorkflowAdmission, WorkflowBound>"
+      - "pub struct ConfidentialApplicationWorkflow"
+      - "From<ConfidentialApplicationError>"
+      - "ConfidentialWorkflowKind::ListJobs"
+      - "ConfidentialWorkflowKind::ReleaseSignedAdditiveAggregate"
+      - "release_signed_additive_aggregate(principal, request)"
+      - "register_differential_privacy_budget(principal, request)"
+      - "register_confidential_job(principal, command)"
+      - "transition_confidential_job(principal, command)"
+      - "list_confidential_jobs(principal, filter)"
+      - "register_confidential_participant(principal, request)"
+      - "reconstruct_shamir_threshold_secret(principal, request)"
+      - "register_threshold_release_request(principal, request)"
+      - "pub(crate) fn confidential_application(&self) -> ConfidentialApplicationAdapter"
+      - ".confidential_application()"
+      - ".begin_workflow()"
+  - id: pds-postgres-transactional-write-projection
+    description: PostgreSQL PDS writes apply resource mutations, audit rows, and lifecycle-ledger rows inside a single transaction.
+    paths:
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres/lifecycle/cases.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/access.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/consent.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/data_products.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/governance.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/ledger.rs
+      - crates/kiva-server/src/surfaces/pds/storage/postgres_queries/lifecycle.rs
+    required_text:
+      - "self.pool.begin().await"
+      - "Transaction<'_, Postgres>"
+      - "Executor<'e, Database = Postgres>"
+      - "select_pds_data_product_in_transaction"
+      - "insert_pds_access_audit_event_in_transaction"
+      - "insert_pds_ledger_event_in_transaction"
+      - ".commit()"

@@ -1,0 +1,10 @@
+description: >
+  Source-group boundary anchors are split by architectural area for focused
+  review. This file is an include index consumed by the root manifest.
+
+includes:
+  - spec/architecture/boundaries/source-groups/http-xapi.yaml
+  - spec/architecture/boundaries/source-groups/application.yaml
+  - spec/architecture/boundaries/source-groups/pds.yaml
+  - spec/architecture/boundaries/source-groups/confidential.yaml
+  - spec/architecture/boundaries/source-groups/ci-and-ledgers.yaml

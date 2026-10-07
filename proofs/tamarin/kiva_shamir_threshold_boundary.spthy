@@ -1,0 +1,186 @@
+theory Kiva_Shamir_Threshold_Boundary
+begin
+
+rule ConfigureShamirTranscript:
+  [ Fr(~transcript) ]
+  --[ ShamirTranscriptConfigured(~transcript, 'threshold_2_of_3') ]->
+  [ !ShamirTranscript(~transcript) ]
+
+rule AcceptFirstParticipantShare:
+  [
+    !ShamirTranscript(transcript),
+    Fr(~request),
+    Fr(~submission)
+  ]
+  --[
+    ShamirReconstructionRequested(transcript, ~request),
+    ShamirShareCommitmentPublished(transcript, ~request, 'participant_1'),
+    ShamirShareOpeningVerified(
+      transcript, ~request, 'participant_1', ~submission
+    ),
+    ShamirShareAccepted(transcript, ~request, 'participant_1', ~submission)
+  ]->
+  [ ShamirOneVerifiedShare(transcript, ~request, 'participant_1') ]
+
+rule RejectInvalidFirstParticipantShare:
+  [
+    !ShamirTranscript(transcript),
+    Fr(~request),
+    Fr(~submission)
+  ]
+  --[
+    ShamirReconstructionRequested(transcript, ~request),
+    ShamirShareCommitmentPublished(transcript, ~request, 'participant_1'),
+    ShamirShareOpeningRejected(
+      transcript, ~request, 'participant_1', ~submission
+    ),
+    ShamirComplaintSustained(
+      transcript, ~request, 'participant_1', ~submission
+    )
+  ]->
+  []
+
+rule RejectDuplicateFirstParticipantShare:
+  [
+    ShamirOneVerifiedShare(transcript, request, 'participant_1'),
+    Fr(~duplicate_submission)
+  ]
+  --[
+    ShamirDuplicateShareRejected(
+      transcript, request, 'participant_1', ~duplicate_submission
+    )
+  ]->
+  []
+
+rule CompleteThresholdWithSecondParticipant:
+  [
+    ShamirOneVerifiedShare(transcript, request, 'participant_1'),
+    Fr(~submission)
+  ]
+  --[
+    ShamirShareCommitmentPublished(transcript, request, 'participant_2'),
+    ShamirShareOpeningVerified(
+      transcript, request, 'participant_2', ~submission
+    ),
+    ShamirShareAccepted(transcript, request, 'participant_2', ~submission),
+    ShamirThresholdShareSet(
+      transcript, request, 'participant_1', 'participant_2'
+    )
+  ]->
+  [ ShamirThresholdReady(transcript, request, 'participant_1', 'participant_2') ]
+
+rule CompleteThresholdWithThirdParticipant:
+  [
+    ShamirOneVerifiedShare(transcript, request, 'participant_1'),
+    Fr(~submission)
+  ]
+  --[
+    ShamirShareCommitmentPublished(transcript, request, 'participant_3'),
+    ShamirShareOpeningVerified(
+      transcript, request, 'participant_3', ~submission
+    ),
+    ShamirShareAccepted(transcript, request, 'participant_3', ~submission),
+    ShamirThresholdShareSet(
+      transcript, request, 'participant_1', 'participant_3'
+    )
+  ]->
+  [ ShamirThresholdReady(transcript, request, 'participant_1', 'participant_3') ]
+
+rule RejectInvalidSecondParticipantShare:
+  [
+    ShamirOneVerifiedShare(transcript, request, 'participant_1'),
+    Fr(~submission)
+  ]
+  --[
+    ShamirShareCommitmentPublished(transcript, request, 'participant_2'),
+    ShamirShareOpeningRejected(
+      transcript, request, 'participant_2', ~submission
+    ),
+    ShamirComplaintSustained(
+      transcript, request, 'participant_2', ~submission
+    )
+  ]->
+  []
+
+rule RejectReconstructionWithOneShare:
+  [ ShamirOneVerifiedShare(transcript, request, 'participant_1') ]
+  --[ ShamirReconstructionRejectedInsufficientShares(transcript, request) ]->
+  []
+
+rule ReconstructFromDistinctVerifiedPair:
+  [ ShamirThresholdReady(transcript, request, left, right) ]
+  --[ ShamirSecretReconstructed(transcript, request, left, right) ]->
+  [ !PersistedShamirReconstruction(transcript, request) ]
+
+lemma reconstruction_requires_configured_transcript:
+  "All transcript request left right #i.
+    ShamirSecretReconstructed(transcript, request, left, right) @ #i
+    ==>
+    Ex #j.
+      ShamirTranscriptConfigured(transcript, 'threshold_2_of_3') @ #j
+      & #j < #i"
+
+lemma reconstruction_requires_distinct_threshold_share_set:
+  "All transcript request left right #i.
+    ShamirSecretReconstructed(transcript, request, left, right) @ #i
+    ==>
+    Ex #j.
+      ShamirThresholdShareSet(transcript, request, left, right) @ #j
+      & #j < #i"
+
+lemma reconstruction_requires_verified_left_opening:
+  "All transcript request left right #i.
+    ShamirSecretReconstructed(transcript, request, left, right) @ #i
+    ==>
+    Ex submission #j.
+      ShamirShareOpeningVerified(transcript, request, left, submission) @ #j
+      & #j < #i"
+
+lemma reconstruction_requires_verified_right_opening:
+  "All transcript request left right #i.
+    ShamirSecretReconstructed(transcript, request, left, right) @ #i
+    ==>
+    Ex submission #j.
+      ShamirShareOpeningVerified(transcript, request, right, submission) @ #j
+      & #j < #i"
+
+lemma duplicate_share_rejection_is_not_accepted:
+  "All transcript request participant duplicate_submission #i #j.
+    ShamirDuplicateShareRejected(
+      transcript, request, participant, duplicate_submission
+    ) @ #i
+    & ShamirShareAccepted(
+      transcript, request, participant, duplicate_submission
+    ) @ #j
+    ==>
+    F"
+
+lemma sustained_complaint_is_not_accepted:
+  "All transcript request participant submission #i #j.
+    ShamirComplaintSustained(transcript, request, participant, submission) @ #i
+    & ShamirShareAccepted(transcript, request, participant, submission) @ #j
+    ==>
+    F"
+
+lemma rejected_opening_is_not_reconstructed_as_left_share:
+  "All transcript request participant submission right #i #j.
+    ShamirShareOpeningRejected(transcript, request, participant, submission) @ #i
+    & ShamirSecretReconstructed(transcript, request, participant, right) @ #j
+    ==>
+    F"
+
+lemma rejected_opening_is_not_reconstructed_as_right_share:
+  "All transcript request participant submission left #i #j.
+    ShamirShareOpeningRejected(transcript, request, participant, submission) @ #i
+    & ShamirSecretReconstructed(transcript, request, left, participant) @ #j
+    ==>
+    F"
+
+lemma insufficient_share_rejection_is_not_reconstruction:
+  "All transcript request left right #i #j.
+    ShamirReconstructionRejectedInsufficientShares(transcript, request) @ #i
+    & ShamirSecretReconstructed(transcript, request, left, right) @ #j
+    ==>
+    F"
+
+end

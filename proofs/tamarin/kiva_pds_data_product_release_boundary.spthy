@@ -1,0 +1,167 @@
+theory Kiva_PDS_Data_Product_Release_Boundary
+begin
+
+rule RegisterSubject:
+  [ Fr(~subject) ]
+  --[ SubjectRegistered(~subject) ]->
+  [ !Subject(~subject) ]
+
+rule RegisterThresholdReleaseRequest:
+  [
+    !Subject(owner),
+    Fr(~release)
+  ]
+  --[ ThresholdReleaseRequestPersisted(owner, ~release) ]->
+  [ PendingThresholdRelease(owner, ~release) ]
+
+rule CompleteThresholdRelease:
+  [ PendingThresholdRelease(owner, release) ]
+  --[
+    ThresholdReleaseCompleted(owner, release),
+    PdsReleaseAvailable(owner, 'threshold_release', release)
+  ]->
+  [ !AvailablePdsRelease(owner, 'threshold_release', release) ]
+
+rule PersistDifferentialPrivacyRelease:
+  [
+    !Subject(owner),
+    Fr(~release)
+  ]
+  --[
+    DifferentialPrivacyReleasePersisted(owner, ~release),
+    PdsReleaseAvailable(owner, 'differential_privacy_release', ~release)
+  ]->
+  [ !AvailablePdsRelease(owner, 'differential_privacy_release', ~release) ]
+
+rule PersistShamirThresholdReconstruction:
+  [
+    !Subject(owner),
+    Fr(~release)
+  ]
+  --[
+    ShamirThresholdReconstructionPersisted(owner, ~release),
+    PdsReleaseAvailable(owner, 'shamir_threshold_reconstruction', ~release)
+  ]->
+  [ !AvailablePdsRelease(owner, 'shamir_threshold_reconstruction', ~release) ]
+
+rule RegisterThresholdDataProduct:
+  [
+    !Subject(owner),
+    !AvailablePdsRelease(owner, 'threshold_release', release),
+    Fr(~product)
+  ]
+  --[
+    PdsDataProductRegistered(
+      owner, 'threshold_release', release, ~product
+    )
+  ]->
+  []
+
+rule RegisterShamirThresholdReconstructionDataProduct:
+  [
+    !Subject(owner),
+    !AvailablePdsRelease(owner, 'shamir_threshold_reconstruction', release),
+    Fr(~product)
+  ]
+  --[
+    PdsDataProductRegistered(
+      owner, 'shamir_threshold_reconstruction', release, ~product
+    )
+  ]->
+  []
+
+rule RegisterDifferentialPrivacyDataProduct:
+  [
+    !Subject(owner),
+    !AvailablePdsRelease(owner, 'differential_privacy_release', release),
+    Fr(~product)
+  ]
+  --[
+    PdsDataProductRegistered(
+      owner, 'differential_privacy_release', release, ~product
+    )
+  ]->
+  []
+
+lemma data_product_registration_requires_available_release:
+  "All owner source release product #i.
+    PdsDataProductRegistered(owner, source, release, product) @ #i
+    ==>
+    Ex #j.
+      PdsReleaseAvailable(owner, source, release) @ #j
+      & #j < #i"
+
+lemma threshold_data_product_requires_completed_threshold_release:
+  "All owner release product #i.
+    PdsDataProductRegistered(
+      owner, 'threshold_release', release, product
+    ) @ #i
+    ==>
+    Ex #j.
+      ThresholdReleaseCompleted(owner, release) @ #j
+      & #j < #i"
+
+lemma threshold_request_does_not_admit_data_product_before_completion:
+  "All owner release product #i #j.
+    ThresholdReleaseRequestPersisted(owner, release) @ #i
+    & PdsDataProductRegistered(
+      owner, 'threshold_release', release, product
+    ) @ #j
+    ==>
+    Ex #k.
+      ThresholdReleaseCompleted(owner, release) @ #k
+      & #i < #k
+      & #k < #j"
+
+lemma differential_privacy_data_product_requires_persisted_release:
+  "All owner release product #i.
+    PdsDataProductRegistered(
+      owner, 'differential_privacy_release', release, product
+    ) @ #i
+    ==>
+    Ex #j.
+      DifferentialPrivacyReleasePersisted(owner, release) @ #j
+      & #j < #i"
+
+lemma shamir_data_product_requires_persisted_reconstruction:
+  "All owner release product #i.
+    PdsDataProductRegistered(
+      owner, 'shamir_threshold_reconstruction', release, product
+    ) @ #i
+    ==>
+    Ex #j.
+      ShamirThresholdReconstructionPersisted(owner, release) @ #j
+      & #j < #i"
+
+lemma data_product_registration_is_owner_scoped_to_release:
+  "All release_owner product_owner source release product #i #j.
+    PdsReleaseAvailable(release_owner, source, release) @ #i
+    & PdsDataProductRegistered(product_owner, source, release, product) @ #j
+    ==>
+    release_owner = product_owner"
+
+lemma source_kind_specific_release_admission:
+  "All owner release product #i.
+    PdsDataProductRegistered(
+      owner, 'threshold_release', release, product
+    ) @ #i
+    ==>
+    not (Ex #j.
+      PdsReleaseAvailable(
+        owner, 'differential_privacy_release', release
+      ) @ #j
+      & #j < #i)"
+
+lemma shamir_reconstruction_does_not_substitute_for_threshold_release:
+  "All owner release product #i.
+    PdsDataProductRegistered(
+      owner, 'threshold_release', release, product
+    ) @ #i
+    ==>
+    not (Ex #j.
+      PdsReleaseAvailable(
+        owner, 'shamir_threshold_reconstruction', release
+      ) @ #j
+      & #j < #i)"
+
+end

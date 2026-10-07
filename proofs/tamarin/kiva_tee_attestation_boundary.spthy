@@ -1,0 +1,135 @@
+theory Kiva_TEE_Attestation_Boundary
+begin
+
+rule ConfigureTeePolicy:
+  [ Fr(~job) ]
+  --[
+    TeePolicyConfigured(~job, 'portable_evidence_v1', 'measurement', 'image_digest', 'policy_binding'),
+    TeePolicyApproved(~job)
+  ]->
+  [ !TeePolicy(~job, 'portable_evidence_v1', 'measurement', 'image_digest', 'policy_binding') ]
+
+rule AcceptFreshAttestation:
+  [
+    !TeePolicy(job, format, measurement, image_digest, policy_binding),
+    Fr(~evidence)
+  ]
+  --[
+    TeeSupportedFormat(job, format),
+    TeeJobBindingMatched(job, ~evidence),
+    TeeMeasurementMatched(job, measurement),
+    TeeImageDigestMatched(job, image_digest),
+    TeePolicyBindingMatched(job, policy_binding),
+    TeeFreshEvidence(job, ~evidence),
+    TeePolicyApprovalObserved(job),
+    TeeAttestationAccepted(job, ~evidence)
+  ]->
+  [ !AcceptedTeeAttestation(job, ~evidence) ]
+
+rule RejectStaleEvidence:
+  [ !TeePolicy(job, format, measurement, image_digest, policy_binding) ]
+  --[ TeeStaleEvidenceRejected(job, 'stale_evidence') ]->
+  []
+
+rule RejectReplayEvidence:
+  [ !TeePolicy(job, format, measurement, image_digest, policy_binding) ]
+  --[ TeeReplayRejected(job, 'replayed_evidence') ]->
+  []
+
+rule RejectRollbackEvidence:
+  [ !TeePolicy(job, format, measurement, image_digest, policy_binding) ]
+  --[ TeeRollbackRejected(job, 'rollback_evidence') ]->
+  []
+
+rule ProvisionSecret:
+  [ !AcceptedTeeAttestation(job, evidence) ]
+  --[ TeeSecretProvisioned(job, evidence) ]->
+  [ !TeeSecretAvailable(job, evidence) ]
+
+rule ReleaseResult:
+  [
+    !AcceptedTeeAttestation(job, evidence),
+    !TeeSecretAvailable(job, evidence),
+    Fr(~authority)
+  ]
+  --[
+    TeeResultReleaseAuthorized(job, evidence, ~authority),
+    TeeResultReleased(job, evidence, ~authority)
+  ]->
+  [ !TeeReleasedResult(job, evidence) ]
+
+lemma accepted_attestation_requires_configured_policy:
+  "All job evidence #i.
+    TeeAttestationAccepted(job, evidence) @ #i
+    ==>
+    Ex format measurement image_digest policy_binding #j.
+      TeePolicyConfigured(job, format, measurement, image_digest, policy_binding) @ #j
+      & #j < #i"
+
+lemma accepted_attestation_requires_policy_approval:
+  "All job evidence #i.
+    TeeAttestationAccepted(job, evidence) @ #i
+    ==>
+    Ex #j.
+      TeePolicyApproved(job) @ #j
+      & #j < #i"
+
+lemma accepted_attestation_requires_measurement_match:
+  "All job evidence #i.
+    TeeAttestationAccepted(job, evidence) @ #i
+    ==>
+    Ex measurement #j.
+      TeeMeasurementMatched(job, measurement) @ #j
+      & #j = #i"
+
+lemma secret_provisioning_requires_accepted_attestation:
+  "All job evidence #i.
+    TeeSecretProvisioned(job, evidence) @ #i
+    ==>
+    Ex #j.
+      TeeAttestationAccepted(job, evidence) @ #j
+      & #j < #i"
+
+lemma result_release_requires_accepted_attestation:
+  "All job evidence authority #i.
+    TeeResultReleased(job, evidence, authority) @ #i
+    ==>
+    Ex #j.
+      TeeAttestationAccepted(job, evidence) @ #j
+      & #j < #i"
+
+lemma result_release_requires_secret_provisioning:
+  "All job evidence authority #i.
+    TeeResultReleased(job, evidence, authority) @ #i
+    ==>
+    Ex #j.
+      TeeSecretProvisioned(job, evidence) @ #j
+      & #j < #i"
+
+lemma result_release_requires_job_binding:
+  "All job evidence authority #i.
+    TeeResultReleased(job, evidence, authority) @ #i
+    ==>
+    Ex #j.
+      TeeJobBindingMatched(job, evidence) @ #j
+      & #j < #i"
+
+lemma stale_rejection_is_not_accepted:
+  "All job evidence #i.
+    TeeStaleEvidenceRejected(job, evidence) @ #i
+    ==>
+    not(Ex #j. TeeAttestationAccepted(job, evidence) @ #j)"
+
+lemma replay_rejection_is_not_released:
+  "All job evidence #i.
+    TeeReplayRejected(job, evidence) @ #i
+    ==>
+    not(Ex authority #j. TeeResultReleased(job, evidence, authority) @ #j)"
+
+lemma rollback_rejection_is_not_accepted:
+  "All job evidence #i.
+    TeeRollbackRejected(job, evidence) @ #i
+    ==>
+    not(Ex #j. TeeAttestationAccepted(job, evidence) @ #j)"
+
+end

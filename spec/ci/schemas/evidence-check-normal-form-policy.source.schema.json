@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:ci:evidence-check-normal-form-policy-source:1",
+  "title": "Kiva CI evidence-check normal-form policy source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "status",
+    "transition_stage",
+    "compatibility_view",
+    "group_source",
+    "generator",
+    "validator",
+    "schema_registry",
+    "compatibility_view_lifecycle",
+    "drift_policy",
+    "normal_form_sources",
+    "ci_check"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "kiva-ci-evidence-normal-form-policy-source" },
+    "status": { "const": "active" },
+    "description": { "type": "string", "minLength": 1 },
+    "transition_stage": { "const": "normal-form-primary" },
+    "compatibility_view": { "const": "spec/ci/evidence-checks.source.yaml" },
+    "group_source": { "const": "spec/ci/evidence-check-groups.source.yaml" },
+    "generator": { "const": "scripts/ci/generate_evidence_check_catalog.py" },
+    "validator": { "const": "scripts/ci/validate_evidence_check_normal_form.py" },
+    "schema_registry": { "const": "spec/architecture/source-ledger-schemas.yaml" },
+    "compatibility_view_lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["human_editable", "generated_only", "canonical_source", "review_role"],
+      "properties": {
+        "human_editable": { "const": false },
+        "generated_only": { "const": true },
+        "canonical_source": { "const": false },
+        "review_role": { "const": "generated-compatibility-view" }
+      }
+    },
+    "drift_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enforcement", "synchronized_by", "authoritative_behavior", "retirement_gate"],
+      "properties": {
+        "enforcement": { "const": "compatibility-view-matches-normal-form" },
+        "synchronized_by": { "const": "normal-form-primary-with-evidence-check-compatibility-view" },
+        "authoritative_behavior": {
+          "const": "check-catalog-and-gate-plan"
+        },
+        "retirement_gate": {
+          "const": "evidence-check-source-groups-remain-byte-for-byte-compatibility-view"
+        }
+      }
+    },
+    "normal_form_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_catalog", "gate_plan"],
+      "properties": {
+        "check_catalog": { "$ref": "#/$defs/source_row" },
+        "gate_plan": { "$ref": "#/$defs/source_row" }
+      }
+    },
+    "ci_check": { "$ref": "#/$defs/ci_check" }
+  },
+  "$defs": {
+    "source_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "kind", "schema", "primary_fields"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "schema": { "type": "string", "minLength": 1 },
+        "primary_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "ci_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "check_id"],
+      "properties": {
+        "group": { "const": "openapi-contract" },
+        "check_id": { "const": "evidence-check-normal-form-policy" }
+      }
+    }
+  }
+}

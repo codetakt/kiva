@@ -1,0 +1,56 @@
+examples:
+  - id: consent-grant-request
+    file: consent-grant.request.json
+    schema: ConsentGrantRequest
+    kind: request
+    operation: postPdsConsentGrant
+  - id: data-product-request
+    file: data-product.request.json
+    schema: DataProductRequest
+    kind: request
+    operation: postPdsDataProduct
+  - id: shamir-reconstruction-data-product-request
+    file: shamir-reconstruction-data-product.request.json
+    schema: DataProductRequest
+    kind: request
+    operation: postPdsDataProduct
+  - id: data-product-read-request
+    file: data-product-read.request.json
+    schema: DataProductReadRequest
+    kind: request
+    operation: postPdsDataProductRead
+  - id: lifecycle-event-request
+    file: lifecycle-event.request.json
+    schema: LifecycleEventRequest
+    kind: request
+    operation: postPdsLifecycleEvent
+  - id: retention-policy-request
+    file: retention-policy.request.json
+    schema: RetentionPolicyRequest
+    kind: request
+    operation: postPdsRetentionPolicy
+  - id: lifecycle-case-request
+    file: lifecycle-case.request.json
+    schema: LifecycleCaseRequest
+    kind: request
+    operation: postPdsLifecycleCase
+  - id: governance-profile-request
+    file: governance-profile.request.json
+    schema: GovernanceProfileRequest
+    kind: request
+    operation: postPdsGovernanceProfile
+  - id: access-check-request
+    file: access-check.request.json
+    schema: AccessCheckRequest
+    kind: request
+    operation: postPdsAccessCheck
+  - id: access-audit-event-list-response
+    file: access-audit-event-list.response.json
+    schema: AccessAuditEventList
+    kind: response
+    operation: getPdsAccessAuditEvents
+  - id: metadata-export-response
+    file: metadata-export.response.json
+    schema: MetadataExport
+    kind: response
+    operation: getPdsMetadataExports

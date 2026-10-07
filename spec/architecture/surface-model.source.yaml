@@ -1,0 +1,101 @@
+schema_version: 1
+kind: kiva-surface-operation-model-source
+status: active
+description: >
+  Operation algebra and join rules for Kiva public HTTP surfaces.
+surface_operation_algebra:
+  description: >
+    SurfaceOperation is the sole public operation algebra produced by joining
+    OpenAPI-derived HttpOperation identity with a sparse human-owned
+    SemanticOperationOverlay. HTTP route, operationId, and scope fields are
+    projected from OpenAPI; the overlay owns only application workflow, PDS
+    resource family, and route-context decisions.
+  root_type: SurfaceOperation
+  join_type: HttpOperation + Optional<SemanticOperationOverlay>
+  sole_operation_algebra: true
+  canonical_source: spec/architecture/operation-ownership.source.yaml
+  policy_source: spec/architecture/surface-projections.yaml
+  generated_review_surface: generated/architecture/surface-catalog.yaml
+  openapi_derived_facets:
+    source_of_truth: openapi-contracts
+    drift_check: generated/http-operation-catalog.evidence.json
+    compatibility_fields:
+      - openapi_contract
+      - method
+      - path
+      - operation_id
+      - required_scopes
+    retirement_target: completed-operation-ownership-overlay-keyed-by-openapi-operationId
+  semantic_owned_facets:
+    - application_operation_id
+    - application_surface
+    - workflow_label
+    - rust_workflow_kind
+    - workflow_family
+    - pds_resource_family
+    - pds_route_context
+  joined_facets:
+    - openapi_contract
+    - method
+    - path
+    - operation_id
+    - required_scopes
+    - application_operation_id
+    - application_surface
+    - workflow_label
+    - rust_workflow_kind
+    - workflow_family
+    - pds_resource_family
+    - pds_route_context
+  projections:
+    - id: operation_kernel
+      target: generated/architecture/operation-kernel.yaml
+      role: first-class-operation-kernel-ir
+    - id: operation_kernel_markdown
+      target: docs/architecture/generated/operation-kernel.md
+      role: first-class-operation-kernel-review-projection
+    - id: application_operation_catalog
+      target: generated/architecture/operation-catalog.yaml
+      role: workflow-and-scope-binding-projection
+    - id: pds_resource_family_ledger
+      target: generated/architecture/pds-resource-families.yaml
+      role: pds-route-context-and-handler-ownership-projection
+    - id: surface_family_ledger
+      target: generated/architecture/surface-families.yaml
+      role: cross-surface-family-ownership-projection
+    - id: surface_operation_index
+      target: docs/architecture/generated/surface-operation-index.md
+      role: review-index-projection
+    - id: surface_operation_index_evidence
+      target: generated/surface-operation-index.evidence.json
+      role: review-index-evidence-projection
+    - id: route_coverage
+      target: docs/architecture/generated/route-coverage.md
+      role: axum-route-coverage-projection
+    - id: route_coverage_evidence
+      target: generated/route-coverage.evidence.json
+      role: axum-route-coverage-evidence-projection
+    - id: server_surface_profile_registry
+      target: crates/kiva-server/src/core/state/generated_surface_profiles.rs
+      role: bounded-context-profile-projection
+join_policy:
+  required_http_fields:
+    - openapi_contract
+    - method
+    - path
+    - operation_id
+    - required_scopes
+  required_application_fields:
+    - application_operation_id
+    - application_surface
+    - workflow_label
+    - rust_workflow_kind
+  required_pds_fields:
+    - pds_resource_family
+    - pds_route_context
+  require_pds_family_for_contracts:
+    - spec/openapi/kiva-pds.yaml
+  require_application_operations_for_route_contexts:
+    - pds
+    - pds-application
+  scope_drift_policy: application-and-http-scopes-must-match

@@ -1,0 +1,7 @@
+{
+  "event_id": "00000000-0000-4000-8000-000000000301",
+  "event_type": "retention-reviewed",
+  "resource_kind": "metadata-export",
+  "resource_id": "metadata-export-2026-spring",
+  "reason": "annual public-sector retention review"
+}

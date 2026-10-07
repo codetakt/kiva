@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:adl-compatibility-report:1",
+  "title": "Kiva ADL compatibility gap report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "compatibility_map",
+    "requirement_catalog",
+    "adl_suite",
+    "adl_source_verification",
+    "totals",
+    "mappings_by_relationship",
+    "requirements"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "compatibility_map": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "requirement_catalog": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "adl_suite": {
+      "$ref": "#/$defs/adlSuite"
+    },
+    "adl_source_verification": {
+      "$ref": "#/$defs/adlSourceVerification"
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "mappings_by_relationship": {
+      "$ref": "#/$defs/mappingCounts"
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equivalent",
+        "partial",
+        "absent",
+        "unclassified"
+      ],
+      "properties": {
+        "equivalent": {
+          "$ref": "#/$defs/requirementRows"
+        },
+        "partial": {
+          "$ref": "#/$defs/requirementRows"
+        },
+        "absent": {
+          "$ref": "#/$defs/requirementRows"
+        },
+        "unclassified": {
+          "$ref": "#/$defs/requirementRows"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "nullableBoolean": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "adlSuite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "upstream",
+        "test_root",
+        "role",
+        "license"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "upstream": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "local_reference": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "test_root": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "role": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "license": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "adlSourceVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checked",
+        "root",
+        "exists",
+        "git_commit",
+        "git_dirty"
+      ],
+      "properties": {
+        "checked": {
+          "type": "boolean"
+        },
+        "root": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "git_commit": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "git_dirty": {
+          "$ref": "#/$defs/nullableBoolean"
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirements",
+        "mappings",
+        "equivalent",
+        "partial",
+        "absent",
+        "unclassified"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mappings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "equivalent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "absent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unclassified": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "mappingCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "absent",
+        "equivalent",
+        "obsolete",
+        "partial"
+      ],
+      "properties": {
+        "absent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "equivalent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "obsolete": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "requirementRows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    },
+    "requirementRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "clause",
+        "area",
+        "summary",
+        "mappings"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "clause": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "area": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    }
+  }
+}

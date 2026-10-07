@@ -1,0 +1,464 @@
+schema_version: 1
+kind: pds-deployment-template-catalog
+standard: Kiva Architecture
+scope: >
+  Kiva Personal Data Store deployment templates for public-sector and school
+  use. These templates do not expand the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS
+  conformance claim and are not legal advice.
+status: published
+templates:
+  - id: school-district-public-task-v1
+    title: School district public-task PDS deployment
+    deployment_kind: school-district
+    status: published-template
+    jurisdiction_profile: public-sector-school
+    intended_use:
+      - district attendance and completion dashboards
+      - subject-facing metadata export
+      - retention review and correction/dispute workflow metadata
+    confidential_mechanisms:
+      enabled:
+        - additive-secure-aggregation
+        - differential-privacy-release
+        - shamir-vss-admission
+      disabled:
+        - threshold-frost-signing
+        - psi-cohort-hash-token
+        - psi-oprf-dh-voprf
+        - tee-portable-attestation
+        - tee-aws-nitro-attestation
+        - fhe-sum-feasibility
+        - fhe-sum-runtime
+    governance_profile:
+      profile_kind: school-district
+      tenant_partition: tenant:district-alpha
+      subject_partition: subject-partition:district-alpha:learners
+      role_subjects:
+        data_custodian: school-data-custodian
+        platform_operator: regional-platform-operator
+        policy_authority: district-policy-authority
+        analyst: district-analyst
+        auditor: public-auditor
+        identity_authority: district-identity-authority
+      emergency_access_policy: >
+        Emergency access requires policy-authority approval, platform-operator
+        execution, and auditor review within one school day.
+      runbook_refs:
+        - runbook:key-rotation
+        - runbook:policy-change
+        - runbook:consent-incident
+        - runbook:audit-export
+        - runbook:emergency-access
+    legal_policy_examples:
+      - id: district-attendance-public-task
+        legal_basis: public-task
+        purpose: District-level attendance trend reporting.
+        data_classes:
+          - statement-metadata
+          - data-product-metadata
+          - access-audit-metadata
+          - lifecycle-metadata
+        consent_scope: aggregate-insights
+        retention_policy:
+          resource_kind: xapi-statement
+          data_class: statement-metadata
+          retention_period_days: 365
+          review_interval_days: 90
+          tombstone_after_days: 730
+          tombstone_publication: metadata-only
+        permitted_operations:
+          - postPdsConsentGrant
+          - postPdsDataProduct
+          - postPdsDataProductRead
+          - postPdsAccessCheck
+          - postPdsLifecycleCase
+          - getPdsMetadataExports
+        prohibited_payloads:
+          - raw xAPI Statement JSON
+          - confidential aggregate payloads
+          - submitted shares or signatures
+    operator_runbooks:
+      - id: runbook:key-rotation
+        title: Rotate PDS and confidential-computation operating keys.
+        owner_role: platform_operator
+        approving_roles:
+          - policy_authority
+        trigger: Scheduled key rotation or suspected key exposure.
+        steps:
+          - Open an audit-tracked rotation case and identify affected subjects.
+          - Register replacement keys before disabling old active keys.
+          - Re-run metadata-only access checks for affected data products.
+          - Export audit evidence for auditor review.
+        evidence:
+          - key rotation request identifier
+          - affected tenant partition
+          - auditor review timestamp
+      - id: runbook:policy-change
+        title: Change deployment policy metadata.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Retention, purpose, or legal-basis policy update.
+        steps:
+          - Register or supersede retention policy metadata.
+          - Publish impacted purpose and legal-basis changes to operators.
+          - Review lifecycle cases linked to the affected policy.
+          - Archive the decision record in the PDS evidence bundle.
+        evidence:
+          - retention policy identifier
+          - policy authority approval
+          - auditor acknowledgement
+      - id: runbook:consent-incident
+        title: Handle consent or delegated-access incident.
+        owner_role: data_custodian
+        approving_roles:
+          - policy_authority
+          - auditor
+        trigger: Incorrect consent state, delegated scope, or access-audit decision.
+        steps:
+          - Revoke affected grants when subject ownership is confirmed.
+          - Preserve access-audit metadata without exposing raw records.
+          - Open a dispute or correction lifecycle case.
+          - Complete auditor review before re-enabling delegated access.
+        evidence:
+          - grant identifier
+          - access-audit event identifiers
+          - lifecycle case identifier
+      - id: runbook:audit-export
+        title: Produce a metadata-only audit export.
+        owner_role: auditor
+        approving_roles:
+          - data_custodian
+        trigger: Scheduled public-sector audit or subject export request.
+        steps:
+          - Request metadata export for the relevant subject partition.
+          - Verify that raw Statement and confidential payload fields are absent.
+          - Record export lifecycle event metadata.
+          - Store checksum and review notes.
+        evidence:
+          - metadata export identifier
+          - checksum
+          - lifecycle event identifier
+      - id: runbook:emergency-access
+        title: Execute emergency metadata access.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Documented student safety or statutory emergency.
+        steps:
+          - Record emergency reason and affected subject partition.
+          - Approve the minimum necessary metadata access.
+          - Require platform-operator execution under audit.
+          - Complete auditor review within one school day.
+        evidence:
+          - emergency reason
+          - policy authority approval
+          - auditor review timestamp
+    claim_boundary: >
+      Template covers metadata-only PDS operation for a school district. It
+      does not implement legal-hold automation, physical deletion execution, or
+      production identity-provider claim mapping.
+  - id: multi-agency-research-aggregate-v1
+    title: Multi-agency aggregate-insight PDS deployment
+    deployment_kind: multi-agency
+    status: published-template
+    jurisdiction_profile: public-sector-research-collaboration
+    practical_workload_profile: spec/confidential/practical-deployment-workload-selection.yaml
+    intended_use:
+      - multi-agency aggregate trend analysis
+      - differential-privacy and threshold-release data-product publication
+      - independent audit of analyst access
+    confidential_mechanisms:
+      enabled:
+        - additive-secure-aggregation
+        - differential-privacy-release
+        - shamir-vss-admission
+        - psi-cohort-hash-token
+        - tee-portable-attestation
+      disabled:
+        - psi-oprf-dh-voprf
+        - threshold-frost-signing
+        - tee-aws-nitro-attestation
+        - fhe-sum-feasibility
+        - fhe-sum-runtime
+    governance_profile:
+      profile_kind: multi-agency
+      tenant_partition: tenant:regional-collaboration
+      subject_partition: subject-partition:regional-collaboration:learners
+      role_subjects:
+        data_custodian: lead-agency-data-custodian
+        platform_operator: neutral-platform-operator
+        policy_authority: joint-policy-board
+        analyst: approved-research-analyst
+        auditor: independent-public-auditor
+        identity_authority: regional-identity-authority
+      emergency_access_policy: >
+        Emergency access is limited to metadata export and requires joint
+        policy-board approval plus independent auditor review before analyst
+        access is restored.
+      runbook_refs:
+        - runbook:key-rotation
+        - runbook:policy-change
+        - runbook:consent-incident
+        - runbook:audit-export
+        - runbook:emergency-access
+    legal_policy_examples:
+      - id: cross-agency-aggregate-research
+        legal_basis: legitimate-interest
+        purpose: Cross-agency aggregate research with metadata-only PDS access.
+        data_classes:
+          - consent-metadata
+          - data-product-metadata
+          - access-audit-metadata
+          - lifecycle-metadata
+        consent_scope: aggregate-insights
+        retention_policy:
+          resource_kind: data-product
+          data_class: data-product-metadata
+          retention_period_days: 540
+          review_interval_days: 90
+          tombstone_after_days: 900
+          tombstone_publication: public-redacted
+        permitted_operations:
+          - postPdsConsentGrant
+          - postPdsDataProduct
+          - postPdsDataProductRead
+          - getPdsAccessAuditEvents
+          - postPdsLifecycleCase
+          - getPdsMetadataExports
+        prohibited_payloads:
+          - raw xAPI Statement JSON
+          - reconstructed Shamir secrets
+          - submitted shares or signed envelopes
+    operator_runbooks:
+      - id: runbook:key-rotation
+        title: Rotate collaboration signing and operating keys.
+        owner_role: platform_operator
+        approving_roles:
+          - policy_authority
+          - auditor
+        trigger: Scheduled collaboration key rotation or participant turnover.
+        steps:
+          - Freeze new data-product registration during rotation.
+          - Register replacement keys per participant boundary.
+          - Re-enable metadata-only data-product reads after auditor approval.
+          - Record rotation evidence in the publication bundle.
+        evidence:
+          - rotation case identifier
+          - participant boundary list
+          - auditor approval
+      - id: runbook:policy-change
+        title: Change cross-agency purpose or disclosure policy.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Collaboration agreement, purpose, or disclosure change.
+        steps:
+          - Create a lifecycle case for the policy update.
+          - Register updated retention policy metadata.
+          - Review affected consent grants and data products.
+          - Publish redacted policy-change evidence for participants.
+        evidence:
+          - lifecycle case identifier
+          - affected data product identifiers
+          - participant notice record
+      - id: runbook:consent-incident
+        title: Respond to delegated aggregate-access incident.
+        owner_role: data_custodian
+        approving_roles:
+          - policy_authority
+          - auditor
+        trigger: Delegation scope mismatch or unexpected analyst access.
+        steps:
+          - Revoke affected grants.
+          - Preserve access-audit metadata and deny reasons.
+          - Suspend affected data-product reads.
+          - Complete policy-authority and auditor review.
+        evidence:
+          - grant identifiers
+          - access-audit event identifiers
+          - suspension window
+      - id: runbook:audit-export
+        title: Produce collaboration audit export.
+        owner_role: auditor
+        approving_roles:
+          - policy_authority
+        trigger: Scheduled collaboration audit or participant request.
+        steps:
+          - Export PDS metadata for the collaboration partition.
+          - Check absence of raw xAPI and confidential payload fields.
+          - Compare data-product reads to active consent grants.
+          - Publish checksums to collaboration participants.
+        evidence:
+          - export checksum
+          - access-audit event count
+          - participant publication record
+      - id: runbook:emergency-access
+        title: Restrict emergency access in multi-agency deployment.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Statutory emergency affecting collaboration subjects.
+        steps:
+          - Limit access to metadata export and access-audit review.
+          - Require joint policy-board approval.
+          - Prevent analyst raw-record access.
+          - Record post-incident review before normal access resumes.
+        evidence:
+          - emergency approval record
+          - metadata export identifier
+          - post-incident review timestamp
+    claim_boundary: >
+      Template covers metadata-only multi-agency aggregate-insight governance.
+      It does not implement production IdP federation, legal advice, physical
+      redaction execution, or malicious-robust MPC.
+  - id: learner-principal-v1
+    title: Learner-principal PDS deployment
+    deployment_kind: learner-principal
+    status: published-template
+    jurisdiction_profile: learner-subject-agency
+    intended_use:
+      - learner-subject consent grant and revocation using a subject-bound token
+      - learner-subject record inventory inspection
+      - learner-subject metadata export
+    confidential_mechanisms:
+      enabled:
+        - additive-secure-aggregation
+        - differential-privacy-release
+        - shamir-vss-admission
+      disabled:
+        - threshold-frost-signing
+        - psi-cohort-hash-token
+        - psi-oprf-dh-voprf
+        - tee-portable-attestation
+        - tee-aws-nitro-attestation
+        - fhe-sum-feasibility
+        - fhe-sum-runtime
+    governance_profile:
+      profile_kind: learner-principal
+      tenant_partition: tenant:learner-principal-reference
+      subject_partition: subject-partition:oauth-subject:self
+      role_subjects:
+        data_custodian: learner-profile-data-custodian
+        platform_operator: learner-profile-platform-operator
+        policy_authority: learner-profile-policy-authority
+        analyst: learner-profile-approved-analyst
+        auditor: learner-profile-independent-auditor
+        identity_authority: learner-profile-identity-authority
+      emergency_access_policy: >
+        Emergency metadata access requires policy-authority approval,
+        platform-operator execution, and independent auditor review before
+        ordinary learner or analyst access resumes.
+      runbook_refs:
+        - runbook:key-rotation
+        - runbook:policy-change
+        - runbook:consent-incident
+        - runbook:audit-export
+        - runbook:emergency-access
+    legal_policy_examples:
+      - id: learner-subject-consent-and-export
+        legal_basis: consent
+        purpose: >
+          Let the authenticated learner grant or revoke consent and inspect
+          their own inventory and metadata export.
+        data_classes:
+          - statement-metadata
+          - consent-metadata
+          - access-audit-metadata
+          - lifecycle-metadata
+        consent_scope: personal-data
+        retention_policy:
+          resource_kind: consent-grant
+          data_class: consent-metadata
+          retention_period_days: 365
+          review_interval_days: 90
+          tombstone_after_days: 730
+          tombstone_publication: subject-visible
+        permitted_operations:
+          - postPdsConsentGrant
+          - postPdsConsentRevocation
+          - getPdsRecordInventory
+          - getPdsMetadataExports
+          - postPdsAccessCheck
+        prohibited_payloads:
+          - raw xAPI Statement JSON
+          - confidential aggregate payloads
+          - submitted shares or signatures
+    operator_runbooks:
+      - id: runbook:key-rotation
+        title: Rotate learner-profile operating keys.
+        owner_role: platform_operator
+        approving_roles:
+          - policy_authority
+          - auditor
+        trigger: Scheduled rotation or suspected key exposure.
+        steps:
+          - Open an audit-tracked rotation case.
+          - Register replacement keys before disabling active keys.
+          - Verify subject-bound metadata reads after rotation.
+        evidence:
+          - rotation case identifier
+          - affected tenant partition
+          - auditor approval timestamp
+      - id: runbook:policy-change
+        title: Change learner-profile policy metadata.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Purpose, consent, or retention policy update.
+        steps:
+          - Record the proposed metadata policy change.
+          - Review affected consent grants and retention metadata.
+          - Archive approval and learner notification evidence.
+        evidence:
+          - policy change identifier
+          - auditor acknowledgement
+          - learner notification record
+      - id: runbook:consent-incident
+        title: Handle learner consent or revocation incidents.
+        owner_role: data_custodian
+        approving_roles:
+          - policy_authority
+          - auditor
+        trigger: Incorrect consent ownership, scope, or revocation state.
+        steps:
+          - Confirm the token subject and affected grant owner.
+          - Revoke affected grants through the existing scoped operation.
+          - Preserve metadata-only audit evidence for review.
+        evidence:
+          - grant identifier
+          - authenticated subject identifier
+          - incident review record
+      - id: runbook:audit-export
+        title: Review a learner-requested metadata export.
+        owner_role: auditor
+        approving_roles:
+          - data_custodian
+        trigger: Learner export request or scheduled profile review.
+        steps:
+          - Request the export with the learner-subject token flow.
+          - Verify that the export contains only subject-scoped metadata.
+          - Record checksum and review outcome.
+        evidence:
+          - authenticated subject identifier
+          - export checksum
+          - review outcome
+      - id: runbook:emergency-access
+        title: Restrict emergency learner metadata access.
+        owner_role: policy_authority
+        approving_roles:
+          - auditor
+        trigger: Documented statutory or learner-safety emergency.
+        steps:
+          - Record the reason and affected subject partition.
+          - Approve only the minimum necessary metadata access.
+          - Complete independent review before ordinary access resumes.
+        evidence:
+          - emergency reason
+          - policy authority approval
+          - auditor review timestamp
+    claim_boundary: >
+      This profile exercises subject-bound token flows over existing PDS
+      scopes and adds no authorization semantics. Production identity-provider
+      integration, JWKS validation, and token introspection remain outside this
+      template and milestone.

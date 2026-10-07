@@ -1,0 +1,367 @@
+schema_version: 1
+kind: kiva-verification-obligation-index
+status: active
+description: Generated tool-neutral verification obligation index. Boundary properties are primary; Kani, Tamarin, F*, Rust tests, implementation anchors, and assurance-registry entries are discharge methods.
+generated_from:
+- spec/verification/verification-obligations.source.yaml
+- spec/verification/confidential-verified-kernels.yaml
+generated_artifacts:
+  obligation_index: generated/verification/verification-obligations.yaml
+  markdown: docs/architecture/generated/verification-obligations.md
+model:
+  root_type: VerificationObligation
+  property_first: true
+  tool_neutral: true
+  discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  - fstar
+  - assurance-registry
+summary:
+  obligation_count: 9
+  complete_count: 9
+  incomplete_count: 0
+  receipt_required_count: 44
+obligations:
+- id: additive-share-admission-and-release
+  root_type: VerificationObligation
+  status: active
+  mechanism: additive-secure-aggregation
+  boundary_property: authenticated share admission, replay gating, n-of-n aggregation, and two-authority release.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  - fstar
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.additive-share-admission-and-release.implementation
+    source_field: implementation_anchors
+    count: 2
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.additive-share-admission-and-release.rust-test
+    source_field: rust_tests
+    count: 2
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.additive-share-admission-and-release.kani
+    source_field: kani_harnesses
+    count: 2
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.additive-share-admission-and-release.tamarin
+    source_field: tamarin_lemmas
+    count: 2
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.additive-share-admission-and-release.fstar
+    source_field: fstar_modules
+    count: 2
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: differential-privacy-budget-release
+  root_type: VerificationObligation
+  status: active
+  mechanism: differential-privacy-release
+  boundary_property: budget monotonicity, composition summary, checked noise evidence, and release gate.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  - fstar
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.differential-privacy-budget-release.implementation
+    source_field: implementation_anchors
+    count: 3
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.differential-privacy-budget-release.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.differential-privacy-budget-release.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.differential-privacy-budget-release.tamarin
+    source_field: tamarin_lemmas
+    count: 1
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.differential-privacy-budget-release.fstar
+    source_field: fstar_modules
+    count: 3
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: shamir-vss-reconstruction
+  root_type: VerificationObligation
+  status: active
+  mechanism: shamir-vss-admission
+  boundary_property: verified share openings, threshold uniqueness, and reconstruction admission.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  - fstar
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.shamir-vss-reconstruction.implementation
+    source_field: implementation_anchors
+    count: 1
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.shamir-vss-reconstruction.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.shamir-vss-reconstruction.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.shamir-vss-reconstruction.tamarin
+    source_field: tamarin_lemmas
+    count: 1
+    status: declared
+  - method: fstar
+    receipt_id: verification-receipt.shamir-vss-reconstruction.fstar
+    source_field: fstar_modules
+    count: 1
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: psi-cohort-and-oprf-release
+  root_type: VerificationObligation
+  status: active
+  mechanism: private-set-intersection
+  boundary_property: bounded hash-token PSI plus review-gated OPRF PSI transcript and release gates.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.implementation
+    source_field: implementation_anchors
+    count: 3
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.tamarin
+    source_field: tamarin_lemmas
+    count: 2
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.psi-cohort-and-oprf-release.assurance-registry
+    source_field: assurance_registry_entries
+    count: 1
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: tee-attestation-gates
+  root_type: VerificationObligation
+  status: active
+  mechanism: tee-attestation
+  boundary_property: portable evidence gate and review-gated Nitro adapter boundary.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.tee-attestation-gates.implementation
+    source_field: implementation_anchors
+    count: 3
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.tee-attestation-gates.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.tee-attestation-gates.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.tee-attestation-gates.tamarin
+    source_field: tamarin_lemmas
+    count: 2
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.tee-attestation-gates.assurance-registry
+    source_field: assurance_registry_entries
+    count: 2
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: threshold-frost-runtime
+  root_type: VerificationObligation
+  status: active
+  mechanism: threshold-frost-signing
+  boundary_property: review-gated key-ceremony, signing transcript, replay, and release gates.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.threshold-frost-runtime.implementation
+    source_field: implementation_anchors
+    count: 3
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.threshold-frost-runtime.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.threshold-frost-runtime.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.threshold-frost-runtime.tamarin
+    source_field: tamarin_lemmas
+    count: 1
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.threshold-frost-runtime.assurance-registry
+    source_field: assurance_registry_entries
+    count: 1
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: fhe-feasibility-and-runtime
+  root_type: VerificationObligation
+  status: active
+  mechanism: fhe
+  boundary_property: deterministic FHE feasibility fixture plus review-gated external FHE runtime boundary.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.implementation
+    source_field: implementation_anchors
+    count: 4
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.tamarin
+    source_field: tamarin_lemmas
+    count: 2
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.fhe-feasibility-and-runtime.assurance-registry
+    source_field: assurance_registry_entries
+    count: 2
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: confidential-job-participant-lifecycle
+  root_type: VerificationObligation
+  status: active
+  mechanism: confidential-job-lifecycle
+  boundary_property: strict job and participant lifecycle transition/admission gates.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - tamarin
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.implementation
+    source_field: implementation_anchors
+    count: 2
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.kani
+    source_field: kani_harnesses
+    count: 2
+    status: declared
+  - method: tamarin
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.tamarin
+    source_field: tamarin_lemmas
+    count: 2
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.confidential-job-participant-lifecycle.assurance-registry
+    source_field: assurance_registry_entries
+    count: 2
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true
+- id: provider-runtime-boundary
+  root_type: VerificationObligation
+  status: active
+  mechanism: secret-compute-provider-contract
+  boundary_property: provider capability, review evidence, production claim, and control/data-plane runtime boundary.
+  required_discharge_methods:
+  - implementation
+  - rust-test
+  - kani
+  - assurance-registry
+  declared_discharges:
+  - method: implementation
+    receipt_id: verification-receipt.provider-runtime-boundary.implementation
+    source_field: implementation_anchors
+    count: 3
+    status: declared
+  - method: rust-test
+    receipt_id: verification-receipt.provider-runtime-boundary.rust-test
+    source_field: rust_tests
+    count: 1
+    status: declared
+  - method: kani
+    receipt_id: verification-receipt.provider-runtime-boundary.kani
+    source_field: kani_harnesses
+    count: 1
+    status: declared
+  - method: assurance-registry
+    receipt_id: verification-receipt.provider-runtime-boundary.assurance-registry
+    source_field: assurance_registry_entries
+    count: 1
+    status: declared
+  missing_required_discharge_methods: []
+  complete: true

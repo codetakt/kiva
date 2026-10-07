@@ -1,0 +1,39 @@
+schema_version: 1
+kind: kiva-verification-obligations-source
+status: active
+description: >
+  Tool-neutral verification obligation model for Kiva. Obligations name the
+  boundary property first; Rust tests, Kani harnesses, Tamarin lemmas, F*
+  modules, assurance-registry entries, and implementation anchors are discharge
+  methods for that property.
+source_ledger: spec/verification/confidential-verified-kernels.yaml
+generated_artifacts:
+  obligation_index: generated/verification/verification-obligations.yaml
+  markdown: docs/architecture/generated/verification-obligations.md
+obligation_model:
+  root_type: VerificationObligation
+  primitive_root_type: BoundaryProperty
+  property_first: true
+  tool_neutral: true
+  property_flow:
+    - BoundaryProperty
+    - RequiredDischargeMethod
+    - DeclaredDischarge
+    - VerificationReceipt
+  discharge_methods:
+    - implementation
+    - rust-test
+    - kani
+    - tamarin
+    - fstar
+    - assurance-registry
+  method_fields:
+    implementation: implementation_anchors
+    rust-test: rust_tests
+    kani: kani_harnesses
+    tamarin: tamarin_lemmas
+    fstar: fstar_modules
+    assurance-registry: assurance_registry_entries
+  claim_rule: >
+    Required evidence kinds describe discharge methods for one boundary
+    property. No single tool row is the source of the claim.

@@ -1,0 +1,181 @@
+---
+schema_version: 1
+kind: external-production-assurance-readiness
+standard: Kiva Architecture
+status: review-ready
+milestone: CC15
+profile: kiva-cc15-external-production-assurance-readiness-v1
+claim_boundary: >
+  Kiva has a repository-side release-candidate assurance gate for the exact
+  multi-agency aggregate deployment profile selected in CC8. The gate packages
+  external review inputs, strict CI evidence requirements, operational
+  controls, release-candidate bundle requirements, and public claim language.
+  It does not record completed external cryptographic, security, privacy,
+  legal, IEEE xAPI, or full formal-verification certification.
+release_candidate_scope:
+  deployment_selection: spec/confidential/practical-deployment-workload-selection.yaml
+  selection_id: kiva-cc8-multi-agency-aggregate-v1
+  selected_template_id: multi-agency-research-aggregate-v1
+  selected_mechanisms:
+    enabled_for_first_practical_workload:
+      - additive-secure-aggregation
+      - differential-privacy-release
+      - shamir-vss-admission
+    bounded_assurance_only:
+      - psi-cohort-hash-token
+      - tee-portable-attestation
+    review_gated_available_not_enabled:
+      - psi-oprf-dh-voprf
+      - threshold-frost-signing
+      - tee-aws-nitro-attestation
+      - fhe-sum-feasibility
+      - fhe-sum-runtime
+  production_claim_allowed_before_external_review: false
+external_review_inputs:
+  selected_mechanism_package:
+    required: true
+    path: spec/confidential/confidential-computation-assurance-package.yaml
+  provider_contract:
+    required: true
+    path: spec/confidential/secret-compute-provider-contract.yaml
+  threat_model:
+    required: true
+    path: docs/architecture/confidential-aggregate-threat-model.md
+  code:
+    required: true
+    paths:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-policy/src/lib.rs
+      - crates/kiva-server/src/lib.rs
+  cryptographic_assumptions:
+    required: true
+    paths:
+      - docs/architecture/private-set-intersection.md
+      - docs/architecture/production-psi-upgrade.md
+      - docs/architecture/tee-attestation-boundary.md
+      - docs/architecture/tee-nitro-attestation-integration.md
+      - docs/architecture/shamir-threshold-cryptography.md
+      - docs/architecture/threshold-frost-signing.md
+      - docs/architecture/fhe-feasibility-boundary.md
+      - docs/architecture/fhe-runtime-integration.md
+  deployment_templates:
+    required: true
+    path: spec/pds/deployment-templates.yaml
+  operator_runbooks:
+    required: true
+    paths:
+      - docs/operations/confidential-computation-assurance-runbook.md
+      - docs/operations/external-production-assurance-runbook.md
+      - docs/operations/psi-oprf-runbook.md
+      - docs/operations/tee-nitro-runbook.md
+      - docs/operations/threshold-frost-runbook.md
+      - docs/operations/fhe-runtime-runbook.md
+  openapi_contracts:
+    required: true
+    paths:
+      - spec/openapi/kiva-xapi.yaml
+      - spec/openapi/kiva-pds.yaml
+      - spec/openapi/kiva-confidential.yaml
+  formal_models:
+    required: true
+    paths:
+      - proofs/kani/README.md
+      - proofs/tamarin/README.md
+      - fstar/README.md
+ci_evidence_requirements:
+  clean_git_required_for_release_candidate: true
+  live_postgres_required_for_release_candidate: true
+  formal_verification_regression_required: true
+  pds_evidence_required: true
+  conformance_evidence_required: true
+  release_evidence_set_validation_required: true
+  workflows:
+    - .github/workflows/ci.yml
+    - .github/workflows/conformance.yml
+    - .github/workflows/verification.yml
+    - .github/workflows/release-evidence.yml
+  validators:
+    - scripts/ci/validate_external_production_assurance_readiness.py
+    - scripts/ci/validate_confidential_computation_assurance_package.py
+    - scripts/ci/validate_release_evidence_set.py
+    - scripts/ci/validate_pds_evidence_bundle.py
+  nix_checks:
+    - checks.x86_64-linux.confidential-computation-assurance
+    - checks.x86_64-linux.postgres-verification
+    - checks.x86_64-linux.kani-boundary
+    - checks.x86_64-linux.tamarin-boundary
+    - checks.x86_64-linux.fstar-boundary
+    - checks.x86_64-linux.release-evidence-contract
+operational_controls:
+  vulnerability_intake:
+    required: true
+    runbook_section: "## Vulnerability Intake"
+  patch_slas:
+    required: true
+    runbook_section: "## Patch SLAs"
+    critical_hours: 24
+    high_days: 7
+    medium_days: 30
+  cryptographic_deprecation_policy:
+    required: true
+    runbook_section: "## Cryptographic Deprecation Policy"
+  key_compromise_response:
+    required: true
+    runbook_section: "## Key Compromise Response"
+  audit_export_retention:
+    required: true
+    runbook_section: "## Audit Export Retention"
+    minimum_days: 540
+  incident_disclosure_workflow:
+    required: true
+    runbook_section: "## Incident Disclosure Workflow"
+release_candidate_evidence_bundle:
+  signed_checksums_required: true
+  toolchain_versions_required: true
+  database_migration_state_required: true
+  openapi_contracts_required: true
+  review_outcomes_required_for_production_claim: true
+  release_evidence_validator: scripts/ci/validate_release_evidence_set.py
+  conformance_generator: scripts/ci/generate_conformance_evidence.sh
+  pds_evidence_generator: scripts/ci/generate_pds_evidence.sh
+  release_workflow: .github/workflows/release-evidence.yml
+external_review_status:
+  external_review_required_before_production_claim: true
+  external_review_completed_in_repository: false
+  review_outcomes_bound_to_release_candidate: false
+public_claim_language:
+  allowed_claims:
+    - Kiva has a CC15 repository-side release-candidate assurance gate for the exact CC8 deployment profile.
+    - Kiva requires clean-git release evidence, live PostgreSQL conformance evidence, formal regression evidence, PDS evidence, and release evidence-set validation before production confidential-computation claims.
+    - Kiva separates external production assurance readiness from legal privacy certification, IEEE xAPI certification, and full formal verification.
+  prohibited_claims:
+    - Kiva has completed external production security review.
+    - Kiva is legally or regulatorily privacy-certified by CC15.
+    - Kiva is IEEE xAPI certified by CC15.
+    - Kiva is fully formally verified.
+    - Kiva provides production MPC.
+    - Kiva provides malicious-secure PSI.
+    - Kiva provides production FHE.
+    - Kiva provides production hardware-backed TEE confidential execution.
+    - Kiva provides production threshold cryptography.
+  claim_flags:
+    production_security_claim_allowed: false
+    legal_privacy_certification: false
+    ieee_xapi_certification: false
+    complete_formal_verification: false
+    production_mpc: false
+    malicious_secure_psi: false
+    production_fhe: false
+    production_hardware_backed_tee: false
+    production_threshold_cryptography: false
+traceability:
+  requirement_id: confidential-external-production-assurance-readiness-001
+  compliance_matrix: spec/compliance-matrix.yaml
+  milestone_ledger: docs/architecture/confidential-computation-milestones.md
+evidence:
+  architecture_note: docs/architecture/external-production-assurance-readiness.md
+  operator_runbook: docs/operations/external-production-assurance-runbook.md
+  ci_gates: docs/operations/ci-gates.md
+  assurance_package: spec/confidential/confidential-computation-assurance-package.yaml
+  compliance_matrix: spec/compliance-matrix.yaml
+  validator: scripts/ci/validate_external_production_assurance_readiness.py

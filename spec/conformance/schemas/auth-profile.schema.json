@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:auth-profile:1",
+  "title": "Kiva xAPI LRS conformance authentication profile fixture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "profiles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/profileName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/profile"
+      }
+    }
+  },
+  "$defs": {
+    "profileName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+    },
+    "envName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "headerName": {
+      "type": "string",
+      "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "bearer_token_env"
+          ]
+        },
+        {
+          "required": [
+            "headers"
+          ]
+        }
+      ],
+      "properties": {
+        "bearer_token_env": {
+          "$ref": "#/$defs/envName"
+        },
+        "headers": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/headerName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/envName"
+          }
+        }
+      }
+    }
+  }
+}

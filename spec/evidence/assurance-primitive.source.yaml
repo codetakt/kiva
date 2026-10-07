@@ -1,0 +1,59 @@
+schema_version: 1
+kind: kiva-assurance-primitive-source
+status: active
+description: >
+  Thin human review entrypoint for the AssurancePrimitive model. EvidenceSet,
+  EvidenceReceipt, ClaimGraph, VerificationObligation, and release overlays are
+  materialized inputs to the generated AssuranceGraph review surface.
+assurance_primitive_model:
+  root_type: AssurancePrimitiveSource
+  primitive_flow:
+    - Claim
+    - Obligation
+    - Discharge
+    - Receipt
+  primary_review_surface: generated/architecture/assurance-graph.yaml
+  review_bundle: spec/evidence/review-bundle.source.yaml
+  materialized_input_rule: >
+    Materialized inputs can explain or index evidence, but they are not new
+    public claim sources. Claims are reviewed through AssuranceGraph.
+authority_model:
+  rule: Only Claim nodes are public-claim authoritative; all other node types
+    provide discharge, capability context, or verification boundaries.
+  node_types:
+    - node_type: claim
+      policy_key: claim
+      authority_level: public-claim
+      rule: Public implementation claims are the only claim-authoritative AssuranceGraph nodes.
+    - node_type: evidence-receipt
+      policy_key: evidence_receipt
+      authority_level: declared-evidence
+      rule: Evidence receipts discharge or declare evidence and cannot create public claim semantics.
+    - node_type: capability
+      policy_key: capability
+      authority_level: capability-context
+      rule: Capability nodes provide confidential-computation context and require claim edges for public assertions.
+    - node_type: verification-obligation
+      policy_key: verification_obligation
+      authority_level: verification-boundary
+      rule: Verification obligations discharge boundary properties below the claim authority layer.
+materialized_input_sources:
+  - spec/evidence/evidence-set.source.yaml
+  - spec/evidence/evidence-receipts.source.yaml
+  - spec/evidence/executed-receipts.source.yaml
+  - spec/architecture/claim-graph.source.yaml
+  - spec/verification/verification-obligations.source.yaml
+generated_inputs:
+  - generated/evidence/evidence-set.yaml
+  - generated/evidence/evidence-receipts.yaml
+  - generated/evidence/executed-receipt-overlay.yaml
+  - generated/architecture/claim-graph.yaml
+  - generated/verification/verification-obligations.yaml
+review_surfaces:
+  primary:
+    - generated/architecture/assurance-graph.yaml
+  supporting:
+    - docs/architecture/generated/assurance-graph.md
+    - generated/evidence/evidence-set.yaml
+    - generated/evidence/evidence-receipts.yaml
+    - generated/architecture/claim-graph.yaml

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:coverage-report:1",
+  "title": "Kiva xAPI LRS conformance coverage report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "requirement_catalog",
+    "discharge_plan",
+    "totals",
+    "active_by_method",
+    "planned_only",
+    "requirements"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "requirement_catalog": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "discharge_plan": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirements",
+        "active",
+        "planned_only"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "planned_only": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "active_by_method": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "propertyNames": {
+        "enum": [
+          "external-adl",
+          "http-test",
+          "openapi",
+          "property-kani",
+          "tamarin",
+          "upstream-contribution"
+        ]
+      }
+    },
+    "planned_only": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirementRow"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "idList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "requirementRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "clause",
+        "level",
+        "area",
+        "projection",
+        "summary",
+        "status",
+        "active_groups",
+        "planned_groups"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "clause": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "level": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "area": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "projection": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "planned"
+          ]
+        },
+        "active_groups": {
+          "$ref": "#/$defs/idList"
+        },
+        "planned_groups": {
+          "$ref": "#/$defs/idList"
+        }
+      }
+    }
+  }
+}

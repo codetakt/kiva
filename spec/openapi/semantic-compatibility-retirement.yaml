@@ -1,0 +1,54 @@
+version: 1
+kind: kiva-openapi-dto-semantic-compatibility-retirement
+status: active
+source_of_truth: openapi-contracts
+description: >
+  Retirement ledger for the retired aggregate DTO archive. The active HTTP
+  boundary policy is owned by spec/openapi/dto-boundary-policy.yaml; this ledger
+  records the completed retirement of the former aggregate
+  spec/openapi/rust-dto-map.yaml guard and the split maps that remain active.
+completion_milestones:
+  - id: semantic-compatibility-guard-retirement
+    status: complete
+    completion_rule: semantic-compatibility-dto-map-retired-after-openapi-conformance-and-evidence-gates-pass
+    contract_set: all-openapi-contracts
+retired_archives:
+  rust_dto_map_archive:
+    status: complete
+    path: spec/openapi/rust-dto-map.yaml
+    former_role: retired-openapi-rust-dto-map
+    retirement_milestone: semantic-compatibility-guard-retirement
+    completion_rule: generated-boundary-adoption-complete-and-split-dto-map-checks-active
+final_contract_boundary:
+  archive_after_retirement: retired
+  retired_dto_map_archive: spec/openapi/rust-dto-map.yaml
+  active_external_guard_after_retirement: spec/openapi/generated-contract-dto-map.yaml
+  temporary_semantic_guard: spec/openapi/semantic-compatibility-map.yaml
+  external_http_dtos: generated-contract-crates
+  internal_domain_types: handwritten-domain-and-application-types
+retirement_exit_criteria:
+  required_evidence_checks:
+    - openapi-generated-contract-dto-map
+    - openapi-semantic-compatibility-map
+    - openapi-dto-boundary-ledger
+    - openapi-dto-map-projection
+  required_artifacts:
+    - spec/openapi/generated-contract-dto-map.yaml
+    - generated/openapi-dto-map-projection.yaml
+  forbidden_post_retirement_active_guards:
+    - spec/openapi/rust-dto-map.yaml
+remaining_compatibility_work_queue:
+  source_of_truth: contracts[].handler_adoption
+  completion_order: []
+  items: []
+phases:
+  - id: semantic-compatibility-dto-retirement
+    status: active
+    description: >
+      Retire the remaining semantic compatibility DTO definitions only after
+      generated crates pass the existing OpenAPI, conformance, PDS evidence, and
+      confidential evidence gates.
+retirement_invariants:
+  - The aggregate rust-dto-map guard is retired and cannot be used as an active post-retirement guard.
+  - Generated contract DTO maps and semantic compatibility maps must stay split while semantic compatibility anchors remain.
+  - Aggregate-guard retirement cannot weaken the generated contract crate parity or handler adoption completion rules.

@@ -1,0 +1,232 @@
+suite:
+  id: xapi-lrs-statement-reference-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Destructive StatementRef query checks for disposable isolated LRS targets.
+cases:
+  - id: statementref-query-expands-related-activity-filter
+    requirements:
+      - xapi-lrs-4.1.6.1-statementref-filtering
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-target-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000401
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000401
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-statementref-target@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/statementref-target
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: put-referring-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000402
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000402
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-statementref-referrer@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: StatementRef
+              id: 00000000-0000-4000-8000-000000000401
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-related-activity
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/statementref-target
+            related_activities: 'true'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000000402
+                  object:
+                    objectType: StatementRef
+                    id: 00000000-0000-4000-8000-000000000401
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true
+  - id: statementref-query-recurses-through-target-chain
+    requirements:
+      - xapi-lrs-4.1.6.1-statementref-filtering
+      - xapi-lrs-4.1.6.1-statement-consistent-through
+      - xapi-lrs-4.1.6.1-statement-last-modified
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    steps:
+      - id: put-recursive-target-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000411
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000411
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-statementref-recursive-target@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/statementref-recursive-target
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: put-recursive-middle-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000412
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000412
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-statementref-recursive-middle@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: StatementRef
+              id: 00000000-0000-4000-8000-000000000411
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: put-recursive-outer-statement
+        request:
+          method: PUT
+          path: /statements
+          query:
+            statementId: 00000000-0000-4000-8000-000000000413
+          headers:
+            Content-Type: application/json
+            X-Experience-API-Version: 2.0.0
+          body:
+            id: 00000000-0000-4000-8000-000000000413
+            actor:
+              objectType: Agent
+              mbox: mailto:kiva-conformance-statementref-recursive-outer@example.org
+            verb:
+              id: https://adlnet.gov/expapi/verbs/experienced
+            object:
+              objectType: StatementRef
+              id: 00000000-0000-4000-8000-000000000412
+            version: 2.0.0
+        expect:
+          status: 204
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+      - id: query-recursive-target-activity
+        request:
+          method: GET
+          path: /statements
+          query:
+            activity: https://example.org/kiva/conformance/activity/statementref-recursive-target
+            limit: '10'
+          headers:
+            Accept: application/json
+            X-Experience-API-Version: 2.0.0
+          await_retrieval_ms: 5000
+        expect:
+          status: 200
+          headers:
+            X-Experience-API-Version:
+              equals: 2.0.0
+            X-Experience-API-Consistent-Through:
+              iso8601: true
+          json:
+            pointers:
+              /statements:
+                contains:
+                  id: 00000000-0000-4000-8000-000000000413
+                  object:
+                    objectType: StatementRef
+                    id: 00000000-0000-4000-8000-000000000412
+          checks:
+            - kind: header-time
+              header: Last-Modified
+              max_pointer: /statements
+              optional_if_empty: true
+            - kind: json-order
+              pointer: /statements
+              by: stored
+              descending: true

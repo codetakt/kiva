@@ -1,0 +1,326 @@
+suite:
+  id: xapi-lrs-statement-context-validation-isolated
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Isolated Statement Context admission checks.
+cases:
+  - id: statement-context-accepts-valid-context-properties
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.2.5-context-activities
+      - xapi-lrs-4.2.2.5-context-agent-relations
+      - xapi-lrs-4.2.2.5-context-group-relations
+      - xapi-lrs-4.2.7-uuid-string
+      - xapi-lrs-4.2.7-extension-key-iri
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000951
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000951
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-valid
+        context:
+          registration: 00000000-0000-4000-8000-000000000952
+          revision: r1
+          platform: kiva-test
+          language: en-US
+          statement:
+            objectType: StatementRef
+            id: 00000000-0000-4000-8000-000000000953
+          contextActivities:
+            parent:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/context-parent
+            other:
+              - objectType: Activity
+                id: https://example.org/kiva/conformance/activity/context-other
+          contextAgents:
+            - objectType: contextAgent
+              agent:
+                objectType: Agent
+                mbox: mailto:kiva-conformance-context-agent@example.org
+              relevantTypes:
+                - https://example.org/kiva/conformance/relevant/coach
+          contextGroups:
+            - objectType: contextGroup
+              group:
+                objectType: Group
+                member:
+                  - objectType: Agent
+                    mbox: mailto:kiva-conformance-context-member@example.org
+          extensions:
+            https://example.org/kiva/conformance/extensions/context:
+              retained: true
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-registration
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.7-uuid-string
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-registration
+        context:
+          registration: not-a-uuid
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-context-activities-key
+    requirements:
+      - xapi-lrs-4.2.2.5-context-activities
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-activity-key
+        context:
+          contextActivities:
+            invalid:
+              objectType: Activity
+              id: https://example.org/kiva/conformance/activity/invalid-key
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-context-activities-value
+    requirements:
+      - xapi-lrs-4.2.2.5-context-activities
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-activity-value
+        context:
+          contextActivities:
+            parent:
+              - key: not-an-activity
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-revision-platform-language
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-language
+        context:
+          revision: r1
+          platform: kiva-test
+          language: a12345
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-statement-ref
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+      - xapi-lrs-4.2.7-uuid-string
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-statement-ref
+        context:
+          statement:
+            objectType: statementref
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-context-agent
+    requirements:
+      - xapi-lrs-4.2.2.5-context-agent-relations
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-agent
+        context:
+          contextAgents:
+            - objectType: contextAgent
+              agent:
+                objectType: Agent
+                mbox: mailto:kiva-conformance-context-agent@example.org
+              relevantTypes: []
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-context-rejects-invalid-context-group
+    requirements:
+      - xapi-lrs-4.2.2.5-context-group-relations
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/context-group
+        context:
+          contextGroups:
+            - objectType: bad
+              group:
+                objectType: Group
+                member:
+                  - objectType: Agent
+                    mbox: mailto:kiva-conformance-context-member@example.org
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: statement-substatement-context-rejects-invalid-language
+    requirements:
+      - xapi-lrs-4.2.2.5-context-properties
+    safety:
+      destructive: true
+      requires_isolated_lrs: true
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-context@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: SubStatement
+          actor:
+            objectType: Agent
+            mbox: mailto:kiva-conformance-substatement@example.org
+          verb:
+            id: https://adlnet.gov/expapi/verbs/experienced
+          object:
+            objectType: Activity
+            id: https://example.org/kiva/conformance/activity/substatement-context
+          context:
+            language: a12345
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true

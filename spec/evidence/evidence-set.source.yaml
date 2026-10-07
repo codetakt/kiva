@@ -1,0 +1,45 @@
+schema_version: 1
+kind: kiva-evidence-set-source
+status: active
+description: >
+  Source policy for the generated EvidenceSet materialized view. EvidenceSet
+  normalizes manifest-declared CI checks, claim boundaries, projection-derived
+  inputs, generated outputs, stable receipt ids, and ready public claims for
+  the primary AssuranceGraph review surface.
+source_model:
+  root_type: EvidenceSet
+  claim_boundary_source: spec/ci/evidence-checks.yaml#/required_groups
+  ci_check_source: spec/ci/evidence-checks.yaml#/groups
+  projection_graph_source: spec/ci/projection-graph.yaml
+  claim_readiness_source: generated/claim-readiness-matrix.yaml
+  rule: >
+    Conformance, PDS, confidential-computation, formal-verification, and release
+    evidence remain domain-specific packages. The generated EvidenceSet index is
+    a materialized AssuranceGraph input that binds those packages to CI checks
+    and public claims without making each package invent a separate readiness
+    model.
+assurance_meta_model:
+  root_type: AssurancePrimitive
+  primitive_flow:
+    - Claim
+    - Obligation
+    - Discharge
+    - Receipt
+  bindings:
+    claim: generated/claim-readiness-matrix.yaml
+    obligation: generated/verification/verification-obligations.yaml
+    discharge: spec/ci/evidence-checks.yaml
+    receipt: generated/evidence/evidence-receipts.yaml
+  rule: >
+    AssuranceGraph is the primary review surface over this flow. EvidenceSet,
+    EvidenceReceipt, ClaimGraph, and VerificationObligation are materialized
+    views that feed it and do not create independent public claims.
+generated_artifacts:
+  evidence_set: generated/evidence/evidence-set.yaml
+  markdown: docs/architecture/generated/evidence-set.md
+projection_policy:
+  required_group_policy: every required evidence-check group becomes one EvidenceSet group
+  check_policy: every manifest check becomes one EvidenceSet check row
+  claim_policy: ready claims are linked by matched_evidence_checks group/check id
+  input_policy: projection-graph derived inputs are carried as effective inputs
+  receipt_policy: every EvidenceSet check row declares a stable EvidenceReceipt id

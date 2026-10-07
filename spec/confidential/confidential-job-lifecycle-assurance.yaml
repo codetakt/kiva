@@ -1,0 +1,139 @@
+---
+schema_version: 1
+kind: confidential-job-lifecycle-assurance
+standard: Kiva Architecture
+status: published
+milestone: CC9
+profile_id: kiva-cc9-production-confidential-job-lifecycle-v1
+claim_boundary: >
+  Kiva implements a durable metadata-only confidential job lifecycle for the
+  selected CC8 bounded mechanisms. The lifecycle covers job identity,
+  owner/tenant binding, mechanism profile, participant set, policy binding,
+  retry counter, deadline, evidence references, strict transitions,
+  PostgreSQL transaction boundaries, and metadata-only audit export. It does
+  not by itself claim malicious-secure MPC, production PSI, vendor TEE quote
+  verification, production FHE, or external certification.
+job_model:
+  required_fields:
+    - tenant_id
+    - job_id
+    - owner_subject
+    - mechanism
+    - mechanism_profile
+    - workload_id
+    - participant_subjects
+    - policy_binding_id
+    - status
+    - retry_count
+    - max_retry_count
+    - deadline_at
+    - admission_quota_key
+    - evidence_refs
+    - created_at
+    - updated_at
+  status_enum:
+    - draft
+    - admitted
+    - running
+    - awaitingRelease
+    - released
+    - failed
+    - cancelled
+    - expired
+    - retired
+  mechanisms:
+    - additive-secure-aggregation
+    - differential-privacy-release
+    - shamir-vss-admission
+    - threshold-frost-signing
+    - psi-cohort-hash-token
+    - psi-oprf-dh-voprf
+    - tee-portable-attestation
+    - tee-aws-nitro-attestation
+    - fhe-sum-feasibility
+    - fhe-sum-runtime
+  metadata_only_forbidden_fields:
+    - rawInput
+    - rawInputs
+    - share
+    - signedEnvelope
+    - plaintext
+    - secret
+    - signature
+    - noise
+    - noiseValue
+api_contract:
+  openapi: spec/openapi/kiva-confidential.yaml
+  endpoints:
+    - path: /confidential/jobs
+      methods: [get, post]
+      idempotent_write: true
+      scopes:
+        get: ["confidential:read"]
+        post: ["confidential:write"]
+    - path: /confidential/job-transitions
+      methods: [post]
+      idempotent_write: true
+      conditional_release_scope:
+        target_status: released
+        scope: confidential:release
+      scopes:
+        post: ["confidential:write"]
+    - path: /confidential/job-audit-events
+      methods: [get]
+      metadata_only: true
+      scopes:
+        get: ["confidential:read"]
+persistence:
+  migration: db/migrations/20260619250000_confidential_job_lifecycle.sql
+  schema: db/schema.sql
+  atlas_sum: db/migrations/atlas.sum
+  tables:
+    - kiva.confidential_jobs
+    - kiva.confidential_job_audit_events
+  transaction_boundaries:
+    create_job_and_audit_event: single-postgresql-transaction
+    transition_job_and_audit_event: select-for-update-single-postgresql-transaction
+    idempotent_duplicate_create: primary-key-conflict-detection
+    idempotent_duplicate_transition: same-state-no-op
+scheduler:
+  admission_quota:
+    field: admission_quota_key
+    max_active_per_quota_key: 64
+    active_statuses: [admitted, running, awaitingRelease]
+  bounded_concurrency:
+    max_running_per_tenant: 16
+    enforced_on_transition_to: running
+  timeout_handling:
+    deadline_field: deadline_at
+    expired_status: expired
+    admission_after_deadline: rejected
+  backpressure:
+    signal: scheduler-capacity-exhausted
+    http_status: 409
+verification:
+  rust_tests:
+    - crates/kiva-confidential/src/lib.rs::confidential_job_lifecycle_allows_only_strict_transitions
+    - crates/kiva-confidential/src/lib.rs::confidential_job_admission_fails_closed
+    - crates/kiva-server/src/lib.rs::confidential_job_lifecycle_persists_metadata_and_audit_in_memory
+    - crates/kiva-server/src/lib.rs::confidential_job_admission_rejects_invalid_metadata_in_memory
+    - crates/kiva-server/src/lib.rs::confidential_job_transition_rejects_expired_deadline_in_memory
+    - crates/kiva-server/src/lib.rs::postgres_confidential_job_lifecycle_is_idempotent_and_audited
+  kani_harnesses:
+    - kani_harnesses::confidential_job_lifecycle_matches_strict_transition_table
+    - kani_harnesses::confidential_job_admission_gate_fails_closed
+  tamarin_models:
+    - proofs/tamarin/kiva_confidential_job_lifecycle_boundary.spthy
+  validators:
+    - scripts/ci/validate_confidential_job_lifecycle_assurance.py
+    - scripts/ci/validate_confidential_openapi.py
+  docs:
+    - docs/architecture/confidential-job-lifecycle.md
+    - docs/architecture/confidential-computation-milestones.md
+non_claims:
+  external_certification: false
+  production_mpc: false
+  malicious_secure_psi: false
+  vendor_tee_quote_verification: false
+  production_fhe: false
+  raw_payload_audit_export: false

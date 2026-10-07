@@ -1,0 +1,258 @@
+schema_version: 1
+kind: kiva-confidential-verified-kernel-ledger
+status: active
+description: >
+  Reviewable ledger for confidential-computation kernels that Kiva treats as
+  verification boundaries. This binds implementation anchors to Rust tests,
+  Kani harnesses, Tamarin lemmas, selected F* artifacts, and assurance registry
+  entries without claiming complete formal verification.
+source_registries:
+  assurance_evidence_registry: spec/confidential/assurance-evidence-registry.yaml
+  kani_runner: scripts/ci/run_kani_verification.sh
+  tamarin_runner: scripts/ci/run_tamarin_verification.sh
+  fstar_runner: scripts/ci/run_fstar_verification.sh
+kernel_boundary_model:
+  root_type: ConfidentialKernelBoundary
+  implementation_anchor: crates/kiva-confidential/src/mechanism/core/kernel.rs
+  pure_kernel_namespace: crates/kiva-confidential/src/mechanism/core
+  verification_namespace: crates/kiva-confidential/src/mechanism/verification
+  rule: >
+    Rows in this ledger name pure mechanism-kernel boundary properties. Runtime
+    providers, provider adapters, HTTP adapters, storage, and external
+    execution evidence remain outside the pure kernel namespace and are
+    admitted through provider or release gates.
+kernels:
+  - id: additive-share-admission-and-release
+    status: active
+    mechanism: additive-secure-aggregation
+    claim_boundary: authenticated share admission, replay gating, n-of-n aggregation, and two-authority release.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin, fstar]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/additive/combine.rs
+        anchors: [accept_authenticated_additive_share, validate_additive_share_verification_keys]
+      - file: crates/kiva-confidential/src/mechanism/core/lifecycle/threshold_release.rs
+        anchors: [record_threshold_release_approval, validate_threshold_release_completion]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/additive.rs
+        tests: [accepts_authenticated_share_envelope_when_slot_matches, rejects_replay_windowed_envelope_when_record_already_exists]
+      - file: crates/kiva-confidential/src/mechanism/core/tests/threshold_release.rs
+        tests: [threshold_release_requires_matching_computed_aggregate, threshold_release_duplicate_approval_is_idempotent]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/participants_and_additive.rs
+        harnesses: [additive_secure_aggregate_requires_all_participants, authenticated_share_acceptance_matches_commitment_slot, verification_key_validation_requires_one_registered_key_per_slot, replay_windowed_acceptance_requires_sequence_inside_window]
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/threshold_release.rs
+        harnesses: [threshold_release_requires_both_authority_approvals, threshold_release_completion_requires_actor_and_full_threshold]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_additive_share_transport_boundary.spthy
+        lemmas: [accepted_share_requires_signature_verification, accepted_share_requires_persisted_replay_record]
+      - file: proofs/tamarin/kiva_threshold_release_failure_boundary.spthy
+        lemmas: [release_requires_left_approval, release_requires_right_approval]
+    fstar_modules:
+      - file: fstar/Kiva.Confidential.TranscriptGate.fst
+        module: Kiva.Confidential.TranscriptGate
+        lemmas: [compute_requires_replay_records, compute_requires_authenticated_shares]
+      - file: fstar/Kiva.Confidential.ReleaseGate.fst
+        module: Kiva.Confidential.ReleaseGate
+        lemmas: [release_requires_computed, duplicate_left_approval_does_not_release_without_right]
+  - id: differential-privacy-budget-release
+    status: active
+    mechanism: differential-privacy-release
+    claim_boundary: budget monotonicity, composition summary, checked noise evidence, and release gate.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin, fstar]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/differential_privacy/budget.rs
+        anchors: [spend_differential_privacy_budget, summarize_differential_privacy_composition]
+      - file: crates/kiva-confidential/src/mechanism/differential_privacy/noise.rs
+        anchors: [apply_differential_privacy_integer_noise]
+      - file: crates/kiva-confidential/src/mechanism/differential_privacy/release.rs
+        anchors: [validate_differential_privacy_release]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/differential_privacy.rs
+        tests: [differential_privacy_budget_spend_is_monotonic, differential_privacy_release_requires_applied_noise, differential_privacy_noise_application_rejects_overflow]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/differential_privacy.rs
+        harnesses: [differential_privacy_budget_spend_fails_closed_and_is_monotonic, differential_privacy_composition_summary_fails_closed, differential_privacy_noise_application_matches_checked_arithmetic, differential_privacy_release_gate_fails_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_differential_privacy_budget_boundary.spthy
+        lemmas: [budget_spend_requires_registered_budget, budget_spend_requires_owner, release_requires_budget_spend, release_requires_noise]
+    fstar_modules:
+      - file: fstar/Kiva.Confidential.PrivacyBudget.fst
+        module: Kiva.Confidential.PrivacyBudget
+        lemmas: [spend_is_monotonic, spend_stays_within_total]
+      - file: fstar/Kiva.Confidential.PrivacyNoise.fst
+        module: Kiva.Confidential.PrivacyNoise
+        lemmas: [valid_noise_requires_applied, valid_noise_binds_released_value]
+      - file: fstar/Kiva.Confidential.PrivacyGate.fst
+        module: Kiva.Confidential.PrivacyGate
+        lemmas: [release_requires_noise, no_release_without_noise]
+  - id: shamir-vss-reconstruction
+    status: active
+    mechanism: shamir-vss-admission
+    claim_boundary: verified share openings, threshold uniqueness, and reconstruction admission.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin, fstar]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/shamir.rs
+        anchors: [verify_shamir_share_openings, reconstruct_verified_shamir_secret, reconstruct_shamir_secret, resolve_shamir_share_complaint]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/shamir.rs
+        tests: [shamir_reconstruction_rejects_insufficient_or_duplicate_shares, verified_shamir_reconstruction_rejects_tampered_share_opening]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/shamir.rs
+        harnesses: [shamir_reconstruction_rejects_insufficient_or_duplicate_shares, shamir_share_complaint_resolution_fails_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_shamir_threshold_boundary.spthy
+        lemmas: [reconstruction_requires_distinct_threshold_share_set, reconstruction_requires_verified_left_opening, reconstruction_requires_verified_right_opening, duplicate_share_rejection_is_not_accepted]
+    fstar_modules:
+      - file: fstar/Kiva.Confidential.ShamirGate.fst
+        module: Kiva.Confidential.ShamirGate
+        lemmas: [reconstruction_requires_unique_participant_indexes, reconstruction_requires_verified_share_openings, no_reconstruction_with_duplicate_participant_indexes]
+  - id: psi-cohort-and-oprf-release
+    status: active
+    mechanism: private-set-intersection
+    claim_boundary: bounded hash-token PSI plus review-gated OPRF PSI transcript and release gates.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin]
+    assurance_registry_entries: [production-psi-upgrade]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/psi/cohort.rs
+        anchors: [compute_psi_cohort_intersection]
+      - file: crates/kiva-confidential/src/mechanism/core/psi/oprf/intersection.rs
+        anchors: [compute_psi_oprf_intersection]
+      - file: crates/kiva-confidential/src/mechanism/core/psi/release.rs
+        anchors: [validate_psi_oprf_release]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/psi.rs
+        tests: [psi_cohort_intersection_exposes_only_matches, psi_oprf_intersection_exposes_only_matches_and_records_transcript, psi_oprf_rejects_abort_duplicate_replay_and_review_pending_release]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/psi.rs
+        harnesses: [psi_cohort_intersection_exposes_only_common_digests, psi_oprf_intersection_exposes_only_common_elements, psi_oprf_release_gate_fails_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_psi_cohort_boundary.spthy
+        lemmas: [release_requires_prior_intersection, left_non_match_is_not_released, right_non_match_is_not_released]
+      - file: proofs/tamarin/kiva_psi_oprf_boundary.spthy
+        lemmas: [release_requires_reviewed_runtime, accepted_transcript_has_replay_record, aborted_transcript_is_not_released, raw_identifier_is_never_published]
+  - id: tee-attestation-gates
+    status: active
+    mechanism: tee-attestation
+    claim_boundary: portable evidence gate and review-gated Nitro adapter boundary.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin]
+    assurance_registry_entries: [tee-attestation, tee-nitro-attestation]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs
+        anchors: [validate_tee_attestation_gate_context, validate_tee_secret_provisioning, validate_tee_result_release]
+      - file: crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs
+        anchors: [validate_tee_aws_nitro_attestation_gate_context]
+      - file: crates/kiva-confidential/src/mechanism/core/tee/nitro/release.rs
+        anchors: [validate_tee_aws_nitro_key_release, validate_tee_aws_nitro_result_release]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/tee.rs
+        tests: [tee_attestation_rejects_policy_stale_rollback_replay_and_digest_mismatch, tee_aws_nitro_attestation_rejects_review_rollback_replay_and_digest_mismatch, tee_aws_nitro_key_and_result_release_gates_fail_closed]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/tee.rs
+        harnesses: [tee_attestation_gate_fails_closed_for_policy_freshness_and_replay, tee_secret_and_result_release_gates_fail_closed, tee_aws_nitro_attestation_gate_fails_closed, tee_aws_nitro_key_and_result_release_gates_fail_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_tee_attestation_boundary.spthy
+        lemmas: [secret_provisioning_requires_accepted_attestation, result_release_requires_secret_provisioning, replay_rejection_is_not_released]
+      - file: proofs/tamarin/kiva_tee_nitro_boundary.spthy
+        lemmas: [accepted_nitro_attestation_requires_external_review, accepted_nitro_attestation_requires_replay_record, rejected_replay_nitro_document_is_not_released]
+  - id: threshold-frost-runtime
+    status: active
+    mechanism: threshold-frost-signing
+    claim_boundary: review-gated key-ceremony, signing transcript, replay, and release gates.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin]
+    assurance_registry_entries: [threshold-frost]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/admission.rs
+        anchors: [accept_threshold_frost_key_ceremony, derive_threshold_frost_key_ceremony_digest]
+      - file: crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/gate.rs
+        anchors: [validate_threshold_frost_key_ceremony_gate_context]
+      - file: crates/kiva-confidential/src/mechanism/core/frost/release.rs
+        anchors: [validate_threshold_frost_release]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/frost.rs
+        tests: [threshold_frost_key_ceremony_rejects_unreviewed_or_invalid_metadata, threshold_frost_signature_transcript_enforces_threshold_digest_and_replay, threshold_frost_release_gate_fails_closed]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/frost.rs
+        harnesses: [threshold_frost_key_ceremony_gate_fails_closed, threshold_frost_release_gate_fails_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_threshold_frost_boundary.spthy
+        lemmas: [accepted_key_ceremony_requires_reviewed_runtime, accepted_signature_requires_key_ceremony, release_requires_accepted_signature, replay_rejection_does_not_release]
+  - id: fhe-feasibility-and-runtime
+    status: active
+    mechanism: fhe
+    claim_boundary: deterministic FHE feasibility fixture plus review-gated external FHE runtime boundary.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin]
+    assurance_registry_entries: [fhe-feasibility, fhe-runtime]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/parameters.rs
+        anchors: [validate_fhe_feasibility_parameters]
+      - file: crates/kiva-confidential/src/mechanism/core/fhe/feasibility/release.rs
+        anchors: [validate_fhe_feasibility_release]
+      - file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs
+        anchors: [validate_fhe_runtime_ciphertext_transcript_gate_context]
+      - file: crates/kiva-confidential/src/mechanism/core/fhe/runtime/release.rs
+        anchors: [validate_fhe_runtime_release]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/fhe.rs
+        tests: [fhe_feasibility_release_gate_fails_closed, fhe_runtime_rejects_unreviewed_invalid_and_replayed_ciphertexts, fhe_runtime_ciphertext_transcript_gate_fails_closed]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/fhe.rs
+        harnesses: [fhe_feasibility_parameter_profile_is_strict, fhe_feasibility_release_gate_fails_closed, fhe_runtime_ciphertext_transcript_gate_fails_closed, fhe_runtime_release_gate_fails_closed]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_fhe_feasibility_boundary.spthy
+        lemmas: [evaluation_requires_left_and_right_ciphertexts, release_requires_prior_evaluation, plaintext_is_not_publicly_released]
+      - file: proofs/tamarin/kiva_fhe_runtime_boundary.spthy
+        lemmas: [accepted_ciphertext_transcript_requires_reviewed_runtime, release_requires_prior_evaluation, decryption_key_is_not_persisted_by_kiva]
+  - id: confidential-job-participant-lifecycle
+    status: active
+    mechanism: confidential-job-lifecycle
+    claim_boundary: strict job and participant lifecycle transition/admission gates.
+    required_evidence_kinds: [implementation, rust-test, kani, tamarin]
+    assurance_registry_entries: [confidential-job-lifecycle, confidential-key-participant-lifecycle]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/job.rs
+        anchors: [confidential_job_transition_is_allowed, transition_confidential_job_status, validate_confidential_job_admission]
+      - file: crates/kiva-confidential/src/mechanism/core/lifecycle/participant.rs
+        anchors: [confidential_participant_transition_is_allowed, transition_confidential_participant_status]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/lifecycle.rs
+        tests: [confidential_job_lifecycle_allows_only_strict_transitions, confidential_participant_lifecycle_is_strict_and_fail_closed, confidential_job_admission_fails_closed]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/jobs.rs
+        harnesses: [confidential_job_lifecycle_matches_strict_transition_table, confidential_job_admission_gate_fails_closed]
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/participants_and_additive.rs
+        harnesses: [confidential_participant_lifecycle_matches_strict_transition_table, confidential_participant_admission_is_active_only]
+    tamarin_lemmas:
+      - file: proofs/tamarin/kiva_confidential_job_lifecycle_boundary.spthy
+        lemmas: [released_requires_awaiting_release, transition_has_audit_event, released_job_never_runs_again]
+      - file: proofs/tamarin/kiva_confidential_participant_lifecycle_boundary.spthy
+        lemmas: [admitted_participant_was_active, removed_participant_has_audit_event]
+  - id: provider-runtime-boundary
+    status: active
+    mechanism: secret-compute-provider-contract
+    claim_boundary: provider capability, review evidence, production claim, and control/data-plane runtime boundary.
+    required_evidence_kinds: [implementation, rust-test, kani, assurance-registry]
+    assurance_registry_entries: [secret-compute-provider-contract]
+    implementation_anchors:
+      - file: crates/kiva-confidential/src/mechanism/provider/binding.rs
+        anchors: [validate_secret_compute_provider_binding, secret_compute_provider_kind_requires_parameter_set]
+      - file: crates/kiva-confidential/src/mechanism/provider/admission.rs
+        anchors: [validate_secret_compute_provider_for_mechanism, admit_secret_compute_provider]
+      - file: crates/kiva-confidential/src/mechanism/provider/runtime.rs
+        anchors: [admit_secret_compute_provider_runtime_boundary, admit_reference_primitive_runtime_boundary, admit_reviewed_production_runtime_boundary]
+    rust_tests:
+      - file: crates/kiva-confidential/src/mechanism/core/tests/provider.rs
+        tests: [reference_primitive_provider_is_admitted_only_for_non_production_fixtures, external_provider_requires_review_evidence_for_production_claims, provider_capability_must_match_mechanism_family]
+    kani_harnesses:
+      - target: crates/kiva-confidential
+        file: crates/kiva-confidential/src/mechanism/verification/kani_harnesses/provider_and_plan.rs
+        harnesses: [reference_provider_rejects_production_claims, provider_capability_mismatch_fails_closed]

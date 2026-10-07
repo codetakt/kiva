@@ -1,0 +1,91 @@
+suite:
+  id: xapi-lrs-version-negotiation
+  standard: IEEE/ISO/IEC 39274-1-1-2025
+  description: Low-side-effect checks for xAPI version negotiation outside About.
+cases:
+  - id: statements-get-accepts-version-2-0-alias
+    requirements:
+      - xapi-lrs-4.1.7-version-2-0-alias
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        limit: '1'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: '2.0'
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        Content-Type:
+          contains: application/json
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      checks:
+        - kind: json-shape
+          shape:
+            type: object
+            required: [statements]
+            properties:
+              statements: {type: array, items: {type: object}}
+  - id: statements-get-rejects-version-before-2
+    requirements:
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-reject-before-2
+      - xapi-lrs-4.1.7-version-reject-400
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        limit: '1'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 1.0.3
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          present: true
+      status_in:
+        - 200
+      checks:
+        - kind: status-body
+          status: 400
+          non_empty: true
+  - id: statements-get-rejects-version-2-1-or-greater
+    requirements:
+      - xapi-lrs-4.1.7-version-header-every-response
+      - xapi-lrs-4.1.7-version-header-latest-patch
+      - xapi-lrs-4.1.7-version-reject-2-1-or-greater
+      - xapi-lrs-4.1.7-version-reject-400
+    safety:
+      destructive: false
+      requires_isolated_lrs: false
+    request:
+      method: GET
+      path: /statements
+      query:
+        limit: '1'
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.1.0
+    expect:
+      status: 400
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      body:
+        non_empty: true

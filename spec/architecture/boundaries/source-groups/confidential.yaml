@@ -1,0 +1,308 @@
+description: >
+  Source-group boundary anchors split by architectural area.
+
+source_groups:
+  - id: confidential-endpoint-entry-boundary
+    description: Confidential handlers share endpoint entry helpers for rate-limit, OAuth/OIDC scope authorization, and JSON parsing.
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/handlers.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/additive.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/handlers/threshold.rs
+    required_text:
+      - "authorize_confidential_endpoint("
+      - "enforce_confidential_endpoint_rate_limit("
+      - "parse_confidential_json_request::<"
+      - "authorize_confidential_read_endpoint("
+      - "authorize_confidential_write_endpoint("
+      - "authorize_confidential_compute_endpoint("
+      - "authorize_confidential_release_endpoint("
+  - id: confidential-state-resource-families
+    description: Confidential-computation server-local state is split by resource family behind the state module owner.
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/model/state.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/additive.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/keys.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/model/state/threshold.rs
+    required_text:
+      - "mod additive;"
+      - "mod differential_privacy;"
+      - "mod jobs;"
+      - "mod keys;"
+      - "mod participants;"
+      - "mod shamir;"
+      - "mod threshold;"
+      - "pub(crate) struct ConfidentialAdditiveAggregateResult"
+      - "pub(crate) struct ConfidentialDifferentialPrivacyBudgetState"
+      - "pub(crate) struct ConfidentialDifferentialPrivacyReleaseState"
+      - "pub(crate) struct ConfidentialJobState"
+      - "pub(crate) struct ConfidentialParticipantState"
+      - "pub(crate) struct ConfidentialShareSigningKey"
+      - "pub(crate) struct ConfidentialShamirThresholdReconstructionState"
+      - "pub(crate) struct ConfidentialThresholdReleaseState"
+  - id: confidential-mechanism-registry
+    description: Confidential mechanisms expose a single descriptor registry for technique, provider capability, and review-gate metadata.
+    paths:
+      - crates/kiva-secret-provider-contract/src/lib.rs
+      - crates/kiva-secret-provider-contract/src/kind_registry.rs
+      - crates/kiva-confidential/src/mechanism/mod.rs
+      - crates/kiva-confidential/src/mechanism/registry.rs
+      - crates/kiva-confidential/src/mechanism/provider.rs
+      - crates/kiva-confidential/src/mechanism/provider/binding.rs
+      - crates/kiva-confidential/src/mechanism/provider/contract.rs
+      - crates/kiva-confidential/src/mechanism/provider/pipeline.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/mechanisms.rs
+      - spec/confidential/mechanism-catalog.source.yaml
+      - spec/confidential/mechanism-catalog.yaml
+      - spec/confidential/mechanism-maturity.yaml
+      - spec/confidential/secret-compute-provider-contract.yaml
+      - scripts/ci/confidential_mechanism_catalog_model.py
+      - scripts/ci/confidential_mechanism_registry_codegen.py
+      - scripts/ci/generate_confidential_mechanism_catalog.py
+    required_text:
+      - "pub mod registry;"
+      - "pub struct ConfidentialMechanismDescriptor"
+      - "const fn from_parts"
+      - "pub struct SecretComputeProviderContract"
+      - "pub struct ReferencePrimitiveProvider"
+      - "pub struct SecretCustodyProvider"
+      - "pub struct ComputeMechanismProvider"
+      - "pub enum ReferenceProviderKind"
+      - "pub enum SecretCustodyProviderKind"
+      - "pub enum ComputeMechanismProviderKind"
+      - "pub trait SecretComputeProviderKindContract"
+      - "pub const SECRET_COMPUTE_PROVIDER_KIND_REGISTRY"
+      - "pub trait SecretComputeProviderCapabilityProfile"
+      - "pub trait SecretComputeProviderContractProfile"
+      - "pub struct SecretComputeProviderContractPipeline"
+      - "impl SecretComputeProviderCapabilityProfile for ConfidentialMechanismDescriptor"
+      - "impl SecretComputeProviderCapabilityProfile for SecretComputeProviderContractPipeline"
+      - "pub const CONFIDENTIAL_MECHANISM_REGISTRY"
+      - "pub const fn descriptor_for_mechanism"
+      - "secret_compute_required_capability_for_mechanism("
+      - "pub enum ConfidentialMechanismKind"
+      - "kind: kiva-confidential-mechanism-catalog-source"
+      - "kind: kiva-confidential-mechanism-catalog"
+      - "provider_algebra:"
+      - "kind_contract_trait: SecretComputeProviderKindContract"
+      - "provider_boundary_type:"
+      - "provider_kind_field: provider_kind"
+      - "provider_kind:"
+      - "capability_map_projection:"
+      - "reference_capability_map_projection:"
+      - "fixture-coverage-map-only"
+      - "maturity_mechanism:"
+      - "DEFAULT_REGISTRY_OUTPUT"
+      - "mechanism_catalog_document"
+      - "render_registry"
+  - id: confidential-core-review-units
+    description: Large confidential core mechanisms are split into explicit review units.
+    paths:
+      - crates/kiva-confidential/src/mechanism/core/additive.rs
+      - crates/kiva-confidential/src/mechanism/core/additive/combine.rs
+      - crates/kiva-confidential/src/mechanism/core/additive/envelope.rs
+      - crates/kiva-confidential/src/mechanism/core/additive/plan.rs
+      - crates/kiva-confidential/src/mechanism/core/additive/replay.rs
+      - crates/kiva-confidential/src/mechanism/core/lifecycle.rs
+      - crates/kiva-confidential/src/mechanism/core/lifecycle/key.rs
+      - crates/kiva-confidential/src/mechanism/core/lifecycle/participant.rs
+      - crates/kiva-confidential/src/mechanism/core/lifecycle/plan.rs
+      - crates/kiva-confidential/src/mechanism/core/lifecycle/threshold_release.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/feasibility.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/parameters.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/fixture.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/feasibility/release.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/runtime.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/runtime/profile.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/runtime/ciphertext.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/runtime/evaluation.rs
+      - crates/kiva-confidential/src/mechanism/core/fhe/runtime/release.rs
+      - crates/kiva-confidential/src/mechanism/core/tee.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/portable.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/portable/claims.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/portable/evidence.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/portable/gate.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/portable/policy.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/nitro.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/nitro/profile.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/nitro/claims.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/nitro/gate.rs
+      - crates/kiva-confidential/src/mechanism/core/tee/nitro/release.rs
+      - crates/kiva-confidential/src/mechanism/core/frost.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/profile.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/key_ceremony.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/admission.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/gate.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/record.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/key_ceremony/transcript.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/signature.rs
+      - crates/kiva-confidential/src/mechanism/core/frost/release.rs
+      - crates/kiva-confidential/src/mechanism/core/psi.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/cohort.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/digest.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/oprf.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/oprf/element.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/oprf/intersection.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/oprf/profile.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/oprf/transcript.rs
+      - crates/kiva-confidential/src/mechanism/core/psi/release.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/additive.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/compat.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/additive.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/fhe.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/frost.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/provider.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/psi.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/shamir.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/errors/tee.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/fhe.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/frost.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/mechanisms.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/provider.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/psi.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/shamir.rs
+      - crates/kiva-confidential/src/mechanism/core/profiles/tee.rs
+    required_text:
+      - "mod combine;"
+      - "mod envelope;"
+      - "mod replay;"
+      - "mod key;"
+      - "mod participant;"
+      - "mod threshold_release;"
+      - "mod mechanisms;"
+      - "pub type SecureAggregateError"
+      - "pub enum SecureAggregateCompatibilityError"
+      - "pub enum AdditiveSecureAggregateError"
+      - "pub enum PsiBoundaryError"
+      - "pub enum TeeBoundaryError"
+      - "pub enum FheBoundaryError"
+      - "pub enum FrostBoundaryError"
+      - "pub enum ShamirBoundaryError"
+      - "pub enum SecretComputeProviderBoundaryError"
+      - "pub const FHE_RUNTIME_PROFILE"
+      - "pub const TEE_AWS_NITRO_ATTESTATION_PROFILE"
+      - "mod claims;"
+      - "mod evidence;"
+      - "mod gate;"
+      - "mod policy;"
+  - id: confidential-provider-admission
+    description: Provider capability, evidence, runtime binding, and release gates are normalized in the provider boundary.
+    paths:
+      - crates/kiva-secret-provider-contract/src/lib.rs
+      - crates/kiva-confidential/src/mechanism/provider.rs
+      - crates/kiva-confidential/src/mechanism/provider/admission.rs
+      - crates/kiva-confidential/src/mechanism/provider/binding.rs
+      - crates/kiva-confidential/src/mechanism/provider/contract.rs
+      - crates/kiva-confidential/src/mechanism/provider/digest.rs
+      - crates/kiva-confidential/src/mechanism/provider/pipeline.rs
+      - crates/kiva-confidential/src/mechanism/provider/runtime.rs
+      - crates/kiva-confidential-core/src/lib.rs
+      - crates/kiva-confidential/Cargo.toml
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-confidential/src/mechanism/core/tests/provider.rs
+      - spec/confidential/secret-compute-provider-contract.yaml
+      - docs/architecture/secret-compute-provider-integration.md
+    required_text:
+      - "pub struct SecretComputeProviderContract"
+      - "pub trait SecretComputeProviderCapabilityProfile"
+      - "pub trait SecretComputeProviderContractProfile"
+      - "pub struct SecretComputeProviderContractPipeline"
+      - "pub struct SecretComputeProviderPipelineAdmission"
+      - "impl SecretComputeProviderCapabilityProfile for ConfidentialMechanismDescriptor"
+      - "impl SecretComputeProviderContractProfile for SecretComputeProviderContractPipeline"
+      - "pub struct SecretComputeProviderAdmission"
+      - "pub fn admit("
+      - "pub fn admit_secret_compute_provider("
+      - "pub enum SecretComputeProviderRuntimeClass"
+      - "pub struct SecretComputeProviderRuntimeContract"
+      - "pub enum ConfidentialBoundaryPlane"
+      - "pub type ControlPlaneEvidence<T>"
+      - "pub type ExternalDataPlaneBoundary<T>"
+      - "ControlPlaneEvidence<SecretComputeProviderAdmission>"
+      - "ExternalDataPlaneBoundary<SecretComputeProviderRuntimeClass>"
+      - "admit_runtime_boundary"
+      - "runtime_contract"
+      - "kiva-control-plane"
+      - "external-data-plane"
+      - "pub fn admit_reference_primitive_runtime_boundary"
+      - "pub fn admit_reviewed_production_runtime_boundary"
+      - "SecretComputeProviderParameterSetRequired"
+      - "admission_model:"
+      - "SecretComputeProviderAdmission"
+  - id: confidential-root-api-is-thin
+    description: The confidential crate root exposes only mechanism and primitive namespaces; mechanisms are accessed through explicit facades.
+    paths:
+      - crates/kiva-confidential/src/lib.rs
+      - crates/kiva-confidential/src/mechanism/mod.rs
+      - crates/kiva-server/src/surfaces/confidential/model.rs
+      - crates/kiva-server/src/surfaces/confidential/storage.rs
+    required_text:
+      - "pub mod mechanism;"
+      - "pub mod primitive;"
+      - "pub(crate) use mechanism::additive::SecureAggregateError;"
+      - "pub mod additive;"
+      - "pub(crate) mod core;"
+      - "mechanism::{"
+      - "primitive::{"
+      - "differential_privacy::{"
+      - "job::{"
+      - "workflow::{"
+  - id: confidential-http-projection-review-units
+    description: Confidential wire and error response projection bodies are split by resource family behind small module owners.
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/wire.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/additive.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/wire/threshold.rs
+      - crates/kiva-server/src/surfaces/confidential/response.rs
+      - crates/kiva-server/src/surfaces/confidential/response/common.rs
+      - crates/kiva-server/src/surfaces/confidential/response/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/response/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/response/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/response/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/response/threshold.rs
+    required_text:
+      - "mod additive;"
+      - "mod common;"
+      - "pub(crate) use additive::{"
+      - "pub(crate) use differential_privacy::{"
+      - "pub(crate) fn aggregate_response("
+      - "pub(crate) fn confidential_store_error_response("
+  - id: confidential-storage-review-units
+    description: Confidential storage is owned by memory/PostgreSQL directory owners.
+    paths:
+      - crates/kiva-server/src/surfaces/confidential/storage.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/additive.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/memory/threshold.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/additive.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/commands.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/differential_privacy_api.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/jobs.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/lifecycle.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/participants.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/queries.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/release_artifacts.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/shamir.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/shares_threshold.rs
+      - crates/kiva-server/src/surfaces/confidential/storage/postgres/threshold.rs

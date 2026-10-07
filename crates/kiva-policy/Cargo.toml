@@ -1,0 +1,20 @@
+[package]
+name = "kiva-policy"
+description = "Pure policy decision types for Kiva."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish.workspace = true
+
+[dependencies]
+kiva-identity = { path = "../kiva-identity", version = "0.0.0" }
+kiva-release-artifacts = { path = "../kiva-release-artifacts", version = "0.0.0" }
+serde.workspace = true
+
+[lints]
+workspace = true

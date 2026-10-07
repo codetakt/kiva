@@ -1,0 +1,151 @@
+schema_version: 1
+kind: kiva-surface-implementation-policy
+status: active
+description: >
+  Implementation-facing projection policy for route coverage, application
+  operations, PDS resource-family checks, and cross-surface families.
+route_coverage_projection:
+  description: >
+    Route coverage projection generated from the surface catalog.
+    It verifies that every OpenAPI operation has a matching Axum route
+    registration and records whether the path is bound by literal route text or
+    a shared path constant.
+  targets:
+    - openapi_contract: spec/openapi/kiva-analytics.yaml
+      route_file: crates/kiva-server/src/surfaces/analytics/routes.rs
+      path_binding: path-constant
+      path_constants_file: crates/kiva-server/src/core/paths.rs
+    - openapi_contract: spec/openapi/kiva-xapi.yaml
+      route_file: crates/kiva-server/src/surfaces/xapi/routes.rs
+      path_binding: literal
+    - openapi_contract: spec/openapi/kiva-pds.yaml
+      route_file: crates/kiva-server/src/surfaces/pds/routes.rs
+      path_binding: path-constant
+      path_constants_file: crates/kiva-server/src/core/paths.rs
+    - openapi_contract: spec/openapi/kiva-confidential.yaml
+      route_file: crates/kiva-server/src/surfaces/confidential/routes.rs
+      path_binding: path-constant
+      path_constants_file: crates/kiva-server/src/core/paths.rs
+application_operation_projection:
+  description: >
+    Drift-checked catalog linking application workflow labels, Rust workflow
+    variants, OpenAPI operationIds, OAuth/OIDC resource-server scopes, and the
+    generated Rust operation evidence projection.
+  rust_registry_path: crates/kiva-application/src/operation_catalog/generated/registry.rs
+  rust_operation_ids_path: crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+  rust_workflow_metadata_path: crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+  source_paths:
+    - crates/kiva-application/src/analytics.rs
+    - crates/kiva-application/src/operation_catalog.rs
+    - crates/kiva-application/src/operation_catalog/generated/operation_ids.rs
+    - crates/kiva-application/src/operation_catalog/generated/registry.rs
+    - crates/kiva-application/src/operation_catalog/generated/workflow_metadata.rs
+    - crates/kiva-application/src/pds/workflow.rs
+    - crates/kiva-application/src/pds/workflow/commands/consent.rs
+    - crates/kiva-application/src/pds/workflow/commands/data_products.rs
+    - crates/kiva-application/src/pds/workflow/commands/governance.rs
+    - crates/kiva-application/src/pds/workflow/commands/lifecycle.rs
+    - crates/kiva-application/src/confidential/workflow_kind.rs
+    - crates/kiva-application/src/confidential/additive.rs
+    - crates/kiva-application/src/confidential/differential_privacy.rs
+    - crates/kiva-application/src/confidential/jobs.rs
+    - crates/kiva-application/src/confidential/participants.rs
+    - crates/kiva-application/src/confidential/shamir.rs
+    - crates/kiva-application/src/confidential/threshold.rs
+pds_resource_family_projection:
+  description: >
+    Reviewable ownership ledger for PDS resource families. Each operation keeps
+    the human-owned family and route-context decision here; OpenAPI operationId,
+    request/response schemas, Rust path constants, and handlers are derived by
+    the validator.
+  resource_family_profile_model:
+    root_type: PdsResourceFamilyProfile
+    generated_ledger: generated/architecture/pds-resource-families.yaml
+    source_family_ledger: spec/architecture/pds-resource-families.source.yaml
+    source_policy: spec/architecture/surface-implementation.policy.yaml#/pds_resource_family_projection
+    required_roles:
+      - handler
+      - repository
+      - memory_storage
+      - postgres_storage
+      - wire_projection
+      - openapi_projection
+    rule: >
+      Each PDS resource family is reviewed as one profile containing operation
+      ownership, route context, implementation files, and the standard server
+      role matrix.
+  source_contract: spec/openapi/kiva-pds.yaml
+  http_operation_catalog: generated/http-operation-catalog.evidence.json
+  operation_catalog: generated/architecture/operation-catalog.yaml
+  route_file: crates/kiva-server/src/surfaces/pds/routes.rs
+  path_constants_file: crates/kiva-server/src/core/paths.rs
+  derived_fields:
+    - operation_id
+    - path_constant
+    - handler
+    - request_schemas
+    - response_schemas
+  application_operation_catalog_policy:
+    source_of_truth: surface-catalog-for-pds-operation-lifecycle
+    http_operation_catalog_source: generated-http-operation-catalog-from-openapi
+    pds_operation_lifecycle_coverage: operation-catalog
+    catalog_required_route_contexts:
+      - pds
+      - pds-application
+    catalog_required_methods:
+      - get
+      - post
+    operation_catalog_owns:
+      - workflow_label
+      - rust_workflow_kind
+      - operation_id
+      - required_scopes
+    resource_family_ledger_owns:
+      - resource_family
+      - route_context
+      - implementation_files
+  server_resource_family_boilerplate_policy:
+    family_role_matrix:
+      consent: &pds_family_roles
+        - handler
+        - repository
+        - memory_storage
+        - postgres_storage
+        - wire_projection
+        - openapi_projection
+      data-products: *pds_family_roles
+      provider-bindings: *pds_family_roles
+      inventory-export: *pds_family_roles
+      access: *pds_family_roles
+      lifecycle: *pds_family_roles
+      governance: *pds_family_roles
+    role_prefixes:
+      handler: crates/kiva-server/src/surfaces/pds/handlers/
+      repository: crates/kiva-server/src/surfaces/pds/repository/
+      memory_storage: crates/kiva-server/src/surfaces/pds/storage/memory/
+      postgres_storage: crates/kiva-server/src/surfaces/pds/storage/postgres/
+      wire_projection: crates/kiva-server/src/surfaces/pds/wire/
+      openapi_projection: crates/kiva-server/src/surfaces/pds/wire/openapi/
+surface_family_projection:
+  description: >
+    Cross-surface review ledger for public HTTP resource families. It projects
+    xAPI, PDS, and confidential-computation operations from the canonical
+    SurfaceOperation catalog into exactly one family owner per route.
+  source_contracts:
+    - spec/openapi/kiva-analytics.yaml
+    - spec/openapi/kiva-xapi.yaml
+    - spec/openapi/kiva-pds.yaml
+    - spec/openapi/kiva-confidential.yaml
+  source_family_ledger: spec/architecture/surface-families.source.yaml
+  pds_family_source: spec/architecture/pds-resource-families.source.yaml
+  assignment_policy:
+    route_ownership: exactly-one-surface-family
+    pds_assignment: source_pds_resource_family-must-match-pds_resource_family
+    prefix_assignment: longest-path-prefix-wins
+    empty_family_policy: reject-empty-family
+  derived_fields:
+    - operation_id
+    - required_scopes
+    - application_operation_id
+    - pds_resource_family
+    - pds_route_context

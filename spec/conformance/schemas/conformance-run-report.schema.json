@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kiva:conformance:run-report:1",
+  "title": "Kiva xAPI LRS conformance aid run report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "standard",
+    "mode",
+    "status",
+    "totals",
+    "suites"
+  ],
+  "properties": {
+    "schema_version": {
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "standard": {
+      "const": "IEEE/ISO/IEC 39274-1-1-2025"
+    },
+    "mode": {
+      "enum": [
+        "validate-only",
+        "execute-http"
+      ]
+    },
+    "status": {
+      "enum": [
+        "validated",
+        "passed",
+        "failed",
+        "incomplete"
+      ]
+    },
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "suites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/suite"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "passed",
+        "failed",
+        "validated"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_run": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "cases"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "path": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/case"
+          }
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "requirements",
+        "safety",
+        "outcome",
+        "failures"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "safety": {
+          "$ref": "#/$defs/safety"
+        },
+        "outcome": {
+          "enum": [
+            "validated",
+            "passed",
+            "failed",
+            "not-run"
+          ]
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "not_run_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diagnostic_statuses": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destructive",
+        "requires_isolated_lrs"
+      ],
+      "properties": {
+        "destructive": {
+          "type": "boolean"
+        },
+        "requires_isolated_lrs": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": 2
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "required": [
+              "not_run"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

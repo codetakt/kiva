@@ -1,0 +1,40 @@
+---
+schema_version: 1
+description: >
+  Deterministic boundary vectors for Kiva's CC11 review-gated DH-OPRF PSI
+  profile. These fixtures check Kiva transcript handling and do not implement
+  production OPRF blinding, evaluation, or finalization.
+vectors:
+  - profile: kiva-psi-oprf-dh-voprf-review-gated-v1
+    element_domain: kiva-confidential:psi-oprf-dh-voprf-element:v1
+    transcript_domain: kiva-confidential:psi-oprf-dh-voprf-transcript:v1
+    suite: ristretto255-sha512-voprf
+    namespace: district-2026
+    job_seed: 84
+    runtime_artifact_seed: 91
+    review_evidence_seed: 92
+    external_review_completed: true
+    participant_count: 2
+    participants:
+      - participant_index: 1
+        identifiers:
+          - shared@example.edu
+          - cohort-a@example.edu
+          - a-only@example.edu
+        element_hex:
+          - 7831b876bce70db93b0389e77dfbc4f5ce4e6ae5def9bb5e53c988dc9d5b42f6
+          - 7800e29576225ebef0cc0dcf7373c2b8a40f1beefd3d8686f56d6499412ce9fd
+          - 066e4ff43e0d7af11d2b274a323a00e43690829dd46777075e6c0d914dfa604c
+      - participant_index: 2
+        identifiers:
+          - shared@example.edu
+          - cohort-a@example.edu
+          - b-only@example.edu
+        element_hex:
+          - 7831b876bce70db93b0389e77dfbc4f5ce4e6ae5def9bb5e53c988dc9d5b42f6
+          - 7800e29576225ebef0cc0dcf7373c2b8a40f1beefd3d8686f56d6499412ce9fd
+          - fa5d2f23bd76ac2e41a675685429704038a5cd5cfed6c5b7ccb2c597bf6cd33c
+    expected_intersection_element_hex:
+      - 7800e29576225ebef0cc0dcf7373c2b8a40f1beefd3d8686f56d6499412ce9fd
+      - 7831b876bce70db93b0389e77dfbc4f5ce4e6ae5def9bb5e53c988dc9d5b42f6
+    expected_transcript_digest_hex: 072dd8a2b9ad493efcf9ddcd872bb173951212605a9e46488f8e7fc473f652ac

@@ -1,0 +1,6971 @@
+schema_version: 1
+scope: Pinned public xAPI LRS projection reconciled with IEEE Std 9274.1.1-2023 clause 4; LRP, LRC, Profiles and
+  ISO 2025 equivalence are outside this projection
+source:
+  repository: https://opensource.ieee.org/xapi/xapi-base-standard-documentation
+  revision: fb8ecb2c1a258e6d3d397805243fd793d47cec5d
+  document: 9274.1.1 xAPI Base Standard for LRSs.md
+  sha256: 2f43d1a0bccbe24c5adaef0daa3519837c6583ba7c3bfbda86ba964924b1ff0b
+  bytes: 98022
+  lines: 1338
+  approved_release_revision: 134afd8c108b4d1b98294a1613db38a6b8fe73d8
+  public_revision_delta:
+  - location: Statements GET parameter table, related_activities
+    change: The current public revision corrects an Agent-filter description to describe Activity filtering in Object,
+      context Activities and contained SubStatements.
+    adoption: PDF chapter 5 independently contains the Activity row; the public correction agrees with that internal PDF reading.
+  - location: Characterstring Parameters example link
+    change: The example link moved from gitlab.com/IEEE-SA to opensource.ieee.org/xapi.
+    adoption: Reference-link correction only; no changed acceptance rule.
+  published_source_record: spec/conformance/lrs-published-source.yaml
+  published_erratum_status: The IEEE 2023 PDF chapter 4 duplicates the Agent description, but chapter 5 contains the Activity description. Read the redundant tables together; no external overlay is required. Official erratum status is unverified.
+coverage_meaning: Curated source spans are mapped to concrete expectation bodies and review tests. This is a finite
+  projection, not proof of all possible inputs or an assertion that all reviewed obligations have passed.
+rules:
+- id: resource-methods-and-parameter-tables
+  lines:
+  - 11
+  - 26
+  case_selectors:
+  - support-
+  - state-
+  - agent-profile-
+  - activity-profile-
+  - agents-
+  - activities-
+  - statement-query-
+  - single-
+  - about-
+  - standard-resource-families-
+  review: null
+  interpretation: null
+- id: contextual-http-headers
+  lines:
+  - 28
+  - 53
+  case_selectors:
+  - attachment-
+  - state-
+  - agent-profile-
+  - activity-profile-
+  - statement-
+  - signature-
+  - about-
+  review: http-rfc-interoperability
+  interpretation: null
+- id: utf8
+  lines:
+  - 55
+  - 57
+  case_selectors:
+  - statement-utf8
+  - state-binary
+  - agent-profile-binary
+  - activity-profile-binary
+  review: null
+  interpretation: null
+- id: json-and-multipart-transmission
+  lines:
+  - 59
+  - 106
+  case_selectors:
+  - attachment-
+  - statement-attachments-
+  - multipart-
+  - signature-
+  review: mime-rfc-framing
+  interpretation: null
+- id: document-etags
+  lines:
+  - 113
+  - 132
+  case_selectors:
+  - state-
+  - agent-profile-
+  - activity-profile-
+  review: null
+  interpretation: null
+- id: document-conflict-explanation
+  lines:
+  - 134
+  - 140
+  case_selectors:
+  - state-unconditional-put-conflict
+  - agent-profile-unconditional-put-conflict
+  - activity-profile-unconditional-put-conflict
+  - state-put-existing-without-condition-conflicts
+  review: conflict-resolution-explanation
+  interpretation: null
+- id: error-codes-and-extension-exception
+  lines:
+  - 142
+  - 170
+  case_selectors:
+  - authentication-
+  - statement-auth
+  - statement-writer
+  - statement-reader
+  - statement-query-
+  - single-
+  - state-
+  - agent-profile-
+  - activity-profile-
+  - batch-invalid-
+  - error-profile-
+  - deterministic-rate-limit-
+  - request-rejected-for-refused-
+  - request-too-large-
+  - statements-get-rejects-case-
+  - statements-get-rejects-unknown-
+  - parameter-case-
+  review: declared-limit-and-extension-contexts
+  interpretation: null
+- id: resources-and-unknown-identities
+  lines:
+  - 172
+  - 207
+  case_selectors:
+  - support-
+  - state-
+  - agent-profile-
+  - activity-profile-
+  review: null
+  interpretation: null
+- id: statement-storage-put-post
+  lines:
+  - 208
+  - 241
+  case_selectors:
+  - statement-put-
+  - statement-post-
+  - post-ids-
+  - duplicate-
+  - batch-invalid-
+  - lrs-populates-
+  - post-generated-ids-
+  review: duplicate-state-and-response-observation
+  interpretation: null
+- id: statement-query-table
+  lines:
+  - 243
+  - 378
+  case_selectors:
+  - agent-filter-
+  - activity-filter-
+  - statement-query-
+  - single-
+  - statement-stored-time-
+  - statement-pagination
+  - statement-get-format-
+  - statement-recursive-formats-
+  - statement-query-filter-
+  - statement-activity-filter-
+  - statements-put-statementId-
+  review: null
+  interpretation: null
+- id: single-query-limits-and-empty-result
+  lines:
+  - 379
+  - 382
+  case_selectors:
+  - single-
+  - statement-get-empty
+  - statement-query-
+  - statements-get-empty-
+  - statements-get-rejects-single-
+  - statements-get-rejects-statement-and-
+  review: null
+  interpretation: null
+- id: consistent-through
+  lines:
+  - 383
+  - 383
+  case_selectors:
+  - statement-
+  - agent-filter-
+  - activity-filter-
+  - attachment-
+  - duplicate-
+  - signature-
+  - lrs-populates-
+  review: consistent-through-visibility
+  interpretation: null
+- id: retrieval-attachments-and-last-modified
+  lines:
+  - 384
+  - 386
+  case_selectors:
+  - attachment-
+  - statement-
+  - agent-filter-
+  - activity-filter-
+  - duplicate-
+  - lrs-populates-
+  review: null
+  interpretation: null
+- id: exact-format
+  lines:
+  - 387
+  - 387
+  case_selectors:
+  - statement-get-format-exact
+  - exact-omitted-verb-display
+  - statement-recursive-formats-
+  review: exact-and-ids-recursive-response
+  interpretation: null
+- id: reference-filter-expansion
+  lines:
+  - 389
+  - 402
+  case_selectors:
+  - statement-ref-
+  - statement-reference-
+  - statementref-query-
+  review: reference-time-sequence-and-cycles
+  interpretation: null
+- id: canonical-language-selection
+  lines:
+  - 404
+  - 409
+  case_selectors:
+  - statement-get-format-canonical
+  - statement-recursive-formats-
+  review: canonical-language-negotiation
+  interpretation: null
+- id: voided-visibility
+  lines:
+  - 411
+  - 414
+  case_selectors:
+  - statement-void
+  - voided-
+  - statement-reference-
+  review: null
+  interpretation: null
+- id: state-document-resource
+  lines:
+  - 416
+  - 525
+  case_selectors:
+  - state-
+  review: document-updated-time-boundary
+  interpretation: null
+- id: person-response
+  lines:
+  - 526
+  - 559
+  case_selectors:
+  - person-response-
+  - agents-
+  - agent-
+  review: person-semantic-identifiers
+  interpretation: null
+- id: activity-response
+  lines:
+  - 561
+  - 579
+  case_selectors:
+  - activities-
+  - activity-
+  review: canonical-activity-available-information
+  interpretation: null
+- id: agent-profile-resource
+  lines:
+  - 581
+  - 676
+  case_selectors:
+  - agent-profile-
+  review: document-updated-time-boundary
+  interpretation: null
+- id: activity-profile-resource
+  lines:
+  - 678
+  - 752
+  case_selectors:
+  - activity-profile-
+  review: document-updated-time-boundary
+  interpretation: null
+- id: about-resource
+  lines:
+  - 754
+  - 773
+  case_selectors:
+  - about-
+  review: null
+  interpretation: null
+- id: version-negotiation
+  lines:
+  - 775
+  - 795
+  case_selectors:
+  - about-
+  - statements-get-rejects-version-
+  - statements-get-accepts-version-
+  review: older-version-routing
+  interpretation: null
+- id: authentication-decisions
+  lines:
+  - 797
+  - 806
+  case_selectors:
+  - statement-auth
+  - statement-writer
+  - statement-reader
+  - authentication-
+  review: authorization-policy-fixture
+  interpretation: null
+- id: immutable-components
+  lines:
+  - 814
+  - 840
+  case_selectors:
+  - duplicate-
+  - signature-equivalence-
+  - statement-duplicate-
+  - statement-duration-
+  review: duplicate-state-and-response-observation
+  interpretation: null
+- id: generic-table-enforcement
+  lines:
+  - 842
+  - 862
+  case_selectors:
+  - statement-root-
+  - agent-
+  - identified-group-
+  - anonymous-group-
+  - account-
+  - verb-
+  - activity-
+  - definition-
+  - interaction-
+  - component-
+  - statement-ref-
+  - substatement-
+  - result-
+  - score-
+  - context-
+  - attachment-
+  review: null
+  interpretation: null
+- id: statement-and-nested-tables
+  lines:
+  - 864
+  - 1130
+  case_selectors:
+  - statement-root-
+  - agent-
+  - identified-group-
+  - anonymous-group-
+  - account-
+  - verb-
+  - activity-
+  - definition-
+  - interaction-
+  - component-
+  - statement-ref-
+  - substatement-
+  - result-
+  - score-
+  - context-
+  review: interaction-validation-policy
+  interpretation: null
+- id: attachment-metadata-table
+  lines:
+  - 1131
+  - 1147
+  case_selectors:
+  - attachment-attachments-
+  - attachment-object-attachments-
+  - attachment-put-
+  - attachment-post-
+  review: null
+  interpretation: null
+- id: metadata-recommendations
+  lines:
+  - 1149
+  - 1177
+  case_selectors: []
+  review: resolvable-metadata-advisory
+  interpretation: null
+- id: rejection-exceptions
+  lines:
+  - 1178
+  - 1192
+  case_selectors:
+  - statement-member-order-
+  - statement-voided-
+  - statement-future-
+  review: rejection-policy-and-clock-margin
+  interpretation: null
+- id: specific-processing
+  lines:
+  - 1194
+  - 1215
+  case_selectors:
+  - statement-
+  - context-activities-array-
+  - lrs-populates-
+  - authority-mapping-
+  - signature-equivalence-
+  - identified-group-
+  - agent-
+  - substatement-
+  - interaction-
+  review: authority-overwrite-policy
+  interpretation: null
+- id: optional-response-behavior-and-version
+  lines:
+  - 1217
+  - 1237
+  case_selectors:
+  - statement-version-
+  - lrs-populates-
+  - statement-pagination
+  review: canonical-metadata-and-cursor-policy
+  interpretation: null
+- id: voiding-state
+  lines:
+  - 1239
+  - 1250
+  case_selectors:
+  - statement-void
+  - voided-
+  - voiding-statement-
+  review: null
+  interpretation: null
+- id: signature-validation
+  lines:
+  - 1252
+  - 1276
+  case_selectors:
+  - signature-
+  - signed-statement-
+  review: null
+  interpretation: null
+- id: iri-comparison
+  lines:
+  - 1278
+  - 1287
+  case_selectors:
+  - statement-activity-filter-
+  - signature-equivalence-excludes-case
+  review: iri-comparison-allowed-strategies
+  interpretation: null
+- id: extensions
+  lines:
+  - 1289
+  - 1296
+  case_selectors:
+  - extension-values-
+  - definition-
+  - result-
+  - context-
+  - statement-extension-
+  review: null
+  interpretation: null
+- id: language-map-tags
+  lines:
+  - 1298
+  - 1309
+  case_selectors:
+  - definition-
+  - verb-
+  - component-
+  - attachment-
+  - statement-language-
+  review: language-tag-full-rfc-boundary
+  interpretation: null
+- id: uuid-standard-form
+  lines:
+  - 1311
+  - 1316
+  case_selectors:
+  - statement-root-id-
+  - statement-ref-
+  - context-context-registration-
+  - lrs-populates-
+  review: null
+  interpretation: null
+- id: timestamp-conversion-and-precision
+  lines:
+  - 1318
+  - 1321
+  case_selectors:
+  - statement-timestamp-
+  - statement-root-timestamp-
+  - substatement-
+  - statement-future-
+  review: timestamp-precision-rounding
+  interpretation: null
+- id: duration-format-and-comparison
+  lines:
+  - 1323
+  - 1328
+  case_selectors:
+  - result-
+  - statement-duration-
+  - signature-equivalence-excludes-duration
+  review: null
+  interpretation: null
+- id: arbitrary-document-data
+  lines:
+  - 1330
+  - 1338
+  case_selectors:
+  - state-binary-
+  - agent-profile-binary-
+  - activity-profile-binary-
+  review: null
+  interpretation: null
+source_units:
+- lines:
+  - 1
+  - 1
+  sha256: 315371e1cbe9833f2caf5d10ca88374ed7d5304eb37f11949f3eb515a77c087d
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 2
+  - 2
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 3
+  - 3
+  sha256: 995491250502936009eb4c8942371b56077c420234846e11e4bab3475e6167a9
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 4
+  - 4
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 5
+  - 5
+  sha256: 63f8233d3140c6b71f1564fc6d67e0dba47913f1df849d813968c8a6803140c0
+  disposition: context
+  rules: []
+  strength_inventory: []
+- lines:
+  - 6
+  - 6
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 7
+  - 7
+  sha256: 31c4b1e50056f6292c5e18aed467bfe810db8b893da29ddce9116e417a0689c0
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 8
+  - 8
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 9
+  - 9
+  sha256: 7090d64d7d5775ae576525ab6b3603082aebcaa4cdce18c5fa78b670147e8b75
+  disposition: context
+  rules: []
+  strength_inventory:
+  - should
+- lines:
+  - 10
+  - 10
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 11
+  - 11
+  sha256: 47fd2b0b08867fcea295f9066e849a7da2602e8727aa17225f05dd1341f88b3d
+  disposition: test-or-review-rules
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 12
+  - 12
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 13
+  - 13
+  sha256: a809412525b4c0657e72f0c1fb3ebe135bdd42644a8a8360ebf6ed18975605e0
+  disposition: test-or-review-rules
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 14
+  - 14
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 15
+  - 15
+  sha256: 709f643548ba391145dbe0cb3f65f0a5b00b6dbd3ba27fd2d800ace7648f9ee3
+  disposition: test-or-review-rules
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 16
+  - 16
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 17
+  - 26
+  sha256: 11724561653ab1bfc8d76e3261affcdfd413ce511d0f8253b90b576f2f764bbd
+  disposition: test-or-review-rules
+  rules:
+  - resource-methods-and-parameter-tables
+  strength_inventory: []
+- lines:
+  - 27
+  - 27
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 28
+  - 28
+  sha256: ab1f873ff5afd1d9ae8dba2734c73a37f4ecff5efff5edfbb00d006c3f0f77b3
+  disposition: structure
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 29
+  - 29
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 30
+  - 30
+  sha256: e819d74908541ba37a16a1d04e5422ef7dc82b862af06e03de993478b9f61b6f
+  disposition: test-or-review-rules
+  rules:
+  - contextual-http-headers
+  strength_inventory:
+  - shall
+- lines:
+  - 31
+  - 31
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 32
+  - 41
+  sha256: 15a0ceaa9d0c87504c3174081dc7feb1712b6228d792af73e1a76682cd69e340
+  disposition: test-or-review-rules
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 42
+  - 42
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 43
+  - 43
+  sha256: 83112ec4879934f90117057d92206b854441874bb22d5318ec3453b9a86743c5
+  disposition: test-or-review-rules
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 44
+  - 44
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 45
+  - 51
+  sha256: ed7a5d433dfdde028991be3f371cab089306317700b083a2eaa22472429bb592
+  disposition: test-or-review-rules
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 52
+  - 52
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 53
+  - 53
+  sha256: 4d7dff08e66b839f01568b5779b2ec4c7355d18c48be72d9761eaee8da9ebee1
+  disposition: test-or-review-rules
+  rules:
+  - contextual-http-headers
+  strength_inventory: []
+- lines:
+  - 54
+  - 54
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 55
+  - 55
+  sha256: 8067c2340180553b81032ad6c6b269e3747ede47b7277b76001134c880155943
+  disposition: structure
+  rules:
+  - utf8
+  strength_inventory: []
+- lines:
+  - 56
+  - 56
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - utf8
+  strength_inventory: []
+- lines:
+  - 57
+  - 57
+  sha256: e44ed73a99e23c86cbca998367fa719a0d70d169018ec2e4c761a4c60d6fb55e
+  disposition: test-or-review-rules
+  rules:
+  - utf8
+  strength_inventory:
+  - shall
+- lines:
+  - 58
+  - 58
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 59
+  - 59
+  sha256: e84f89b34f50a1659a948d97a7552d3e29c9db9be56416abfb5ab42ccace9e11
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 60
+  - 60
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 61
+  - 61
+  sha256: 3d5719684ae8e0fae9ae41a005f17be1a9baba8b04f555e2d631bf7f4d429fff
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 62
+  - 62
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 63
+  - 64
+  sha256: 7524423805d421721bbabdb76245032ac3dd9e8a8180747d40252687e964f3fe
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 65
+  - 65
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 66
+  - 66
+  sha256: 0ff8ddb6f3046a39fb0b1e81939c91fab5795160f248b9da393bdb1622623ee3
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 67
+  - 67
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 68
+  - 69
+  sha256: 131937b731315b8eb81ff1a4d819f9c21f9e50663626208d3e9f3e0f277eff5c
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory:
+  - shall
+- lines:
+  - 70
+  - 70
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 71
+  - 71
+  sha256: ded610bf9d991258d03a33b3e6638a3e9fd4eed9b35634a239d665e8401d5a20
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 72
+  - 73
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 74
+  - 74
+  sha256: aef9648445002ecb9c354eeb6849615222240d1d9a5ee7daff3b4ce4ad90859e
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 75
+  - 76
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 77
+  - 77
+  sha256: 61273699dda5f3cc4e9a1bbaed3c531e15c84d56907ff2e93f8128992cebc9a5
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 78
+  - 78
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 79
+  - 80
+  sha256: 499af605424c0ff6ae3cc90701097fab3b12a0ce5cd9f2fa11660ff10b6fc260
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 81
+  - 81
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 82
+  - 83
+  sha256: ec39251015ae7991db66d6c500a57871c6214ab469d41a460bed97d020df46e3
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory:
+  - shall
+- lines:
+  - 84
+  - 84
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 85
+  - 85
+  sha256: 43328995fd6c2bff24a2e73627a5d4fc1195c87f13eee3a9428ad3673182da19
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 86
+  - 86
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 87
+  - 87
+  sha256: 0775f249370aac06867e0ca4e6b5b8557366e69c94d7479ecd3417cabf7897a3
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory:
+  - shall
+- lines:
+  - 88
+  - 88
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 89
+  - 97
+  sha256: 3e00aed3a8f2adb18d552a98aefc395e6fbe6058ecd0907ae45d031c2ef168e2
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 98
+  - 98
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 99
+  - 99
+  sha256: a13f07fda17b8a03500db8c837643a922736316918975377fe28ec88cd67df03
+  disposition: structure
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 100
+  - 100
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory: []
+- lines:
+  - 101
+  - 106
+  sha256: 5bce2eead5ee656e749f4db7afa5af61435ae4b065bd88ff7ac4c9faae72787f
+  disposition: test-or-review-rules
+  rules:
+  - json-and-multipart-transmission
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 107
+  - 107
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 108
+  - 108
+  sha256: dfbad8fbe85c2f5e015a9f56dcf4eca4454865d02d596949547459a5dcf8caef
+  disposition: context
+  rules: []
+  strength_inventory: []
+- lines:
+  - 109
+  - 109
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 110
+  - 110
+  sha256: 5dc749e473204a54f6ff9e5460955e860a18cf55d87e9e77e9052839c75f8571
+  disposition: context
+  rules: []
+  strength_inventory: []
+- lines:
+  - 111
+  - 111
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 112
+  - 112
+  sha256: fbb6c6a8df7c07667ab80eb130e6213515451d089c1b87726d8d62648949eede
+  disposition: context
+  rules: []
+  strength_inventory: []
+- lines:
+  - 113
+  - 113
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 114
+  - 114
+  sha256: 8eb7507015b578c25c13842c392062c27a3f611e6fa24565b2142dc80fc3327c
+  disposition: structure
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 115
+  - 115
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 116
+  - 116
+  sha256: 8cacd48db832f09c45467d0f6b0ba829747b11cb1e614e2f342feb713936b384
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 117
+  - 117
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 118
+  - 118
+  sha256: 9c48230cc59abc60451115ca3a56a2da5a8fbdc61ec4ddb4cb031c38a7f0a9c1
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 119
+  - 119
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 120
+  - 122
+  sha256: 12559717be3bcddf3d01764f76faf3a354fd3e2edf60e3db7d353d0db87dfdfd
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 123
+  - 123
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 124
+  - 124
+  sha256: 84e41f21f59fb8477919f81d76c6d221a4f5f4b5017750fefc47c462ead41adf
+  disposition: structure
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 125
+  - 125
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 126
+  - 127
+  sha256: b8ca7c34e0d3b17f2be79b8642e9bfb08fe1d1080a64ad44e4bac59491508b48
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory:
+  - shall
+- lines:
+  - 128
+  - 128
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 129
+  - 129
+  sha256: c11b78466dc34dd053a5f5289fe1edb68f73e8ec9e3fcf980c53df1bdd1a4e78
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 130
+  - 130
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-etags
+  strength_inventory: []
+- lines:
+  - 131
+  - 132
+  sha256: c36122d9088449424cc811a3a34fa66acd63f1ff89014d162a32d227336fce2d
+  disposition: test-or-review-rules
+  rules:
+  - document-etags
+  strength_inventory:
+  - shall
+- lines:
+  - 133
+  - 133
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 134
+  - 134
+  sha256: 69b6e4774f8a95e5b20d1b147132a25b64c639fe111ea26f8f45b7699603f7fd
+  disposition: test-or-review-rules
+  rules:
+  - document-conflict-explanation
+  strength_inventory: []
+- lines:
+  - 135
+  - 135
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - document-conflict-explanation
+  strength_inventory: []
+- lines:
+  - 136
+  - 140
+  sha256: 77a353485a621b78d46c8901a2bf2b2f319641cb2ef97f21804e41c4726f6f96
+  disposition: test-or-review-rules
+  rules:
+  - document-conflict-explanation
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 141
+  - 141
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 142
+  - 142
+  sha256: e6297d166717f8b3bdb06b3de7c672d8bf0231b49a025f4255c4fe64a4e269bf
+  disposition: structure
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 143
+  - 143
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 144
+  - 144
+  sha256: d7cb7df16a9283f5cb157642eaee1dc0ca3f625f42974ecb9f657c6fc14fe91e
+  disposition: test-or-review-rules
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 145
+  - 145
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 146
+  - 154
+  sha256: d2ed61c7c27614e280e1af937366a846c6e78d26486f63725a27badb254407ba
+  disposition: test-or-review-rules
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory:
+  - may
+- lines:
+  - 155
+  - 156
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 157
+  - 157
+  sha256: bbdcb3e4f728b349b6b8e3cf17434804717b292e8e0f7702428d2166e3407bdb
+  disposition: structure
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 158
+  - 158
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory: []
+- lines:
+  - 159
+  - 170
+  sha256: c907dee953b6fac09fddf973e06abd001061f6980e7aa91f4824538aa41107f1
+  disposition: test-or-review-rules
+  rules:
+  - error-codes-and-extension-exception
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 171
+  - 171
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 172
+  - 172
+  sha256: e4d330cba16283c6a0b5b57f0418c4d63683255730edfb826af27c35e1f21720
+  disposition: structure
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 173
+  - 173
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 174
+  - 174
+  sha256: 9d6e6968bf618ef289fbf94fab4bad8d0c073a41aa02be76e90a9df09c5c57e9
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory:
+  - may
+- lines:
+  - 175
+  - 175
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 176
+  - 176
+  sha256: 73d5a398d720aac916cf04161c5f2d114d5b2b566506d4f20f322e89f5c90804
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory:
+  - shall
+- lines:
+  - 177
+  - 177
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 178
+  - 181
+  sha256: c217ac6298a7173c46154d0ccda1c475cf3fd6a7a3839b5f911b98b1a2814e8c
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 182
+  - 182
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 183
+  - 183
+  sha256: 0e60ff25772d6fa4e2104c7a77f5d660d27c8fe270eb78211a06624a97fbf3d6
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory:
+  - shall
+- lines:
+  - 184
+  - 184
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 185
+  - 194
+  sha256: b3cda116405fd628ae71785f700998898250366be77e9ce84ad4b19d5a46fae6
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 195
+  - 195
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 196
+  - 196
+  sha256: 5b1c9cc0d8094bd58b5b28a0082069c8addb7f60e6e3ffd17387147484f191a8
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 197
+  - 197
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 198
+  - 198
+  sha256: 66ba354b55ed54d0258550f67cfa4a8684db7b734066be2c626e3a0224ccdf71
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 199
+  - 199
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 200
+  - 200
+  sha256: 6ae995612b3ea172b9125946ba71b4b7475ee6021a3effbf3bc261716a7a2bfc
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 201
+  - 201
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 202
+  - 206
+  sha256: cfab20d2f4a57e92e357867ade8247212f5321bc580b695c72ca890a53c67c5b
+  disposition: test-or-review-rules
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 207
+  - 207
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - resources-and-unknown-identities
+  strength_inventory: []
+- lines:
+  - 208
+  - 208
+  sha256: 26ec2b373398d64e258ed4dd27b1cdae87834200bbbc87b3ea47dfa32ff0612e
+  disposition: structure
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 209
+  - 209
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 210
+  - 210
+  sha256: ae5d8ea3214f8e166bb499dfa068952fee3c5a39342907bb29750383b7c31ba4
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 211
+  - 211
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 212
+  - 212
+  sha256: 7433fbad2b0a0262a1d6d7cf817e553f126b8610f613388357e7c52629e94474
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 213
+  - 213
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 214
+  - 214
+  sha256: 7f181db0ce4c880c03755add632a9a1d60b44c9b34116772e807fe4fbc56e688
+  disposition: structure
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 215
+  - 215
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 216
+  - 216
+  sha256: 4e795ad3fcf06193e0fa837e0e8967296821bf05c9df713deab6fca38fa45e17
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 217
+  - 217
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 218
+  - 220
+  sha256: 506b55907938bde50e62751b09c7cf38f20f4f76046f8550709b1f3b2efb6f6a
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 221
+  - 221
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 222
+  - 222
+  sha256: c999a73a8fbe24bc83171b603d934d0a1b5c0ee5d896af47aeffb9b61a798549
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 223
+  - 223
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 224
+  - 224
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 225
+  - 225
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 226
+  - 228
+  sha256: 01b305904e32170cf9ef64d14f565b349ac9c2128f52ced7e9367ffc30b2755e
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 229
+  - 229
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 230
+  - 230
+  sha256: dea2e98dad8a9cdc7bd5c3f9ca860bded93d0e9a18fac85151f59599ca4b4889
+  disposition: structure
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 231
+  - 231
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 232
+  - 232
+  sha256: c0fa0d0c02a819933246ae529ddd7fa0be95f38dc22ee236d95f31a2dc2f5178
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 233
+  - 233
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 234
+  - 234
+  sha256: 961992c088ba4e6589ac0bc1f312d4d91dcb5b01b9eb35a439a14bf734d981f1
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 235
+  - 235
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 236
+  - 236
+  sha256: ad8a97ebf2d20fb97f3ab28eaf000240c963ea3771026367ca629f74e79c8631
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 237
+  - 237
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-storage-put-post
+  strength_inventory: []
+- lines:
+  - 238
+  - 241
+  sha256: db4488ccd93e04d133cb89aa7f8e95b00e493309b93556d09eea5e2b5179bef2
+  disposition: test-or-review-rules
+  rules:
+  - statement-storage-put-post
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 242
+  - 242
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 243
+  - 243
+  sha256: b817e8ed72e94582b970b93042eb64114839da525206f6a97b99094155cb2e9b
+  disposition: structure
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 244
+  - 244
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 245
+  - 245
+  sha256: 119c93216b37c3dfc5e779dceb5869d55005202081bdcda0d5359af138121f0b
+  disposition: test-or-review-rules
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 246
+  - 246
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 247
+  - 371
+  sha256: 99d59ef3f4c0a66a8e426afd7e8997a4af332ae9292f2ebc48a726698866a691
+  disposition: test-or-review-rules
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 372
+  - 372
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 373
+  - 373
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 374
+  - 374
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 375
+  - 375
+  sha256: 4b5f1cad2dcc89b099544b27a71823a2cff2a79ca56ce9630d35719003bea95e
+  disposition: test-or-review-rules
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 376
+  - 376
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 377
+  - 377
+  sha256: 0dca8b48f2aae36c50c20e18cf589a5c698ade780586be43930075031c22fd64
+  disposition: test-or-review-rules
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 378
+  - 378
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-query-table
+  strength_inventory: []
+- lines:
+  - 379
+  - 387
+  sha256: 0096f9590fc4614d526cf17cefc7ef4688824f17a7d709eca48e59fc2547d975
+  disposition: test-or-review-rules
+  rules:
+  - single-query-limits-and-empty-result
+  - consistent-through
+  - retrieval-attachments-and-last-modified
+  - exact-format
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 388
+  - 388
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 389
+  - 389
+  sha256: 47613f81fbff4057a17ba8ba3fc6053471105e09ac2c9eb59eb7bcd40d1ff572
+  disposition: structure
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 390
+  - 391
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 392
+  - 392
+  sha256: 9228e5d2ae31ac3d688bd35adbebabb817d85bbe7242b11e912fcd860faed302
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 393
+  - 393
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 394
+  - 394
+  sha256: 0dec0553673ddbbb0256aed7fd04c32d0354ab3a95f9b8eea861b9d372171bd1
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 395
+  - 395
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 396
+  - 396
+  sha256: d4cdc23aab23c1a4eea6f1e5b0da67bb8c08c94b31ab33ecd121df5914c8a251
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 397
+  - 397
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 398
+  - 398
+  sha256: 1c42e4c8856a81132f903490767d0192228c6c41482eb5197418b8ab55b16901
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory:
+  - shall
+- lines:
+  - 399
+  - 399
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 400
+  - 400
+  sha256: dafe2537dbf84bf89d729d1428656606f8cd9e3757993eb62976b9e4d36b017e
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 401
+  - 401
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 402
+  - 402
+  sha256: c16c3606b0459788a056f77537b9df3ecbcc6d1227a888e063f83f7be98d9f01
+  disposition: test-or-review-rules
+  rules:
+  - reference-filter-expansion
+  strength_inventory: []
+- lines:
+  - 403
+  - 403
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 404
+  - 404
+  sha256: f27132aab8e5163a3cbcc22e8452b95da0f409335357cb4dfc444f53b9b5079e
+  disposition: structure
+  rules:
+  - canonical-language-selection
+  strength_inventory: []
+- lines:
+  - 405
+  - 405
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - canonical-language-selection
+  strength_inventory: []
+- lines:
+  - 406
+  - 409
+  sha256: 000b25bf6acb12eb6bef832720c7044cfe775ee6dd61a3e4012d4f06667075f6
+  disposition: test-or-review-rules
+  rules:
+  - canonical-language-selection
+  strength_inventory:
+  - shall
+  - may
+- lines:
+  - 410
+  - 410
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 411
+  - 411
+  sha256: d247e7405801405341b03d6ebd7620c0e44885d51a663daaae6fc36ba785417b
+  disposition: structure
+  rules:
+  - voided-visibility
+  strength_inventory: []
+- lines:
+  - 412
+  - 412
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voided-visibility
+  strength_inventory: []
+- lines:
+  - 413
+  - 414
+  sha256: db44e41a33b0f51dbffd885b75e3d27ce3612aa0bb4010ded60131ba07c238ac
+  disposition: test-or-review-rules
+  rules:
+  - voided-visibility
+  strength_inventory:
+  - shall
+- lines:
+  - 415
+  - 415
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 416
+  - 416
+  sha256: 2fafad70018804ce780147f64d364d8ab0669e97664a6566b24c4b74026580ea
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 417
+  - 417
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 418
+  - 418
+  sha256: bfdd53a1202bc0ed32f10b8c619b14402f3b9547b05b6ccc6cc237ad9432c670
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 419
+  - 419
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 420
+  - 420
+  sha256: d475f3ad39ab0300a25c4b881ae045e4edb55c5f0985af4a02e4b1801ac80a6e
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 421
+  - 421
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 422
+  - 422
+  sha256: 7f181db0ce4c880c03755add632a9a1d60b44c9b34116772e807fe4fbc56e688
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 423
+  - 423
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 424
+  - 424
+  sha256: 1e64b15a265af7f7ef6762bfb0ca3fab2eeeea140c96d156cdfab9b147b72845
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 425
+  - 425
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 426
+  - 426
+  sha256: b04558ddedba908822fc6eac3ab120e47218586e8ec67288324416bd1609bfee
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 427
+  - 427
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 428
+  - 428
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 429
+  - 429
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 430
+  - 435
+  sha256: a35288d4e2c9a8dd5311c0ab811faea0368236d3a7c1ca2d51b535fb39608e95
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 436
+  - 436
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 437
+  - 437
+  sha256: dea2e98dad8a9cdc7bd5c3f9ca860bded93d0e9a18fac85151f59599ca4b4889
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 438
+  - 438
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 439
+  - 439
+  sha256: 1c42a0fcfc2515a741fffae77400422c553b3c67a885b6de3902b904338382a8
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 440
+  - 440
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 441
+  - 441
+  sha256: 7aa899a11b170e628d94824c260add87cf8ff89aacaad04dcc27c9e2a5e74575
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 442
+  - 442
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 443
+  - 443
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 444
+  - 444
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 445
+  - 450
+  sha256: a35288d4e2c9a8dd5311c0ab811faea0368236d3a7c1ca2d51b535fb39608e95
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 451
+  - 451
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 452
+  - 452
+  sha256: 413c4665dcf51691e212258a7d02e7dceb08589bcae472ff5fa5991b89c87e32
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 453
+  - 453
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 454
+  - 456
+  sha256: e0242e0bf4c63c80b85c430873e7a59202484ac520abae0ab7d0e60d4400e308
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 457
+  - 457
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 458
+  - 458
+  sha256: 6c034bf935702f92be8b57fa5224ae213513a0664aff20f0617b5cf2c69b6a81
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 459
+  - 459
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 460
+  - 461
+  sha256: 1d79196040383b652a3301c85e43eca87425263000da2f29b2363a40eab40afb
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 462
+  - 462
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 463
+  - 463
+  sha256: be2f32cde942b52adc308c285faa5376cc441874ac395ad9a8a7800478a75d34
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 464
+  - 464
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 465
+  - 465
+  sha256: 8f10995bfa0cf2fc15d1f01ee3a0d5148333acae1c43967a3344669561578b8b
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 466
+  - 466
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 467
+  - 467
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 468
+  - 468
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 469
+  - 469
+  sha256: 5fd45cee90e6fa7ab21b51e75c2a13125ac7aaf089e897ac7d05aa0c33c5b82c
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 470
+  - 470
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 471
+  - 477
+  sha256: d07b374d5fe8346bca9cf7e0812af0d65cf21d43eb6ca1f255d996018d52c63d
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 478
+  - 478
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 479
+  - 479
+  sha256: 6f2ff7f05a82c935d533cebe49a3a01aabfda7f682de56cd483cbaa09833957d
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 480
+  - 480
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 481
+  - 481
+  sha256: 02454be6b85c6986085e4c02f34c8a2ecbd9b585574bc5ee78b7e58c9d422ce2
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 482
+  - 482
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 483
+  - 483
+  sha256: b01b212dd5eab9117996d7b9c97ca8398337acf4dcbd80f1a0b8142eb6187b0e
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 484
+  - 484
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 485
+  - 485
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 486
+  - 486
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 487
+  - 487
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 488
+  - 488
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 489
+  - 494
+  sha256: a35288d4e2c9a8dd5311c0ab811faea0368236d3a7c1ca2d51b535fb39608e95
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 495
+  - 495
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 496
+  - 496
+  sha256: d993e13153ea069a4123312164b14466e65686532605375bec5e375e84e48ed3
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 497
+  - 497
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 498
+  - 498
+  sha256: b6bb498a0b9fd961fd02525619b2162ad7440f341f666c551d240570aedaeb2d
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 499
+  - 499
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 500
+  - 500
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 501
+  - 501
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 502
+  - 502
+  sha256: 05ace7feb9e5dd167ff984d5c5a832e6f1ac5172a095f3476624a0d3aa4660d5
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 503
+  - 503
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 504
+  - 510
+  sha256: c4ddece8822fa91df1af957dbf4b28f2bff642f25fdad420e680b57966995d37
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 511
+  - 511
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 512
+  - 512
+  sha256: 2922d4ebd8c7949b9b46c2974eb74fe1a673c0ee9a0e016edf62530470183ef2
+  disposition: structure
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 513
+  - 513
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 514
+  - 514
+  sha256: 6e1bb53e3d8545f3e47673ed04f95f8e377c50ee5ec6a172f64d1349f2f2ac8c
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 515
+  - 515
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 516
+  - 516
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 517
+  - 517
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 518
+  - 518
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 519
+  - 519
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 520
+  - 524
+  sha256: dde99a3f5c4223cd69477666990b792b549fab348984f697fa90266c6e2aeee4
+  disposition: test-or-review-rules
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 525
+  - 525
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - state-document-resource
+  strength_inventory: []
+- lines:
+  - 526
+  - 526
+  sha256: 104f7ab875eaaf16ae0a0fa7b8344413920d396d392c6a45c29a4637073093ab
+  disposition: structure
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 527
+  - 527
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 528
+  - 528
+  sha256: 0d30baff0ed11dbf6a087d06c7ac161fa1d500e954463955ed751146ea36c43d
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 529
+  - 529
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 530
+  - 530
+  sha256: f9755f98f9205e028f10517b2347b934c30e21c6a47504d003c742eb25db61ac
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 531
+  - 531
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 532
+  - 532
+  sha256: 08868f8ecd5c39f9f4e86870122a4d33580f1a7b704a8d58545d51e9036ad2db
+  disposition: structure
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 533
+  - 533
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 534
+  - 534
+  sha256: 63acb752a72406a397ae304cb4fe71faa2b8dd04f722bbe5c43ee288d73e2d7e
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 535
+  - 535
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 536
+  - 536
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 537
+  - 537
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 538
+  - 538
+  sha256: 7ce7427f801ee336ff66bc14bddd0130b6e0081ce8d7c167e8568e4b345f0a22
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 539
+  - 539
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 540
+  - 542
+  sha256: ebcaa0afe612c62d46099a0f85db9f20b442ff7878d6f799f16b105acc9dfc5d
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 543
+  - 544
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 545
+  - 545
+  sha256: e9c840a10ad6c9eee7aa22df4cd6df935ccdf7731ac36c1a93b27f94c6e45503
+  disposition: structure
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 546
+  - 547
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 548
+  - 555
+  sha256: ab201430aa471b902d9ccf56dbd0bff7e95a6ce187ffe9f9d27456b8c326502e
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory:
+  - shall
+- lines:
+  - 556
+  - 556
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 557
+  - 557
+  sha256: 108798ea33e2369bccc0ec84506876692d0f1fa598911a6fb341496d79656f84
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory:
+  - shall
+- lines:
+  - 558
+  - 558
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - person-response
+  strength_inventory: []
+- lines:
+  - 559
+  - 559
+  sha256: 115cb0c74fcce5875574083462891a829dfbb54b372f54e6a62bde9a857e44cd
+  disposition: test-or-review-rules
+  rules:
+  - person-response
+  strength_inventory:
+  - shall
+- lines:
+  - 560
+  - 560
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 561
+  - 561
+  sha256: 7eeda3793286adb115b51322491041c1cb57f1af49fd1b6b7668ebf5e3081553
+  disposition: structure
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 562
+  - 562
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 563
+  - 563
+  sha256: 0d4e87c851158b4e2d4ca2cee9b42f6ca0394a3927bab95e3c436ba30e7000da
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 564
+  - 564
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 565
+  - 565
+  sha256: fa8b2f7f48d1199c22f46fd272c05ee1c6089ac2e463bb33fa5a3719a451a607
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 566
+  - 566
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 567
+  - 567
+  sha256: b817e8ed72e94582b970b93042eb64114839da525206f6a97b99094155cb2e9b
+  disposition: structure
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 568
+  - 568
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 569
+  - 569
+  sha256: b3ef0d538f9bf6b69d264622bc691e5d8bdcd9d056c77363dfdeeb0c5537477d
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 570
+  - 570
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 571
+  - 571
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 572
+  - 572
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 573
+  - 573
+  sha256: a26e60406503e5d2671345024b97756f4cf7a80f3c7223dc28e4c21b110d443f
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 574
+  - 574
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 575
+  - 577
+  sha256: 963a556d6f2b86118ddf144573eb8ee0e9f793bec40e09cb03d856470684ae25
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 578
+  - 578
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-response
+  strength_inventory: []
+- lines:
+  - 579
+  - 579
+  sha256: 0d23d4183ede2afcfa967ecdce5286f0fb738c3a6afd57118772778be9a2b7b6
+  disposition: test-or-review-rules
+  rules:
+  - activity-response
+  strength_inventory:
+  - shall
+- lines:
+  - 580
+  - 580
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 581
+  - 581
+  sha256: 9833c1e5d306b1973d42f0b46847532239da6eef0a996d2e1048783e434afa40
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 582
+  - 582
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 583
+  - 583
+  sha256: cea42a41e83530620ab1490ea0444cd5132e9f2bbf1a25614874c31dd937bc65
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 584
+  - 584
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 585
+  - 585
+  sha256: 9dfd498f5539a14b30389f7c9d4d060f0059aa65b0035e463c7628c1143b82f9
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 586
+  - 586
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 587
+  - 587
+  sha256: 7f181db0ce4c880c03755add632a9a1d60b44c9b34116772e807fe4fbc56e688
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 588
+  - 588
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 589
+  - 589
+  sha256: 1e64b15a265af7f7ef6762bfb0ca3fab2eeeea140c96d156cdfab9b147b72845
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 590
+  - 590
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 591
+  - 591
+  sha256: 5f51feae4eeb2e627b8071eebb3fb12b5e0fae0a3608db11ea7c8e39d714916b
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 592
+  - 592
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 593
+  - 593
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 594
+  - 594
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 595
+  - 598
+  sha256: ae0d5a3170b062bbc24cdd6c3b2c9ba6d26437763c477832e06517d9900fa046
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 599
+  - 600
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 601
+  - 601
+  sha256: dea2e98dad8a9cdc7bd5c3f9ca860bded93d0e9a18fac85151f59599ca4b4889
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 602
+  - 602
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 603
+  - 603
+  sha256: 3b6e703406fa582746651f0a05d6d2a97daf42051b96f7dd348e1883af52ca3e
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 604
+  - 604
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 605
+  - 605
+  sha256: a7aa3aacf274bd591bfaf6db11e2c0635d4495e1e053245a00e15286f859fe3e
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 606
+  - 606
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 607
+  - 607
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 608
+  - 608
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 609
+  - 612
+  sha256: ae0d5a3170b062bbc24cdd6c3b2c9ba6d26437763c477832e06517d9900fa046
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 613
+  - 615
+  sha256: 6a3cf5192354f71615ac51034b3e97c20eda99643fcaf5bbe6d41ad59bd12167
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 616
+  - 616
+  sha256: 413c4665dcf51691e212258a7d02e7dceb08589bcae472ff5fa5991b89c87e32
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 617
+  - 617
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 618
+  - 620
+  sha256: e0242e0bf4c63c80b85c430873e7a59202484ac520abae0ab7d0e60d4400e308
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 621
+  - 621
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 622
+  - 622
+  sha256: 6c034bf935702f92be8b57fa5224ae213513a0664aff20f0617b5cf2c69b6a81
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 623
+  - 623
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 624
+  - 625
+  sha256: 1d79196040383b652a3301c85e43eca87425263000da2f29b2363a40eab40afb
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 626
+  - 626
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 627
+  - 627
+  sha256: df2cbe5addbbbda047beb508792c8636a986eaa9f5766645ba405f5bf99e86ae
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 628
+  - 628
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 629
+  - 629
+  sha256: b01b212dd5eab9117996d7b9c97ca8398337acf4dcbd80f1a0b8142eb6187b0e
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 630
+  - 630
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 631
+  - 631
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 632
+  - 632
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 633
+  - 633
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 634
+  - 634
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 635
+  - 638
+  sha256: ae0d5a3170b062bbc24cdd6c3b2c9ba6d26437763c477832e06517d9900fa046
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 639
+  - 640
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 641
+  - 641
+  sha256: 1f88d77736b27eb991070f29ea1d06e8fe451c7e90c9dc704868c40a985c9dd3
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 642
+  - 642
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 643
+  - 643
+  sha256: 8f10995bfa0cf2fc15d1f01ee3a0d5148333acae1c43967a3344669561578b8b
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 644
+  - 644
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 645
+  - 645
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 646
+  - 646
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 647
+  - 647
+  sha256: 1fb3cba7fbe40df91abe6104feac5046482251e0b541ecad1521536e4de33ad5
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 648
+  - 648
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 649
+  - 652
+  sha256: ae0d5a3170b062bbc24cdd6c3b2c9ba6d26437763c477832e06517d9900fa046
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 653
+  - 654
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 655
+  - 655
+  sha256: 6f2ff7f05a82c935d533cebe49a3a01aabfda7f682de56cd483cbaa09833957d
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 656
+  - 656
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 657
+  - 657
+  sha256: d993e13153ea069a4123312164b14466e65686532605375bec5e375e84e48ed3
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 658
+  - 658
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 659
+  - 659
+  sha256: 232f7b5011ed17dc09f1f4ebeddfc1ce3231a4254aaf97d0d40d6684ff5a068b
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 660
+  - 660
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 661
+  - 661
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 662
+  - 662
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 663
+  - 663
+  sha256: 46e040115b30e48657f9e32d3d81e9f1f0ee37f40c48ba0858498003fe7e4143
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 664
+  - 664
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 665
+  - 668
+  sha256: af2123f18faca7fd8025d0f97883b29a62f9526619d6183cd5bc5c589b089055
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 669
+  - 670
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 671
+  - 671
+  sha256: 0d8bcaa47a0e7bc8a23407eabc7fafac25e8440225b4df9c81f96bc248f3e816
+  disposition: structure
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 672
+  - 672
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 673
+  - 673
+  sha256: 66aa8b3b5e1e4d0348b4282cd695cb354a50f6f9d83a7c32397b2b8f8a0d2628
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 674
+  - 674
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 675
+  - 675
+  sha256: 7c10cfedbb6bb48794df8bf52ba9b3b2e27fff5c934191219f09ec028092d55a
+  disposition: test-or-review-rules
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 676
+  - 676
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - agent-profile-resource
+  strength_inventory: []
+- lines:
+  - 677
+  - 677
+  sha256: 7f181db0ce4c880c03755add632a9a1d60b44c9b34116772e807fe4fbc56e688
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 678
+  - 678
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 679
+  - 679
+  sha256: 1e64b15a265af7f7ef6762bfb0ca3fab2eeeea140c96d156cdfab9b147b72845
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 680
+  - 680
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 681
+  - 681
+  sha256: 5f51feae4eeb2e627b8071eebb3fb12b5e0fae0a3608db11ea7c8e39d714916b
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 682
+  - 682
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 683
+  - 683
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 684
+  - 684
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 685
+  - 688
+  sha256: 05f5342d450b3e71794d0acec8f1b7de042bab1324db71eaefae27ac5e4337ea
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 689
+  - 689
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 690
+  - 690
+  sha256: dea2e98dad8a9cdc7bd5c3f9ca860bded93d0e9a18fac85151f59599ca4b4889
+  disposition: structure
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 691
+  - 691
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 692
+  - 692
+  sha256: 3b6e703406fa582746651f0a05d6d2a97daf42051b96f7dd348e1883af52ca3e
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 693
+  - 693
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 694
+  - 694
+  sha256: a7aa3aacf274bd591bfaf6db11e2c0635d4495e1e053245a00e15286f859fe3e
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 695
+  - 695
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 696
+  - 696
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 697
+  - 697
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 698
+  - 701
+  sha256: 05f5342d450b3e71794d0acec8f1b7de042bab1324db71eaefae27ac5e4337ea
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 702
+  - 702
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 703
+  - 703
+  sha256: 413c4665dcf51691e212258a7d02e7dceb08589bcae472ff5fa5991b89c87e32
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 704
+  - 704
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 705
+  - 707
+  sha256: e0242e0bf4c63c80b85c430873e7a59202484ac520abae0ab7d0e60d4400e308
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 708
+  - 708
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 709
+  - 709
+  sha256: 6c034bf935702f92be8b57fa5224ae213513a0664aff20f0617b5cf2c69b6a81
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 710
+  - 710
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 711
+  - 712
+  sha256: 1d79196040383b652a3301c85e43eca87425263000da2f29b2363a40eab40afb
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 713
+  - 713
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 714
+  - 714
+  sha256: df2cbe5addbbbda047beb508792c8636a986eaa9f5766645ba405f5bf99e86ae
+  disposition: structure
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 715
+  - 715
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 716
+  - 716
+  sha256: b01b212dd5eab9117996d7b9c97ca8398337acf4dcbd80f1a0b8142eb6187b0e
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 717
+  - 717
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 718
+  - 718
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 719
+  - 719
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 720
+  - 720
+  sha256: 705cb79cca10285d65e683e583ac813cd769b00eaa201e9755e17ea7b9006ea0
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 721
+  - 721
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 722
+  - 725
+  sha256: 05f5342d450b3e71794d0acec8f1b7de042bab1324db71eaefae27ac5e4337ea
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 726
+  - 726
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 727
+  - 727
+  sha256: 1f88d77736b27eb991070f29ea1d06e8fe451c7e90c9dc704868c40a985c9dd3
+  disposition: structure
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 728
+  - 728
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 729
+  - 729
+  sha256: 8f10995bfa0cf2fc15d1f01ee3a0d5148333acae1c43967a3344669561578b8b
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 730
+  - 730
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 731
+  - 731
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 732
+  - 732
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 733
+  - 733
+  sha256: 1fb3cba7fbe40df91abe6104feac5046482251e0b541ecad1521536e4de33ad5
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 734
+  - 734
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 735
+  - 738
+  sha256: 05f5342d450b3e71794d0acec8f1b7de042bab1324db71eaefae27ac5e4337ea
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 739
+  - 739
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 740
+  - 740
+  sha256: 6f2ff7f05a82c935d533cebe49a3a01aabfda7f682de56cd483cbaa09833957d
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 741
+  - 741
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 742
+  - 742
+  sha256: d993e13153ea069a4123312164b14466e65686532605375bec5e375e84e48ed3
+  disposition: structure
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 743
+  - 743
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 744
+  - 744
+  sha256: 6a088b78670dc26f79842170cdd1255dcc4b27909c72fde5cb2ea3dfe76c446d
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 745
+  - 745
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 746
+  - 746
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 747
+  - 747
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 748
+  - 748
+  sha256: 46e040115b30e48657f9e32d3d81e9f1f0ee37f40c48ba0858498003fe7e4143
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 749
+  - 749
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 750
+  - 753
+  sha256: af2123f18faca7fd8025d0f97883b29a62f9526619d6183cd5bc5c589b089055
+  disposition: test-or-review-rules
+  rules:
+  - activity-profile-resource
+  strength_inventory: []
+- lines:
+  - 754
+  - 754
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 755
+  - 755
+  sha256: f0eb2cf44df5861487b93baa8c90a512d0375d17ab05956f6cf0c902797f941c
+  disposition: structure
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 756
+  - 756
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 757
+  - 757
+  sha256: 706207773b404d3fb9c91ade3c722817286ccb1915a2c47ce5ee5c19ceb48780
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 758
+  - 758
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 759
+  - 759
+  sha256: 6f42c128471cf62ecdb1ee121632be632d1203e611f8a0d4838f1b1932b42f76
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 760
+  - 760
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 761
+  - 761
+  sha256: b817e8ed72e94582b970b93042eb64114839da525206f6a97b99094155cb2e9b
+  disposition: structure
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 762
+  - 762
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 763
+  - 763
+  sha256: fdb53d5cd755a81d72d4bbd360310e623143f3cc97a39195f18f015049d66127
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 764
+  - 764
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 765
+  - 765
+  sha256: 7c94600ed53bd5d111d313c0a17938e6f155714285758c62d282a5a8d5cba39b
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 766
+  - 766
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 767
+  - 770
+  sha256: 32a4650a6c6697f7004b0989a4be94320f3e2c2c76fd05f573e9453078f00c33
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 771
+  - 771
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - about-resource
+  strength_inventory: []
+- lines:
+  - 772
+  - 773
+  sha256: 0d6a61bfea2c264ae2e12d94d89c6c9258ec542d88c46d5a01529998c3b2dd65
+  disposition: test-or-review-rules
+  rules:
+  - about-resource
+  strength_inventory:
+  - shall
+- lines:
+  - 774
+  - 774
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 775
+  - 775
+  sha256: 9c3b74ef7281df539b344955326f9c813d119cce8d7a6a5bd25db87a9d962010
+  disposition: structure
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 776
+  - 776
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 777
+  - 777
+  sha256: f0bd05ce88d349476737edc7acb4857a610c70d3f64f1ba04cccaeb84e8b5451
+  disposition: test-or-review-rules
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 778
+  - 778
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 779
+  - 779
+  sha256: dbb362269f1624a04929914b5ca9e45d5bb802027022b78aa95ff2d38d30f860
+  disposition: structure
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 780
+  - 781
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 782
+  - 783
+  sha256: d5cea9f7b63131dab66dd5db1f88caf95e0ab13995709b4b4435582b01d39c94
+  disposition: test-or-review-rules
+  rules:
+  - version-negotiation
+  strength_inventory:
+  - may
+- lines:
+  - 784
+  - 784
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 785
+  - 785
+  sha256: b6a7aed4bef393022db6d2b943d9ef1e95c967ee2151b872c9a0d219dc1cbb32
+  disposition: test-or-review-rules
+  rules:
+  - version-negotiation
+  strength_inventory:
+  - should
+- lines:
+  - 786
+  - 787
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 788
+  - 788
+  sha256: 84e41f21f59fb8477919f81d76c6d221a4f5f4b5017750fefc47c462ead41adf
+  disposition: structure
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 789
+  - 789
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - version-negotiation
+  strength_inventory: []
+- lines:
+  - 790
+  - 795
+  sha256: 0a41144ebff3ef5c22a1aa6c91444c5904dd050e4dceb868923cd5f1b37323a8
+  disposition: test-or-review-rules
+  rules:
+  - version-negotiation
+  strength_inventory:
+  - shall
+- lines:
+  - 796
+  - 796
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 797
+  - 797
+  sha256: fea12379ca4f5422dc43bbc38dad259da1bfaf5b65f667353ed703527d93302d
+  disposition: structure
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 798
+  - 798
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 799
+  - 799
+  sha256: bd999ca1d06b17dc3c22e1a5e0708e8454fb7af2601f33d45a5e78d1f03d656b
+  disposition: structure
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 800
+  - 801
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 802
+  - 802
+  sha256: 5fe00732f6fe209c579afccce359dcb43d8d5cd548a351bc37a186b3627ca590
+  disposition: test-or-review-rules
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 803
+  - 803
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 804
+  - 804
+  sha256: ff729fbd8d89f78d32ad328e67e1e365fbb95726b410b1c00c7f1f05ad16b803
+  disposition: test-or-review-rules
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 805
+  - 805
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - authentication-decisions
+  strength_inventory: []
+- lines:
+  - 806
+  - 806
+  sha256: 4e9fcf2da1e263e4c13af78df8c6e844e6499821503f404011b1d7b7f2378ad5
+  disposition: test-or-review-rules
+  rules:
+  - authentication-decisions
+  strength_inventory:
+  - shall
+- lines:
+  - 807
+  - 807
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 808
+  - 808
+  sha256: b7819d13e147ac158ab359cd7c9438115664e5fb6e84204ff3b20fff5558bdfb
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 809
+  - 809
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 810
+  - 810
+  sha256: 6b820899fd82c4ef90ee1238864f5e157cfb00f16a8d9254b6db90b32a31487f
+  disposition: out-of-scope-security
+  rules: []
+  strength_inventory: []
+- lines:
+  - 811
+  - 811
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 812
+  - 812
+  sha256: 51fc48ec2d5d07a36d5c92d4c3d0ed79d691027cbd00c591c8a30d2fa9a66341
+  disposition: out-of-scope-security
+  rules: []
+  strength_inventory:
+  - may
+- lines:
+  - 813
+  - 813
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 814
+  - 814
+  sha256: d46568a00f7e02dcd73afcca4413dee7312461fae92a622b57989ad5a71b4397
+  disposition: structure
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 815
+  - 815
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 816
+  - 816
+  sha256: cad7c43db80b8fa889139fe361bb3fd8bd060d9cd88d6df71204b8a398adf183
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 817
+  - 817
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 818
+  - 818
+  sha256: 0af6774182807ab1e4de7ccbbc213b399c6617c3a5d4c48c0b3921cc896fe0d7
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory:
+  - should
+  - may
+- lines:
+  - 819
+  - 819
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 820
+  - 820
+  sha256: bc3aa3bf9f51a974530edb81ce7bed6286fc8cebf6654078c6443d04fa62c752
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 821
+  - 821
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 822
+  - 822
+  sha256: 216429ef5a6e42c76ed4da0ced19987209e3ff1e7d22dc048002ba15523aa512
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory:
+  - may
+- lines:
+  - 823
+  - 823
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 824
+  - 838
+  sha256: c172519c3c69e3db49d03c744ff4678857084fa250f6818933a14fdd76c85aa8
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory:
+  - shall
+- lines:
+  - 839
+  - 839
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 840
+  - 840
+  sha256: edf1b35bdbbd3b869706df7715c9e909f9274399a5cde735181955115057f54d
+  disposition: test-or-review-rules
+  rules:
+  - immutable-components
+  strength_inventory: []
+- lines:
+  - 841
+  - 841
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 842
+  - 842
+  sha256: 80b8072f53e0311780d9bce472457408c91ddbc4020dded3e7a98bf1566788e4
+  disposition: structure
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 843
+  - 843
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 844
+  - 844
+  sha256: b16588a72177dc07280c09bba809a6234990c8b247efedd79e106fb3819c5fce
+  disposition: test-or-review-rules
+  rules:
+  - generic-table-enforcement
+  strength_inventory:
+  - shall
+- lines:
+  - 845
+  - 845
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 846
+  - 853
+  sha256: d5add1027c4e6361db0c5c61887e4dc0869311525eddf5ca151fad20d66d44a4
+  disposition: test-or-review-rules
+  rules:
+  - generic-table-enforcement
+  strength_inventory:
+  - shall
+- lines:
+  - 854
+  - 854
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 855
+  - 856
+  sha256: 7f2e9610ff398230fffcdec5f3f770cada9453e820c9854a77c6555030cf56f9
+  disposition: test-or-review-rules
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 857
+  - 857
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 858
+  - 862
+  sha256: 099f9fa727b67b6c9869ea9ccdfd2a7e60cda7c72fd3e31d0300ce53b09c2632
+  disposition: test-or-review-rules
+  rules:
+  - generic-table-enforcement
+  strength_inventory: []
+- lines:
+  - 863
+  - 863
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 864
+  - 864
+  sha256: e288a9f69d2323be34f13c8410968bbe3b5314180ce6d29746d9f5b79c2185c3
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 865
+  - 865
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 866
+  - 866
+  sha256: c0ad2b4a68f63d195504cce0f68b221fc7732ecf92ede2358a2318f4ac28c16c
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 867
+  - 867
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 868
+  - 880
+  sha256: c9421fcb6dafada80a89a234a907eaca7d53412c011d36d1c2646d20c758ba43
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 881
+  - 881
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 882
+  - 882
+  sha256: 3dd5d508c08cb7bab3d22497d848459e2eb8311f9cfb99ee55d9e4331a3003bc
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 883
+  - 883
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 884
+  - 884
+  sha256: 8cc3af994fe36ae8e6dc12b7555fd10aa8adff685dfdb09499d0d74ba2c2f8a5
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 885
+  - 885
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 886
+  - 886
+  sha256: 420663692278137324e548c017ec7c9ae9a7d7d4702d2d35efcfde6a29bc92bc
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 887
+  - 887
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 888
+  - 895
+  sha256: 2504bc97ea8ebf3ee101a9f10c2e7e02947f89a73e95ba5f9a244277f33710be
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - should
+  - may
+- lines:
+  - 896
+  - 896
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 897
+  - 897
+  sha256: 39bd563ce1268682ff5582484b2b47fb43be1c1464951e3ad54b0470a3898bc4
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 898
+  - 898
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 899
+  - 903
+  sha256: a93382fd78c7870a8be19b31a814a6c1c81337431c50ece5ba8defb915ca8575
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 904
+  - 904
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 905
+  - 905
+  sha256: 930ca2ba2ed3e10e2a0c947d4ccac7f1173412f2994d7dbd2a2d8f489df83980
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 906
+  - 906
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 907
+  - 915
+  sha256: 062eae32b44f6d502d1d65a45b6518455f163a54a9de21774c05b305e599ce87
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - should
+  - may
+- lines:
+  - 916
+  - 916
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 917
+  - 917
+  sha256: e3b51c6f0e8722e2309e3d4360235cf0b73b0a99fbaf2e0895d390a5b6146fdd
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 918
+  - 918
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 919
+  - 922
+  sha256: 09fa88105eadf143d61bfea0a280d58431550d3a343602de8bf84b984ccfee1d
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 923
+  - 923
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 924
+  - 924
+  sha256: cea2620d58893cbb7e05a276c62a79bef9be606fb6d980587466f42732c5dd56
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 925
+  - 925
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 926
+  - 926
+  sha256: 83688052998687ada4efa88968e6b1f583fbe8dc2190960ee654907eada9b472
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 927
+  - 927
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 928
+  - 931
+  sha256: b15006ed2a770aaec43ea6ca3e2830d732d565fcf384afa164766d2dd0eff9d4
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 932
+  - 932
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 933
+  - 933
+  sha256: b225ba4e941ee1bdd58022708cafd3ace7d1a455a9a73ae248a55ddb809c61c8
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 934
+  - 934
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 935
+  - 935
+  sha256: b9a824722a4a8df231c41efc95e1b9edc5a04602d7d9d546e0c12162b53705d4
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 936
+  - 936
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 937
+  - 937
+  sha256: 3e0ab4ccaf8c2043a4b7526c18169b4b18f3a2ffdd4ed1be5f6f20c80114b02b
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+- lines:
+  - 938
+  - 938
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 939
+  - 939
+  sha256: 7c3d9929698e5b352e808686c836d723053c68cf2e610a344601d48484df8684
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 940
+  - 940
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 941
+  - 945
+  sha256: e608d0cd15606dcd658e0c53b33d54fd5765c6e88cde611e8d27a0435a68a985
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+- lines:
+  - 946
+  - 946
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 947
+  - 947
+  sha256: 15ccc8462d8d6ed1bbd62e85930b0c6ec66044e64381c3fff60a87125f9393c0
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 948
+  - 948
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 949
+  - 956
+  sha256: 909240d3e44ad0d974ec89e6efe6361aea342773502793938b2d6114983d756f
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 957
+  - 957
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 958
+  - 958
+  sha256: cdd01dd2219a07dfdf6010676fd49ff46c86c38a94f549c49d161c2c413e2740
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 959
+  - 959
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 960
+  - 964
+  sha256: 34cb4ed44a23d530785ba85d96d5cfe76e2aa0984625e3fca3c077688baeac5f
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 965
+  - 965
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 966
+  - 966
+  sha256: 35733847af0c05c0062551c16a6a8f7bc06c5e381f7b570e3956f8b5a5b91ad9
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 967
+  - 967
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 968
+  - 979
+  sha256: 05d34e72023e325827c0322b6596a987ff53a6b6afc6ec5e2ca0fa80b01ed69e
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+  - may
+- lines:
+  - 980
+  - 980
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 981
+  - 981
+  sha256: 08b6ba9e9c905b14f4a7420b867802e5247fd16b716071cc14120768d2a7a982
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 982
+  - 982
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 983
+  - 983
+  sha256: 25edbbafd52f4cde40af8215eba7d86cbbb20f4fed71df3680038edff323576a
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 984
+  - 984
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 985
+  - 985
+  sha256: 085d725c0732687e37a57370367e5789a24d932c47a54b86b7d699f83bc6cd3b
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 986
+  - 986
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 987
+  - 987
+  sha256: 1a6f301b74ed7ae0e49fd4076bde3885324d302e3c397b4380c0effea34e8ffa
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 988
+  - 988
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 989
+  - 989
+  sha256: 24df815ed5d456c4a6cebef4bb9a887786a7e13f4c47dac109af354ff5b1da88
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 990
+  - 990
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 991
+  - 994
+  sha256: e96229ae227c60ebfa68f4d92f88a0e4723f7567adace970c9b4e4e894cc9e21
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 995
+  - 995
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 996
+  - 996
+  sha256: 60468fea5f5389e6c900708aee60c9ac742127022f4c2127341e9f532e66d8f2
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 997
+  - 997
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 998
+  - 1000
+  sha256: c876bee140ba720270b31adb4e7bde6a94e5f2352cba78c317d547b89455251f
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1001
+  - 1001
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1002
+  - 1002
+  sha256: 371af00ae335b734fecaf9de8ba38540ba89bcf83b10d15a86d6399dee0aa784
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1003
+  - 1003
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1004
+  - 1010
+  sha256: e46bee13006fa704f5ebdc2b0f6776feab6d1ba3df4e3078a11940e1013d395c
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1011
+  - 1011
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1012
+  - 1012
+  sha256: ff4298ecf8f62a60911d97a835a636025db1de789d261043c4862cac989a59d3
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1013
+  - 1013
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1014
+  - 1017
+  sha256: f355d332f33e593cb36eb5eaa8f3558670dba5c2f1fbb1550176edd6f26dcae5
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1018
+  - 1018
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1019
+  - 1019
+  sha256: fcdf6f63fd8d81ef847ff731ee639f57ac54c30699fab99ac19a265063a5e115
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1020
+  - 1020
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1021
+  - 1024
+  sha256: fea4c486b6c66de65f0fc56528adfd70cd8211ef5342c342a0471cf4a129207c
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+- lines:
+  - 1025
+  - 1025
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1026
+  - 1026
+  sha256: 2c929fe4b051e3a88e1376ba50fd7c24dc4473f49fee83a357032bf11a78accd
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1027
+  - 1027
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1028
+  - 1031
+  sha256: ee438076515196a69faab48e89db418f8fbbf4911f454e6c79d7309b7847398d
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+- lines:
+  - 1032
+  - 1032
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1033
+  - 1033
+  sha256: 61a7e622580bc22708593646a7db26ad44e83caebd0793986b1dabcb6e3d26ca
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1034
+  - 1034
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1035
+  - 1044
+  sha256: 2fafc0c0325a997ae7402fce22cc5320252b526ee0fc70c7c0bf45edbbdbac9c
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+- lines:
+  - 1045
+  - 1045
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1046
+  - 1046
+  sha256: b7551eb96d70953543b02331f155a4ee94e765a5f1743a507f794edbbd1341e0
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1047
+  - 1047
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1048
+  - 1048
+  sha256: b823f4afda5508b365fcbdb34eb9d6c11e4b60b41f62ac797565a0c946eceeff
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1049
+  - 1049
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1050
+  - 1050
+  sha256: 1ac0bdc2844b15440e45076a43c87c8bd60e9f08994186c982cd56e02a8a1d68
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1051
+  - 1051
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1052
+  - 1059
+  sha256: b91220c35084ddf53e6f189ae31cf38bf7e6f19c69ab1d91606682c154fb1764
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1060
+  - 1060
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1061
+  - 1061
+  sha256: a7896cfa766641f6ea351be48f5fe8a945fae12f284063271c330a2bececa470
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1062
+  - 1062
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1063
+  - 1068
+  sha256: 87ee9d37f19d4f40ccd10a563910b980563591c1f28b86c75ef822a144596077
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1069
+  - 1069
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1070
+  - 1070
+  sha256: cd31f3183e5f22c5f7ddeadd8662d614fee6008c3aeceb72dc51d4f626dadc6e
+  disposition: structure
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1071
+  - 1071
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1072
+  - 1072
+  sha256: 1cdb9c2ce9741401f0fdf098aaca09c5dc79cf3321db9b6637848bb369e243f5
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1073
+  - 1073
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1074
+  - 1074
+  sha256: 21aa75f5a0f97bd72d6e97ffedb9d8eccc69ff1f6d7ec9efaa4066b06249e92e
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1075
+  - 1075
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1076
+  - 1088
+  sha256: fa8c4a78fb6cb60a178e2e4182035166712bb9a323835e03e13bed15d46bcdec
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - shall
+  - may
+- lines:
+  - 1089
+  - 1089
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1090
+  - 1090
+  sha256: 34996c3089dbd189c7ace0f26e2f2de7cb1f6a94d62f79770692fb3f0fcd3550
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1091
+  - 1091
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1092
+  - 1092
+  sha256: 73326bed4ddef34a3cf492955bb58a9bf38398e03dc042cf955f197ca6fa8450
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1093
+  - 1093
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1094
+  - 1094
+  sha256: 5dc39c82c2c84653da0fe3a492ee7ced337bd6bcf0628b0b079059bad40e54ad
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - may
+- lines:
+  - 1095
+  - 1095
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1096
+  - 1099
+  sha256: ca32dfb1e71fb6bee83f7f150cbae1751afd4f03030c71b703032e26c9eb9af5
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1100
+  - 1100
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1101
+  - 1101
+  sha256: 9d012c4abcbed8787e8c075c69a6d85520fd3a93c3fb366d007dff07e6174baf
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory:
+  - should
+- lines:
+  - 1102
+  - 1102
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1103
+  - 1103
+  sha256: 23c044a024b53d7a51bfeeee50d0975f799982717c088b5c418cd2e71180dcff
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1104
+  - 1104
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1105
+  - 1105
+  sha256: 4671d3ae0cc0c1257cf1e52d3bb8e9d83c1bb834250ebf468845e33e998065a2
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1106
+  - 1106
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1107
+  - 1111
+  sha256: f2b0bb2d13f0ffb48087cbc80bd9c574059fec48e4f39c93f124e12e9d0bae3a
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1112
+  - 1112
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1113
+  - 1116
+  sha256: bfe194f5de05e2692e361fd7ea30186adef80366d285d5cbdaa9b0d1ec19bb46
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1117
+  - 1117
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1118
+  - 1118
+  sha256: cc47ef9c1a3b4b662549ff271dafc1b3d2c9d2af10b3c9d588d8269b67216dfc
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1119
+  - 1119
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1120
+  - 1124
+  sha256: 956bcd15e6de9acb1d2b9b49a5f11b0a243343e9bd1d89cc255f810dc3bb86b1
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1125
+  - 1125
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1126
+  - 1129
+  sha256: e0e4b6d39bc0c9405e6557701e3d3d79ac5d060ebf9651b9b5be031d4bcae7e5
+  disposition: test-or-review-rules
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1130
+  - 1130
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - statement-and-nested-tables
+  strength_inventory: []
+- lines:
+  - 1131
+  - 1131
+  sha256: 0996a408ca6572d4236ab5657f41a2e5f5e4d7c49f13d67cbdea081504febc81
+  disposition: structure
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1132
+  - 1133
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1134
+  - 1134
+  sha256: 7b375726d0f6674fa633b906bd185cbb033df9fcdb68379fea92cf7575de53e4
+  disposition: test-or-review-rules
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1135
+  - 1135
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1136
+  - 1136
+  sha256: 99e306140238c78bf5dd7568ef9cc4cae119ba4bcd4b7ba4f223825be993bcc6
+  disposition: test-or-review-rules
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1137
+  - 1137
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1138
+  - 1146
+  sha256: ac5f8e46f3bbf82e9cbd77ad6b415720e9fc17226dafd1daac9238d81cbc555a
+  disposition: test-or-review-rules
+  rules:
+  - attachment-metadata-table
+  strength_inventory:
+  - shall
+- lines:
+  - 1147
+  - 1147
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - attachment-metadata-table
+  strength_inventory: []
+- lines:
+  - 1148
+  - 1148
+  sha256: 18261db75ba5078fbc8d8533498e028e0d5997d012551c81676f3c13605e90b4
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1149
+  - 1149
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1150
+  - 1150
+  sha256: 45b2ae0fdfe3c52ac9d2b9f1cbacd02addc7875703fca8c0f7935987f12b027b
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1151
+  - 1151
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1152
+  - 1152
+  sha256: d647c9516b0ddb4cd652858c6ea19cbd54a12be99c72e8e7e88f1bdb5760ae30
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1153
+  - 1153
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1154
+  - 1154
+  sha256: 1ab9e78a066585d03275bccd39e3b9c3dcf527eabc7a9c1b45224111abd2f340
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory:
+  - may
+- lines:
+  - 1155
+  - 1155
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1156
+  - 1156
+  sha256: a803d979b96a2ca1c932ca52b0b44727544ed426c884e695f3491591f8ecf3c0
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1157
+  - 1157
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1158
+  - 1158
+  sha256: 52c30ed6a72bfffb51276f666280f3c68ec0f29e639d57a39380fb6ef5204848
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1159
+  - 1159
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1160
+  - 1163
+  sha256: 1b2eb68c8cb82a84e793e4af812ff71e8709494cfc3c5d63f83d58ffc52248f2
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1164
+  - 1164
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1165
+  - 1165
+  sha256: 8a72eede6422bfc1ad2f72a27a18c9070af167a9f97a9ad9f6b2c88902775561
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1166
+  - 1166
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1167
+  - 1167
+  sha256: ceb5d172a19282f1b36640963b348dac757c2cb2d7c3bae5f0c862e822d57203
+  disposition: structure
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1168
+  - 1169
+  sha256: 75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1170
+  - 1170
+  sha256: 1b52fb7beaab55f97178a71bca8dbcafc3ff43fdd7a1c68e3c1cd3f3786f55d0
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1171
+  - 1171
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1172
+  - 1174
+  sha256: 4137614b1b578e69bf6e46c5cd197c478195944a477e0b56a6e84e1bdbf6e210
+  disposition: advisory-or-optional-metadata
+  rules:
+  - metadata-recommendations
+  strength_inventory:
+  - should
+  - may
+- lines:
+  - 1175
+  - 1175
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1176
+  - 1176
+  sha256: 719289365fa30f3341b96f87bb4bf356cef72d27d0dfc41c90aa79524359c4ab
+  disposition: structure
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1177
+  - 1177
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - metadata-recommendations
+  strength_inventory: []
+- lines:
+  - 1178
+  - 1178
+  sha256: 8e1f80e48037d61c4bf1b88dddc92547fb93d835e8ac287e2604f73f86e1c4c7
+  disposition: test-or-review-rules
+  rules:
+  - rejection-exceptions
+  strength_inventory:
+  - should
+- lines:
+  - 1179
+  - 1179
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1180
+  - 1180
+  sha256: 68515154c33a24a20c2e1995cb915451b72a4ebc1bd07d3aa2e1d0873202acc5
+  disposition: structure
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1181
+  - 1181
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1182
+  - 1182
+  sha256: ee8d439bf3d5af7c57588d565ee697cc95e24475560d6864a976a94940f6e6e7
+  disposition: test-or-review-rules
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1183
+  - 1183
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1184
+  - 1184
+  sha256: d0f711219749d101a0a0d942727995f70f901c3c59ddedea741bfd54768608b5
+  disposition: test-or-review-rules
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1185
+  - 1185
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - rejection-exceptions
+  strength_inventory: []
+- lines:
+  - 1186
+  - 1192
+  sha256: c21318fd303677c102410e94a621456c0bd5d8e1ed1719aa24ce6061873845da
+  disposition: test-or-review-rules
+  rules:
+  - rejection-exceptions
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 1193
+  - 1193
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1194
+  - 1194
+  sha256: 01903be4cd6bc4888db617d55a49dada92122dec0d0d364634dd8b11567754ef
+  disposition: structure
+  rules:
+  - specific-processing
+  strength_inventory: []
+- lines:
+  - 1195
+  - 1195
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - specific-processing
+  strength_inventory: []
+- lines:
+  - 1196
+  - 1196
+  sha256: e4fd270eb7f4df9b010cf14820b811143ebac3348823db8217846689a503c6a7
+  disposition: test-or-review-rules
+  rules:
+  - specific-processing
+  strength_inventory: []
+- lines:
+  - 1197
+  - 1197
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - specific-processing
+  strength_inventory: []
+- lines:
+  - 1198
+  - 1215
+  sha256: f27efef64c49f5556dfa465cd679cee587990a6f33da4dba4361755a9f8c4680
+  disposition: test-or-review-rules
+  rules:
+  - specific-processing
+  strength_inventory:
+  - shall
+  - should
+  - may
+- lines:
+  - 1216
+  - 1216
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1217
+  - 1217
+  sha256: ed5021ebb8a87865ce404e2a20da4072a3452f97fb35288b16986b9190917d37
+  disposition: structure
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1218
+  - 1218
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1219
+  - 1219
+  sha256: 32462f1895f04d16ead11a5be19a0b8a0be5ae697268ea614ea2494b3362115c
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1220
+  - 1220
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1221
+  - 1221
+  sha256: f62ea58fc014d828519a38c24ebe19c2c17cb647ff4afa947c47d3807e53a62a
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - should
+- lines:
+  - 1222
+  - 1222
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1223
+  - 1223
+  sha256: 3feb046935960d972e9608143ec8dc37e6a9c9f83dbe481955f6349a8b396744
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - may
+- lines:
+  - 1224
+  - 1224
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1225
+  - 1225
+  sha256: 9b28b3536ed9a8f8e644f2847fa2c7a55abb0a9e1786918ca6bc475f8f1d9dc3
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - should
+- lines:
+  - 1226
+  - 1226
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1227
+  - 1227
+  sha256: d4712dd95f74e37df03372ffa6add9a368aa16c1d50633a33671b380ae4b1add
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - shall
+- lines:
+  - 1228
+  - 1228
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1229
+  - 1229
+  sha256: 0d37b83fb7d108e10e4ad2982c198d72f4a0337b9b9f887ee2581b8cb65004bd
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - may
+- lines:
+  - 1230
+  - 1230
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1231
+  - 1231
+  sha256: 2a8fd4170cd685ba23a687dd1d3a19622e60ec6228ee4bc216a4957565905ec6
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - should
+- lines:
+  - 1232
+  - 1232
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1233
+  - 1233
+  sha256: 3686db971a47302444e9b3363900ad176ae16db329c4d2cc7d2d2e9b7fa0608c
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - may
+- lines:
+  - 1234
+  - 1234
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1235
+  - 1235
+  sha256: 4c2339cf2f4b4c0dafe7eaae86b3c268a8213608194ec587145511364e5efb8c
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - may
+- lines:
+  - 1236
+  - 1236
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory: []
+- lines:
+  - 1237
+  - 1237
+  sha256: 79f4cdb0b0436277a59bb2acaf3b397be80456e0be9caf54af1a5e06867229bb
+  disposition: test-or-review-rules
+  rules:
+  - optional-response-behavior-and-version
+  strength_inventory:
+  - may
+- lines:
+  - 1238
+  - 1238
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1239
+  - 1239
+  sha256: ebb66c84509534be0df9b4ccc073ac55c1aa043166e49c211840825e2eecfe7d
+  disposition: structure
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1240
+  - 1240
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1241
+  - 1241
+  sha256: bfecf8e621a0a86287a31be273fe3cbd7f345ef04cb57f6cd5504672c0fd04d9
+  disposition: test-or-review-rules
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1242
+  - 1242
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1243
+  - 1243
+  sha256: ada9e27d9549d7850274eccaebd07cd5ac51e1a1107da4816e2430e45bf40a40
+  disposition: test-or-review-rules
+  rules:
+  - voiding-state
+  strength_inventory:
+  - shall
+- lines:
+  - 1244
+  - 1244
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1245
+  - 1246
+  sha256: 7fb0b7e8a5472e62471b8da483563ae45aee4fcba97de5c6371d7798d18d3e20
+  disposition: test-or-review-rules
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1247
+  - 1247
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1248
+  - 1248
+  sha256: 6419e0617dcfa86ec2bff658ecff2ebeefee713bf81f5fc36bd19abf1908660b
+  disposition: test-or-review-rules
+  rules:
+  - voiding-state
+  strength_inventory:
+  - shall
+- lines:
+  - 1249
+  - 1249
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - voiding-state
+  strength_inventory: []
+- lines:
+  - 1250
+  - 1250
+  sha256: 3a9db17632e63212c508c594eabbd3f13a3b7258f5d96f726b6ef953309662b6
+  disposition: test-or-review-rules
+  rules:
+  - voiding-state
+  strength_inventory:
+  - may
+- lines:
+  - 1251
+  - 1251
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1252
+  - 1252
+  sha256: 47418e4624623dc61dc34fedf3b57f1edb814469d4d70d0060ca2e33eaf8115f
+  disposition: structure
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1253
+  - 1253
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1254
+  - 1254
+  sha256: c9b4141ce89315813c4aff06dfed61c32749fad225d9652e4c6f526aa4e25488
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1255
+  - 1255
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1256
+  - 1256
+  sha256: c52ec24c96582b8d272667cb1b2543a7512f91c80bb8ff5471453254a50b0235
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory:
+  - should
+- lines:
+  - 1257
+  - 1257
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1258
+  - 1258
+  sha256: d1335fc985405a7286509773c124d9dd4f33d9e7f84e2b43eede9c0fc23dc4d9
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1259
+  - 1259
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1260
+  - 1265
+  sha256: 5e3e1f1e72ef6e421fbf3c2f4366c050aa35cd9cccfffd9da0f426196a6484f5
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 1266
+  - 1266
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1267
+  - 1267
+  sha256: 9cfcb67626d1d7d73cb05212e11fb9ccfbed2a5f2a98eef8e5d9b7d091d499ec
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1268
+  - 1268
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1269
+  - 1275
+  sha256: 86922cff2f1fefdfa9213ba5a9b4bec18142db797453d745b26ee588ae2ae21e
+  disposition: test-or-review-rules
+  rules:
+  - signature-validation
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 1276
+  - 1276
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - signature-validation
+  strength_inventory: []
+- lines:
+  - 1277
+  - 1277
+  sha256: 617f557aa4139350af46ef934d73b38b2bcc64c912f350a5b16eb768d7aecc2d
+  disposition: structure
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1278
+  - 1278
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1279
+  - 1279
+  sha256: c425e90a30827a69ee32c33dc7ac7eda5f7f855f8a5a0f16f14b999fe0aa2669
+  disposition: test-or-review-rules
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1280
+  - 1280
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1281
+  - 1281
+  sha256: 4f4757c086b41ccee4e58bc554c8b866d30945fd3390106c9ab4d1ebe0ffe6b2
+  disposition: structure
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1282
+  - 1282
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1283
+  - 1283
+  sha256: a0fc46fa549bf21dedd7690a8cd4c5af5b3c29d1bf510b9f9680412ea2bf43c4
+  disposition: test-or-review-rules
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1284
+  - 1284
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1285
+  - 1285
+  sha256: 4b4833557145153bfd6a5628ca90a32624e51e55d55ab7f8973055bd9b5fa93d
+  disposition: test-or-review-rules
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1286
+  - 1286
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - iri-comparison
+  strength_inventory: []
+- lines:
+  - 1287
+  - 1287
+  sha256: babda40bf4157003a494df85b3e5b03245a81829e7e680ff0baa628a7f07ba19
+  disposition: test-or-review-rules
+  rules:
+  - iri-comparison
+  strength_inventory:
+  - shall
+- lines:
+  - 1288
+  - 1288
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1289
+  - 1289
+  sha256: 4b3ac516fc457d793e3ea0af6154429731bab982437c9c4a9037f7af342cec69
+  disposition: structure
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1290
+  - 1290
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1291
+  - 1291
+  sha256: 35f60fae442875ef3dad447b8a73fdf7e40f3f89e131df9d074b198cce5dda7f
+  disposition: test-or-review-rules
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1292
+  - 1292
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1293
+  - 1293
+  sha256: ba14c1a7fec10c9c1f760fdaa88076d996ac025fe5a4ecf8185657d06c064695
+  disposition: test-or-review-rules
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1294
+  - 1294
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - extensions
+  strength_inventory: []
+- lines:
+  - 1295
+  - 1296
+  sha256: fedae7c6a9063abaf528c05688e769b13df9c695f83f901183b6147c51f68194
+  disposition: test-or-review-rules
+  rules:
+  - extensions
+  strength_inventory:
+  - shall
+- lines:
+  - 1297
+  - 1297
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1298
+  - 1298
+  sha256: 0b41ba824eca40a5e76ac917bc73d0b1e70d73baabd36f2fc17a5ff2f74de42b
+  disposition: structure
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1299
+  - 1299
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1300
+  - 1300
+  sha256: 5110d38a8b90fe3c50c589074920f5487fa2315693b4d04c8a5519f277f43905
+  disposition: test-or-review-rules
+  rules:
+  - language-map-tags
+  strength_inventory:
+  - should
+- lines:
+  - 1301
+  - 1301
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1302
+  - 1302
+  sha256: 0d6e18ee9696dd55f8d81a071b8bde3efa7bfcaf8066e46633f622fd04a5dc9c
+  disposition: test-or-review-rules
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1303
+  - 1303
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1304
+  - 1304
+  sha256: 9204bffc9dd7856d57e8c583c4b8bb6f77ac497a423bc7851e5807d6db348969
+  disposition: test-or-review-rules
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1305
+  - 1305
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1306
+  - 1306
+  sha256: 3ee028894099a094b55e756aa6883762f2159d41760c2a83fd2c80000acf5be6
+  disposition: test-or-review-rules
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1307
+  - 1307
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - language-map-tags
+  strength_inventory: []
+- lines:
+  - 1308
+  - 1309
+  sha256: 7dcd52a96970a57abcf2406989dbaea465e19af6078470cbf8e007b880efaf4e
+  disposition: test-or-review-rules
+  rules:
+  - language-map-tags
+  strength_inventory:
+  - shall
+- lines:
+  - 1310
+  - 1310
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1311
+  - 1311
+  sha256: 596c73010e3fb1480195a233eb624cd3c6300650a880bee20e19cb1be8a8d592
+  disposition: structure
+  rules:
+  - uuid-standard-form
+  strength_inventory: []
+- lines:
+  - 1312
+  - 1312
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - uuid-standard-form
+  strength_inventory: []
+- lines:
+  - 1313
+  - 1313
+  sha256: f39a3607ff06f0ef2539abdc4645a9d2d7fb3cc038c46d35b53995d4e8918f75
+  disposition: test-or-review-rules
+  rules:
+  - uuid-standard-form
+  strength_inventory: []
+- lines:
+  - 1314
+  - 1314
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - uuid-standard-form
+  strength_inventory: []
+- lines:
+  - 1315
+  - 1316
+  sha256: e4c534c7942b2ff7549d489ef0089e224789d60e0af07c542b358cba495be18f
+  disposition: test-or-review-rules
+  rules:
+  - uuid-standard-form
+  strength_inventory:
+  - shall
+  - should
+- lines:
+  - 1317
+  - 1317
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1318
+  - 1318
+  sha256: cb1b3ca21c8129c85990a2500c122ab20e3f1252415bf841bb67894cd977f2dd
+  disposition: structure
+  rules:
+  - timestamp-conversion-and-precision
+  strength_inventory: []
+- lines:
+  - 1319
+  - 1319
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - timestamp-conversion-and-precision
+  strength_inventory: []
+- lines:
+  - 1320
+  - 1321
+  sha256: d84105b59dd7122cfcb127d4e13ffc009691f9be0d225e9b3d6afdc89953c496
+  disposition: test-or-review-rules
+  rules:
+  - timestamp-conversion-and-precision
+  strength_inventory:
+  - shall
+  - may
+- lines:
+  - 1322
+  - 1322
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1323
+  - 1323
+  sha256: f30e3106f162a61d53717c9dd66f673d99f7b23a60ddc734b1e7384ec9ba2f89
+  disposition: structure
+  rules:
+  - duration-format-and-comparison
+  strength_inventory: []
+- lines:
+  - 1324
+  - 1324
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - duration-format-and-comparison
+  strength_inventory: []
+- lines:
+  - 1325
+  - 1328
+  sha256: 498dede4687b596f980c7824bf1be9727fe8fe93064e78e7eeb89e195707de59
+  disposition: test-or-review-rules
+  rules:
+  - duration-format-and-comparison
+  strength_inventory:
+  - shall
+  - may
+- lines:
+  - 1329
+  - 1329
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules: []
+  strength_inventory: []
+- lines:
+  - 1330
+  - 1330
+  sha256: 748fb68bf908b851604a5b4521fd7f549e9a4677a1f22df37292a57ac5c01689
+  disposition: structure
+  rules:
+  - arbitrary-document-data
+  strength_inventory: []
+- lines:
+  - 1331
+  - 1331
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - arbitrary-document-data
+  strength_inventory: []
+- lines:
+  - 1332
+  - 1332
+  sha256: 66ba354b55ed54d0258550f67cfa4a8684db7b734066be2c626e3a0224ccdf71
+  disposition: test-or-review-rules
+  rules:
+  - arbitrary-document-data
+  strength_inventory: []
+- lines:
+  - 1333
+  - 1333
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+  disposition: layout
+  rules:
+  - arbitrary-document-data
+  strength_inventory: []
+- lines:
+  - 1334
+  - 1338
+  sha256: cfab20d2f4a57e92e357867ade8247212f5321bc580b695c72ca890a53c67c5b
+  disposition: test-or-review-rules
+  rules:
+  - arbitrary-document-data
+  strength_inventory: []
+interpretations:
+- id: state-list-selectors
+  lines:
+  - 418
+  - 507
+  decision: Omitting stateId lists State ids, and omitting stateId for DELETE deletes all State in the given scope;
+    follow narrative over contradictory multiple-GET required cell.
+  published_anchor: IEEE 2023 sections 4.1.6.2 and 4.1.6.2.5, printed pages 27 and 29; the table conflict persists.
+- id: activity-profile-list-scope
+  lines:
+  - 731
+  - 752
+  decision: Use activityId for Activity Profile listing; the agent entry in its multiple-GET table conflicts with
+    resource scope and the other method tables.
+  published_anchor: IEEE 2023 section 4.1.6.6.5, printed page 35; the inconsistent selector persists.
+- id: formatted-identifiers
+  lines:
+  - 848
+  - 1191
+  decision: Retain the explicit syntax and standard UUID-form requirements. The permission not to validate values
+    is read as not resolving identifiers or verifying their existence. This remains an author interpretation; the
+    published PDF does not explicitly adjudicate the boundary.
+  published_anchor: IEEE 2023 sections 4.2.1 and 4.2.4.1, printed pages 37-38 and 48.
+- id: interaction-validation
+  lines:
+  - 1203
+  - 1205
+  decision: A valid interactionType is mandatory. Rejection of other invalid interaction properties is optional,
+    and tests accept 400 or success for those probes. Characterstring parameters are not LRS validation duties.
+- id: put-single-and-batches
+  lines:
+  - 68
+  - 223
+  decision: PUT uses the single-Statement body defined by its resource table; POST tests multi-Statement batches.
+    The generic media-type wording calls both batches and needs editorial clarification.
+  published_anchor: IEEE 2023 sections 4.1.3.1, 4.1.3.5 and 4.1.6.1.1, printed pages 18-19 and 23.
+- id: case-equivalence-and-iri-comparison
+  lines:
+  - 824
+  - 840
+  supporting_lines:
+  - 1287
+  - 1287
+  decision: Keep the existing signed-Statement mbox case vector under the explicit Case exclusion; do not derive
+    unrestricted lowercasing of all IRIs. The intersection with the permitted RFC 3987 comparison strategies remains
+    unresolved in the published PDF.
+  published_anchor: IEEE 2023 section 4.2, printed page 37, and section 4.2.7.1, printed page 51.
+- id: document-non-json-post
+  lines:
+  - 452
+  - 460
+  decision: Arbitrary binary acceptance is tested via PUT. Non-JSON POST against an existing document must reject;
+    non-JSON POST to a missing document is not used as a mandatory success probe.
+- id: canonical-optional-maps
+  lines:
+  - 406
+  - 409
+  decision: Activity maps require language filtering. Verb and extension canonical maps are optional; retaining
+    a submitted Verb display in canonical mode is allowed.
+- id: equivalent-duplicate-status
+  lines:
+  - 227
+  - 239
+  decision: Both 409 and 204 are permitted for known Statement ids. Always test preservation; signature validation
+    exercises required logical comparison exceptions.
+- id: asynchronous-statement-read
+  lines:
+  - 226
+  - 238
+  decision: Wait up to the configured bounded observation window for retrieval. A timeout records a test failure
+    under that fixture; it does not prove the standard specifies a five-second deadline.
+- id: empty-arrays
+  lines:
+  - 899
+  - 1084
+  decision: Do not invent a nonempty requirement for Group.member or contextActivities. relevantTypes explicitly
+    requires one or more entries when supplied.
+- id: pagination-topology
+  lines:
+  - 249
+  - 1235
+  decision: Follow the more IRL without assuming cursor syntax. The reference runner currently supports same-origin
+    pagination and requires an appropriate runner/fixture for other topologies.
+- id: signature-certificate
+  lines:
+  - 1260
+  - 1275
+  decision: Validate the signature with the included certificate public key. No application-specific trusted CA
+    or production credential is required for the synthetic conformance certificate.
+external_references:
+- RFC 3629
+- RFC 2046
+- RFC 2616 conditional requests and language negotiation
+- RFC 8259
+- RFC 3987 sections 5.3.1 and 5.3.2
+- RFC 5646
+- RFC 4122 standard UUID form
+- RFC 7515 and its RSA algorithm definitions
+- FIPS PUB 180-2 SHA-2
+- IEEE 754 binary32 minimum precision
+- Semantic Versioning 1.0.0
+- ISO 8601:2004(E) sections 4.4.3.2 and 4.4.3.3
