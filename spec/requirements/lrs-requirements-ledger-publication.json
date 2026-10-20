@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "id": "kiva-lrs-requirements-ledger-publication",
+  "state": "published",
+  "source_designation": "IEEE Std 9274.1.1-2023",
+  "scope": "LRS ledger, source-validation tooling, documentation and static reference repairs. Publication records available artifacts, not review approval or implementation conformance.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "8954c40428c0cc99eb40ec7b2ff5878c421e9515d4f7c7322fa920aaf10e706e"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "53c11b394fc350d588e59e73295e590f69f284be0a4b7f32bb600e33d0ded289"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f7407b1c1eec1f8362f0f02d61b63bb5397e0d6061e73c1fab2a2cc78669a617"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "0ac619f1ef4462c524a66d4bf3b0cf87984c9f507e951d59d109ce6fa67e43d4"
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "38055fdace5a7db8e1aad8c87d61cf6b280775d1e9ebe55e64dc79fa068e3677"
+    },
+    {
+      "path": "docs/architecture/analytics-claim-boundary.md",
+      "sha256": "5b9050178747d7d62da90bd2dcd4b9a6a7ae4ad7a87e7d05a2060e4eb74169ab"
+    },
+    {
+      "path": "docs/architecture/assurance-and-confidential-computation.md",
+      "sha256": "b216ae62d4b81417b4613bd8136069a17994a7d0ad2eb15de83931b4915d6808"
+    },
+    {
+      "path": "docs/architecture/claim-strengthening-roadmap.md",
+      "sha256": "1e0eadb20c269ebca13b01b7a74ae9221da87e87ea86fa6fbcefcd0d5a405737"
+    },
+    {
+      "path": "docs/architecture/confidential-mechanism-abstraction.md",
+      "sha256": "c4e08e6299b2b7eae1d443210457ec2041115a4ea347ca036f48cd1e6a9483cb"
+    },
+    {
+      "path": "docs/architecture/conformance-auth-fixtures.md",
+      "sha256": "66716d92a3f7cef9aed9bcc0fd66c556b04233c7572a552b3e48dc3dea306508"
+    },
+    {
+      "path": "docs/architecture/conformance-claim.md",
+      "sha256": "d7f027f818989a58db9e542d3d230453314205d0ac339ab8600df7b5c54b2401"
+    },
+    {
+      "path": "docs/architecture/conformance-endpoint-profiles.md",
+      "sha256": "607af758b48e71400533630957e5b98a741435850353f8a2bb330bc7993fe3e2"
+    },
+    {
+      "path": "docs/architecture/conformance-suite-contribution.md",
+      "sha256": "d7d465f968e1bd899f344b7968f3ee0f44681139053b10b48d610363d8521fee"
+    },
+    {
+      "path": "docs/architecture/generated/operation-kernel.md",
+      "sha256": "32653d026ccdd1d12d47afb999633ba2c97cb57274ad2f171dcce5c43a6df91c"
+    },
+    {
+      "path": "docs/architecture/learner-data-portability-export.md",
+      "sha256": "ab7a4b33b502b612c9de369b2d403ebbbd7190e6ae8ac2025d732ac466b9b3e7"
+    },
+    {
+      "path": "docs/architecture/oauth-oidc-resource-server-binding.md",
+      "sha256": "9f7eeffe0ef7f36e836416a00232f886f8c9d3c8de160e30f794fe658b02fa1b"
+    },
+    {
+      "path": "docs/architecture/pds-extension-compatibility.md",
+      "sha256": "3d8be816a3752be22a4fe3b363b391859cb7fae18798a3358d34d2a4d77dd8b2"
+    },
+    {
+      "path": "docs/architecture/pds-milestones.md",
+      "sha256": "ee8ed049548fb2aba4eb51a70191e2f277c7d93e22014ef74e2d56fb2fee6656"
+    },
+    {
+      "path": "docs/architecture/pds-operational-lifecycle-workflows.md",
+      "sha256": "22fbe27d17576389c08f25588eed5d83f052235f27543f6d67ef6b28ab92133c"
+    },
+    {
+      "path": "docs/architecture/pds-public-sector-deployment-templates.md",
+      "sha256": "f286d4125e086efd8ad13d4dbc6b6aa3913317faa72a59a32b04aee38fd54c87"
+    },
+    {
+      "path": "docs/architecture/reference-reporting-deployments.md",
+      "sha256": "65561af5fd8c391afb02ecbc64812beeb2a03416892c87b68c591d7cd7ab8f4c"
+    },
+    {
+      "path": "docs/architecture/system-design.md",
+      "sha256": "1c14ab539224e6b18c85b425b9c315a128b99d1431462f43c05b873f23cb35a0"
+    },
+    {
+      "path": "docs/operations/ci-gates.md",
+      "sha256": "fce2ad06c557e4e5f8e2a2271fed3dea5ba684b623ef1ff52e2fe80b37dc7a99"
+    },
+    {
+      "path": "docs/operations/release-evidence.md",
+      "sha256": "2df4fbdb3ddb841cc7ed96a5aa008c0b0874d800f185e50f310a368e5bbb6be9"
+    },
+    {
+      "path": "generated/architecture/operation-kernel.yaml",
+      "sha256": "809d468cbebee5a318b309d3c3c2142c6bf77b4897797f480f48ea9a74a5416c"
+    },
+    {
+      "path": "generated/http-operation-catalog.evidence.json",
+      "sha256": "77e13a403f6b5d9af2333c0c053e34557e16a697c2e583eacf5d274fa69e5c39"
+    },
+    {
+      "path": "scripts/ci/audit_requirement_catalog.py",
+      "sha256": "a5a881620c7c21cdfb33a1de3e4e68bcaf4d558c9627faf5c37ca1c64f06f904"
+    },
+    {
+      "path": "scripts/ci/issued_contract.py",
+      "sha256": "9cb652787d0ce891cd86e64cba37b2bfaac7359caa89e69dfb21d3c712aabd64"
+    },
+    {
+      "path": "scripts/ci/lrs_ledger_publication.py",
+      "sha256": "7fece7236bd44d23d5c85b53303c696506f00758e2e7dd67a3432c2069720db5"
+    },
+    {
+      "path": "scripts/ci/lrs_projection_followup.py",
+      "sha256": "3477ccb34a4b579508aa3a09185f484a1b61d5fe3cbc4315ac90d0d503ea575d"
+    },
+    {
+      "path": "spec/architecture/boundaries/hygiene-rules.yaml",
+      "sha256": "8ae6c24f9fee71b9bf52542bc4c26c6d5dc1950a8d2ecc9daca4a56c043cfd7c"
+    },
+    {
+      "path": "spec/conformance/README.md",
+      "sha256": "a00789884f0414a25c7d93d34a8d6bab7271f37f7e5c757b3c8a32eda2e5b45a"
+    },
+    {
+      "path": "spec/conformance/lrs-assertion-manifest.yaml",
+      "sha256": "e28e9c4a489136153d7e5f6363b8da802f10f329d49797b84b81b6680ae3ee42"
+    },
+    {
+      "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",
+      "sha256": "12fc33deed35bd9ace54b47cc118acf7a74c76cad6a67df30f643f61a7b77c15"
+    },
+    {
+      "path": "spec/openapi/README.md",
+      "sha256": "116d60cb264dfae711367caabeca99445523d782cb8f6eac0136d6574a5af86b"
+    },
+    {
+      "path": "spec/openapi/kiva-xapi.yaml",
+      "sha256": "0614b5ef42ad25c739325cd598b4d2bc22b38a2a806ef3beecab207f9c03b3a5"
+    },
+    {
+      "path": "spec/pds/README.md",
+      "sha256": "2bebbe59cc8d2a0db0d3ba2b2a89c223864b9356990f1d5ca5c8ecb2dd25cfa2"
+    },
+    {
+      "path": "spec/requirements/README.md",
+      "sha256": "1d3ffb340bfa19c09a6fe9dd126de5f37159e15f8a9d8fd6b52b1676844ada10"
+    },
+    {
+      "path": "spec/requirements/ieee-39274-1-1-2025.yaml",
+      "sha256": "ceb16376c0cfdf9f6c1ccde4ffadfae0dd598a92d73ee42b275d3070080f74c9"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger-publication.md",
+      "sha256": "a77c789aa73fbec7be2092b0b3d5b1e376e3a1d4b7ed4c31396eea5532a06a45"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger-review.md",
+      "sha256": "97372a84ddff3037a039e2ec24eaf479639971b5933079acd000398a5e20e899"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger-semantics.md",
+      "sha256": "1fea6b81a9332769fb7aa7ca3db4779a0afc526e09e925b17623e11d6ee47c95"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/ISSUES.md",
+      "sha256": "230a7bfc2a8031ca1451157073ba7625c25d333f03c8a1e5c1a745178c88a267"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/README.md",
+      "sha256": "19cc170c36742d892333f2de7133972b24394c869d837f70f647f56056e4a8bf"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/dependencies.json",
+      "sha256": "2a5f8a44d528a1d1cc6e8aff74582d76d557a012afd8de88faa92dfbc587152b"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/discharge-groups.json",
+      "sha256": "a9d527cdfb11059573d9ac5d0a59374e70c3210774dacc692c6e63612895f0f1"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/families.json",
+      "sha256": "7dbcd31a29f18f77b50248f0b3d24d995a2c7759639944ca9f09f047b2dfd716"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/issues.json",
+      "sha256": "a8c0b3e9fb77f013d7b7f1a5ba1d8bdeef8b8474ef631a0ba3d104650ce8c656"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/ledger.json",
+      "sha256": "e3a685865a9c710dac0e639b1aeb92ce5520ef83d954ead53c5516327fde6d58"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/project-interpretations.json",
+      "sha256": "3cf785f450535e1f634bdc05be8ca982bfc33afe2ad048491a5651700ecd3425"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/requirements.csv",
+      "sha256": "68cef19e0d31299ff7536de7dec02219dc290f57bbe77fa0328d599cbef98268"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/source-units.csv",
+      "sha256": "6d990d5c113aadf7eaae609a0f7f3f82e7d647e73e8cee5c99d9e3b0c96ad9dc"
+    },
+    {
+      "path": "tests/conformance/http/generated/behaviors.yaml",
+      "sha256": "aeafa3927301bf8e4e3b1e0eed146e71ffe05b7088dd89fa482d856c969ec41d"
+    }
+  ],
+  "inventory_boundary": "All changed or added PR files except this inventory. The signed Git commit binds the inventory."
+}

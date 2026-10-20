@@ -1,0 +1,238 @@
+{
+  "scope": "Existing project choices remain adopted; their open source issues are not thereby closed.",
+  "profile": "xapi-lrs-ieee-2023-interpretation-3",
+  "records": [
+    {
+      "id": "state-list-selectors",
+      "finding": "state-list-selectors",
+      "status": "project-adopted",
+      "chosen_rule": "Omit stateId for list GET/HEAD; supplying it selects a single document. since restricts a list and does not select a single document",
+      "rationale": "Section 4.1.6.2 explicitly defines dispatch by stateId presence; this agrees with the multiple-GET description and multiple-DELETE table. The contradictory required cell would eliminate the list without since The unreconciled required/forbidden condition exists only when both stateId and since are absent; chapter 5 repeats it.",
+      "rejected_reading": "Require stateId for a multiple-document GET without since",
+      "official_adjudication": "not-established",
+      "request_selectors": [
+        {
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "path": "/activities/state",
+          "query_absent": [
+            "stateId",
+            "since"
+          ],
+          "expected_statuses": [
+            200
+          ]
+        }
+      ],
+      "excluded_condition": "GET/HEAD with stateId absent AND since absent",
+      "pdf_anchors": [
+        {
+          "source": "ieee-pdf-extracted",
+          "lines": [
+            3990,
+            4003
+          ],
+          "pdf_page": 63,
+          "printed_page": 62,
+          "byte_start": 259198,
+          "byte_length": 1143,
+          "sha256": "1a790efad447a9a9b429e07a4928e9d19d9c01ae66f6d2608941ee1da4f03cdf"
+        }
+      ],
+      "related_open_ids": [
+        "OPEN-STATE"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    },
+    {
+      "id": "activity-profile-list-scope",
+      "finding": "activity-profile-list-scope",
+      "status": "project-adopted",
+      "chosen_rule": "Select Activity Profile lists with activityId; omit profileId for the list and use since only as an optional exclusive time filter",
+      "rationale": "PDF 5.1.6.6.5 explicitly requires activityId and makes since optional. Read the chapter 4 Agent cell through this redundant table; no condition is excluded.",
+      "rejected_reading": "Require agent to list Activity Profile documents",
+      "official_adjudication": "not-established",
+      "request_selectors": [
+        {
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "path": "/activities/profile",
+          "query_absent": [
+            "profileId"
+          ],
+          "expected_statuses": [
+            200
+          ]
+        }
+      ],
+      "source_route": "in-scope-pdf",
+      "pdf_anchors": [
+        {
+          "source": "ieee-pdf-extracted",
+          "lines": [
+            3375,
+            3378
+          ],
+          "pdf_page": 54,
+          "printed_page": 53,
+          "byte_start": 219292,
+          "byte_length": 352,
+          "sha256": "0d0f1079902a40a4a4599414340e74060cd87818014e3796a088fa01164f9b6f"
+        },
+        {
+          "source": "ieee-pdf-extracted",
+          "lines": [
+            4330,
+            4345
+          ],
+          "pdf_page": 68,
+          "printed_page": 67,
+          "byte_start": 277953,
+          "byte_length": 873,
+          "sha256": "ddee322819417f57f36e39345bb937a91a086cdba775b37388b9e127f6a2a493"
+        }
+      ],
+      "related_open_ids": [
+        "OPEN-ACTIVITY-LIST"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    },
+    {
+      "id": "formatted-identifiers",
+      "finding": "formatted-identifiers",
+      "status": "project-adopted",
+      "chosen_rule": "Validate required identifier syntax, including scheme, mailto form and standard UUID string form; do not require resolution, resource existence or real-world identity validation",
+      "rationale": "Explicit format-rejection rules and the phrase data format, not values can both be retained under this reading. The permission is not silently converted into mandatory resolution or a particular UUID variant",
+      "rejected_reading": "Treat the permission as waiving all identifier syntax checks",
+      "official_adjudication": "not-established",
+      "table_formats": [
+        "uuid",
+        "iri",
+        "irl",
+        "uri",
+        "mailto",
+        "extensions",
+        "iri-array"
+      ],
+      "explicit_cases": [
+        "statement-post-rejects-extension-key-that-is-not-iri",
+        "statement-post-rejects-invalid-verb-iri",
+        "statement-post-rejects-non-uuid-statement-id"
+      ],
+      "query_literals": {
+        "activityId": [
+          "",
+          "no-scheme",
+          "https://invalid host/a"
+        ],
+        "registration": [
+          "",
+          "not-a-uuid"
+        ]
+      },
+      "selector_limit": "Table format-value probes only; iri-array selects invalid string content, not null or numeric items. Query literals conservatively retain the source-scope question rather than claim a syntax waiver",
+      "related_open_ids": [
+        "OPEN-FORMAT",
+        "OPEN-IRI-STRENGTH"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    },
+    {
+      "id": "put-single-and-batches",
+      "finding": "put-single-and-batches",
+      "status": "project-adopted",
+      "chosen_rule": "Require valid single-Statement PUT and single/batch POST; do not infer an unconditional PUT-array rejection obligation",
+      "rationale": "Single PUT is explicit in section 4.1.6.1.1 and batch POST is explicit in section 4.1.6.1.2. The general media-type batch wording does not settle the treatment of a PUT array",
+      "rejected_reading": "Declare every implementation accepting a PUT batch nonconformant solely because of the single PUT summary",
+      "official_adjudication": "not-established",
+      "request_selectors": [
+        {
+          "methods": [
+            "PUT"
+          ],
+          "path": "/statements",
+          "body_type": "array"
+        }
+      ],
+      "unresolved_probe": "Current cases do not necessarily exercise PUT arrays. A missing probe is reported as not exercised, never as acceptance or rejection established. Multipart PUT batches also require a dedicated probe",
+      "related_open_ids": [
+        "OPEN-PUT"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    },
+    {
+      "id": "case-equivalence-and-iri-comparison",
+      "finding": "case-equivalence-and-iri-comparison",
+      "status": "project-adopted",
+      "chosen_rule": "Keep JSON keys and vocabulary values case sensitive and permitted RFC3987 comparisons. Exclude only the conflicted signature mbox-case equivalence status leaf from the conformance verdict; record its actual status diagnostically. Other headers and crypto assertions remain required.",
+      "rationale": "RFC 3987 simple comparison and syntax normalization do not authorize unrestricted lowercasing of an IRI path or an email local part. The broad Statement Case exclusion cannot silently override every identifier comparison rule",
+      "rejected_reading": "Lowercase all identifiers or treat JSON property-name case variants as valid",
+      "official_adjudication": "not-established",
+      "explicit_cases": [
+        "signature-equivalence-excludes-case"
+      ],
+      "unresolved_probe": "Full RFC comparison boundaries and the scope of the Statement Case exclusion remain separate review work",
+      "related_open_ids": [
+        "OPEN-EQUALITY"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    },
+    {
+      "id": "related-activities-public-correction",
+      "finding": "related-activities-public-correction",
+      "status": "project-adopted",
+      "chosen_rule": "With related_activities=true, apply the Activity filter to Object, contextActivities and contained SubStatements; related_agents separately expands the Agent filter",
+      "rationale": "PDF 5.1 declares its tables redundant with 4.1. PDF 5.1.6.1 defines the Activity filter explicitly; read the chapter 4 duplicated Agent prose through this chapter 5 row. No external overlay is required.",
+      "rejected_reading": "Give related_activities the same Agent-filter meaning as related_agents",
+      "official_adjudication": "not-established",
+      "request_selectors": [
+        {
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "path": "/statements",
+          "query_equals": {
+            "related_activities": "true"
+          }
+        }
+      ],
+      "source_route": "in-scope-pdf",
+      "pdf_anchors": [
+        {
+          "source": "ieee-pdf-extracted",
+          "lines": [
+            3375,
+            3378
+          ],
+          "pdf_page": 54,
+          "printed_page": 53,
+          "byte_start": 219292,
+          "byte_length": 352,
+          "sha256": "0d0f1079902a40a4a4599414340e74060cd87818014e3796a088fa01164f9b6f"
+        },
+        {
+          "source": "ieee-pdf-extracted",
+          "lines": [
+            3755,
+            3765
+          ],
+          "pdf_page": 60,
+          "printed_page": 59,
+          "byte_start": 243014,
+          "byte_length": 1133,
+          "sha256": "5fb3880e44f546fe03161f83171ae80f17658ff17a34f1b9282cda345613df40"
+        }
+      ],
+      "historical_id_note": "Stable id retained; prior overlay rationale superseded.",
+      "related_open_ids": [
+        "OPEN-RELATED"
+      ],
+      "relation_basis": "master navigation association; not source adjudication"
+    }
+  ]
+}

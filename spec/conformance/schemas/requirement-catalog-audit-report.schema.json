@@ -48,6 +48,32 @@
     "source_triage": {
       "$ref": "#/$defs/sourceTriage"
     },
+    "issued_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["passed", "failed", "missing"]},
+        "rules": {"type": "integer", "minimum": 0},
+        "source_units": {"type": "integer", "minimum": 0},
+        "families": {"type": "integer", "minimum": 0},
+        "new_rules": {"type": "integer", "minimum": 0},
+        "dependencies": {"type": "integer", "minimum": 0},
+        "unresolved_rules": {"type": "integer", "minimum": 0},
+        "source_spans_verified": {"type": "integer", "minimum": 0},
+        "source_verification": {
+          "enum": ["fresh", "not-run-private-source-not-required-for-CI"]
+        },
+        "semantic_completeness": {"const": "not-established-by-this-check"},
+        "implementation_conformance": {"const": "not-assessed"}
+      },
+      "if": {"properties": {"status": {"enum": ["passed", "failed"]}}},
+      "then": {
+        "required": ["rules", "source_units", "families", "new_rules", "dependencies",
+          "unresolved_rules", "source_spans_verified", "source_verification",
+          "semantic_completeness", "implementation_conformance"]
+      }
+    },
     "clauses": {
       "type": "array",
       "items": {
