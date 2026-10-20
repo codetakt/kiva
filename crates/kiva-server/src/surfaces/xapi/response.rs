@@ -66,9 +66,7 @@ pub(crate) fn single_statement_response(
     record: &StoredStatement,
     query: &BTreeMap<String, String>,
 ) -> Response {
-    if query.get("attachments").map(String::as_str) == Some("true")
-        && !record.attachments.is_empty()
-    {
+    if query.get("attachments").map(String::as_str) == Some("true") {
         return statement_multipart_response(status, record);
     }
     statement_json_response(status, record)

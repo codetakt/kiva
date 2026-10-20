@@ -29,6 +29,13 @@ pub fn validate_statement_shape(statement: &Value) -> Result<(), StatementValida
     validate_statement_object_model(statement)
         .map_err(|error| StatementValidationError::new(error.to_string()))?;
     let object = statement_object(statement)?;
+    if let Some(id) = object.get("id")
+        && !id
+            .as_str()
+            .is_some_and(|id| id.len() == 36 && Uuid::parse_str(id).is_ok())
+    {
+        return Err(StatementValidationError::new("Statement id must be a UUID"));
+    }
     validate_allowed_properties(
         object,
         &[
@@ -315,18 +322,10 @@ pub(crate) fn is_language_tag(value: &str) -> bool {
     })
 }
 
-pub(crate) fn is_absolute_iri(value: &str) -> bool {
-    let Some((scheme, _rest)) = value.split_once(':') else {
-        return false;
-    };
-    let mut chars = scheme.chars();
-    let Some(first) = chars.next() else {
-        return false;
-    };
-    first.is_ascii_alphabetic()
-        && chars.all(|character| {
-            character.is_ascii_alphanumeric() || matches!(character, '+' | '-' | '.')
-        })
+/// Checks the complete syntax of an IRI with a scheme, without normalizing it.
+#[must_use]
+pub fn is_absolute_iri(value: &str) -> bool {
+    iri_string::types::IriStr::new(value).is_ok()
 }
 
 pub(crate) fn is_duration(value: &str) -> bool {

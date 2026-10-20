@@ -2,13 +2,26 @@
 #![allow(clippy::wildcard_imports)]
 
 use super::common::*;
+use crate::surfaces::xapi::request::{StatementCursor, statement_page};
 
 pub(crate) async fn get_statements(
     State(state): State<XapiHttpContext>,
     headers: HeaderMap,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
-    statement_resource_response(get_statements_inner(state, headers, query).await)
+    statement_resource_response(get_statements_inner(state, headers, query, None).await)
+}
+
+pub(crate) async fn get_more_statements(
+    State(state): State<XapiHttpContext>,
+    headers: HeaderMap,
+    Query(mut query): Query<BTreeMap<String, String>>,
+) -> Response {
+    let cursor = match StatementCursor::from_query(&mut query) {
+        Ok(cursor) => cursor,
+        Err(error) => return statement_resource_response(error.into_response()),
+    };
+    statement_resource_response(get_statements_inner(state, headers, query, Some(cursor)).await)
 }
 
 #[allow(clippy::too_many_lines)]
@@ -16,6 +29,7 @@ async fn get_statements_inner(
     state: XapiHttpContext,
     headers: HeaderMap,
     query: BTreeMap<String, String>,
+    cursor: Option<StatementCursor>,
 ) -> Response {
     if let Err(error) = state.authorize_xapi_read_request(&headers, &query).await {
         return error.into_response();
@@ -94,15 +108,16 @@ async fn get_statements_inner(
         Ok(statements) => statements,
         Err(error) => return store_error_response(&error),
     };
-    let statements = match filtered_statements(statements, &query, limit) {
+    let statements = match filtered_statements(statements, &query, None) {
         Ok(statements) => statements,
         Err(error) => return error.into_response(),
     };
+    let (statements, more) = statement_page(statements, &query, limit, cursor.as_ref());
     let statements = statements
         .into_iter()
         .map(|statement| formatted_statement(statement, &query, &headers))
         .collect::<Vec<_>>();
-    let body = json!({"statements": statements, "more": ""});
+    let body = json!({"statements": statements, "more": more});
     if query.get("attachments").map(String::as_str) == Some("true") {
         let mut attachments = BTreeMap::new();
         for statement in body["statements"].as_array().into_iter().flatten() {
@@ -139,6 +154,9 @@ async fn put_statement_inner(
     query: BTreeMap<String, String>,
     body: Bytes,
 ) -> Response {
+    if let Err(error) = validate_query_parameters(&query, &["statementId"]) {
+        return error.into_response();
+    }
     if let Some(response) = statement_body_limit_response(state.runtime_limits(), body.len()) {
         return response;
     }
@@ -166,23 +184,18 @@ async fn put_statement_inner(
         Err(error) => return error.into_response(),
     };
     let stored_at = OffsetDateTime::now_utc();
-    let statement =
-        match normalized_statement(payload.statement, statement_id, stored_at, &authority) {
-            Ok(statement) => statement,
-            Err(error) => return error.into_response(),
-        };
-    let attachments = match attachments_for_statement(&statement, &payload.attachments) {
-        Ok(attachments) => attachments,
+    let statement = match normalized_statement_record(
+        payload.statement,
+        statement_id,
+        stored_at,
+        &authority,
+        &payload.attachments,
+    ) {
+        Ok(statement) => statement,
         Err(error) => return error.into_response(),
     };
 
-    match xapi_service::put_statement(
-        state.xapi_services(),
-        statement_id,
-        StoredStatement::new(statement, stored_at, attachments),
-    )
-    .await
-    {
+    match xapi_service::put_statement(state.xapi_services(), statement_id, statement).await {
         Ok(StoreOutcome::Stored | StoreOutcome::Unchanged) => {
             empty_response(StatusCode::NO_CONTENT)
         }
@@ -210,6 +223,9 @@ async fn post_statements_inner(
     query: BTreeMap<String, String>,
     body: Bytes,
 ) -> Response {
+    if let Err(error) = validate_query_parameters(&query, &[]) {
+        return error.into_response();
+    }
     if let Some(response) = statement_body_limit_response(state.runtime_limits(), body.len()) {
         return response;
     }

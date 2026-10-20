@@ -14,4 +14,4 @@ pub(crate) use documents::{
     post_activity_profile_document, post_agent_profile_document, post_state_document,
     put_activity_profile_document, put_agent_profile_document, put_state_document,
 };
-pub(crate) use statements::{get_statements, post_statements, put_statement};
+pub(crate) use statements::{get_more_statements, get_statements, post_statements, put_statement};

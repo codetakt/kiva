@@ -126,11 +126,19 @@ fn validate_object(
     }
 }
 
-fn validate_activity(
+pub(super) fn validate_activity(
     activity: &Map<String, Value>,
     path: &str,
 ) -> Result<(), ObjectValidationError> {
     allowed_properties(activity, &["objectType", "id", "definition"], path)?;
+    if activity
+        .get("objectType")
+        .is_some_and(|value| value.as_str() != Some("Activity"))
+    {
+        return Err(ObjectValidationError::new(format!(
+            "{path} objectType must be Activity"
+        )));
+    }
     required_absolute_iri(activity.get("id"), &format!("{path} id"))?;
     let Some(definition) = activity.get("definition") else {
         return Ok(());
@@ -171,6 +179,8 @@ fn validate_activity_definition(
     )?;
     optional_absolute_iri(definition.get("type"), &format!("{path} type"))?;
     optional_absolute_iri(definition.get("moreInfo"), &format!("{path} moreInfo"))?;
+    super::validation::validate_extensions(definition.get("extensions"))
+        .map_err(|error| ObjectValidationError::new(error.to_string()))?;
 
     let has_interaction_data = INTERACTION_PROPERTIES[1..]
         .iter()
@@ -261,6 +271,11 @@ fn validate_statement_ref(
 ) -> Result<(), ObjectValidationError> {
     allowed_properties(statement_ref, &["objectType", "id"], path)?;
     let id = required_string(statement_ref.get("id"), &format!("{path} id"))?;
+    if id.len() != 36 {
+        return Err(ObjectValidationError::new(format!(
+            "{path} id must be a standard UUID string"
+        )));
+    }
     Uuid::parse_str(id)
         .map(|_id| ())
         .map_err(|_error| ObjectValidationError::new(format!("{path} id must be a UUID")))

@@ -32,11 +32,11 @@ impl PostgresStatementRepository {
         };
         let attachments =
             select_statement_attachments(&self.pool, &self.tenant_id, statement_id).await?;
-        Ok(Some(StoredStatement {
-            statement: statement.0,
+        Ok(Some(StoredStatement::new(
+            statement.0,
             stored_at,
             attachments,
-        }))
+        )))
     }
 
     pub(crate) async fn list(

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::core::{
     config::DOCUMENT_JSON_CONTENT_TYPE,
-    request_util::{header_string, key_component, required_query},
+    request_util::{header_string, key_component},
     response::{HttpError, new_etag},
 };
 use crate::surfaces::xapi::request::{
     content_type_matches, document_request_content_type, optional_registration, required_agent,
+    required_iri, validate_query_parameters,
 };
 use kiva_xapi::canonical_actor_ifi;
 
@@ -29,6 +30,22 @@ pub(crate) enum DocumentKind {
 }
 
 impl DocumentKind {
+    pub(crate) fn validate_query(
+        self,
+        query: &BTreeMap<String, String>,
+        allow_since: bool,
+    ) -> Result<(), HttpError> {
+        let mut allowed = match self {
+            Self::State => vec!["activityId", "agent", "registration", "stateId"],
+            Self::AgentProfile => vec!["agent", "profileId"],
+            Self::ActivityProfile => vec!["activityId", "profileId"],
+        };
+        if allow_since {
+            allowed.push("since");
+        }
+        validate_query_parameters(query, &allowed)
+    }
+
     pub(crate) const fn as_resource_kind(self) -> &'static str {
         match self {
             Self::State => "state",
@@ -106,6 +123,7 @@ pub(crate) struct DocumentScope {
     pub(crate) activity_id: Option<String>,
     pub(crate) agent: Option<Value>,
     pub(crate) registration: Option<Uuid>,
+    pub(crate) since: Option<OffsetDateTime>,
 }
 
 impl DocumentScope {
@@ -113,15 +131,17 @@ impl DocumentScope {
         kind: DocumentKind,
         query: &BTreeMap<String, String>,
     ) -> Result<Self, HttpError> {
-        if query
+        let since = query
             .get("since")
-            .is_some_and(|since| OffsetDateTime::parse(since, &Rfc3339).is_err())
-        {
-            return Err(HttpError::new(
-                StatusCode::BAD_REQUEST,
-                "since must be an RFC3339 timestamp",
-            ));
-        }
+            .map(|since| {
+                OffsetDateTime::parse(since, &Rfc3339).map_err(|_error| {
+                    HttpError::new(
+                        StatusCode::BAD_REQUEST,
+                        "since must be an RFC3339 timestamp",
+                    )
+                })
+            })
+            .transpose()?;
         let mut prefix = key_component("kind", kind.as_resource_kind());
         let mut activity_id = None;
         let mut agent = None;
@@ -129,7 +149,7 @@ impl DocumentScope {
 
         match kind {
             DocumentKind::State => {
-                let activity = required_query(query, "activityId")?;
+                let activity = required_iri(query, "activityId")?;
                 let parsed_agent = required_agent(query)?;
                 let agent_key = canonical_actor_ifi(&parsed_agent).ok_or_else(|| {
                     HttpError::new(
@@ -140,10 +160,12 @@ impl DocumentScope {
                 registration = optional_registration(query)?;
                 prefix.push_str(&key_component("activity_id", activity));
                 prefix.push_str(&key_component("agent", &agent_key));
-                prefix.push_str(&key_component(
-                    "registration",
-                    &registration.map_or_else(|| "none".to_owned(), |value| value.to_string()),
-                ));
+                if registration.is_some() || query.contains_key("stateId") {
+                    prefix.push_str(&key_component(
+                        "registration",
+                        &registration.map_or_else(|| "none".to_owned(), |value| value.to_string()),
+                    ));
+                }
                 activity_id = Some(activity.to_owned());
                 agent = Some(parsed_agent);
             }
@@ -159,7 +181,7 @@ impl DocumentScope {
                 agent = Some(parsed_agent);
             }
             DocumentKind::ActivityProfile => {
-                let activity = required_query(query, "activityId")?;
+                let activity = required_iri(query, "activityId")?;
                 prefix.push_str(&key_component("activity_id", activity));
                 activity_id = Some(activity.to_owned());
             }
@@ -171,6 +193,7 @@ impl DocumentScope {
             activity_id,
             agent,
             registration,
+            since,
         })
     }
 }
@@ -254,6 +277,9 @@ pub(crate) struct StoredStatement {
     pub(crate) statement: Value,
     pub(crate) stored_at: OffsetDateTime,
     pub(crate) attachments: BTreeMap<String, AttachmentRecord>,
+    // Admission-only provenance: an omitted incoming timestamp can reuse the
+    // existing value on retry. Persisted records do not need this flag.
+    pub(crate) defaulted_substatement_timestamp: bool,
 }
 
 impl StoredStatement {
@@ -266,6 +292,7 @@ impl StoredStatement {
             statement,
             stored_at,
             attachments,
+            defaulted_substatement_timestamp: false,
         }
     }
 }
@@ -319,6 +346,7 @@ pub(crate) struct MultipartPart {
 pub(crate) struct CompactJwsSegments<'a> {
     pub(crate) header: &'a str,
     pub(crate) payload: &'a str,
+    pub(crate) signature: &'a str,
 }
 
 #[derive(Debug, Clone, Default)]

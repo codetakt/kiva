@@ -70,8 +70,8 @@ fn merge_json_objects(
 }
 
 pub(crate) fn person_response(person: Value) -> Result<Value, serde_json::Error> {
-    let person = serde_json::from_value::<xapi_contract::Person>(person)?;
-    serde_json::to_value(person)
+    serde_json::from_value::<xapi_contract::Person>(person.clone())?;
+    Ok(person)
 }
 
 pub(crate) fn statement_response(statement: Value) -> Result<Value, serde_json::Error> {

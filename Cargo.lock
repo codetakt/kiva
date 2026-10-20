@@ -1033,6 +1033,7 @@ dependencies = [
  "ed25519-dalek",
  "getrandom 0.3.4",
  "http",
+ "jsonwebtoken",
  "kiva-analytics-openapi-contract",
  "kiva-application",
  "kiva-confidential",
@@ -1062,6 +1063,7 @@ dependencies = [
 name = "kiva-xapi"
 version = "0.0.0"
 dependencies = [
+ "iri-string",
  "kiva-domain",
  "serde",
  "serde_json",

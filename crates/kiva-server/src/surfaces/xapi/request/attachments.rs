@@ -11,30 +11,34 @@ use crate::{
     surfaces::xapi::model::{AttachmentRecord, CompactJwsSegments},
 };
 
-use super::json::parse_json_without_duplicate_properties;
+use super::{
+    json::parse_json_without_duplicate_properties, signature_comparison::canonical_signed_statement,
+};
+
+#[cfg(test)]
+mod tests;
 
 pub(crate) fn attachments_for_statement(
     statement: &Value,
     attachments: &BTreeMap<String, AttachmentRecord>,
 ) -> Result<BTreeMap<String, AttachmentRecord>, HttpError> {
-    let Some(metadata) = statement.get("attachments") else {
-        if attachments.is_empty() {
-            return Ok(BTreeMap::new());
+    let substatement = statement
+        .get("object")
+        .filter(|value| value.get("objectType").and_then(Value::as_str) == Some("SubStatement"));
+    let mut metadata = Vec::new();
+    for owner in std::iter::once(statement).chain(substatement) {
+        if let Some(entries) = owner.get("attachments") {
+            let entries = entries.as_array().ok_or_else(|| {
+                HttpError::new(
+                    StatusCode::BAD_REQUEST,
+                    "Statement attachments must be an array",
+                )
+            })?;
+            metadata.extend(entries.iter().map(|entry| (owner, entry)));
         }
-        return Err(HttpError::new(
-            StatusCode::BAD_REQUEST,
-            "multipart attachment parts must be referenced by Statement attachment metadata",
-        ));
-    };
-    let Some(metadata) = metadata.as_array() else {
-        return Err(HttpError::new(
-            StatusCode::BAD_REQUEST,
-            "Statement attachments must be an array",
-        ));
-    };
-
+    }
     let mut referenced = BTreeMap::new();
-    for entry in metadata {
+    for (statement, entry) in metadata {
         let sha2 = required_attachment_string(entry, "sha2")?;
         let content_type = required_attachment_string(entry, "contentType")?;
         let length = required_attachment_length(entry)?;
@@ -105,14 +109,19 @@ fn validate_signed_statement_attachment(
             "signed Statement JWS alg must be RS256, RS384, or RS512",
         ));
     }
-    let payload = jws_json_segment(segments.payload, "JWS payload")?;
-    let mut received = canonical_signed_statement(statement);
+    let payload = super::openapi::statement_body_from_openapi_contract(
+        jws_json_segment(segments.payload, "JWS payload")?,
+        "JWS payload",
+    )?;
+    kiva_xapi::validate_statement_shape(&payload).map_err(|error| {
+        HttpError::new(
+            StatusCode::BAD_REQUEST,
+            format!("invalid signed Statement: {error}"),
+        )
+    })?;
+    verify_certificate_signature(&header, &segments)?;
+    let received = canonical_signed_statement(statement);
     let signed = canonical_signed_statement(&payload);
-    if payload.get("version").is_none()
-        && let Some(received) = received.as_object_mut()
-    {
-        received.remove("version");
-    }
     if !statements_equivalent(&received, &signed) {
         return Err(HttpError::new(
             StatusCode::BAD_REQUEST,
@@ -137,7 +146,49 @@ fn compact_jws_segments(value: &str) -> Result<CompactJwsSegments<'_>, HttpError
     {
         return Err(malformed_jws_error());
     }
-    Ok(CompactJwsSegments { header, payload })
+    Ok(CompactJwsSegments {
+        header,
+        payload,
+        signature,
+    })
+}
+
+fn verify_certificate_signature(
+    header: &Value,
+    segments: &CompactJwsSegments<'_>,
+) -> Result<(), HttpError> {
+    let Some(chain) = header.get("x5c") else {
+        return Ok(());
+    };
+    let chain = chain
+        .as_array()
+        .filter(|chain| !chain.is_empty())
+        .ok_or_else(malformed_jws_error)?;
+    if chain.iter().any(|certificate| !certificate.is_string()) {
+        return Err(malformed_jws_error());
+    }
+    // JWS uses the first certificate's public key. Trust-chain policy is separate
+    // from checking that this signature matches the supplied signing certificate.
+    let certificate = chain[0].as_str().ok_or_else(malformed_jws_error)?;
+    let pem = format!("-----BEGIN CERTIFICATE-----\n{certificate}\n-----END CERTIFICATE-----\n");
+    let key = jsonwebtoken::DecodingKey::from_rsa_pem(pem.as_bytes())
+        .map_err(|_error| malformed_jws_error())?;
+    let algorithm = match header.get("alg").and_then(Value::as_str) {
+        Some("RS256") => jsonwebtoken::Algorithm::RS256,
+        Some("RS384") => jsonwebtoken::Algorithm::RS384,
+        Some("RS512") => jsonwebtoken::Algorithm::RS512,
+        _ => return Err(malformed_jws_error()),
+    };
+    let message = format!("{}.{}", segments.header, segments.payload);
+    if !jsonwebtoken::crypto::verify(segments.signature, message.as_bytes(), &key, algorithm)
+        .map_err(|_error| malformed_jws_error())?
+    {
+        return Err(HttpError::new(
+            StatusCode::BAD_REQUEST,
+            "signed Statement JWS signature does not match its certificate",
+        ));
+    }
+    Ok(())
 }
 
 fn malformed_jws_error() -> HttpError {
@@ -187,18 +238,6 @@ const fn base64_url_sextet(byte: u8) -> Option<u8> {
     }
 }
 
-fn canonical_signed_statement(statement: &Value) -> Value {
-    let mut statement = statement.clone();
-    let Some(object) = statement.as_object_mut() else {
-        return statement;
-    };
-    object.remove("attachments");
-    object.remove("stored");
-    object.remove("timestamp");
-    object.remove("authority");
-    statement
-}
-
 fn required_attachment_string<'a>(entry: &'a Value, name: &str) -> Result<&'a str, HttpError> {
     entry.get(name).and_then(Value::as_str).ok_or_else(|| {
         HttpError::new(
@@ -221,24 +260,4 @@ fn required_attachment_length(entry: &Value) -> Result<usize, HttpError> {
             "Statement attachment length is too large",
         )
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use serde_json::json;
-
-    use super::{canonical_signed_statement, statements_equivalent};
-
-    #[test]
-    fn signed_statement_comparison_ignores_sub_centisecond_duration_precision() {
-        let received = canonical_signed_statement(&json!({
-            "result": {"duration": "P1DT12H36M0.1237S"},
-            "attachments": []
-        }));
-        let signed = canonical_signed_statement(&json!({
-            "result": {"duration": "P1DT12H36M0.12S"}
-        }));
-
-        assert!(statements_equivalent(&received, &signed));
-    }
 }

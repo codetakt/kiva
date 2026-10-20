@@ -15,6 +15,7 @@ publish.workspace = true
 axum.workspace = true
 getrandom.workspace = true
 http.workspace = true
+jsonwebtoken.workspace = true
 kiva-application = { path = "../kiva-application", version = "0.0.0" }
 kiva-analytics-openapi-contract = { path = "../kiva-analytics-openapi-contract", version = "0.0.0" }
 kiva-confidential = { path = "../kiva-confidential", version = "0.0.0" }

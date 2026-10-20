@@ -4,7 +4,8 @@ use uuid::Uuid;
 
 use super::{
     actor_validation::{ActorRole, validate_actor_value},
-    validation::{is_absolute_iri, is_duration, is_language_tag, validate_activity_object},
+    object_validation::validate_activity,
+    validation::{is_absolute_iri, is_duration, is_language_tag},
 };
 
 const RESULT_PROPERTIES: [&str; 6] = [
@@ -203,11 +204,6 @@ fn validate_context_activities(
     for (key, value) in activities {
         let activity_path = format!("{path} {key}");
         if let Some(array) = value.as_array() {
-            if array.is_empty() {
-                return Err(ContextResultValidationError::InvalidContextActivity {
-                    path: activity_path,
-                });
-            }
             for (index, activity) in array.iter().enumerate() {
                 validate_context_activity(activity, &format!("{path} {key}[{index}]"))?;
             }
@@ -228,7 +224,7 @@ fn validate_context_activity(
             .ok_or_else(|| ContextResultValidationError::InvalidContextActivity {
                 path: path.to_owned(),
             })?;
-    validate_activity_object(activity).map_err(|_error| {
+    validate_activity(activity, path).map_err(|_error| {
         ContextResultValidationError::InvalidContextActivity {
             path: path.to_owned(),
         }
@@ -325,6 +321,11 @@ fn validate_statement_ref(
             path: format!("{path} objectType"),
         });
     }
+    if !statement_ref.contains_key("id") {
+        return Err(ContextResultValidationError::InvalidUuid {
+            path: format!("{path} id"),
+        });
+    }
     validate_uuid(statement_ref.get("id"), &format!("{path} id"))
 }
 
@@ -353,6 +354,11 @@ fn validate_uuid(value: Option<&Value>, path: &str) -> Result<(), ContextResultV
             path: path.to_owned(),
         });
     };
+    if value.len() != 36 {
+        return Err(ContextResultValidationError::InvalidUuid {
+            path: path.to_owned(),
+        });
+    }
     Uuid::parse_str(value).map(|_uuid| ()).map_err(|_error| {
         ContextResultValidationError::InvalidUuid {
             path: path.to_owned(),
@@ -460,7 +466,7 @@ fn validate_allowed_properties(
 mod tests {
     use serde_json::{Value, json};
 
-    use super::validate_statement_context_result;
+    use super::{CONTEXT_ACTIVITY_KEYS, validate_statement_context_result};
 
     fn statement_with(property: &str, value: Value) -> Value {
         let mut statement = json!({
@@ -470,6 +476,31 @@ mod tests {
         });
         statement[property] = value;
         statement
+    }
+
+    #[test]
+    fn validates_context_activity_definitions_and_allows_empty_arrays() {
+        for key in CONTEXT_ACTIVITY_KEYS {
+            let empty = statement_with("context", json!({"contextActivities": {key: []}}));
+            assert!(validate_statement_context_result(&empty).is_ok());
+            for activity in [
+                json!({"id": "https://example.org/a", "extra": true}),
+                json!({"id": "https://example.org/a", "objectType": "Agent"}),
+                json!({"id": "https://example.org/a", "definition": {"name": 1}}),
+                json!({"id": "https://example.org/a", "definition": {"moreInfo": "relative"}}),
+            ] {
+                for value in [activity.clone(), json!([activity])] {
+                    let statement =
+                        statement_with("context", json!({"contextActivities": {key: value}}));
+                    assert!(validate_statement_context_result(&statement).is_err());
+                }
+            }
+        }
+        let missing_id = statement_with(
+            "context",
+            json!({"statement": {"objectType": "StatementRef"}}),
+        );
+        assert!(validate_statement_context_result(&missing_id).is_err());
     }
 
     #[test]

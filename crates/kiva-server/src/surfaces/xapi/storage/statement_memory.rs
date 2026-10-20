@@ -110,7 +110,7 @@ impl MemoryStatementRepository {
             }
         }
         for (statement_id, statement) in batch {
-            statements.insert(statement_id, statement);
+            statements.entry(statement_id).or_insert(statement);
         }
         Ok(())
     }

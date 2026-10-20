@@ -15,6 +15,33 @@ use uuid::Uuid;
 
 use crate::core::{request_util::required_query, response::HttpError};
 
+pub(crate) fn validate_query_parameters(
+    query: &BTreeMap<String, String>,
+    allowed: &[&str],
+) -> Result<(), HttpError> {
+    if let Some(name) = query.keys().find(|name| !allowed.contains(&name.as_str())) {
+        return Err(HttpError::new(
+            StatusCode::BAD_REQUEST,
+            format!("unknown query parameter: {name}"),
+        ));
+    }
+    Ok(())
+}
+
+pub(crate) fn required_iri<'a>(
+    query: &'a BTreeMap<String, String>,
+    name: &str,
+) -> Result<&'a str, HttpError> {
+    let value = required_query(query, name)?;
+    if !kiva_xapi::is_absolute_iri(value) {
+        return Err(HttpError::new(
+            StatusCode::BAD_REQUEST,
+            format!("{name} must be an IRI"),
+        ));
+    }
+    Ok(value)
+}
+
 pub(crate) fn optional_limit(query: &BTreeMap<String, String>) -> Result<Option<usize>, HttpError> {
     query
         .get("limit")
