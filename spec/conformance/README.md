@@ -1,6 +1,11 @@
 # Kiva Conformance Planning
 
 This directory maps requirement catalogs to executable or reviewable evidence.
+The current xAPI LRS requirements baseline is the pinned IEEE Std 9274.1.1-2023.
+Historical `39274-1-1-2025` filenames and machine labels are compatibility
+identifiers; equivalence with the 2025 edition has not been established.
+Requirement traceability alone does not establish implementation conformance;
+see the [xAPI claim boundary](../../docs/architecture/conformance-claim.md).
 
 The source-pinned LRS projection, portable vectors, assertion contract and
 review procedures are described in [lrs-projection.md](lrs-projection.md).
@@ -28,8 +33,8 @@ python scripts/ci/run_lrs_person_identifier_controls.py --runner target/debug/xa
 
 Use a fresh output directory for each run.
 
-- `xapi-lrs-discharge.yaml`: discharge plan for the IEEE/ISO/IEC
-  39274-1-1-2025 xAPI LRS requirement catalog.
+- `xapi-lrs-discharge.yaml`: discharge plan for the IEEE Std 9274.1.1-2023
+  xAPI LRS requirement catalog.
 - `adl-compatibility-map.yaml`: conservative compatibility map from the ADL
   xAPI 2.0 LRS Conformance Test Suite to Kiva requirement ids.
 - `adl-run-expectations.yaml`: revision-pinned expected outcomes for every

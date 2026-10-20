@@ -6,8 +6,8 @@ The machine-readable source of truth is
 
 ## Claim Boundary
 
-The PDS API is a Kiva platform extension around the IEEE/ISO/IEC
-39274-1-1:2025-aligned xAPI LRS surface. It governs subject-oriented consent,
+The PDS API is a Kiva platform extension around the
+[xAPI LRS surface](conformance-claim.md). It governs subject-oriented consent,
 derived analytical products, access decisions, public-sector governance
 metadata, and audit evidence around accepted xAPI records and confidential
 release metadata. It does not expand the IEEE xAPI LRS conformance surface.

@@ -2,7 +2,8 @@
 
 This directory contains machine-readable API contracts for Kiva.
 
-- `kiva-xapi.yaml`: OpenAPI 3.1 contract for the IEEE/ISO/IEC 39274-1-1-2025 aligned xAPI LRS surface.
+- `kiva-xapi.yaml`: OpenAPI 3.1 contract for the xAPI LRS surface, with
+  requirement references to the pinned IEEE Std 9274.1.1-2023 baseline.
 - `kiva-confidential.yaml`: OpenAPI 3.1 contract for Kiva-specific
   confidential-computation endpoints. This is a platform extension contract,
   not part of the IEEE xAPI LRS surface.
@@ -11,6 +12,11 @@ This directory contains machine-readable API contracts for Kiva.
   metadata, public-sector governance profile, policy decision, and audit
   endpoints. This is a platform extension contract, not part of the IEEE xAPI
   LRS surface.
+
+Historical `39274-1-1-2025` filenames and machine labels are compatibility
+identifiers. Equivalence with the 2025 edition has not been established, and
+requirement traceability alone does not establish implementation conformance.
+See the [xAPI claim boundary](../../docs/architecture/conformance-claim.md).
 
 PDS publication examples live in `../../examples/pds`, and generated PDS
 component schema artifacts live in `../../generated/pds-openapi-schemas`.

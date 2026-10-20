@@ -16,7 +16,8 @@ Kiva is organized around five claim boundaries, but the design model enters
 through four primary roots: OpenAPI, OperationKernel, AssurancePrimitive, and
 CapabilityPort.
 
-- **IEEE xAPI LRS:** the standard-aligned HTTP/JSON learning-record surface.
+- **IEEE xAPI LRS:** the HTTP/JSON learning-record surface, with requirements
+  mapped to the pinned IEEE Std 9274.1.1-2023.
 - **PDS supporting plane:** Kiva-specific consent, lifecycle, governance, and
   approved data-product command/query workflows under OperationKernel.
 - **Confidential computation provider boundary:** mechanism contracts,
@@ -28,9 +29,10 @@ CapabilityPort.
 
 Kiva has four deliberately separate public surfaces:
 
-- **xAPI LRS:** IEEE/ISO/IEC 39274-1-1-2025 aligned HTTP/JSON interface,
-  PostgreSQL-backed persistence, OpenAPI projection, conformance aid, and
-  release evidence. The xAPI claim is not an IEEE certification claim.
+- **xAPI LRS:** HTTP/JSON interface with the pinned IEEE Std 9274.1.1-2023
+  requirements baseline, PostgreSQL-backed persistence, OpenAPI projection,
+  conformance aid, and release evidence. The xAPI claim is not an IEEE
+  certification claim.
 - **PDS extension:** Kiva-specific consent, audit, lifecycle, approved
   data-product, governance-template, and provider-binding registry surface
   around accepted xAPI records and confidential releases. Provider bindings are
@@ -48,6 +50,12 @@ Kiva has four deliberately separate public surfaces:
   releases. External reporting tools consume this surface; Kiva does not host
   a BI product, and this surface does not expose raw Statements or
   individual-level data.
+
+The historical label `IEEE/ISO/IEC 39274-1-1-2025` and associated filenames are
+compatibility identifiers. Equivalence with the 2025 edition has not been
+established, and requirement traceability alone does not establish
+implementation conformance.
+See the [xAPI claim boundary](architecture/conformance-claim.md).
 
 The main entry points are:
 
@@ -254,6 +262,6 @@ mechanical inventories should stay in `spec/` and generated evidence artifacts.
 
 ## Requirement Traceability
 
-- [IEEE/ISO/IEC 39274-1-1-2025 requirement catalog](../spec/requirements/ieee-39274-1-1-2025.yaml)
+- [IEEE Std 9274.1.1-2023 requirement catalog](../spec/requirements/ieee-39274-1-1-2025.yaml)
 - [xAPI LRS conformance discharge plan](../spec/conformance/xapi-lrs-discharge.yaml)
 - [ADL compatibility map](../spec/conformance/adl-compatibility-map.yaml)

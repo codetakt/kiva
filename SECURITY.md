@@ -63,17 +63,20 @@ The following are not security issues by themselves:
 
 ## Security Posture
 
-Kiva is an IEEE/ISO/IEC 39274-1-1-2025-aligned xAPI LRS implementation with a
-PostgreSQL backend, conformance evidence generation, and bounded formal
-assurance artifacts. The current assurance boundary is defined in:
+Kiva implements an xAPI LRS with a PostgreSQL backend, conformance evidence
+generation, and bounded formal assurance artifacts. Its current requirements
+baseline is the pinned IEEE Std 9274.1.1-2023. Historical `39274-1-1-2025`
+filenames and machine labels are compatibility identifiers; equivalence with
+the 2025 edition has not been established. The current assurance boundary is
+defined in:
 
 - `docs/architecture/conformance-claim.md`
 - `docs/architecture/formal-verification-coverage-review.md`
 - `docs/architecture/assurance-and-confidential-computation.md`
 
-The xAPI conformance claim is internal evidence-based alignment, not IEEE
-certification. The formal artifacts are also internal assurance evidence. They
-cover selected pure Rust logic and symbolic boundary properties with Kani,
+Requirement traceability alone does not establish implementation conformance
+or IEEE certification. The formal artifacts are also internal assurance evidence.
+They cover selected pure Rust logic and symbolic boundary properties with Kani,
 Tamarin, and F*, but they do not prove the complete HTTP server, PostgreSQL
 execution semantics, OAuth/OIDC deployment profile, cryptographic primitives,
 or production confidential-computation protocols.

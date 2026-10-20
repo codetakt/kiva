@@ -17,7 +17,7 @@ def followup_cases():
         body = dict(copy.deepcopy(S), id=uuid_for(name))
         query = {"statementId": body["id"]} if method == "PUT" else {}
         invalid = request(method, "/statements", dict(query, unknownParameter="value"), body)
-        cases.append(case(name, ["xapi-lrs-4.1.6.1-statement-query-validation"], steps=[
+        cases.append(case(name, ["xapi-lrs-4.1.5-unknown-parameters"], steps=[
             step("valid-write", request("PUT", "/statements", {"statementId": body["id"]}, body), expect(204)),
             step("unknown-key", invalid, expect(400)),
             read_statement(body["id"]),

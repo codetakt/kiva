@@ -1,8 +1,11 @@
 # Conformance Authentication Fixtures
 
 Kiva's xAPI LRS conformance aid needs explicit authentication fixtures for
-IEEE/ISO/IEC 39274-1-1-2025 requirements that are credential-sensitive rather
-than purely syntactic.
+credential-sensitive requirements in the pinned IEEE Std 9274.1.1-2023
+baseline. These requirements concern credentials rather than syntax alone.
+The [xAPI claim boundary](conformance-claim.md) separates source traceability
+from implementation conformance; equivalence with the 2025 edition has not
+been established.
 
 ## Scope
 

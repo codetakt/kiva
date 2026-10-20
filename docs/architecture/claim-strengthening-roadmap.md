@@ -134,8 +134,10 @@ consumers.
 
 - Boundary: run the complete ADL xAPI LRS conformance test suite against a
   release candidate and publish the compatibility report inside the
-  conformance evidence bundle. ADL results remain compatibility evidence;
-  IEEE/ISO/IEC 39274-1-1-2025 alignment stays the normative claim.
+  conformance evidence bundle. ADL results remain compatibility evidence.
+  The requirements baseline is the pinned IEEE Std 9274.1.1-2023;
+  [xAPI claim limits](conformance-claim.md) remain in force, including
+  unestablished 2025 equivalence and separate implementation evidence.
 - Exit criteria: full-suite run recorded in the evidence bundle with the
   existing ADL compatibility report tooling; bundle validator updated to
   require it for release candidates.

@@ -89,8 +89,14 @@ certification.
 
 ## Normative Audit
 
-The requirement catalog paraphrases IEEE/ISO/IEC 39274-1-1-2025 xAPI LRS
-requirements for traceability. It is not a replacement for the standard text.
+The detailed requirement catalog paraphrases the pinned IEEE Std 9274.1.1-2023
+xAPI LRS source for traceability. It is not a replacement for the standard text.
+The historical `ieee-39274-1-1-2025.yaml` filename and machine `standard` labels
+are compatibility identifiers. Equivalence with a separate ISO/2025 edition
+has not been established. The ledger's source reading, review and adoption
+state are distinct from test execution and implementation conformance; consult
+the [ledger review guide](../../spec/requirements/lrs-requirements-ledger-review.md)
+for the current candidate and its historical adoption boundary.
 
 The machine audit checks that the catalog has stable requirement ids, valid
 clause references, valid requirement levels, valid OpenAPI/assertion projection
@@ -135,8 +141,8 @@ anonymous behavior.
 ## ADL Compatibility
 
 The ADL xAPI LRS Conformance Test Suite is useful compatibility evidence for
-the older xAPI ecosystem. It is not the normative source for an
-IEEE/ISO/IEC 39274-1-1-2025 claim.
+the older xAPI ecosystem. It is not the normative source for the pinned
+IEEE Std 9274.1.1-2023 requirements.
 
 Kiva records ADL compatibility through
 `spec/conformance/adl-compatibility-map.yaml` and
@@ -149,8 +155,8 @@ python scripts/ci/report_adl_compatibility.py \
   --adl-root /home/claude/Codex/github.com/adlnet/lrs-conformance-test-suite
 ```
 
-The result should be presented as compatibility or gap evidence, not as proof
-that Kiva satisfies IEEE/ISO/IEC 39274-1-1-2025.
+The result should be presented as compatibility or gap evidence. It does not
+prove that Kiva satisfies the pinned IEEE source or a separate ISO/2025 edition.
 
 The ADL compatibility report records the local ADL checkout path, git commit,
 dirty status, and source-file verification status when `--adl-root` is

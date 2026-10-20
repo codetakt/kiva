@@ -1,7 +1,7 @@
 # Confidential Mechanism Abstraction
 
-Kiva separates the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS surface from
-Kiva-specific confidential-computation mechanisms. xAPI remains the learning
+Kiva separates the [xAPI LRS surface](conformance-claim.md) from Kiva-specific
+confidential-computation mechanisms. xAPI remains the learning
 record interface. Confidential mechanisms are platform extensions used by PDS
 and BI workflows.
 

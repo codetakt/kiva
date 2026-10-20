@@ -8,7 +8,9 @@ kept locally under `target/`.
 
 ## Summary
 
-Kiva should treat **IEEE/ISO/IEC 39274-1-1-2025 xAPI** as the external interoperability contract and build the privacy, Personal Data Store, BI, and confidential computation capabilities as platform layers around that contract.
+Kiva should use the pinned **IEEE Std 9274.1.1-2023** as its current xAPI
+requirements baseline and build privacy, Personal Data Store, BI, and confidential
+computation capabilities as platform layers around the xAPI interface.
 
 The implementation direction is:
 
@@ -21,9 +23,11 @@ Project Everest-style components are useful for high-assurance cryptographic imp
 
 ## xAPI Boundary
 
-Kiva's xAPI surface is an LRS-compatible interface aligned with
-IEEE/ISO/IEC 39274-1-1-2025. The xAPI boundary is the stable interoperability
-surface for learning record producers and consumers.
+Kiva's xAPI surface provides the LRS interface for learning record producers
+and consumers. Its requirements are traced to the pinned IEEE 2023 baseline;
+that traceability alone does not establish implementation conformance.
+Equivalence with the 2025 edition has not been established. See the
+[xAPI claim boundary](conformance-claim.md).
 
 The implemented xAPI scope includes the standard LRS resource families:
 

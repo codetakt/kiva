@@ -5,8 +5,8 @@
 BI2 provides validated reference reporting deployments for schools and
 corporate training. Each deployment is guidance for an external HTTP and OAuth
 consumer of the BI1 governed analytics API. Kiva does not host the dashboard,
-does not select a BI vendor, and does not extend the IEEE/ISO/IEC
-39274-1-1:2025 xAPI LRS conformance claim. The templates are not legal advice.
+does not select a BI vendor, and does not extend the
+[xAPI LRS conformance claim](conformance-claim.md). The templates are not legal advice.
 
 The machine-readable catalog is
 `spec/analytics/reporting-templates.yaml`. Its validator checks the catalog

@@ -144,5 +144,5 @@ external production assurance gates plus the provider contract where
 production claims remain blocked by external review outcomes.
 PDS publication-readiness evidence supports the current Kiva PDS extension
 boundary only. It does not create an IEEE certification claim, expand the
-IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance surface, or prove complete
+[xAPI LRS claim boundary](../architecture/conformance-claim.md), or prove complete
 end-to-end formal correctness.

@@ -4,8 +4,8 @@
 
 `GET /pds/data-portability-exports` is a governed PDS operation for
 learner-initiated data portability. It is separate from the xAPI Statement
-Resource. The format and operation do not expand the IEEE/ISO/IEC
-39274-1-1:2025 xAPI LRS conformance claim.
+Resource. The format and operation do not expand the
+[xAPI LRS conformance claim](conformance-claim.md).
 
 The exact resource-server scope is `pds:read`. No other scope implies it.
 

@@ -6,8 +6,8 @@ M12 defines metadata-only operational workflows for retention schedules,
 tombstone publication rules, and correction/dispute/tombstone cases in Kiva's
 Personal Data Store extension.
 
-This is not part of the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance
-surface. Accepted xAPI Statements remain immutable LRS records. Kiva records
+This is outside the [xAPI LRS claim boundary](conformance-claim.md).
+Accepted xAPI Statements remain immutable LRS records. Kiva records
 operational lifecycle metadata around those records and PDS resources instead
 of silently rewriting or deleting accepted Statement JSON.
 

@@ -52,8 +52,8 @@ The PDS bundle validates the Kiva PDS extension contract, examples, generated
 schemas, PDS policy tests, PDS server tests, optional PostgreSQL/Kani/Tamarin
 evidence, a schema-validated manifest, and checksums. It supports publication
 readiness for the current PDS extension boundary; it is not an IEEE xAPI
-certification claim and does not expand the IEEE/ISO/IEC 39274-1-1:2025 LRS
-conformance surface.
+certification claim and does not expand the
+[xAPI LRS claim boundary](../architecture/conformance-claim.md).
 
 Generate a static PDS evidence bundle from Nix with:
 

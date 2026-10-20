@@ -8,7 +8,7 @@ learner-principal profile over the existing M11 resource-server scope boundary.
 
 The templates are operational guidance artifacts for Kiva's PDS extension.
 They are not legal advice, not a certification claim, and not part of the
-IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance surface.
+[xAPI LRS claim boundary](conformance-claim.md).
 
 ## Artifacts
 

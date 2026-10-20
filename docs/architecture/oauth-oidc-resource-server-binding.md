@@ -71,8 +71,10 @@ rejected by the Bearer-only core.
 This mode does not add Basic authentication to the resource-server core and is
 not a production identity-provider integration. It compensates for the ADL
 Axios helper's unconditional Basic header so that the suite can exercise xAPI
-resource semantics. IEEE/ISO/IEC 39274-1-1-2025 clause 4.1.8 does not define a
-specific authentication mechanism.
+resource semantics. The pinned IEEE Std 9274.1.1-2023, clause 4.1.8.1, does
+not define a specific authentication mechanism. This is a reference to the
+[2023 requirements baseline](conformance-claim.md), not a claim of 2025
+edition equivalence.
 
 ## Scope Vocabulary
 

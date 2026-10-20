@@ -1,7 +1,9 @@
 # Kiva
 
 Kiva is a learner experience data platform that exposes an xAPI Learning
-Record Store (LRS) interface targeting **IEEE/ISO/IEC 39274-1-1-2025**.
+Record Store (LRS) interface. Its current requirements baseline is the pinned
+**IEEE Std 9274.1.1-2023**. Support for IEEE/ISO/IEC 39274-1-1-2025 remains a
+project target; equivalence with that edition has not been established.
 Around that interface, Kiva provides separate governed
 surfaces for Personal Data Store (PDS) workflows, confidential-computation
 provider integration, and aggregate analytics.
@@ -11,8 +13,8 @@ provider integration, and aggregate analytics.
 Kiva is designed around four deliberately separate responsibilities:
 
 1. **Standards-based xAPI access**
-   - Expose an xAPI LRS interface aligned with IEEE/ISO/IEC
-     39274-1-1-2025.
+   - Use the pinned IEEE Std 9274.1.1-2023 as the current xAPI LRS
+     requirements baseline.
    - Preserve interoperability for statements, activities, agents, verbs, documents, and RESTful access patterns.
    - Define the interface through OpenAPI and portable conformance cases.
 
@@ -71,7 +73,8 @@ under `target/`. See [the conformance aid](spec/conformance/README.md) for usage
 - **Explicit governance:** schools and public organizations require stronger
   governance than ordinary application telemetry.
 - **Multi-party by default:** analytics should not assume a single trusted data owner.
-- **Conformance must be testable:** claims about IEEE/ISO/IEC 39274-1-1-2025 support should be backed by explicit tests, examples, and traceable references.
+- **Conformance must be testable:** claims should identify the reviewed standard
+  edition and be backed by explicit tests, examples, and traceable references.
 - **Conformance assets should be portable:** the xAPI conformance suite should keep requirement metadata,
   YAML cases, fixture contracts, schemas, and reports language-neutral, with Rust used as a strict reference runner.
 
@@ -89,6 +92,11 @@ Kiva uses the following IEEE Open Source xAPI reference repositories:
 - [xAPI Base Standard documentation](https://opensource.ieee.org/xapi/xapi-base-standard-documentation)
 - [xAPI Base Standard examples](https://opensource.ieee.org/xapi/xapi-base-standard-examples)
 - [xAPI Profiles](https://opensource.ieee.org/xapi/xapi-profiles)
+
+The detailed requirement ledger uses the pinned IEEE 2023 publication.
+Historical `39274-1-1-2025` filenames and machine labels remain compatibility
+identifiers. Source traceability does not establish implementation conformance;
+see the [xAPI claim boundary](docs/architecture/conformance-claim.md).
 
 See `AGENTS.md` for repository-specific development notes and reference paths.
 
@@ -111,6 +119,6 @@ See `AGENTS.md` for repository-specific development notes and reference paths.
 - [Kiva analytics OpenAPI contract](spec/openapi/kiva-analytics.yaml)
 - [PDS examples](examples/pds)
 - [PDS publication artifact schemas](spec/pds)
-- [IEEE/ISO/IEC 39274-1-1-2025 requirement catalog](spec/requirements/ieee-39274-1-1-2025.yaml)
+- [IEEE Std 9274.1.1-2023 requirement catalog](spec/requirements/ieee-39274-1-1-2025.yaml)
 - [xAPI LRS conformance discharge plan](spec/conformance/xapi-lrs-discharge.yaml)
 - [xAPI LRS conformance aid runner](tools/xapi-lrs-conformance)

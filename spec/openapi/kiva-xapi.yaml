@@ -172,6 +172,8 @@ paths:
         - xapi-lrs-4.1.6.1-statement-get-attachments-false
         - xapi-lrs-4.1.6.1-statement-last-modified
         - xapi-lrs-4.1.6.1-statement-format-exact
+        - xapi-lrs-4.1.6.1-statement-format-ids
+        - xapi-lrs-4.1.6.1-statement-format-canonical-agents
         - xapi-lrs-4.1.6.1-statementref-filtering
         - xapi-lrs-4.1.6.1-statement-query-filters
         - xapi-lrs-4.1.6.1-statement-query-related-agents

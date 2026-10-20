@@ -139026,7 +139026,7 @@ cases:
         equals: 2.0.0
 - id: statement-unknown-parameter-with-valid-selectors-put
   requirements:
-  - xapi-lrs-4.1.6.1-statement-query-validation
+  - xapi-lrs-4.1.5-unknown-parameters
   safety:
     destructive: true
     requires_isolated_lrs: true
@@ -139410,7 +139410,7 @@ cases:
         utc: true
 - id: statement-unknown-parameter-with-valid-selectors-post
   requirements:
-  - xapi-lrs-4.1.6.1-statement-query-validation
+  - xapi-lrs-4.1.5-unknown-parameters
   safety:
     destructive: true
     requires_isolated_lrs: true

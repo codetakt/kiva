@@ -136,6 +136,8 @@ doc_anchors:
       - "spec/confidential/computation-milestones.yaml"
   - path: docs/README.md
     anchors:
+      # Preserve this historical compatibility label in the documentation;
+      # its presence does not assert equivalence with the pinned 2023 baseline.
       - "IEEE/ISO/IEC 39274-1-1-2025"
       - "Design Source of Truth"
       - "architecture/design-source-of-truth.md"

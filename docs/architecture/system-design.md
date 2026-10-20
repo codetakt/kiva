@@ -743,8 +743,11 @@ re-exports require an explicit ledger entry and migration target.
 
 ## Claim Boundary
 
-This design supports an IEEE/ISO/IEC 39274-1-1:2025-aligned xAPI LRS
-implementation claim, plus Kiva-specific PDS and confidential-computation
-engineering assurance claims. It does not assert IEEE certification, production
+This design uses the pinned IEEE Std 9274.1.1-2023 as the xAPI LRS requirements
+baseline, alongside Kiva-specific PDS and confidential-computation engineering
+assurance boundaries. Requirement traceability alone does not establish
+implementation conformance, and equivalence with the 2025 edition has not been
+established; see the [xAPI claim boundary](conformance-claim.md).
+It does not assert IEEE certification, production
 MPC security, production FHE security, or hardware-backed TEE certification
 without external conformance and security review evidence.
