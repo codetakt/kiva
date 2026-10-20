@@ -1,0 +1,2846 @@
+{
+  "authority": "Index only; detailed rules control strength and conditions.",
+  "records": [
+    {
+      "id": "xapi-lrs-4.1.1-headers",
+      "clause": "4.1.1",
+      "level": "shall",
+      "area": "http",
+      "summary": "The LRS implements and validates the xAPI request and response headers that apply to each request context.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-request-header-accept",
+        "IP-request-header-accept-encoding",
+        "IP-request-header-accept-language",
+        "IP-request-header-authorization",
+        "IP-request-header-content-type",
+        "IP-request-header-content-length",
+        "IP-request-header-content-transfer-encoding",
+        "IP-request-header-if-match",
+        "IP-request-header-if-none-match",
+        "IP-request-header-x-experience-api-version",
+        "IP-response-header-context"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.2-utf8",
+      "clause": "4.1.2",
+      "level": "shall",
+      "area": "encoding",
+      "summary": "Strings are encoded and interpreted as UTF-8.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-utf8"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-utf8-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-json-statement-batches",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "media-type",
+      "summary": "The issued JSON-batch wording covers PUT and POST, but PUT also specifies a single Statement; preserve OPEN-PUT rather than asserting unrestricted PUT batch support.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-json-attachment-admission"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-attachment-sha2-match",
+      "clause": "4.1.3",
+      "level": "shall-not",
+      "area": "attachment",
+      "summary": "Attachment raw data is matched to attachment metadata only by SHA-2 hash comparison.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-attachment-match"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-attachment-transmission-criteria",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Statement transmissions with attachments use either JSON with fileUrl coverage or RFC 2046 multipart/mixed.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-attachment-transmission-json",
+        "IP-multipart-rfc"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-multipart-first-json",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Multipart Statement transmissions place the Statement JSON in the first application/json part.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-multipart-first-json"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-multipart-attachment-headers",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Multipart attachment parts include the xAPI hash header and binary transfer encoding.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-multipart-x-experience-api-hash",
+        "IP-multipart-content-transfer-encoding"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-attachment-header-property-match",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Attachment part headers and attachment object properties match where both specify the same value.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-multipart-match-contentType",
+        "IP-multipart-match-length",
+        "IP-multipart-match-sha2"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-multipart-accept-valid",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Valid multipart Statement batches are accepted, including batches with no attachment objects or only fileUrl attachments; PUT array acceptance retains the OPEN-PUT reservation in IP-multipart-accept.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-multipart-accept",
+        "IP-multipart-no-attachments"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.3-multipart-reject-unmatched",
+      "clause": "4.1.3",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "Multipart Statement batches are rejected when attachment objects lack both fileUrl and matching received attachment data.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-multipart-missing-data"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.4-etag-on-document-get",
+      "clause": "4.1.4",
+      "level": "shall",
+      "area": "concurrency",
+      "summary": "Document resource GET responses include an ETag header.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-document-etag"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.4-if-match",
+      "clause": "4.1.4",
+      "level": "shall",
+      "area": "concurrency",
+      "summary": "Document PUT, POST, and DELETE requests handle If-Match preconditions for optimistic concurrency.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-document-if-match",
+        "IP-precondition-boundary"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.4-precondition-failed",
+      "clause": "4.1.4",
+      "level": "shall",
+      "area": "concurrency",
+      "summary": "Failed document preconditions return 412 and do not modify the target resource.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-document-precondition-status",
+        "IP-document-precondition-no-write"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.4-put-conflict",
+      "clause": "4.1.4",
+      "level": "shall",
+      "area": "concurrency",
+      "summary": "PUT to an existing document without a conditional header returns 409, explains checking the current resource and using If-Match with its current ETag, and does not modify the resource.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-document-unconditional-put-status",
+        "IP-document-unconditional-put-explanation",
+        "IP-document-unconditional-put-no-write"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-error-most-appropriate",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "error",
+      "summary": "The LRS returns the most appropriate xAPI error code for each error condition.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-error-400",
+        "IP-error-401",
+        "IP-error-403",
+        "IP-error-404",
+        "IP-error-409",
+        "IP-error-412",
+        "IP-error-413",
+        "IP-error-429",
+        "IP-error-500"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-unknown-parameters",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "error",
+      "summary": "Unrecognized parameters in a specified context are rejected with 400 unless intentionally extended.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-unknown-parameter"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-parameter-case",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "error",
+      "summary": "Parameters matching specified parameters except for case are rejected with 400.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-parameter-case"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-batch-rejection",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "statement",
+      "summary": "A Statement batch is rejected when any Statement in that batch is rejected.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-batch-atomic-rejection"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-unauthorized",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "authorization",
+      "summary": "Requests with credentials that are required but refused are rejected with 401.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-error-401"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-forbidden",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "authorization",
+      "summary": "Credential-based permission denials are rejected with 403.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-error-403"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-too-large",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "error",
+      "summary": "Oversized Statements, documents, or attachments are rejected with 413.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-error-413",
+        "IP-size-limit-choice"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.5-rate-limit",
+      "clause": "4.1.5",
+      "level": "shall",
+      "area": "error",
+      "summary": "Requests rejected due to rate limits are rejected with 429.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-error-429",
+        "IP-rate-limit-choice"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6-support-resources",
+      "clause": "4.1.6",
+      "level": "shall",
+      "area": "resource",
+      "summary": "The LRS supports all standard xAPI LRS resource families.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-resource-statements-put",
+        "IP-resource-statements-post",
+        "IP-resource-statements-get",
+        "IP-resource-statements-head",
+        "IP-resource-agents-get",
+        "IP-resource-agents-head",
+        "IP-resource-agents-profile-put",
+        "IP-resource-agents-profile-post",
+        "IP-resource-agents-profile-get",
+        "IP-resource-agents-profile-head",
+        "IP-resource-agents-profile-delete",
+        "IP-resource-activities-get",
+        "IP-resource-activities-head",
+        "IP-resource-activities-profile-put",
+        "IP-resource-activities-profile-post",
+        "IP-resource-activities-profile-get",
+        "IP-resource-activities-profile-head",
+        "IP-resource-activities-profile-delete",
+        "IP-resource-activities-state-put",
+        "IP-resource-activities-state-post",
+        "IP-resource-activities-state-get",
+        "IP-resource-activities-state-delete",
+        "IP-resource-activities-state-head",
+        "IP-resource-about-get",
+        "IP-resource-about-head",
+        "IP-resource-table-validation"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-resource-families",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6-document-no-prior-knowledge",
+      "clause": "4.1.6",
+      "level": "shall-not",
+      "area": "document",
+      "summary": "Document resources are not rejected solely because the LRS lacks prior knowledge of the Activity or Agent.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-document-unknown-entity"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6-request-parameter-validation",
+      "clause": "4.1.6",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Request parameters are rejected when required values are missing, null, wrongly typed, malformed, case-invalid, disallowed, or scheme-less where an IRI or IRL is required.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-parameter-required",
+        "IP-parameter-null",
+        "IP-parameter-type",
+        "IP-parameter-format",
+        "IP-parameter-key-case",
+        "IP-parameter-enum-case",
+        "IP-parameter-unsupported",
+        "IP-parameter-scheme"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification",
+      "clause": "4.1.6.1",
+      "level": "shall-not",
+      "area": "statement",
+      "summary": "PUT with a known statementId does not modify the existing Statement or any other object.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-statement-put-duplicate"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-post-duplicate-no-modification",
+      "clause": "4.1.6.1",
+      "level": "shall-not",
+      "area": "statement",
+      "summary": "POST with a Statement id already stored by the LRS does not modify the existing Statement or any other object.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-statement-post-duplicate"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-post-duplicate-batch-id",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement",
+      "summary": "A POST batch with duplicate Statement ids inside the submitted batch is rejected with 400.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-batch-duplicate-id"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-get-id-mutual-exclusion",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Requests containing both statementId and voidedStatementId are rejected with 400.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-mutually-exclusive-ids"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-get-single-query-limits",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Single Statement retrieval by id allows only attachments and format as additional query parameters.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-id-parameters"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-get-empty-result",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Multiple Statement queries with no matches still return 200 with a StatementResult containing an empty statements array.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-query-empty"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-query-filters",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Multiple Statement queries apply agent, verb, activity, and registration filters to matching Statement fields.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-param-agent",
+        "IP-get-param-verb",
+        "IP-get-param-activity",
+        "IP-get-param-registration"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-query-related-agents",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Multiple Statement queries with related_agents=true include related Agents and Groups from authority and context.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-param-related_agents"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-query-related-activities",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "The related_activities behavior is conflicting between chapter 4 Agent wording and chapter 5 Activity wording; preserve both under OPEN-RELATED.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-param-related_activities"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-query-time-order-limit",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Multiple Statement queries apply since, until, ascending, and limit according to stored-time query semantics.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-get-param-since",
+        "IP-get-param-until",
+        "IP-get-param-ascending",
+        "IP-get-param-limit"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-consistent-through",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Statement resource responses include X-Experience-API-Consistent-Through.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-consistent-through",
+        "IP-consistent-through-load"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-http-conformance-statement-normalization-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-reference-isolated",
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-http-conformance-statement-utf8-isolated",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-get-attachments-true",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "attachment",
+      "summary": "GET Statements with attachments=true uses multipart response format with all attachments.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-get-param-attachments",
+        "IP-attachment-response"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-get-attachments-false",
+      "clause": "4.1.6.1",
+      "level": "shall-not",
+      "area": "attachment",
+      "summary": "GET Statements with attachments=false omits raw attachment data and reports application/json.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-get-param-attachments",
+        "IP-attachment-transmission-json"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-last-modified",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "Statement GET responses include Last-Modified using the most recent stored timestamp among returned Statements.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-statement-last-modified"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-http-conformance-statement-normalization-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-reference-isolated",
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-http-conformance-statement-utf8-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-format-exact",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "exact and default formats return Agent, Group, Activity and Verb data as received, including display values as included or omitted, subject to explicitly permitted transformations.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-format-exact"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "public-lrs-generated-recursive-response-vectors",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-format-ids",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "ids format returns only minimum identifying information in Agent, Group, Activity and Verb Objects, including the identifying information of each anonymous Group member.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-format-ids"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "public-lrs-generated-recursive-response-vectors"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statement-format-canonical-agents",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "canonical format returns original Agent and Group Objects as in exact format.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-format-canonical"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "public-lrs-generated-recursive-response-vectors"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-statementref-filtering",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "StatementRef query expansion applies non-time filters recursively while time and sequence filters apply to the targeting Statement.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-statementref-filters",
+        "IP-statementref-time"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-reference-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-canonical-language-map-one-language",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "canonical format returns one language entry per Activity language map and per other map that the LRS elects to canonicalize.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-canonical-activity-language",
+        "IP-canonical-other-language"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-canonical-accept-language",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-query",
+      "summary": "canonical language selection applies Accept-Language per language map.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-canonical-negotiation"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-voided-not-returned",
+      "clause": "4.1.6.1",
+      "level": "shall-not",
+      "area": "statement-voiding",
+      "summary": "Voided Statements are not returned unless requested through voidedStatementId.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-voided-visibility"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.1-voided-targeting-returned",
+      "clause": "4.1.6.1",
+      "level": "shall",
+      "area": "statement-voiding",
+      "summary": "Statements targeting a voided Statement remain returnable according to normal query processing.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-voided-targeters"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.2-state-post-json-merge",
+      "clause": "4.1.6.2",
+      "level": "shall",
+      "area": "document",
+      "summary": "State POST with application/json against an existing application/json document merges top-level object properties.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-state-merge-trigger",
+        "IP-state-merge-depth",
+        "IP-state-merge-serialization"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.2-state-post-merge-reject-invalid",
+      "clause": "4.1.6.2",
+      "level": "shall",
+      "area": "document",
+      "summary": "Invalid State JSON merge inputs return 400 and do not update the target document.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-state-merge-invalid-status",
+        "IP-state-merge-invalid-no-write"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.2-state-post-merge-success",
+      "clause": "4.1.6.2",
+      "level": "shall",
+      "area": "document",
+      "summary": "Successful State POST merge returns 204.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-state-merge-success"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.2-state-get-last-modified",
+      "clause": "4.1.6.2",
+      "level": "shall",
+      "area": "document",
+      "summary": "Single State document GET includes Last-Modified.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-state-last-modified"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.3-agents-person-fallback",
+      "clause": "4.1.6.3",
+      "level": "shall",
+      "area": "agent",
+      "summary": "The Agents resource returns a Person object even when only the requested Agent information is known.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-person-fallback",
+        "IP-agents-get"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-agent-activity-fallback",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.3-person-arrays",
+      "clause": "4.1.6.3",
+      "level": "shall",
+      "area": "agent",
+      "summary": "Person object array properties contain members with the corresponding Agent property definitions.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-person-array-members",
+        "IP-person-multiple-identifiers",
+        "IP-Person-objectType-presence",
+        "IP-Person-objectType-type",
+        "IP-Person-objectType-value",
+        "IP-Person-name-presence",
+        "IP-Person-name-type",
+        "IP-Person-mbox-presence",
+        "IP-Person-mbox-type",
+        "IP-Person-mbox_sha1sum-presence",
+        "IP-Person-mbox_sha1sum-type",
+        "IP-Person-openid-presence",
+        "IP-Person-openid-type",
+        "IP-Person-account-presence",
+        "IP-Person-account-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-agent-activity-fallback",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.4-activity-fallback",
+      "clause": "4.1.6.4",
+      "level": "shall",
+      "area": "activity",
+      "summary": "The Activities resource returns an Activity object even when no canonical Activity definition is stored.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-activity-fallback"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-agent-activity-fallback",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.4-activity-complete",
+      "clause": "4.1.6.4",
+      "level": "shall",
+      "area": "activity",
+      "summary": "The Activities resource returns all available information about the requested Activity under the LRS's declared canonical metadata policy; no particular metadata update or merge policy is required.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-activities-get",
+        "IP-canonical-update-authority",
+        "IP-canonical-small-corrections",
+        "IP-canonical-major-changes"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-agent-activity-fallback"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.5-agent-profile-post-json-merge",
+      "clause": "4.1.6.5",
+      "level": "shall",
+      "area": "document",
+      "summary": "Agent Profile POST with application/json against an existing application/json document merges top-level object properties.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-agent-profile-merge-trigger",
+        "IP-agent-profile-merge-depth",
+        "IP-agent-profile-merge-serialization"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.5-agent-profile-post-merge-reject-invalid",
+      "clause": "4.1.6.5",
+      "level": "shall",
+      "area": "document",
+      "summary": "Invalid Agent Profile JSON merge inputs return 400 and do not update the target document.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-agent-profile-merge-invalid-status",
+        "IP-agent-profile-merge-invalid-no-write"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.5-agent-profile-post-merge-success",
+      "clause": "4.1.6.5",
+      "level": "shall",
+      "area": "document",
+      "summary": "Successful Agent Profile POST merge returns 204.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-agent-profile-merge-success"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.5-agent-profile-get-last-modified",
+      "clause": "4.1.6.5",
+      "level": "shall",
+      "area": "document",
+      "summary": "Single Agent Profile document GET includes Last-Modified.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-agent-profile-last-modified"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.6-activity-profile-post-json-merge",
+      "clause": "4.1.6.6",
+      "level": "shall",
+      "area": "document",
+      "summary": "Activity Profile POST with application/json against an existing application/json document merges top-level object properties.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-activity-profile-merge-trigger",
+        "IP-activity-profile-merge-depth",
+        "IP-activity-profile-merge-serialization"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.6-activity-profile-post-merge-reject-invalid",
+      "clause": "4.1.6.6",
+      "level": "shall",
+      "area": "document",
+      "summary": "Invalid Activity Profile JSON merge inputs return 400 and do not update the target document.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-activity-profile-merge-invalid-status",
+        "IP-activity-profile-merge-invalid-no-write"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.6-activity-profile-post-merge-success",
+      "clause": "4.1.6.6",
+      "level": "shall",
+      "area": "document",
+      "summary": "Successful Activity Profile POST merge returns 204.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-activity-profile-merge-success"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.6-activity-profile-get-last-modified",
+      "clause": "4.1.6.6",
+      "level": "shall",
+      "area": "document",
+      "summary": "Single Activity Profile document GET includes Last-Modified.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-activity-profile-last-modified"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.7-about-version",
+      "clause": "4.1.6.7",
+      "level": "shall",
+      "area": "about",
+      "summary": "About returns a JSON object whose version property includes the latest minor and patch version supported for each major version.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-about-versions",
+        "IP-about-get",
+        "IP-about-extensions"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.6.7-about-version-header-not-rejected",
+      "clause": "4.1.6.7",
+      "level": "shall-not",
+      "area": "about",
+      "summary": "About requests are not rejected solely because of the xAPI version header.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-about-version-exemption"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-header-every-response",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "Every LRS response includes X-Experience-API-Version.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-response-version-header"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-http-conformance-about-version",
+        "kiva-http-conformance-resource-families",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-http-conformance-statement-normalization-isolated",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-result-validation-isolated",
+        "kiva-http-conformance-statement-context-validation-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-reference-isolated",
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-http-conformance-statement-utf8-isolated",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-http-conformance-statement-signing-isolated",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-http-conformance-agent-activity-fallback",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-header-latest-patch",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "The version response header is set to the latest supported xAPI patch version.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-response-version-value"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-http-conformance-about-version",
+        "kiva-http-conformance-resource-families",
+        "kiva-http-conformance-statements-isolated",
+        "kiva-http-conformance-statement-format-isolated",
+        "kiva-http-conformance-statement-voiding-isolated",
+        "kiva-http-conformance-statement-normalization-isolated",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-result-validation-isolated",
+        "kiva-http-conformance-statement-context-validation-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-reference-isolated",
+        "kiva-http-conformance-statement-query-filter-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-http-conformance-statement-utf8-isolated",
+        "kiva-http-conformance-statement-attachments-isolated",
+        "kiva-http-conformance-statement-signing-isolated",
+        "kiva-http-conformance-statement-query-validation",
+        "kiva-http-conformance-state-documents-isolated",
+        "kiva-http-conformance-profile-documents-isolated",
+        "kiva-http-conformance-agent-activity-fallback",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-2-0-alias",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "Requests declaring xAPI version 2.0 are accepted as 2.0.0.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-version-alias"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-reject-before-2",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "Requests with xAPI versions before 2.0.0 are rejected unless routed to a conformant earlier implementation.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-version-before-two"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-reject-2-1-or-greater",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "Requests with xAPI version 2.1.0 or greater are rejected.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-version-after-two"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.7-version-reject-400",
+      "clause": "4.1.7",
+      "level": "shall",
+      "area": "versioning",
+      "summary": "Version rejections return 400 with a short problem description.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-version-reject-status"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-about-version",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.1.8-authorization-decisions",
+      "clause": "4.1.8",
+      "level": "shall",
+      "area": "authorization",
+      "summary": "The LRS handles or delegates Statement validity and operation permission decisions based on credentials.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-authorization"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-tamarin-protocol-models",
+        "kiva-donation-track"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2-statement-immutability-preserve",
+      "clause": "4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "Statement storage, retrieval, and comparison preserve xAPI immutability requirements for Actor, Verb, Object, and Duration, subject to stated exceptions.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-preserve-actor",
+        "IP-preserve-verb",
+        "IP-preserve-object",
+        "IP-preserve-duration"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2-statement-immutability-ignore-excluded",
+      "clause": "4.2",
+      "level": "shall-not",
+      "area": "statement",
+      "summary": "Statement equivalence does not depend on excluded properties such as id, authority, stored, timestamp, version, attachments, group member order, or referenced Activity definitions.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-equivalence-ignore-case",
+        "IP-equivalence-ignore-id",
+        "IP-equivalence-ignore-group-member-order",
+        "IP-equivalence-ignore-authority",
+        "IP-equivalence-ignore-stored",
+        "IP-equivalence-ignore-timestamp",
+        "IP-equivalence-ignore-version",
+        "IP-equivalence-ignore-attachments",
+        "IP-equivalence-ignore-referenced-activity-definitions"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-immutability-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.1-statement-type-validation",
+      "clause": "4.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements are rejected when fields fail the specified type requirements.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-table-types",
+        "IP-Statement-id-type",
+        "IP-Statement-actor-type",
+        "IP-Statement-verb-type",
+        "IP-Statement-object-type",
+        "IP-Statement-result-type",
+        "IP-Statement-context-type",
+        "IP-Statement-timestamp-type",
+        "IP-Statement-stored-type",
+        "IP-Statement-authority-type",
+        "IP-Statement-version-type",
+        "IP-Statement-attachments-type",
+        "IP-Agent-objectType-type",
+        "IP-Agent-name-type",
+        "IP-Agent-mbox-type",
+        "IP-Agent-mbox_sha1sum-type",
+        "IP-Agent-openid-type",
+        "IP-Agent-account-type",
+        "IP-AnonymousGroup-objectType-type",
+        "IP-AnonymousGroup-name-type",
+        "IP-AnonymousGroup-member-type",
+        "IP-IdentifiedGroup-objectType-type",
+        "IP-IdentifiedGroup-name-type",
+        "IP-IdentifiedGroup-member-type",
+        "IP-IdentifiedGroup-mbox-type",
+        "IP-IdentifiedGroup-mbox_sha1sum-type",
+        "IP-IdentifiedGroup-openid-type",
+        "IP-IdentifiedGroup-account-type",
+        "IP-Account-homePage-type",
+        "IP-Account-name-type",
+        "IP-Verb-id-type",
+        "IP-Verb-display-type",
+        "IP-Activity-objectType-type",
+        "IP-Activity-id-type",
+        "IP-Activity-definition-type",
+        "IP-ActivityDefinition-name-type",
+        "IP-ActivityDefinition-description-type",
+        "IP-ActivityDefinition-type-type",
+        "IP-ActivityDefinition-moreInfo-type",
+        "IP-ActivityDefinition-extensions-type",
+        "IP-Interaction-interactionType-type",
+        "IP-Interaction-correctResponsesPattern-type",
+        "IP-Interaction-choices-type",
+        "IP-Interaction-scale-type",
+        "IP-Interaction-source-type",
+        "IP-Interaction-target-type",
+        "IP-Interaction-steps-type",
+        "IP-InteractionComponent-id-type",
+        "IP-InteractionComponent-description-type",
+        "IP-ActorObject-objectType-type",
+        "IP-StatementRef-objectType-type",
+        "IP-StatementRef-id-type",
+        "IP-SubStatement-objectType-type",
+        "IP-SubStatement-actor-type",
+        "IP-SubStatement-verb-type",
+        "IP-SubStatement-object-type",
+        "IP-SubStatement-result-type",
+        "IP-SubStatement-context-type",
+        "IP-SubStatement-timestamp-type",
+        "IP-SubStatement-attachments-type",
+        "IP-Result-score-type",
+        "IP-Result-success-type",
+        "IP-Result-completion-type",
+        "IP-Result-response-type",
+        "IP-Result-duration-type",
+        "IP-Result-extensions-type",
+        "IP-Score-scaled-type",
+        "IP-Score-raw-type",
+        "IP-Score-min-type",
+        "IP-Score-max-type",
+        "IP-Context-registration-type",
+        "IP-Context-instructor-type",
+        "IP-Context-team-type",
+        "IP-Context-contextActivities-type",
+        "IP-Context-contextAgents-type",
+        "IP-Context-contextGroups-type",
+        "IP-Context-revision-type",
+        "IP-Context-platform-type",
+        "IP-Context-language-type",
+        "IP-Context-statement-type",
+        "IP-Context-extensions-type",
+        "IP-contextAgent-objectType-type",
+        "IP-contextAgent-agent-type",
+        "IP-contextAgent-relevantTypes-type",
+        "IP-contextAgent-any-type",
+        "IP-contextGroup-objectType-type",
+        "IP-contextGroup-group-type",
+        "IP-contextGroup-relevantTypes-type",
+        "IP-contextGroup-any-type",
+        "IP-Attachment-usageType-type",
+        "IP-Attachment-display-type",
+        "IP-Attachment-description-type",
+        "IP-Attachment-contentType-type",
+        "IP-Attachment-length-type",
+        "IP-Attachment-sha2-type",
+        "IP-Attachment-fileUrl-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.1-statement-extra-properties",
+      "clause": "4.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements are rejected for additional properties outside extension locations.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-table-extra"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.1-statement-invalid-iris",
+      "clause": "4.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "The table rule rejects invalid IRIs, while the processing rule permits not validating IRIs/UUIDs; preserve OPEN-FORMAT and the selected interpretation separately.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-table-iri",
+        "IP-identifier-validation-waiver"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.1-statement-duplicate-properties",
+      "clause": "4.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements using a property more than once are rejected.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-table-duplicate"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.1-statement-required-null-case",
+      "clause": "4.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements are rejected for missing required properties, nulls outside extensions, wrong primitive types, malformed formatted strings, case mismatches, disallowed keys, or scheme-less IRIs/IRLs.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-table-required",
+        "IP-table-null",
+        "IP-table-primitive",
+        "IP-table-format",
+        "IP-table-key-case",
+        "IP-table-enum-case",
+        "IP-table-allowed",
+        "IP-table-scheme"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-actor-validation-isolated",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.3-object-default-activity",
+      "clause": "4.2.2.3",
+      "level": "shall",
+      "area": "statement",
+      "summary": "Statement objects without objectType are treated as Activity objects.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-object-default"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2-statement-version-format",
+      "clause": "4.2.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "A supplied Statement version is a string formatted according to Semantic Versioning 1.0.0.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Statement-version-presence",
+        "IP-Statement-version-type",
+        "IP-version-scheme",
+        "IP-version-admission"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.2-verb-properties",
+      "clause": "4.2.2.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "A Verb contains a required IRI id and an optional Language Map display, with no properties outside the Verb table.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Verb-id-presence",
+        "IP-Verb-id-type",
+        "IP-Verb-id-value",
+        "IP-Verb-display-presence",
+        "IP-Verb-display-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.3-activity-properties",
+      "clause": "4.2.2.3",
+      "level": "shall",
+      "area": "validation",
+      "summary": "An Activity contains a required IRI id, an optional Activity objectType, and an optional Activity Definition object.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Activity-objectType-presence",
+        "IP-Activity-objectType-type",
+        "IP-Activity-objectType-value",
+        "IP-Activity-id-presence",
+        "IP-Activity-id-type",
+        "IP-Activity-id-value",
+        "IP-Activity-definition-presence",
+        "IP-Activity-definition-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.3-activity-definition-properties",
+      "clause": "4.2.2.3",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Activity Definition fields follow their table contracts; after a valid interactionType, remaining interaction validation is optional under 4.2.4.2.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-ActivityDefinition-name-presence",
+        "IP-ActivityDefinition-name-type",
+        "IP-ActivityDefinition-description-presence",
+        "IP-ActivityDefinition-description-type",
+        "IP-ActivityDefinition-type-presence",
+        "IP-ActivityDefinition-type-type",
+        "IP-ActivityDefinition-moreInfo-presence",
+        "IP-ActivityDefinition-moreInfo-type",
+        "IP-ActivityDefinition-extensions-presence",
+        "IP-ActivityDefinition-extensions-type",
+        "IP-Interaction-interactionType-presence",
+        "IP-Interaction-interactionType-type",
+        "IP-Interaction-interactionType-value",
+        "IP-Interaction-correctResponsesPattern-presence",
+        "IP-Interaction-correctResponsesPattern-type",
+        "IP-Interaction-choices-presence",
+        "IP-Interaction-choices-type",
+        "IP-Interaction-choices-value",
+        "IP-Interaction-scale-presence",
+        "IP-Interaction-scale-type",
+        "IP-Interaction-scale-value",
+        "IP-Interaction-source-presence",
+        "IP-Interaction-source-type",
+        "IP-Interaction-source-value",
+        "IP-Interaction-target-presence",
+        "IP-Interaction-target-type",
+        "IP-Interaction-target-value",
+        "IP-Interaction-steps-presence",
+        "IP-Interaction-steps-type",
+        "IP-Interaction-steps-value",
+        "IP-InteractionComponent-id-presence",
+        "IP-InteractionComponent-id-type",
+        "IP-InteractionComponent-id-value",
+        "IP-InteractionComponent-description-presence",
+        "IP-InteractionComponent-description-type",
+        "IP-interaction-table-label",
+        "IP-interaction-pattern-true-false",
+        "IP-interaction-pattern-choice",
+        "IP-interaction-pattern-fill-in",
+        "IP-interaction-pattern-long-fill-in",
+        "IP-interaction-pattern-matching",
+        "IP-interaction-pattern-performance",
+        "IP-interaction-pattern-sequencing",
+        "IP-interaction-pattern-likert",
+        "IP-interaction-pattern-numeric",
+        "IP-interaction-pattern-other",
+        "IP-interaction-length-description",
+        "IP-interaction-correctness",
+        "IP-interaction-no-components",
+        "IP-interaction-type",
+        "IP-interaction-remaining",
+        "IP-characterstring-validation",
+        "IP-characterstring-context",
+        "IP-ActivityDefinition-moreInfo-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.3-substatement-properties",
+      "clause": "4.2.2.3",
+      "level": "shall",
+      "area": "validation",
+      "summary": "SubStatement fields follow the issued table, excluding id/stored/authority/version; the omitted-timestamp population rule remains recorded with OPEN-SUBTIME.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-SubStatement-objectType-presence",
+        "IP-SubStatement-objectType-type",
+        "IP-SubStatement-objectType-value",
+        "IP-SubStatement-actor-presence",
+        "IP-SubStatement-actor-type",
+        "IP-SubStatement-verb-presence",
+        "IP-SubStatement-verb-type",
+        "IP-SubStatement-object-presence",
+        "IP-SubStatement-object-type",
+        "IP-SubStatement-result-presence",
+        "IP-SubStatement-result-type",
+        "IP-SubStatement-context-presence",
+        "IP-SubStatement-context-type",
+        "IP-SubStatement-timestamp-presence",
+        "IP-SubStatement-timestamp-type",
+        "IP-SubStatement-attachments-presence",
+        "IP-SubStatement-attachments-type",
+        "IP-substatement-default-time",
+        "IP-substatement-forbidden-fields",
+        "IP-substatement-future",
+        "IP-SubStatement-timestamp-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.6-attachment-properties",
+      "clause": "4.2.2.6",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Attachment metadata contains the required usageType, display, contentType, non-negative length, and sha2 properties with the table-defined types and optional description and fileUrl.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Attachment-usageType-presence",
+        "IP-Attachment-usageType-type",
+        "IP-Attachment-usageType-value",
+        "IP-Attachment-display-presence",
+        "IP-Attachment-display-type",
+        "IP-Attachment-display-value",
+        "IP-Attachment-description-presence",
+        "IP-Attachment-description-type",
+        "IP-Attachment-contentType-presence",
+        "IP-Attachment-contentType-type",
+        "IP-Attachment-contentType-value",
+        "IP-Attachment-length-presence",
+        "IP-Attachment-length-type",
+        "IP-Attachment-length-value",
+        "IP-Attachment-sha2-presence",
+        "IP-Attachment-sha2-type",
+        "IP-Attachment-sha2-value",
+        "IP-Attachment-fileUrl-presence",
+        "IP-Attachment-fileUrl-type",
+        "IP-Attachment-fileUrl-value"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-actor-object-type",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Actor objectType values and optional names follow the Agent and Group table types and role-specific values.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Agent-objectType-presence",
+        "IP-Agent-objectType-type",
+        "IP-Agent-objectType-value",
+        "IP-Agent-name-presence",
+        "IP-Agent-name-type",
+        "IP-AnonymousGroup-objectType-presence",
+        "IP-AnonymousGroup-objectType-type",
+        "IP-AnonymousGroup-objectType-value",
+        "IP-AnonymousGroup-name-presence",
+        "IP-AnonymousGroup-name-type",
+        "IP-IdentifiedGroup-objectType-presence",
+        "IP-IdentifiedGroup-objectType-type",
+        "IP-IdentifiedGroup-objectType-value",
+        "IP-IdentifiedGroup-name-presence",
+        "IP-IdentifiedGroup-name-type",
+        "IP-ActorObject-objectType-presence",
+        "IP-ActorObject-objectType-type",
+        "IP-ActorObject-objectType-value"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-agent-exactly-one-ifi",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Every Agent contains exactly one of mbox, mbox_sha1sum, openid, or account.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Agent-one-ifi"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-group-identification",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "An identified Group contains exactly one IFI, while an anonymous Group contains a required member array and no IFI.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-IdentifiedGroup-one-ifi",
+        "IP-anonymous-no-ifi",
+        "IP-AnonymousGroup-member-presence",
+        "IP-IdentifiedGroup-member-presence"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-group-member-agent",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Every Group member is an Agent object satisfying the Agent table requirements.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-AnonymousGroup-member-type",
+        "IP-IdentifiedGroup-member-type",
+        "IP-nested-group"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-actor-ifi-formats",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Actor mbox, mbox_sha1sum, and openid values follow their mailto IRI, hexadecimal SHA-1, and absolute URI formats.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-Agent-mbox-presence",
+        "IP-Agent-mbox-type",
+        "IP-Agent-mbox_sha1sum-presence",
+        "IP-Agent-mbox_sha1sum-type",
+        "IP-Agent-openid-presence",
+        "IP-Agent-openid-type",
+        "IP-IdentifiedGroup-mbox-presence",
+        "IP-IdentifiedGroup-mbox-type",
+        "IP-IdentifiedGroup-mbox_sha1sum-presence",
+        "IP-IdentifiedGroup-mbox_sha1sum-type",
+        "IP-IdentifiedGroup-openid-presence",
+        "IP-IdentifiedGroup-openid-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.1-actor-account-shape",
+      "clause": "4.2.2.1",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Actor Account objects contain the required string homePage and name properties, with homePage expressed as an absolute IRL.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Account-homePage-presence",
+        "IP-Account-homePage-type",
+        "IP-Account-homePage-value",
+        "IP-Account-name-presence",
+        "IP-Account-name-type",
+        "IP-Account-name-value",
+        "IP-Agent-account-type",
+        "IP-IdentifiedGroup-account-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.4-result-properties",
+      "clause": "4.2.2.4",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Result objects contain only the defined result properties, with success and completion as Booleans, response as a String, duration as a Duration, and extensions as an extension map.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Result-score-presence",
+        "IP-Result-score-type",
+        "IP-Result-success-presence",
+        "IP-Result-success-type",
+        "IP-Result-completion-presence",
+        "IP-Result-completion-type",
+        "IP-Result-response-presence",
+        "IP-Result-response-type",
+        "IP-Result-duration-presence",
+        "IP-Result-duration-type",
+        "IP-Result-extensions-presence",
+        "IP-Result-extensions-type",
+        "IP-result-response-format",
+        "IP-Result-duration-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-result-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.4-score-properties",
+      "clause": "4.2.2.4",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Score objects contain only scaled, raw, min, and max numeric properties; scaled is within -1 and 1, raw is within present min and max bounds, and min is less than max when both are present.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Score-scaled-presence",
+        "IP-Score-scaled-type",
+        "IP-Score-scaled-value",
+        "IP-Score-raw-presence",
+        "IP-Score-raw-type",
+        "IP-Score-raw-value",
+        "IP-Score-min-presence",
+        "IP-Score-min-type",
+        "IP-Score-min-value",
+        "IP-Score-max-presence",
+        "IP-Score-max-type",
+        "IP-Score-max-value",
+        "IP-Score-scaled-meaning",
+        "IP-Score-raw-meaning",
+        "IP-Score-min-meaning",
+        "IP-Score-max-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-result-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.5-context-properties",
+      "clause": "4.2.2.5",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Context has the defined typed properties: registration is a UUID string; statement is a StatementRef object whose id is a UUID; revision/platform are strings, language follows RFC 5646, and extensions use their extension-map contract.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-Context-registration-presence",
+        "IP-Context-registration-type",
+        "IP-Context-instructor-presence",
+        "IP-Context-instructor-type",
+        "IP-Context-team-presence",
+        "IP-Context-team-type",
+        "IP-Context-contextActivities-presence",
+        "IP-Context-contextActivities-type",
+        "IP-Context-contextAgents-presence",
+        "IP-Context-contextAgents-type",
+        "IP-Context-contextGroups-presence",
+        "IP-Context-contextGroups-type",
+        "IP-Context-revision-presence",
+        "IP-Context-revision-type",
+        "IP-Context-platform-presence",
+        "IP-Context-platform-type",
+        "IP-Context-language-presence",
+        "IP-Context-language-type",
+        "IP-Context-statement-presence",
+        "IP-Context-statement-type",
+        "IP-Context-extensions-presence",
+        "IP-Context-extensions-type",
+        "IP-StatementRef-objectType-presence",
+        "IP-StatementRef-objectType-type",
+        "IP-StatementRef-objectType-value",
+        "IP-StatementRef-id-presence",
+        "IP-StatementRef-id-type",
+        "IP-Context-language-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.5-context-activities",
+      "clause": "4.2.2.5",
+      "level": "shall",
+      "area": "validation",
+      "summary": "contextActivities objects use only parent, grouping, category, and other keys, and every value is either an Activity object or an array of Activity objects.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-context-activity-keys",
+        "IP-context-activity-values"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.5-context-agent-relations",
+      "clause": "4.2.2.5",
+      "level": "shall",
+      "area": "validation",
+      "summary": "contextAgents contains typed contextAgent relationships; relevantTypes is optional, with one-or-more table wording versus zero-or-more prose held under OPEN-ARRAY.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-contextAgent-objectType-presence",
+        "IP-contextAgent-objectType-type",
+        "IP-contextAgent-objectType-value",
+        "IP-contextAgent-agent-presence",
+        "IP-contextAgent-agent-type",
+        "IP-contextAgent-relevantTypes-presence",
+        "IP-contextAgent-relevantTypes-type",
+        "IP-contextAgent-relevantTypes-value",
+        "IP-contextAgent-any-entity",
+        "IP-contextAgent-any-type",
+        "IP-contextAgent-generic-relationship",
+        "IP-contextAgent-types-recommended"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.2.5-context-group-relations",
+      "clause": "4.2.2.5",
+      "level": "shall",
+      "area": "validation",
+      "summary": "contextGroups contains typed contextGroup relationships; relevantTypes is optional, with one-or-more table wording versus zero-or-more prose held under OPEN-ARRAY.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-contextGroup-objectType-presence",
+        "IP-contextGroup-objectType-type",
+        "IP-contextGroup-objectType-value",
+        "IP-contextGroup-group-presence",
+        "IP-contextGroup-group-type",
+        "IP-contextGroup-relevantTypes-presence",
+        "IP-contextGroup-relevantTypes-type",
+        "IP-contextGroup-relevantTypes-value",
+        "IP-contextGroup-any-entity",
+        "IP-contextGroup-any-type",
+        "IP-contextGroup-generic-relationship",
+        "IP-contextGroup-types-recommended"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.1-voided-target-missing-not-rejected",
+      "clause": "4.2.4.1",
+      "level": "shall-not",
+      "area": "statement-voiding",
+      "summary": "A Statement using the voided verb is not rejected solely because the target Statement id is not found.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-void-missing-target"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-voiding-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.1-future-timestamp-not-rejected",
+      "clause": "4.2.4.1",
+      "level": "shall-not",
+      "area": "validation",
+      "summary": "A timestamp is not rejected solely because it is in the future within the implementation's acceptable margin.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-future-timestamp"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-datatypes-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-return-serialization",
+      "clause": "4.2.4.2",
+      "level": "shall-not",
+      "area": "statement",
+      "summary": "The LRS does not return a different serialization of preserved Statement properties except as allowed by the data requirements.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-return-serialization"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-http-conformance-statement-utf8-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-create-statement-id",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "The LRS creates an id property for accepted Statements that do not include one.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-create-id",
+        "IP-Statement-id-presence",
+        "IP-Statement-id-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statements-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-actor-single-ifi",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements are rejected when an Actor object contains more than one inverse functional identifier.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-actor-multiple-ifi"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-no-group-member-group",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements are rejected when a Group member is itself a Group.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-nested-group"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-actor-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-number-precision",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "data",
+      "summary": "Numbers are processed and stored with at least IEEE 754 single precision.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-number-precision"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-interaction-type",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Interaction Activities without a valid interactionType are rejected.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-interaction-type"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-no-nested-substatement",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements with a SubStatement whose object is another SubStatement are rejected.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-nested-substatement"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-object-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-timestamp-default",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "If timestamp is omitted, the LRS sets timestamp to the stored timestamp.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-timestamp-default"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-stored-set-by-lrs",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "The stored property is set by the LRS and any submitted stored value is overwritten; validating that submitted value is recommended.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-stored-overwrite",
+        "IP-stored-validate",
+        "IP-Statement-stored-meaning"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-authority-present",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "All stored Statements have an authority.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-authority-present",
+        "IP-authority-overwrite",
+        "IP-authority-trust",
+        "IP-authority-trust-caution",
+        "IP-authority-authentication",
+        "IP-authority-table-default"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-authority-deterministic",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "authorization",
+      "summary": "When authority is overwritten, credentials are mapped to authority through a deterministic process.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-authority-deterministic"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-authz-authority-fixtures",
+        "kiva-property-and-kani",
+        "kiva-tamarin-protocol-models"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.2-context-activities-array",
+      "clause": "4.2.4.2",
+      "level": "shall",
+      "area": "statement",
+      "summary": "Returned contextActivities values are arrays even when submitted as single Activity objects.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-context-array",
+        "IP-context-single-array"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.4.3-version-retention",
+      "clause": "4.2.4.3",
+      "level": "shall",
+      "area": "statement",
+      "summary": "Returned Statements retain the accepted version, and missing versions are set to 2.0.0.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-version-retention",
+        "IP-version-default"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-normalization-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.5-voided-verb-rejection",
+      "clause": "4.2.5",
+      "level": "shall",
+      "area": "statement-voiding",
+      "summary": "Voiding Statements are rejected when their object is not a StatementRef with an id.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-void-reject-type",
+        "IP-void-reject-id"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.5-voided-state",
+      "clause": "4.2.5",
+      "level": "shall",
+      "area": "statement-voiding",
+      "summary": "A Statement is considered voided exactly when a non-voiding Statement is targeted by a stored voiding Statement.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-voided-definition"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-voiding-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-signed-statement-attachment",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "Signed Statements include a JWS attachment with the specified signature usage type and application/octet-stream content type.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-signature-attachment"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-signing-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-jws-compact",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "Statement signatures use JWS Compact Serialization.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-signature-compact"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-signing-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-jws-payload",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "The JWS payload is a valid JSON serialization of the complete Statement before the signature was added.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-signature-payload"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-signing-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-jws-algorithm",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "Statement signatures use RS256, RS384, or RS512.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-signature-algorithm"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-signing-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-reject-malformed-signature",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "Requests storing Statements with malformed signatures are rejected with 400.",
+      "projection": "openapi-and-assertion",
+      "rule_ids": [
+        "IP-signature-reject"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-signing-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.6-verify-signature",
+      "clause": "4.2.6",
+      "level": "shall",
+      "area": "signing",
+      "summary": "Signature verification decodes the JWS, checks logical Statement equivalence, validates x5c certificate signatures when present, and enforces signature requirements.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-signature-decode",
+        "IP-signature-equivalence",
+        "IP-signature-certificate-verify",
+        "IP-signature-requirements"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-signing-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-iri-comparison",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "datatype",
+      "summary": "IRI storage and comparison use the specified RFC 3987 comparison approaches.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-iri-comparison"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "kiva-http-conformance-statement-datatypes-isolated",
+        "kiva-property-and-kani"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-extension-key-iri",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Statements with extension map keys that are not IRIs are rejected.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-extension-key"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-result-validation-isolated",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-extension-values",
+      "clause": "4.2.7",
+      "level": "shall-not",
+      "area": "validation",
+      "summary": "Statements are not rejected based on extension map values.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-extension-value-acceptance",
+        "IP-extension-values-domain"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-result-validation-isolated",
+        "kiva-http-conformance-statement-context-validation-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-language-tags",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "validation",
+      "summary": "Invalid language map keys are rejected, with at least RFC 5646 token-length validation.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-language-invalid",
+        "IP-language-minimum",
+        "IP-language-map-shape"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-uuid-string",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "datatype",
+      "summary": "UUIDs use the standard string form.",
+      "projection": "openapi",
+      "rule_ids": [
+        "IP-uuid-form",
+        "IP-uuid-variant"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "openapi-contract-static",
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-context-validation-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-timestamps-utc",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "datatype",
+      "summary": "Timestamps are converted to UTC rather than rejected solely for non-UTC representation.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-timestamp-utc",
+        "IP-timestamp-precision",
+        "IP-timestamp-format"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-object-validation-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated"
+      ]
+    },
+    {
+      "id": "xapi-lrs-4.2.7-duration-format",
+      "clause": "4.2.7",
+      "level": "shall",
+      "area": "datatype",
+      "summary": "Invalid ISO 8601 duration format is rejected, the alternative time-point-like form is rejected, and comparison ignores precision beyond 0.01 second.",
+      "projection": "assertion",
+      "rule_ids": [
+        "IP-duration-format",
+        "IP-duration-alternative",
+        "IP-duration-high-precision",
+        "IP-duration-truncate",
+        "IP-duration-compare"
+      ],
+      "relation": "refined-by",
+      "evidence_reuse": "Existing family discharge is not proof of each new facet. Reassess condition/exception witnesses before marking detailed rules tested.",
+      "discharge_group_ids": [
+        "adl-v2-external-compatibility",
+        "kiva-http-conformance-statement-validation-isolated",
+        "kiva-http-conformance-statement-result-validation-isolated",
+        "kiva-http-conformance-statement-datatypes-isolated"
+      ]
+    }
+  ]
+}

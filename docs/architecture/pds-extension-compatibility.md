@@ -1,15 +1,17 @@
 # PDS Extension Compatibility
 
 Kiva's Personal Data Store (PDS) API is a Kiva platform extension layered
-around the xAPI Learning Record Store. It does not change the IEEE/ISO/IEC
-39274-1-1:2025 xAPI LRS interoperability surface and should not be described
-as part of the IEEE xAPI conformance claim.
+around the xAPI Learning Record Store. It does not change the
+[xAPI LRS interoperability surface](conformance-claim.md) and should not be
+described as part of the IEEE xAPI conformance claim.
 
 ## Compatibility Boundary
 
 The standards-facing xAPI contract is `spec/openapi/kiva-xapi.yaml`. It
-defines the IEEE/ISO/IEC 39274-1-1:2025-aligned LRS HTTP boundary for xAPI
+defines the LRS HTTP boundary for xAPI
 Statements, state, activity profile, agent profile, and related resources.
+Its requirement references use the pinned IEEE Std 9274.1.1-2023 baseline.
+Equivalence with the 2025 edition has not been established.
 
 The PDS contract is `spec/openapi/kiva-pds.yaml`. It defines Kiva-specific
 endpoints for consent, delegation, metadata lifecycle, governed data-product
@@ -19,12 +21,13 @@ LRS contract.
 
 Kiva can therefore make two separate statements:
 
-- the xAPI LRS interface is aligned with IEEE/ISO/IEC 39274-1-1:2025 for the
-  current implementation and evidence revision;
+- the xAPI LRS interface has requirement traceability to the pinned IEEE 2023
+  baseline, with implementation conformance assessed separately;
 - the PDS API is a Kiva extension that governs personal-data and analytics
   workflows around accepted xAPI records.
 
-Neither statement is an IEEE certification claim.
+Neither statement is an IEEE certification claim; source traceability alone
+does not establish implementation conformance.
 
 ## Current PDS Extension Surface
 
@@ -142,7 +145,7 @@ The current PDS publication boundary is not:
 - a complete emergency-access workflow implementation;
 - a complete secure multi-party computation or confidential-computation
   security proof;
-- an expansion of the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS conformance claim.
+- an expansion of the [xAPI LRS conformance claim](conformance-claim.md).
 
 Physical deletion/redaction execution, legal-hold automation, administrative
 UX, production identity-provider bindings, and deployment-specific legal review

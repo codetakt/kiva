@@ -10,6 +10,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from issued_contract import validate_issued_contract
+
 from validate_conformance import (
     DEFAULT_REQUIREMENT_CATALOG,
     ConformanceError,
@@ -21,6 +23,7 @@ from validate_conformance import (
 
 REPORT_SCHEMA_VERSION = 1
 STANDARD = "IEEE/ISO/IEC 39274-1-1-2025"
+SOURCE_DESIGNATION = "IEEE Std 9274.1.1-2023"
 DEFAULT_REFERENCE_ROOT = Path(
     "/home/claude/Codex/opensource.ieee.org/xapi/xapi-base-standard-documentation"
 )
@@ -67,6 +70,7 @@ def build_report(
     )
     level_counts = count_by_key(requirements, "level")
     projection_counts = count_by_key(requirements, "projection")
+    issued_contract = validate_issued_contract(catalog, issues)
 
     report = {
         "schema_version": REPORT_SCHEMA_VERSION,
@@ -88,6 +92,7 @@ def build_report(
         "levels": level_counts,
         "projections": projection_counts,
         "source_triage": triage["metadata"],
+        "issued_contract": issued_contract,
         "clauses": clause_rows,
         "issues": issues,
     }
@@ -361,7 +366,12 @@ def print_markdown(report: dict[str, Any]) -> None:
     """Print a compact Markdown audit report."""
     source = report["source"]
     totals = report["totals"]
-    print(f"# {report['standard']} Requirement Catalog Audit")
+    print(f"# {SOURCE_DESIGNATION} Requirement Catalog Audit")
+    print()
+    print(
+        f"Compatibility identifier: `{report['standard']}`. "
+        "This label does not establish equivalence with a separate ISO/2025 edition."
+    )
     print()
     print(f"- Requirement catalog: `{report['requirement_catalog']}`")
     print(f"- Status: `{report['status']}`")
@@ -379,6 +389,11 @@ def print_markdown(report: dict[str, Any]) -> None:
     print(f"- Source triage checked: {report['source_triage']['checked']}")
     if report["source_triage"]["path"] is not None:
         print(f"- Source triage: `{report['source_triage']['path']}`")
+    detailed = report["issued_contract"]
+    print(f"- Issued contract structural status: `{detailed['status']}`")
+    if "rules" in detailed:
+        print(f"- Issued contract rules: {detailed['rules']}; unresolved: {detailed['unresolved_rules']}")
+    print("- These machine checks do not establish semantic completeness or implementation conformance.")
     print()
     print("## Levels")
     print()

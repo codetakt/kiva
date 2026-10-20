@@ -1,8 +1,12 @@
 # Conformance Endpoint Profiles
 
-Kiva's IEEE/ISO/IEC 39274-1-1-2025 xAPI LRS conformance aid keeps generic HTTP
-cases portable by separating implementation-specific trigger values from the
-test cases themselves.
+Kiva's xAPI LRS conformance aid uses the pinned IEEE Std 9274.1.1-2023
+requirements baseline. It keeps generic HTTP cases portable by separating
+implementation-specific trigger values from the test cases themselves.
+
+Equivalence with the 2025 edition has not been established. Requirement
+traceability alone does not establish implementation conformance; see the
+[xAPI claim boundary](conformance-claim.md).
 
 ## Problem
 
@@ -22,7 +26,8 @@ The runner therefore accepts an endpoint profile with `--endpoint-profile PATH`.
 The profile is a local conformance fixture declaration for the target LRS, not
 an xAPI extension and not a production API contract.
 
-The current profile schema is intentionally small:
+The current profile schema is intentionally small. Its historical `standard`
+value remains a compatibility identifier, not a claim about the reviewed edition:
 
 ```yaml
 schema_version: 1

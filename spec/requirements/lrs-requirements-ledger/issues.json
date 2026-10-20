@@ -1,0 +1,1026 @@
+{
+  "scope": "Final issue register. Source questions, policy choices, static reference findings and runtime observations have separate assurance states.",
+  "count_warning": "Issue, policy and observation counts overlap semantically and are not requirement counts.",
+  "assessment_boundary": "Suite observations retain their stated audited revision unless a narrower final resolution is recorded. They are not new runtime results.",
+  "records": [
+    {
+      "id": "OPEN-EXT",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Original ISO 8601:2004 duration text and applicable undated ISO 8601 editions/amendments, full IEEE 754 edition, ISO code-list editions, and selected transitive RFC grammars are not fully acquired/read. FIPS 180-2 byte download failed twice, though official NIST metadata/summary was consulted.",
+      "contract_status": "open",
+      "related_rule_ids": [],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Use the 19 current delegated dependency contracts. Pin actual runtime/parser/crypto/storage components and establish required xAPI integration evidence. Retain dated ISO 8601:2004 incorporation. Full independent IEEE 754 implementation/certification is outside the clarified boundary.",
+      "exit_evidence": "Discharge each incorporated xAPI obligation within its recorded delegation boundary; no unsupported claim of full external-standard verification. Missing evidence stays explicit.",
+      "scope_update": {
+        "basis": {
+          "artifact": "projection-adoption"
+        },
+        "effect": "Later user-authorized primitive delegation qualifies the older acquisition plan; it does not close this issue."
+      },
+      "resolution_condition": "Acquire authorized originals, pin exact editions and applicable amendments, read only calling-clause dependencies, and add byte/page anchors plus narrowly adjudicated edge-case outcomes. Do not acquire ISO xAPI edition as a prerequisite.",
+      "affected_scope": "Duration edge grammar, timestamp intersection including -00:00, language registry validity, complete floating/IRI/mailto/MIME/JWS boundary classes. Ordinary explicit xAPI differences remain supported.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-PUT",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Both editions mix general PUT/POST batch acceptance with specific single-Statement PUT resource description.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-json-attachment-admission",
+        "IP-multipart-accept"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "put-single-and-batches"
+      ],
+      "next_action": "Compare general media-type/batch prose with PUT/POST method contracts, query statementId, duplicate and batch atomicity rules. Enumerate single object, singleton array and multiple-element array separately.",
+      "exit_evidence": "A method/body/outcome/state-effect table with both readings and source ruling; valid single operations, arrays and otherwise-invalid controls; unresolved mandatory conflict remains visible.",
+      "resolution_condition": "Obtain issuing-body clarification or explicitly adopt a reviewed method-specific interpretation. Distinguish legacy ambiguity from an edition change.",
+      "affected_scope": "PUT array acceptance/rejection.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-RELATED",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE chapter 4 related_activities row describes Agents, chapter 5 describes Activities.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-get-param-related_activities"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "related-activities-public-correction"
+      ],
+      "next_action": "Read conflicting chapter 4/5 rows in rendered context and operation semantics; reconcile existing related_activities project decision and check official corrections.",
+      "exit_evidence": "Explicit conflict disposition plus Activity/Object/context/SubStatement/reference graph positives and negatives; document any residual issuer-dependent claim.",
+      "resolution_condition": "Attach an authoritative correction if one is obtained; otherwise retain explicit chapter 5-based interpretation and conflicting source spans.",
+      "affected_scope": "related_activities filtering.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-LASTMOD",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE requires Statements Last-Modified from most recent returned stored value but defines no such value for an empty result.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-statement-last-modified"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read Statements Last-Modified and incorporated HTTP semantics for empty result representations; separate header presence from value meaning and snapshot time from stored time.",
+      "exit_evidence": "Source-backed empty/nonempty header contract and time-controlled tests including zero matches, deletion/voiding effects and precision; no arbitrary-value oracle.",
+      "resolution_condition": "Obtain a source-backed rule or separately reviewed project convention for empty result header value, distinguishing presence from meaningful value.",
+      "affected_scope": "Empty Statements result response.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-RESULT",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE refers to StatementResult but omits old defining table and continuation 24-hour minimum.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-statement-more",
+        "IP-more-cache-voids"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Reconstruct envelope, more URI resolution, last-page signaling and continuation guarantees from all IEEE occurrences and dependencies; distinguish deleted ADL requirements from remaining IEEE rules.",
+      "exit_evidence": "Envelope/link/exhaustion decision and end-to-end multi-page/voiding/restart tests; retention and resource limits separately adopted; unresolved required envelope interpretation cannot be hidden by cursor success.",
+      "resolution_condition": "Clarify/adopt exact envelope/relative-link/exhaustion contract; decide continuation service lifetime as compatibility policy separately from IEEE mandatory minimum.",
+      "affected_scope": "StatementResult shape and continuation validity.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-PRECONDITION",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE omits explicit If-None-Match server bullet; old State headerless-client permission conflicts with general server PUT conflict wording.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-precondition-boundary"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read incorporated RFC 2616 conditional-request rules and exact resource exceptions. Build method x resource x exists x ETag/header x concurrent-change table; include unconditional errors.",
+      "exit_evidence": "Each cell has source/exception and expected state effects; PostgreSQL competing writes and memory parity; known conflicts must be resolved or retained as blockers.",
+      "resolution_condition": "Review full RFC 2616 calling scope and receive a source clarification or record a local interpretation for each method/resource/header case, retaining exceptions for unconditional errors.",
+      "affected_scope": "If-None-Match handling and old/new State headerless overwrite compatibility.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-STATE",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE State multi-GET cell both forbids and conditionally requires stateId, repeated in chapter 5.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-state-list-id-conflict"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "state-list-selectors"
+      ],
+      "next_action": "Inspect both contradictory tables visually and dispatch prose, compare absent/present stateId and since including GET/HEAD; reconcile state-list-selectors policy.",
+      "exit_evidence": "Decision and evidence for every selector cell; independent type/error assertions retained; any incompatible mandatory reading remains in claim boundary.",
+      "resolution_condition": "Obtain correction or adopt omission-based list interpretation with explicit conflicting-cell record.",
+      "affected_scope": "State list selectors.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-GROUP",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE chapter 5 allows Identified Groups for State and Agent Profile while chapter 4 types them Agent; old Agent Profile explicitly excludes Group.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-state-put-agent",
+        "IP-state-post-agent",
+        "IP-state-get-one-agent",
+        "IP-state-delete-one-agent",
+        "IP-state-get-list-agent",
+        "IP-state-delete-list-agent",
+        "IP-agent-profile-put-agent",
+        "IP-agent-profile-post-agent",
+        "IP-agent-profile-delete-one-agent",
+        "IP-agent-profile-get-one-agent",
+        "IP-agent-profile-get-list-agent",
+        "IP-document-group-ifi"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read chapter 4 Agent types, chapter 5 Identified Group/IFI context and Agent Profile rules; separate Agent, Identified Group and Anonymous Group cases.",
+      "exit_evidence": "Actor/resource matrix with identity isolation and State/Profile round-trips; official conflict or justified contextual resolution recorded rather than erased.",
+      "resolution_condition": "Obtain clarification or review/adopt chapter 5 support as project interpretation, with separate tests for Agent and Identified Group; do not infer Anonymous Group permission.",
+      "affected_scope": "Document agent selector type.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-ACTIVITY-LIST",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE chapter 4 Activity Profile list uses agent while chapter 5 uses activityId.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-activity-profile-get-list-activityId"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "activity-profile-list-scope"
+      ],
+      "next_action": "Read chapter 4 agent versus chapter 5 activityId table and resource context; reconcile existing activity-profile-list-scope policy.",
+      "exit_evidence": "Anchored decision plus list/empty/since/HEAD and cross-Activity isolation controls, with residual contradiction status explicit.",
+      "resolution_condition": "Preserve chapter 5-backed choice and attach any future authoritative correction; do not label a public draft as the issued source.",
+      "affected_scope": "Activity Profile list scope.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-EQUALITY",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Broad Case and field exclusions in IEEE equality/serialization, duration representation and attachment-array ordering are not conclusively scoped.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-statement-put-compare",
+        "IP-statement-put-conflict",
+        "IP-statement-post-compare",
+        "IP-statement-post-conflict",
+        "IP-format-exact",
+        "IP-preserve-actor",
+        "IP-preserve-verb",
+        "IP-preserve-object",
+        "IP-preserve-duration",
+        "IP-equivalence-ignore-case",
+        "IP-equivalence-ignore-id",
+        "IP-equivalence-ignore-group-member-order",
+        "IP-equivalence-ignore-authority",
+        "IP-equivalence-ignore-stored",
+        "IP-equivalence-ignore-timestamp",
+        "IP-equivalence-ignore-version",
+        "IP-equivalence-ignore-attachments",
+        "IP-equivalence-ignore-referenced-activity-definitions",
+        "IP-return-serialization",
+        "IP-signature-equivalence"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "case-equivalence-and-iri-comparison"
+      ],
+      "next_action": "Split Case/Id/Timestamp/Version/attachments/Activity Definitions/Group order/duration by role, field path and operation. Read specific IRI, replay, format and signing clauses alongside 4.2. Produce a matrix of retained/excluded/transformed values.",
+      "exit_evidence": "Source-backed tables for replay, signing and output plus distinguishing vectors. Root versus nested behavior is explicit. Remaining ambiguous cells continue to block only their claims.",
+      "resolution_condition": "Adjudicate each field/role/operation separately using both source contexts and exact incorporated comparison clauses; split logical equivalence from permissible returned-value transformation.",
+      "affected_scope": "Duplicate IDs, signature equivalence, preservation, IRI case and metadata ordering.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-FORMAT",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Mandatory formatted IRI/IRL/UUID syntax coexists with optional IRI/UUID validation waiver.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-parameter-format",
+        "IP-parameter-scheme",
+        "IP-table-iri",
+        "IP-table-format",
+        "IP-table-scheme",
+        "IP-identifier-validation-waiver"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "formatted-identifiers"
+      ],
+      "next_action": "Determine syntax versus value-validation waiver for each IRI/IRL/URI/UUID/mailto occurrence and operation; retain table/type requirements, exceptions and explicit format rejection.",
+      "exit_evidence": "Field/operation requirement table, complete relevant grammar partitions and legal-boundary controls; reconcile formatted-identifiers policy and Person validation.",
+      "resolution_condition": "Clarify or formally adopt syntax-versus-real-world-value boundary with examples; keep strict-format project policy identifiable as interpretation.",
+      "affected_scope": "Invalid identifier rejection.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-MAY-NOT",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE negated may in property-order rejection is awkward under modal definitions.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-property-order"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read 1.3 modal definitions, rejection clause and ADL contextual predecessor; distinguish explicit prohibition interpretation from ordinary permissive may.",
+      "exit_evidence": "Anchored modal disposition and reordered-property round-trips; generic failure classification follows the supported reading.",
+      "resolution_condition": "Confirm prohibition reading through clarification or recorded project adoption supported by old wording and context.",
+      "affected_scope": "Property-order-only rejection.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-ARRAY",
+      "kind": "source-question",
+      "state": "open",
+      "title": "relevantTypes one-or-more description conflicts with general zero-or-more relationship prose; other arrays lack explicit minima; component uniqueness/empty-response prose omitted.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-contextAgent-relevantTypes-presence",
+        "IP-contextAgent-relevantTypes-type",
+        "IP-contextAgent-relevantTypes-value",
+        "IP-contextGroup-relevantTypes-presence",
+        "IP-contextGroup-relevantTypes-type",
+        "IP-contextGroup-relevantTypes-value"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Enumerate each array field, presence/null/empty/nonempty and component uniqueness. Resolve relevantTypes conflict and review existing empty-array judgments separately for each field.",
+      "exit_evidence": "All array-table rows mapped to conditions and positive/negative controls, including Group/Context/interaction cases; generated field parameters individually accounted for.",
+      "resolution_condition": "Adjudicate absent vs present-empty for each table field; do not apply a universal nonempty-array rule or silently import old interaction explanation.",
+      "affected_scope": "Context wrappers, Group members, correctResponsesPattern and component IDs.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-EXTENSION-DUP",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Explicit repeated-property rejection in IEEE and arbitrary-JSON extension-value protection have an unreviewed deep-nesting boundary.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-table-duplicate",
+        "IP-extension-value-acceptance"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Trace duplicate-member rejection through raw JSON parsing and extension-owned subtrees; read arbitrary-JSON protection and applicable JSON rules before Value construction erases duplicate names.",
+      "exit_evidence": "Source decision and raw-byte fixtures for core/nested extension duplicates, case variants, nulls and custom timestamp/id keys; parser and Suite qualified separately.",
+      "resolution_condition": "Clarify scope for duplicate names within extension-owned JSON, keeping core duplicate keys distinct; pin any parser policy separately.",
+      "affected_scope": "Duplicate JSON inside extension values.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-LANGUAGE",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE LRP language-map clause says invalid while adjacent text and LRS clause require valid tags; full registry snapshot not pinned.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-language-invalid"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Inspect the LRP invalid/valid wording visually, read LRS valid-tag requirements and distinguish minimum token-length check from complete registry validity. Pin registry snapshot and relevant RFC text.",
+      "exit_evidence": "Role-specific decision, syntax/registry separation, normal/irregular/private-use boundary vectors and a registry-update policy; LRP editorial issue may remain without blocking an independently determined LRS rule.",
+      "resolution_condition": "Obtain correction or reviewed valid-tag interpretation; separately pin registry date if testing RFC 5646 validity beyond syntax.",
+      "affected_scope": "Producer tags and LRS invalid-tag rejection classes.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-IRI-STRENGTH",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE IRI best-practice preamble gives should the weight of shall despite clause 1.3 and explicit should bullets.",
+      "contract_status": "open",
+      "related_rule_ids": [],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [
+        "formatted-identifiers"
+      ],
+      "next_action": "Separate producer IRI governance recommendations from LRS obligations and compare preamble strength with 1.3. Map any current Suite rejection that relies on the disputed producer prose.",
+      "exit_evidence": "LRS impact explicitly proven absent or resolved; remove only unsupported LRS assertions with evidence. A role-based out-of-scope disposition is not a universal issuer correction.",
+      "resolution_condition": "Obtain authoritative clarification or scope a local producer policy; do not derive a network/ownership rejection obligation for LRS.",
+      "affected_scope": "LRP identifier governance and removed old Verb-control MUST.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-SUBTIME",
+      "kind": "source-question",
+      "state": "open",
+      "title": "IEEE SubStatement table says timestamp set by LRS if missing, but SubStatement cannot have stored and source of default time is not explicit.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-substatement-default-time"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read SubStatement timestamp table, stored prohibition and root timestamp defaulting; distinguish an absent field from an explicit future/offset timestamp.",
+      "exit_evidence": "Nested default source and field-scope decision, readback tests with absent/present values, same-instant conversion and forbidden shift controls on both backends.",
+      "resolution_condition": "Clarify source of nested default time and preservation implications, or adopt a reviewed project convention with role-specific tests.",
+      "affected_scope": "SubStatement timestamp defaulting.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-VERSION",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Missing request-header response policy, omitted all-2.0-patches acceptance bullet, and claimed old two-component body alias remain incompletely specified/contradictory.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-about-version-exemption",
+        "IP-version-missing-boundary",
+        "IP-version-admission"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Separate header absence, malformed values, 2.0 alias, patch versions, prior/future major/minor and About exception; separately examine Statement body version/default/preservation and two-component body claim.",
+      "exit_evidence": "Resource/header/body decision table with the four missing-header fixture paths and dispatch trace, source-supported allowed outcomes and recalculated compatibility classifications.",
+      "resolution_condition": "Separate header and body cases; obtain source clarification or local routing/defaulting policy; never infer a MUST accept from IEEE should-not-reject or header alias.",
+      "affected_scope": "Protocol patch handling, no-header requests, Statement body version.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-JWS",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Both editions reference RFC 7515 x5c chain validation but xAPI acceptance note separates error detection from authentication; transitive RFC 5280/7518/4648 rules not fully reviewed.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-signature-certificate-verify"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read exact RFC 7515 x5c/algorithm/encoding calls and applicable RFC 5280/7518/4648 dependencies. Trace all verification call sites and actual signature-byte processing, not just JSON equality.",
+      "exit_evidence": "Invoked-path evidence plus valid/bad-signature/wrong-key/algorithm/encoding/certificate-chain and no-x5c vectors with source-derived outcomes; obligations and trust policy independently recorded.",
+      "resolution_condition": "Read exact chain/algorithm/encoding dependencies within application scope; distinguish certificate mathematical validation, chain validation and deployment trust; no automatic blanket PKI guarantee.",
+      "affected_scope": "Signed Statement certificate and cryptographic edge cases.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "POL-EQUALITY-REPLAY",
+      "kind": "policy",
+      "state": "held",
+      "title": "For a valid replay with the same existing root Statement id and a changed explicit timestamp, what equality relation should the IEEE profile use?",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-statement-put-compare",
+        "IP-statement-put-conflict",
+        "IP-statement-post-compare",
+        "IP-statement-post-conflict"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Determine permitted same-root-ID timestamp differences, nested scope and otherwise-invalid inputs; ensure equality never implies overwrite or unconditional success.",
+      "exit_evidence": "Reviewed replay table, same/different/absent timestamps, immutable-field mismatch, invalid replay and concurrent duplicate controls; source modal strength retained.",
+      "parent_open": "OPEN-EQUALITY",
+      "related": [
+        "REV-N09"
+      ],
+      "question": "For a valid replay with the same existing root Statement id and a changed explicit timestamp, what equality relation should the IEEE profile use?",
+      "options": [
+        "Apply the literal IEEE top-level Timestamp exclusion to comparison while preserving all stored state.",
+        "Keep an ADL-style timestamp-instant comparison as a separate compatibility/diagnostic profile; it cannot be called literal IEEE behavior without resolving 4.2."
+      ],
+      "recommendation": "Prefer the literal top-level exclusion as an IEEE candidate, scoped to comparison only. Preserve shall-not-mutate. Do not promote should-409 or lack of mismatch into unconditional success.",
+      "closure": "Document operation/field scope, including whether SubStatement timestamps share the exclusion; root-only scope is a candidate assumption. Distinguish otherwise-invalid inputs and existing/new id cases, inspect comparison code/fixtures, then explicitly select the project rule. No issuer adjudication is claimed.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "POL-EQUALITY-SIGNATURE",
+      "kind": "policy",
+      "state": "held",
+      "title": "How do root Id/Timestamp exclusions apply between a signed payload and the received Statement?",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-signature-equivalence"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Justify whether/how 4.2 governs logically equivalent in 4.2.6; inspect original payload, root/nested identifiers, exclusions and actual verifier call sites.",
+      "exit_evidence": "Full-payload and byte-signature test vectors distinguish comparison exclusions from cryptographic tampering; complete applicable JWS dependency review.",
+      "parent_open": "OPEN-EQUALITY",
+      "related": [
+        "REV-N09"
+      ],
+      "question": "How do root Id/Timestamp exclusions apply between a signed payload and the received Statement?",
+      "options": [
+        "Apply the IEEE exclusions only to logical comparison of the complete parsed Statements, independently of cryptographic checks.",
+        "Retain stricter field matching as a separately documented policy pending reconciliation with the explicit IEEE comparison exclusions."
+      ],
+      "recommendation": "Develop the first candidate with root-only scope and concrete examples. Do not equate logical equality with cryptographic validity, omit payload fields, or ignore nested actor/activity identifiers.",
+      "closure": "Explicitly justify whether 4.2 governs logically equivalent in 4.2.6: the ADL cross-reference is not repeated in IEEE. Review comparison call sites and signature fixtures; specify field/nesting scope, absent/present fields, complete-payload and cryptographic requirements. OPEN-JWS remains independently open.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "POL-EQUALITY-OUTPUT",
+      "kind": "policy",
+      "state": "held",
+      "title": "Which stored/returned values may change independently of comparison exclusions?",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-format-exact",
+        "IP-return-serialization"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Resolve preservation separately from comparison exclusions; enumerate defaults, UTC/precision conversion and explicit overwrite rules in exact/ids/canonical paths.",
+      "exit_evidence": "Round-trips and state-invariance tests over root/nested/default/extension fields and both backends; signatures keep original signed bytes.",
+      "parent_open": "OPEN-EQUALITY",
+      "related": [
+        "REV-N09"
+      ],
+      "question": "Which stored/returned values may change independently of comparison exclusions?",
+      "options": [
+        "Preserve the represented timestamp and id; apply specified defaulting, UTC/precision conversion and explicit overwrite rules only.",
+        "Read the broad 4.2 preservation exception as wider latitude, subject to resolving its interaction with specific rules."
+      ],
+      "recommendation": "Use the first candidate. A comparator exclusion should not be implemented as arbitrary data mutation; existing-id replay explicitly forbids changing state.",
+      "closure": "Record a separate preservation contract and check output/defaulting paths. Resolve the broad exception explicitly without treating a project preference as an issuer correction.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "POL-VERSION-MISSING",
+      "kind": "policy",
+      "state": "held",
+      "title": "How should each IEEE resource respond when X-Experience-API-Version is absent?",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-version-missing-boundary"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Read all applicable resource/version rules, identify four missing-header tests and routing, assess existing acceptance and consequences of rejection.",
+      "exit_evidence": "Resource-specific accepted rule and fixture evidence, no blanket guard, compatibility expectation reclassification and regression cases.",
+      "parent_open": "OPEN-VERSION",
+      "related": [
+        "review REVIEW.md section 7"
+      ],
+      "question": "How should each IEEE resource respond when X-Experience-API-Version is absent?",
+      "options": [
+        "Accept under an explicitly documented routing/default policy where compatible with applicable rules.",
+        "Use a 400 policy for ordinary resources, separately adjudicating About and other exceptions."
+      ],
+      "recommendation": "Do not adopt a global 400 rule from 4.1.1 alone. First separate About, ordinary resources, missing/invalid/unsupported values and protocol routing. Preserve the current implementation until this candidate is specified.",
+      "closure": "Inspect all four referenced tests/fixtures and routing code, identify expected response behavior and chosen policy, then recalculate expectation classifications. The reviewer withdrew the claim that four divergences necessarily remain under either implementation choice; this successor has not inspected or run those fixtures. Resolve About missing-header scope independently: its garbled version-header sentence refers to Versioning, which has no explicit absent-header rule.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "POL-ABOUT",
+      "kind": "policy",
+      "state": "held",
+      "title": "Does the IEEE prescribed About JSON table itself close extra members and duplicate keys?",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-about-version-exemption"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Determine prescribed response table closure and duplicate-key scope separately; inspect concrete extra-property oracle and About output path.",
+      "exit_evidence": "Independent valid minimal/extended response and duplicate-member controls; output preference and generic normative oracle recorded separately.",
+      "parent_open": null,
+      "related": [
+        "REV-N02"
+      ],
+      "question": "Does the IEEE prescribed About JSON table itself close extra members and duplicate keys?",
+      "options": [
+        "Treat the described version/extensions object as a closed response schema.",
+        "Treat omission of the explicit ADL prohibition as permitting additional response members, subject to other applicable requirements."
+      ],
+      "recommendation": "Keep Kiva responses within the prescribed fields. Hold any Suite oracle that judges another LRS solely on extra members until the schema-closure basis is documented; duplicate members need their own analysis.",
+      "closure": "Resolve the scope of table closure and JSON member constraints against the exact response requirement; identify the concrete oracle before any expected outcome changes.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OPEN-VOID-QUERY-WORDING",
+      "kind": "source-question",
+      "state": "open",
+      "title": "Issued voiding/voided selector wording is inconsistent; retain both literal wording and operational interpretation question.",
+      "contract_status": "open",
+      "related_rule_ids": [
+        "IP-void-query-wording"
+      ],
+      "rule_relation": "explicit issued_contract issue references",
+      "existing_project_interpretations": [],
+      "next_action": "Compare the literal selector wording and the surrounding retrieval clauses; retain a bounded interpretation or issuer question.",
+      "exit_evidence": "Source-bound interpretation or explicitly recorded issuer clarification; do not relabel a local reading as an official erratum.",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD01",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Person mailbox syntax defects pass every selected Person check",
+      "priority": "P1",
+      "finding_kind": "under-testing",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "Both a valid extra mailbox and mailto:directory pass all 8 unchanged Person HTTP cases. Both procedure runs report 28 passed checks plus the same 1 not-run grammar check; no failed check detects the invalid mailbox.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.6.3.2",
+        "4.2.2.1"
+      ],
+      "next_action": "Validate the mailto email-address grammar for every returned mbox element, with valid and single-defect controls; retain internationalized and encoded alternatives allowed by the chosen source policy.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Validate the mailto email-address grammar for every returned mbox element, with valid and single-defect controls; retain internationalized and encoded alternatives allowed by the chosen source policy.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD02",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Older-version review uses About despite its explicit exception",
+      "priority": "P1",
+      "finding_kind": "over-testing-and-wrong-context",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "Fresh controls reproduce correct About 200: HTTP PASS/procedure FAIL, and incorrect About 400: HTTP FAIL/procedure PASS. The same raw procedure failure is in the verified historical Kiva report; no native Kiva rerun occurred in this audit.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.6.7.1",
+        "4.1.7.2"
+      ],
+      "next_action": "Exercise version rejection and routing on a version-sensitive resource such as Statements; keep About exception tests separate and validate actual prior-version routing evidence.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Exercise version rejection and routing on a version-sensitive resource such as Statements; keep About exception tests separate and validate actual prior-version routing evidence.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD03",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Timestamp comparison accepts an impermissible one millisecond shift",
+      "priority": "P1",
+      "finding_kind": "under-testing-in-supplementary-procedures",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "Both exact UTC conversion and UTC conversion shifted by +1 ms pass all 8 precision-procedure checks. preservation also passes .123Z -> .124Z. This is not rounding or truncation at any permitted precision. The Rust json-time oracle is stricter; this finding concerns the Python procedure/helper.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.2.7.5"
+      ],
+      "next_action": "Compare exact instants or explicit decimal rounding/truncation at precision >= 3, and execute valid rounding and illegal-shift controls at top-level and SubStatement locations.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Compare exact instants or explicit decimal rounding/truncation at precision >= 3, and execute valid rounding and illegal-shift controls at top-level and SubStatement locations.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD04",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Response preservation requires more than the binary32 precision floor",
+      "priority": "P2",
+      "finding_kind": "over-testing-in-supplementary-helper",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "preservation(0.1, binary32(0.1), /result/score/scaled) fails, although binary32(0.1) = 0.10000000149011612 satisfies the source precision floor. The exact-value control passes. This helper contrast is not attributed to the 329 live HTTP failures.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.2.4.2"
+      ],
+      "next_action": "Apply source-permitted numeric precision when comparing numeric values; add controls around binary32 rounding and score bounds without accepting lower precision.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Apply source-permitted numeric precision when comparing numeric values; add controls around binary32 rounding and score bounds without accepting lower precision.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD05",
+      "kind": "suite-audit",
+      "state": "resolved-at-reference-level",
+      "title": "Two executable cases reference a nonexistent requirement",
+      "priority": "P1",
+      "finding_kind": "broken-traceability",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "statement-unknown-parameter-with-valid-selectors-put and -post reference xapi-lrs-4.1.6.1-statement-query-validation, which is absent from the 128-entry catalog. The case-matrix command exits 1; the source/hash audit, portable validation and runner validate-only still pass.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.5",
+        "4.1.6.1.1",
+        "4.1.6.1.2",
+        "4.1.6.1.3"
+      ],
+      "next_action": "Preserve catalog membership and manifest consistency when changing these cases.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Choose the existing source-correct requirement IDs or add a justified catalog entry in the authored source, regenerate projections, and require catalog membership in the validation path.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "scripts/ci/lrs_projection_followup.py",
+        "tests/conformance/http/generated/behaviors.yaml",
+        "spec/conformance/lrs-assertion-manifest.yaml"
+      ],
+      "resolution": "Both cases and the generator reference xapi-lrs-4.1.5-unknown-parameters; the two whole-case digests match the final definitions. This does not certify runtime behavior."
+    },
+    {
+      "id": "AUD06",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Normal conformance gates do not require the supplementary procedures",
+      "priority": "P1",
+      "finding_kind": "missing-default-gate",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "The shell wrapper runs procedures only when KIVA_CONFORMANCE_PROCEDURE_REPORT_ROOT is set. Memory/PostgreSQL Nix checks do not set it; the bundle required-file list contains no mandatory procedure result. A future HTTP all-pass would not discharge those handovers.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.6.1.3",
+        "4.1.6.1.5",
+        "4.1.6.3.2"
+      ],
+      "next_action": "Add a required procedure manifest and results to the completeness gate; bind target fixtures and inputs, reject unresolved applicable mandatory conditions, and keep advisory observations separate.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Add a required procedure manifest and results to the completeness gate; bind target fixtures and inputs, reject unresolved applicable mandatory conditions, and keep advisory observations separate.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD07",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Finite table witnesses and review rubrics leave explicit conditions unchecked",
+      "priority": "P1",
+      "finding_kind": "unclosed-semantic-coverage",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "The table suite has 701 single-request acceptance cases that assert status/headers without readback. Supplementary procedures are partial and record 21 not-run checks (2 in pure advisory procedures). Source groups and prefix bindings do not provide an atomic requirement/condition/exception and inverse-assertion completeness proof; full external grammar boundaries remain open.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1",
+        "4.2"
+      ],
+      "next_action": "Close each applicable rubric and external dependency against source-defined equivalence classes, map each atomic condition to actual assertions and controls, and audit every mandatory expectation back to its source and exceptions.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Close each applicable rubric and external dependency against source-defined equivalence classes, map each atomic condition to actual assertions and controls, and audit every mandatory expectation back to its source and exceptions.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD09",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Several harness restrictions exceed what the standard fixes",
+      "priority": "P2",
+      "finding_kind": "fixture-and-portability-boundary",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "Same-origin continuation, finite retrieval wait, a specific writer authority and assumed-unrecognized parameter names are fixture assumptions. The authority procedure additionally requires different credentials to produce distinct authorities, which is stronger than determinism unless a target policy explicitly promises it. These restrictions need declared applicability; they are not additional xAPI requirements.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.5",
+        "4.1.6.1",
+        "4.1.6.1.3",
+        "4.2.4.2"
+      ],
+      "next_action": "Bind those assumptions to target profiles and distinguish unsupported fixture/topology from normative failure; compare deterministic authority values without assuming an injective mapping unless independently declared.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Bind those assumptions to target profiles and distinguish unsupported fixture/topology from normative failure; compare deterministic authority values without assuming an injective mapping unless independently declared.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "IEEE-AUD10",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Content-Type substring checks reject legal case and accept a wrong subtype",
+      "priority": "P1",
+      "finding_kind": "insufficient-and-excessive-media-type-oracle",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "Fresh unchanged case: application/json passes, Application/JSON fails, application/jsonx passes. The wrong-version negative control fails as expected.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.1",
+        "4.1.3",
+        "4.1.6.7.1"
+      ],
+      "next_action": "Parse and compare media-type type/subtype with HTTP case rules, preserve meaningful parameters and binary-document exceptions; require valid case variants and single-defect wrong-subtype controls to produce the correct outcomes. Review other Content-Type expectations listed in expectation-index.jsonl.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Parse and compare media-type type/subtype with HTTP case rules, preserve meaningful parameters and binary-document exceptions; require valid case variants and single-defect wrong-subtype controls to produce the correct outcomes. Review other Content-Type expectations listed in expectation-index.jsonl.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "IEEE-AUD11",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "Lossy response decoding lets invalid UTF-8 pass a JSON expectation",
+      "priority": "P1",
+      "finding_kind": "invalid-response-encoding-missed",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "An About body with a raw FF byte inside an extension string and a valid /version array passes the unchanged case; raw body_hex preserves the evidence. A valid UTF-8 control passes and wrong version fails.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.1.2",
+        "4.1.6.7.1"
+      ],
+      "next_action": "For representations that require UTF-8, fail invalid byte sequences before pointer checks/captures. Retain raw bytes and allow binary Document data. Qualify valid non-ASCII UTF-8, invalid/overlong/truncated sequences and binary-document controls.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. For representations that require UTF-8, fail invalid byte sequences before pointer checks/captures. Retain raw bytes and allow binary Document data. Qualify valid non-ASCII UTF-8, invalid/overlong/truncated sequences and binary-document controls.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "IEEE-AUD12",
+      "kind": "suite-audit",
+      "state": "unrepaired-in-last-assessment",
+      "title": "A custom extension timestamp key is treated as an xAPI timestamp",
+      "priority": "P2",
+      "finding_kind": "over-testing-in-preservation-helper",
+      "audited_revision": "88e58445169a118587d01ddc16bce2cabc34bd81",
+      "observation": "The direct helper receives identical submitted/returned {result:{extensions:{https://example.org/custom:{timestamp:not-a-timestamp}}}} values and reports failed because pointer.endswith(/timestamp) invokes timestamp parsing.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed; empty does not mean unrelated",
+      "source_clauses": [
+        "4.2.7.2",
+        "4.2.7.5"
+      ],
+      "next_action": "Apply permitted datatype transformations only at schema-defined xAPI positions, treating extension values as opaque JSON for this comparison. Qualify unchanged custom timestamp/duration/member keys and changed-value negative controls while preserving real top-level/SubStatement timestamp rules.",
+      "exit_evidence": "Execute the recorded conforming and single-defect contrast, demonstrate allowed alternatives do not fail, and bind affected source/case/oracle revisions. Apply permitted datatype transformations only at schema-defined xAPI positions, treating extension values as opaque JSON for this comparison. Qualify unchanged custom timestamp/duration/member keys and changed-value negative controls while preserving real top-level/SubStatement timestamp rules.",
+      "current_runtime_revalidation": "not-run",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-01",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "Statement POST array `minItems: 1`; Group.member; ContextActivityValue",
+      "observation": "These array minima are not stated in the corresponding issued table rows. Required array presence is not automatically minimum length one. RelevantTypeArray has distinct one-or-more table wording and an existing interpretation question.",
+      "next_action": "Resolve each array separately against IP field contracts / OPEN-ARRAY; do not reuse one global minimum policy.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [
+        "OPEN-ARRAY"
+      ],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-02",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "StateId, StateIdOptional, ProfileId, ProfileIdOptional `minLength: 1`",
+      "observation": "The document-id type is String; the formatted-string empty-value rule does not automatically establish a minimum for every String.",
+      "next_action": "Justify or remove these minima as a separate contract/oracle change.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-03",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "SubStatement.properties.extensions",
+      "observation": "The issued SubStatement table has no top-level extensions property; extension locations are Activity Definition, Result and Context.",
+      "next_action": "Remove this schema allowance or provide an explicit local-extension classification, without presenting it as issued-standard input.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-04",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "Agent and Group `additionalProperties: true`",
+      "observation": "These schemas alone do not enforce the issued table closure.",
+      "next_action": "Verify a separate runtime/assertion discharge for table-extra; schema acceptance alone is insufficient.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-05",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "Attachment.sha2 pattern fixes 64 hexadecimal digits",
+      "observation": "The issued table names SHA-2, and the sender section recommends SHA-256/384/512. A 64-digit-only schema is a narrower project choice, not the whole stated family.",
+      "next_action": "Decide supported SHA-2 algorithms against the primitive integration contract; audit both transport matching and schema rejection.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-06",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "OptionalXapiVersion enum vs description saying ignored for rejection",
+      "observation": "A schema consumer enforcing the enum may reject About version headers despite the explicit About exception.",
+      "next_action": "Review POL-ABOUT and the concrete routing/oracle; no new header expectation was adopted here.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [
+        "POL-ABOUT"
+      ],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-07",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "About.version item enum; About additionalProperties=false",
+      "observation": "2.0.0-only output can describe the current product profile; it does not express the general per-major version rule. Source does not explicitly restore ADL's closed About property set.",
+      "next_action": "Separate product output contract from generic conformance oracle (POL-ABOUT).",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [
+        "POL-ABOUT"
+      ],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-08",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "DocumentBody content entries and Document scalar union",
+      "observation": "Documents permit arbitrary content types and binary content. The listed representations do not express every allowed media type; JSON null is absent from the Document union. POST merge requires JSON objects, while generic PUT is a different condition.",
+      "next_action": "Separate transport openness, PUT bytes and conditional POST merge.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-09",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "Agent mbox/openid, Account.homePage, Activity.moreInfo, Attachment.fileUrl use Iri",
+      "observation": "The issued fields distinguish mailto IRI, URI and IRL; an undifferentiated Iri schema does not express all those constraints.",
+      "next_action": "Check delegated validators and add distinct projection/discharge where needed.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-10",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "LanguageMap keys, Context.language, Result.duration, Score relational bounds",
+      "observation": "Several format and cross-field requirements reside outside these OpenAPI shapes.",
+      "next_action": "Bind the detailed contract facets to actual assertions; family references are not evidence that each facet is tested.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "OP-11",
+      "kind": "openapi-observation",
+      "state": "open-observation",
+      "title": "StatementResult additionalProperties=false / more string; ErrorResponse closed JSON object",
+      "observation": "StatementResult has issued omissions tracked as OPEN-RESULT. Error-message representation is recommended and content-negotiated, not a universally mandatory closed JSON error object.",
+      "next_action": "Treat these as product representation choices or unresolved projection questions, not universal IEEE oracles.",
+      "exit_evidence": "Source-backed disposition and affected contract/oracle validation; a schema observation alone is not a proven runtime defect.",
+      "related_rule_ids": [],
+      "rule_relation": "detailed rule assignment not reviewed",
+      "related_question_ids": [
+        "OPEN-RESULT"
+      ],
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    },
+    {
+      "id": "AUD08",
+      "kind": "excluded-edition-question",
+      "state": "excluded-unresolved",
+      "title": "The pinned source does not establish ISO 2025 text equivalence",
+      "observation": "Current traceability is pinned to the public Markdown and a reconciliation with the supplied IEEE 9274.1.1-2023 PDF. The project explicitly leaves ISO/IEC/IEEE 39274-1-1:2025 equivalence unverified. A catalog entry establishes the edition identity, not full-text equivalence.",
+      "next_action": "No work required for the issued-IEEE scope. Reopen edition comparison only for an ISO-text-specific claim.",
+      "exit_evidence": "For a claim specifically about the ISO 2025 edition, bind authorized edition bytes and reconcile LRS clauses, incorporated references and applicable corrections; retain the current source identity until that review is complete.",
+      "related_rule_ids": [],
+      "rule_relation": "outside issued-IEEE scope",
+      "references": [
+        "spec/requirements/ieee-39274-1-1-2025.yaml"
+      ]
+    }
+  ]
+}

@@ -1,13 +1,20 @@
 # Conformance Suite Contribution Strategy
 
 Kiva should incubate a conformance test suite that can be contributed upstream
-as a neutral IEEE/ISO/IEC 39274-1-1-2025 xAPI LRS conformance asset.
+as a neutral xAPI LRS conformance aid using the pinned IEEE Std 9274.1.1-2023
+requirements baseline.
+
+Historical `39274-1-1-2025` filenames and machine labels are compatibility
+identifiers. The proposed repository name below retains the same naming
+convention. Equivalence with the 2025 edition has not been established.
+Requirement traceability alone does not establish implementation conformance;
+see the [xAPI claim boundary](conformance-claim.md).
 
 ## Position
 
 Contributing a conformance suite is strategically valuable. The xAPI ecosystem
 has an ADL LRS Conformance Test Suite with xAPI 2.0 coverage, but Kiva should
-not treat it as the normative source for an IEEE/ISO/IEC 39274-1-1-2025
+not treat it as the normative source for an IEEE Std 9274.1.1-2023
 conformance claim. Kiva should use ADL as an external compatibility gate while
 building a clause-indexed, machine-readable suite around the IEEE requirement
 catalog in this repository.
@@ -22,7 +29,7 @@ a Rust reference runner.
 
 The normative project assets should be:
 
-- The IEEE/ISO/IEC 39274-1-1-2025 requirement catalog.
+- The IEEE Std 9274.1.1-2023 requirement catalog.
 - Clause-indexed YAML test cases and fixtures.
 - Endpoint and authentication fixture contracts.
 - JSON Schema contracts for machine-readable reports.
@@ -57,7 +64,7 @@ The dependency direction must stay one-way:
 
 The standalone repository should own:
 
-- The IEEE/ISO/IEC 39274-1-1-2025 xAPI LRS requirement catalog.
+- The IEEE Std 9274.1.1-2023 xAPI LRS requirement catalog.
 - Generic LRS conformance tests as language-neutral YAML assets.
 - Fixtures and expected results.
 - Test runner code, including the Rust reference runner.

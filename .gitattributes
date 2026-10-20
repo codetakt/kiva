@@ -1,0 +1,3 @@
+# These evidence-bound CSV blobs retain their original CRLF bytes in Git.
+/spec/requirements/lrs-requirements-ledger/requirements.csv -text
+/spec/requirements/lrs-requirements-ledger/source-units.csv -text

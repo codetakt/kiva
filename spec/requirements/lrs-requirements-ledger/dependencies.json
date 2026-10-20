@@ -1,0 +1,201 @@
+{
+  "boundary": {
+    "dated": "Use the cited edition; withdrawal does not cancel an explicit incorporation.",
+    "undated": "Latest edition including amendments/corrigenda, with applicable edition and configuration resolved at adapter adoption.",
+    "delegation": "Retain the xAPI observable requirement and assign its implementation to a runtime/library/primitive. Do not require an independent implementation or certification of all IEEE 754/ISO 8601 provisions.",
+    "completion": "Projection means requirements and delegation obligations are represented, not that dependencies or the product have passed integration verification."
+  },
+  "records": [
+    {
+      "id": "FIPS180-2",
+      "reference": "FIPS PUB 180-2",
+      "edition_rule": "Exact named publication; no substitution with 180-4",
+      "incorporation": "Attachment SHA-2 matching/hash metadata",
+      "owner": "Cryptographic digest primitive",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "IEEE754",
+      "reference": "IEEE Std 754",
+      "edition_rule": "Undated; latest-edition/amendment resolution remains open",
+      "incorporation": "At least binary32 precision in numeric processing and storage",
+      "owner": "Runtime numeric primitive and persistence adapter",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC2046",
+      "reference": "IETF RFC 2046",
+      "edition_rule": "Exact numbered RFC; later replacement not silently substituted",
+      "incorporation": "Multipart media types and boundary framing",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC2616",
+      "reference": "IETF RFC 2616",
+      "edition_rule": "Exact numbered RFC; do not silently replace with RFC 9110",
+      "incorporation": "Concurrency, headers, Accept-Language and HTTP framing",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC3629",
+      "reference": "IETF RFC 3629",
+      "edition_rule": "Exact numbered RFC",
+      "incorporation": "UTF-8 byte validity",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC3987",
+      "reference": "IETF RFC 3987",
+      "edition_rule": "Exact numbered RFC",
+      "incorporation": "IRI syntax; specifically 5.3.1/5.3.2 comparison choices",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC4122",
+      "reference": "IETF RFC 4122",
+      "edition_rule": "Exact numbered RFC; UUID variant recommendation not promoted to shall",
+      "incorporation": "UUID standard string form and recommended variant",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC5646",
+      "reference": "IETF RFC 5646",
+      "edition_rule": "Exact numbered RFC; transitive grammar/registry dependencies not fully closed",
+      "incorporation": "Language tag syntax and minimum token-length sequence check",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC7231",
+      "reference": "IETF RFC 7231",
+      "edition_rule": "Exact numbered RFC",
+      "incorporation": "HTTP semantics and media types",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC7515",
+      "reference": "IETF RFC 7515",
+      "edition_rule": "Exact numbered RFC; crypto/certificate dependencies remain open",
+      "incorporation": "JWS decode, equivalence, allowed algorithms, conditional x5c verification",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC8259",
+      "reference": "IETF RFC 8259",
+      "edition_rule": "Exact numbered RFC",
+      "incorporation": "JSON grammar, numbers and encoding",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "ISO639",
+      "reference": "ISO 639",
+      "edition_rule": "Undated; edition/part resolution remains open",
+      "incorporation": "Language-code context for Language Maps",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "ISO3166-1",
+      "reference": "ISO 3166-1",
+      "edition_rule": "Undated; edition/amendment resolution remains open",
+      "incorporation": "Country-code context for Language Maps",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "ISO8601",
+      "reference": "ISO 8601",
+      "edition_rule": "Undated general reference; see separate dated duration incorporation",
+      "incorporation": "Timestamps/date representations",
+      "owner": "Timestamp parser and serializer",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "SEMVER1",
+      "reference": "Semantic Versioning 1.0.0",
+      "edition_rule": "Exact incorporated edition/section; transitive editions resolved by the integrating adapter.",
+      "incorporation": "Protocol/Statement version lexical rules.",
+      "owner": "Runtime/parser/cryptographic adapter",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin dependency/version/configuration and verify the xAPI integration boundary.",
+      "original_reading": "Not freshly read in this task."
+    },
+    {
+      "id": "ISO8601-2004",
+      "reference": "ISO 8601:2004(E), 4.4.3.2 and 4.4.3.3",
+      "edition_rule": "Exact incorporated edition/section; transitive editions resolved by the integrating adapter.",
+      "incorporation": "Exact dated duration format, even if withdrawn; do not substitute a current edition silently.",
+      "owner": "Runtime/parser/cryptographic adapter",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin dependency/version/configuration and verify the xAPI integration boundary.",
+      "original_reading": "Not freshly read in this task."
+    },
+    {
+      "id": "RFC3339",
+      "reference": "RFC 3339",
+      "edition_rule": "Inline chapter 5 timestamp reference; role/relevance must stay explicit",
+      "incorporation": "Timestamp interoperability and -00:00 semantics",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "RFC6068",
+      "reference": "RFC 6068",
+      "edition_rule": "Scheme-specific explanatory dependency; not a numbered entry in IEEE clause 2",
+      "incorporation": "mailto email address structure (narrow finite AUD01 example)",
+      "owner": "Protocol/data-type adapter and its selected library",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin the chosen runtime/library and configuration; demonstrate the xAPI boundary and preservation/error behavior. Delegation alone is not evidence of implementation conformance.",
+      "original_reading": "Not freshly read in this task; any earlier reading remains limited to its recorded spans."
+    },
+    {
+      "id": "JWS-TRANSITIVE",
+      "reference": "JWS algorithm/encoding/X.509 dependencies",
+      "edition_rule": "Exact incorporated edition/section; transitive editions resolved by the integrating adapter.",
+      "incorporation": "Applicable RFC 7515 transitive requirements, including algorithm, base64url and certificate processing.",
+      "owner": "Runtime/parser/cryptographic adapter",
+      "status": "delegated-unverified",
+      "evidence_required": "Pin dependency/version/configuration and verify the xAPI integration boundary.",
+      "original_reading": "Not freshly read in this task."
+    }
+  ],
+  "implementation_evidence": "not-assessed; delegated-unverified retained"
+}

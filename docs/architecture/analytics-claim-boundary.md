@@ -23,8 +23,8 @@ the existing PDS or confidential release controls.
 
 The following are explicit non-claims:
 
-- Analytics serving is not part of the IEEE/ISO/IEC 39274-1-1:2025 xAPI LRS
-  conformance surface and does not extend Kiva's xAPI conformance claim.
+- Analytics serving is outside the [xAPI LRS claim boundary](conformance-claim.md)
+  and does not extend Kiva's xAPI conformance claim.
 - The boundary does not provide raw xAPI Statements or individual-level data.
 - Kiva does not host or claim a BI dashboard or reporting product. Such tools
   are external consumers of the analytics API.

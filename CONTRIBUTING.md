@@ -2,9 +2,12 @@
 
 Thank you for your interest in contributing to Kiva.
 
-Kiva is an IEEE/ISO/IEC 39274-1-1-2025-aligned xAPI LRS platform with a
-PostgreSQL backend, OAuth/OIDC-oriented authorization boundaries, Personal Data
+Kiva is an xAPI LRS platform with a PostgreSQL backend, OAuth/OIDC-oriented
+authorization boundaries, Personal Data
 Store design goals, and internal conformance and formal-assurance evidence.
+Its requirements ledger uses the pinned IEEE Std 9274.1.1-2023 source.
+The historical `39274-1-1-2025` filenames and machine labels are compatibility
+identifiers; equivalence with a separate ISO/2025 edition is not established.
 Changes that affect xAPI behavior should cite the relevant requirement ids and
 include conformance, persistence, or verification evidence.
 
@@ -67,7 +70,8 @@ nix build .#checks.x86_64-linux.postgres-conformance --print-build-logs
 ```
 
 The ADL xAPI LRS conformance suite is compatibility evidence, not the normative
-source for Kiva's IEEE/ISO/IEC 39274-1-1-2025 alignment claim.
+source for Kiva's IEEE Std 9274.1.1-2023 requirements ledger. A requirement's
+presence in that ledger does not establish implementation conformance.
 
 ## PostgreSQL Changes
 
