@@ -11,6 +11,9 @@ pub(crate) async fn get_agent_person(
     if let Err(error) = state.authorize_xapi_read_request(&headers, &query).await {
         return error.into_response();
     }
+    if let Err(error) = validate_query_parameters(&query, &["agent"]) {
+        return error.into_response();
+    }
     let agent = match required_agent(&query) {
         Ok(agent) => agent,
         Err(error) => return error.into_response(),
@@ -35,7 +38,10 @@ pub(crate) async fn get_activity(
     if let Err(error) = state.authorize_xapi_read_request(&headers, &query).await {
         return error.into_response();
     }
-    let activity_id = match required_query(&query, "activityId") {
+    if let Err(error) = validate_query_parameters(&query, &["activityId"]) {
+        return error.into_response();
+    }
+    let activity_id = match required_iri(&query, "activityId") {
         Ok(activity_id) => activity_id,
         Err(error) => return error.into_response(),
     };

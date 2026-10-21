@@ -135,6 +135,8 @@ impl StatementFilters {
                     serde_json::from_str::<Value>(agent)
                         .map_err(|_error| StatementFilterError::InvalidAgentJson)
                         .and_then(|agent| {
+                            actor_validation::validate_filter_agent(&agent)
+                                .map_err(|_error| StatementFilterError::InvalidAgent)?;
                             canonical_actor_ifi(&agent).ok_or(
                                 StatementFilterError::AgentMissingInverseFunctionalIdentifier,
                             )
@@ -310,12 +312,17 @@ fn related_agent_values(statement: &Value) -> impl Iterator<Item = &Value> {
     .into_iter()
     .flatten();
     let collection_values = [
-        statement.pointer("/context/contextAgents"),
-        statement.pointer("/context/contextGroups"),
+        (statement.pointer("/context/contextAgents"), "agent"),
+        (statement.pointer("/context/contextGroups"), "group"),
     ]
     .into_iter()
-    .flatten()
-    .flat_map(context_agent_collection_values);
+    .flat_map(|(values, property)| {
+        values
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(move |relation| relation.get(property))
+    });
     single_values.chain(collection_values)
 }
 
@@ -327,18 +334,6 @@ fn related_agent_matches_statement_or_substatement(statement: &Value, actor_ifi:
                 || related_agent_values(substatement)
                     .any(|agent| actor_value_matches_ifi(Some(agent), actor_ifi))
         })
-}
-
-fn context_agent_collection_values(value: &Value) -> Box<dyn Iterator<Item = &Value> + '_> {
-    match value {
-        Value::Array(values) => Box::new(values.iter()),
-        Value::Object(object) => {
-            Box::new(object.values().flat_map(context_agent_collection_values))
-        }
-        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {
-            Box::new(std::iter::empty())
-        }
-    }
 }
 
 fn statement_related_activity_ids(statement: &Value) -> impl Iterator<Item = &str> {

@@ -16,7 +16,7 @@ use crate::{
     surfaces::xapi::model::{AttachmentRecord, StoredStatement},
 };
 
-use super::{attachments::attachments_for_statement, query::parse_statement_id};
+use super::{attachments_for_statement, query::parse_statement_id};
 
 pub(crate) fn normalize_statement_batch(
     body: Value,
@@ -45,14 +45,30 @@ pub(crate) fn normalize_statement_batch(
                 "statement batch must not contain duplicate ids",
             ));
         }
-        let statement = normalized_statement(value, statement_id, stored_at, authority)?;
-        let statement_attachments = attachments_for_statement(&statement, attachments)?;
         statements.push((
             statement_id,
-            StoredStatement::new(statement, stored_at, statement_attachments),
+            normalized_statement_record(value, statement_id, stored_at, authority, attachments)?,
         ));
     }
     Ok(statements)
+}
+
+pub(crate) fn normalized_statement_record(
+    value: Value,
+    statement_id: Uuid,
+    stored_at: OffsetDateTime,
+    authority: &Value,
+    attachments: &BTreeMap<String, AttachmentRecord>,
+) -> Result<StoredStatement, HttpError> {
+    let defaulted_substatement_timestamp = value.get("object").is_some_and(|object| {
+        object.get("objectType").and_then(Value::as_str) == Some("SubStatement")
+            && object.get("timestamp").is_none()
+    });
+    let statement = normalized_statement(value, statement_id, stored_at, authority)?;
+    let attachments = attachments_for_statement(&statement, attachments)?;
+    let mut record = StoredStatement::new(statement, stored_at, attachments);
+    record.defaulted_substatement_timestamp = defaulted_substatement_timestamp;
+    Ok(record)
 }
 
 fn statement_id_or_new(value: &Value) -> Result<Uuid, HttpError> {
@@ -113,8 +129,16 @@ pub(crate) fn normalized_statement(
     object.insert("stored".to_owned(), Value::String(stored.clone()));
     object
         .entry("timestamp".to_owned())
-        .or_insert_with(|| Value::String(stored));
+        .or_insert_with(|| Value::String(stored.clone()));
     normalize_statement_timestamp(object)?;
+    if let Some(substatement) = object.get_mut("object").and_then(Value::as_object_mut)
+        && substatement.get("objectType").and_then(Value::as_str) == Some("SubStatement")
+    {
+        substatement
+            .entry("timestamp".to_owned())
+            .or_insert_with(|| Value::String(stored));
+        normalize_statement_timestamp(substatement)?;
+    }
     object.insert("authority".to_owned(), authority.clone());
     Ok(value)
 }

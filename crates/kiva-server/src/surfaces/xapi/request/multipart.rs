@@ -48,6 +48,14 @@ pub(crate) fn multipart_statement_payload(
             })?;
     let mut records = BTreeMap::new();
     for part in attachments {
+        if let Some(length) = part.headers.get("content-length")
+            && length.parse::<usize>().ok() != Some(part.body.len())
+        {
+            return Err(HttpError::new(
+                StatusCode::BAD_REQUEST,
+                "multipart attachment Content-Length does not match attachment body",
+            ));
+        }
         if part
             .headers
             .get("content-transfer-encoding")
@@ -119,33 +127,49 @@ pub(crate) fn parse_multipart_parts(
 ) -> Result<Vec<MultipartPart>, HttpError> {
     let delimiter = format!("--{boundary}");
     let delimiter = delimiter.as_bytes();
-    let boundary_start = if body.starts_with(delimiter) {
-        0
-    } else {
-        let prefixed_delimiter = [b"\r\n".as_slice(), delimiter].concat();
-        body.windows(prefixed_delimiter.len())
-            .position(|window| window == prefixed_delimiter)
-            .map(|position| position + 2)
-            .ok_or_else(|| {
-                HttpError::new(
-                    StatusCode::BAD_REQUEST,
-                    "multipart body does not contain its opening boundary",
-                )
-            })?
-    };
+    let boundary_start =
+        if body.starts_with(delimiter) && boundary_line_end(body, delimiter.len()).is_some() {
+            0
+        } else {
+            next_multipart_boundary(body, 0, delimiter)?.1
+        };
 
     let mut cursor = boundary_start + delimiter.len();
     let mut parts = Vec::new();
     loop {
-        if body.get(cursor..cursor.saturating_add(2)) == Some(b"--") {
+        let Some((closing, next)) = boundary_line_end(body, cursor) else {
+            return Err(HttpError::new(
+                StatusCode::BAD_REQUEST,
+                "invalid multipart boundary",
+            ));
+        };
+        if closing {
             break;
         }
-        cursor = skip_line_ending(body, cursor)?;
+        cursor = next;
         let (part_end, boundary_start) = next_multipart_boundary(body, cursor, delimiter)?;
         parts.push(parse_multipart_part(&body[cursor..part_end])?);
         cursor = boundary_start + delimiter.len();
     }
     Ok(parts)
+}
+
+// RFC 2046 section 5.1.1: a delimiter occupies a complete line; a prefix
+// appearing in binary attachment bytes is not itself a delimiter.
+fn boundary_line_end(body: &[u8], mut cursor: usize) -> Option<(bool, usize)> {
+    let closing = body.get(cursor..cursor.checked_add(2)?) == Some(b"--");
+    if closing {
+        cursor += 2;
+    }
+    while matches!(body.get(cursor), Some(b' ' | b'\t')) {
+        cursor += 1;
+    }
+    if closing && cursor == body.len() {
+        return Some((true, cursor));
+    }
+    skip_line_ending(body, cursor)
+        .ok()
+        .map(|next| (closing, next))
 }
 
 pub(crate) fn skip_line_ending(body: &[u8], cursor: usize) -> Result<usize, HttpError> {
@@ -166,16 +190,17 @@ pub(crate) fn next_multipart_boundary(
     cursor: usize,
     delimiter: &[u8],
 ) -> Result<(usize, usize), HttpError> {
-    let mut crlf_marker = b"\r\n".to_vec();
-    crlf_marker.extend_from_slice(delimiter);
-    if let Some(offset) = find_bytes(&body[cursor..], &crlf_marker) {
-        return Ok((cursor + offset, cursor + offset + 2));
-    }
-
-    let mut lf_marker = b"\n".to_vec();
-    lf_marker.extend_from_slice(delimiter);
-    if let Some(offset) = find_bytes(&body[cursor..], &lf_marker) {
-        return Ok((cursor + offset, cursor + offset + 1));
+    // CRLF framing takes precedence: a bare LF plus the boundary token may
+    // occur inside binary data. Retain LF-only compatibility as a fallback.
+    for line_ending in [b"\r\n".as_slice(), b"\n".as_slice()] {
+        let mut marker = line_ending.to_vec();
+        marker.extend_from_slice(delimiter);
+        for (offset, window) in body[cursor..].windows(marker.len()).enumerate() {
+            let start = cursor + offset + line_ending.len();
+            if window == marker && boundary_line_end(body, start + delimiter.len()).is_some() {
+                return Ok((cursor + offset, start));
+            }
+        }
     }
 
     Err(HttpError::new(
@@ -215,8 +240,23 @@ pub(crate) fn parse_multipart_headers(
             "multipart part headers must be valid UTF-8",
         )
     })?;
-    headers
-        .lines()
+    let mut unfolded: Vec<String> = Vec::new();
+    for line in headers.lines() {
+        if line.starts_with([' ', '\t']) {
+            let previous = unfolded.last_mut().ok_or_else(|| {
+                HttpError::new(
+                    StatusCode::BAD_REQUEST,
+                    "multipart header continuation has no field",
+                )
+            })?;
+            // Unfold by removing only the line ending, preserving whitespace.
+            previous.push_str(line);
+        } else {
+            unfolded.push(line.to_owned());
+        }
+    }
+    unfolded
+        .iter()
         .map(|line| {
             let (name, value) = line.split_once(':').ok_or_else(|| {
                 HttpError::new(StatusCode::BAD_REQUEST, "multipart part header is invalid")
@@ -242,3 +282,6 @@ pub(crate) fn sha256_hex(body: &[u8]) -> String {
     }
     hex
 }
+
+#[cfg(test)]
+mod tests;

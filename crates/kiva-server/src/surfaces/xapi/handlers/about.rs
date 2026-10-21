@@ -8,6 +8,9 @@ pub(crate) async fn about(
     headers: HeaderMap,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_query_parameters(&query, &[]) {
+        return error.into_response();
+    }
     if let Some(response) = state.rate_limit_response("/about").await {
         return response;
     }

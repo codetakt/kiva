@@ -26,13 +26,15 @@ impl PostgresDocumentRepository {
         scope: &DocumentScope,
     ) -> Result<Vec<String>, DocumentStoreError> {
         let rows = sqlx::query_as::<_, (String,)>(
-            "SELECT document_id FROM kiva.xapi_documents \
+            "SELECT DISTINCT document_id FROM kiva.xapi_documents \
              WHERE tenant_id = $1 AND resource_kind = $2 AND starts_with(document_key, $3) \
+             AND ($4::timestamptz IS NULL OR updated_at > $4) \
              ORDER BY document_id ASC",
         )
         .bind(&self.tenant_id)
         .bind(scope.kind.as_resource_kind())
         .bind(&scope.document_key_prefix)
+        .bind(scope.since)
         .fetch_all(&self.pool)
         .await?;
 
@@ -81,6 +83,9 @@ impl PostgresDocumentRepository {
         match selection {
             DocumentSelection::Single(address) => {
                 let Some(existing) = self.get(address).await? else {
+                    if !preconditions_pass(None, preconditions) {
+                        return Ok(DocumentDeleteOutcome::PreconditionFailed);
+                    }
                     return Ok(DocumentDeleteOutcome::NotFound);
                 };
                 if !preconditions_pass(Some(&existing), preconditions) {

@@ -90,6 +90,26 @@ kiva_run_xapi_conformance() {
       suite_status=0
     else
       suite_status=$?
+      # Failed Nix builds do not install the report; keep diagnostics in the log.
+      echo "xAPI conformance exited with status $suite_status; report: $KIVA_CONFORMANCE_JSON_REPORT" >&2
+      python3 - "$KIVA_CONFORMANCE_JSON_REPORT" <<'PY' >&2 || echo "unable to summarize conformance report" >&2
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    report = json.load(handle)
+
+print(f"status: {report['status']}; totals: {json.dumps(report['totals'], sort_keys=True)}")
+for suite in report["suites"]:
+    for case in suite["cases"]:
+        if case["outcome"] not in {"failed", "not-run"}:
+            continue
+        print(f"[{case['outcome']}] {suite['id']}/{case['id']}")
+        for failure in case.get("failures", []):
+            print(f"  - {failure}")
+        for reason in case.get("not_run_reasons", []):
+            print(f"  - {reason}")
+PY
     fi
   else
     if cargo "${args[@]}"; then

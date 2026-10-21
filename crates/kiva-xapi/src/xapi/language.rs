@@ -136,10 +136,10 @@ fn project_context_ids(context: Option<&mut Value>) {
     for name in ["instructor", "team"] {
         project_actor_ids(context.get_mut(name));
     }
-    for name in ["contextAgents", "contextGroups"] {
+    for (name, actor_property) in [("contextAgents", "agent"), ("contextGroups", "group")] {
         if let Some(actors) = context.get_mut(name).and_then(Value::as_array_mut) {
-            for actor in actors {
-                project_actor_ids(Some(actor));
+            for relation in actors {
+                project_actor_ids(relation.get_mut(actor_property));
             }
         }
     }
@@ -171,6 +171,12 @@ fn project_actor_ids(actor: Option<&mut Value>) {
     let Some(actor) = actor.and_then(Value::as_object_mut) else {
         return;
     };
+    let identified = ["mbox", "mbox_sha1sum", "openid", "account"]
+        .iter()
+        .any(|name| actor.contains_key(*name));
+    if identified {
+        actor.remove("member");
+    }
     if let Some(members) = actor.get_mut("member").and_then(Value::as_array_mut) {
         for member in members {
             project_actor_ids(Some(member));
@@ -263,7 +269,8 @@ mod tests {
             "object": {"id": "https://example.org/activity", "definition": {"name": {"en": "Activity"}}},
             "context": {
                 "instructor": {"objectType": "Agent", "name": "Instructor", "mbox": "mailto:instructor@example.org"},
-                "contextAgents": [{"objectType": "Agent", "name": "Observer", "mbox": "mailto:observer@example.org"}],
+                "contextAgents": [{"objectType": "contextAgent", "agent": {"name": "Observer", "mbox": "mailto:observer@example.org"}, "relevantTypes": ["https://example.org/observer"]}],
+                "contextGroups": [{"objectType": "contextGroup", "group": {"objectType": "Group", "mbox": "mailto:group@example.org", "member": [{"mbox": "mailto:member@example.org"}]}}],
                 "contextActivities": {
                     "parent": [{"id": "https://example.org/parent", "definition": {"name": {"en": "Parent"}}}]
                 }
@@ -276,7 +283,28 @@ mod tests {
         assert!(projected.pointer("/verb/display").is_none());
         assert!(projected.pointer("/object/definition").is_none());
         assert!(projected.pointer("/context/instructor/name").is_none());
-        assert!(projected.pointer("/context/contextAgents/0/name").is_none());
+        assert!(
+            projected
+                .pointer("/context/contextAgents/0/agent/name")
+                .is_none()
+        );
+        assert_eq!(
+            projected.pointer("/context/contextAgents/0/agent/mbox"),
+            Some(&json!("mailto:observer@example.org"))
+        );
+        assert_eq!(
+            projected.pointer("/context/contextAgents/0/relevantTypes"),
+            Some(&json!(["https://example.org/observer"]))
+        );
+        assert_eq!(
+            projected.pointer("/context/contextGroups/0/group/mbox"),
+            Some(&json!("mailto:group@example.org"))
+        );
+        assert!(
+            projected
+                .pointer("/context/contextGroups/0/group/member")
+                .is_none()
+        );
         assert!(
             projected
                 .pointer("/context/contextActivities/parent/0/definition")

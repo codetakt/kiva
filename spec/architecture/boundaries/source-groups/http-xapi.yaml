@@ -69,7 +69,7 @@ source_groups:
       - "mod normalization;"
       - "mod person;"
       - "pub(crate) use attachments::attachments_for_statement"
-      - "pub(crate) use normalization::{normalize_statement_batch, normalized_statement}"
+      - "pub(crate) use normalization::{normalize_statement_batch, normalized_statement_record}"
   - id: xapi-pure-validation
     description: xAPI Statement shape validation lives in the pure xAPI crate, outside the HTTP adapter.
     paths:

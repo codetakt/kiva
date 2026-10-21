@@ -158,6 +158,10 @@ pub fn validate_agent(value: &Value) -> Result<(), ActorValidationError> {
     validate_actor_value(value, "Agent", ActorRole::Agent)
 }
 
+pub(super) fn validate_filter_agent(value: &Value) -> Result<(), ActorValidationError> {
+    validate_actor_value(value, "agent filter", ActorRole::AgentOrGroup)
+}
+
 fn validate_statement_actor_fields(
     statement: &Map<String, Value>,
     path: &str,

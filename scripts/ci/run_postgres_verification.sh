@@ -48,6 +48,8 @@ cargo test -q -p kiva-server postgres_pds_ \
   -- --ignored --test-threads=1
 cargo test -q -p kiva-server postgres_analytics_ \
   -- --ignored --test-threads=1
+cargo test -q -p kiva-server postgres_xapi_ \
+  -- --ignored --test-threads=1
 
 if [[ -n "$REPORT_FILE" ]]; then
   mkdir -p "$(dirname "$REPORT_FILE")"
@@ -70,6 +72,16 @@ report = {
     "temporary_cluster": True,
     "migrations_applied": True,
     "checks": [
+        {
+            "id": "postgres_xapi_substatement_retries_preserve_stored_timestamps",
+            "crate": "kiva-server",
+            "status": "passed",
+        },
+        {
+            "id": "postgres_xapi_continuations_survive_collection_changes",
+            "crate": "kiva-server",
+            "status": "passed",
+        },
         {
             "id": "postgres_confidential_threshold_release_is_idempotent_under_retries",
             "crate": "kiva-server",

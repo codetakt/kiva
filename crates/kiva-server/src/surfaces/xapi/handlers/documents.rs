@@ -111,6 +111,9 @@ async fn get_document(
     query: BTreeMap<String, String>,
     kind: DocumentKind,
 ) -> Response {
+    if let Err(error) = kind.validate_query(&query, true) {
+        return error.into_response();
+    }
     if let Err(error) = state.authorize_xapi_read_request(&headers, &query).await {
         return error.into_response();
     }
@@ -142,6 +145,9 @@ async fn put_document(
     kind: DocumentKind,
     body: Bytes,
 ) -> Response {
+    if let Err(error) = kind.validate_query(&query, false) {
+        return error.into_response();
+    }
     if let Err(error) = state.authorize_xapi_write_request(&headers, &query).await {
         return error.into_response();
     }
@@ -179,6 +185,9 @@ async fn post_document(
     kind: DocumentKind,
     body: Bytes,
 ) -> Response {
+    if let Err(error) = kind.validate_query(&query, false) {
+        return error.into_response();
+    }
     if let Err(error) = state.authorize_xapi_write_request(&headers, &query).await {
         return error.into_response();
     }
@@ -217,6 +226,9 @@ async fn delete_document(
     query: BTreeMap<String, String>,
     kind: DocumentKind,
 ) -> Response {
+    if let Err(error) = kind.validate_query(&query, false) {
+        return error.into_response();
+    }
     if let Err(error) = state.authorize_xapi_write_request(&headers, &query).await {
         return error.into_response();
     }

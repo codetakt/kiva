@@ -156,6 +156,61 @@ fn statement_filtering_reports_agent_json_errors() {
 }
 
 #[test]
+fn iri_validation_checks_the_complete_identifier() {
+    for valid in [
+        "urn:example:lesson",
+        "https://例え.テスト/学習#項目",
+        "https://example.org/a%20b",
+    ] {
+        assert!(super::is_absolute_iri(valid), "{valid}");
+    }
+    for invalid in [
+        "relative",
+        "https://example.org/a b",
+        "https://example.org/%ZZ",
+        "https://example.org/\n",
+    ] {
+        assert!(!super::is_absolute_iri(invalid), "{invalid:?}");
+    }
+}
+
+#[test]
+fn related_agent_filter_reads_relation_actors_in_statements_and_substatements() {
+    for (collection, property, actor) in [
+        (
+            "contextAgents",
+            "agent",
+            json!({"mbox": "mailto:related@example.org"}),
+        ),
+        (
+            "contextGroups",
+            "group",
+            json!({"objectType": "Group", "mbox": "mailto:related@example.org"}),
+        ),
+    ] {
+        for nested in [false, true] {
+            let mut value = json!({
+                "actor": {"mbox": "mailto:other@example.org"},
+                "verb": {"id": "https://example.org/v"},
+                "object": {"id": "https://example.org/a"},
+                "context": {(collection): [{(property): actor}]}
+            });
+            if nested {
+                value["objectType"] = json!("SubStatement");
+                value = json!({"actor": {"mbox": "mailto:other@example.org"}, "object": value});
+            }
+            let query = BTreeMap::from([
+                ("agent".to_owned(), actor.to_string()),
+                ("related_agents".to_owned(), "true".to_owned()),
+            ]);
+            value["stored"] = json!("2025-01-01T00:00:00Z");
+            let result = filter_statements(vec![value], &query, None);
+            assert!(matches!(result, Ok(ref values) if values.len() == 1));
+        }
+    }
+}
+
+#[test]
 fn statement_equivalence_ignores_lrs_managed_fields() {
     assert!(super::statements_equivalent(
         &json!({

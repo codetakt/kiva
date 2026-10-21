@@ -1,6 +1,7 @@
 #![allow(clippy::wildcard_imports)]
 
 use super::*;
+use time::{UtcOffset, format_description::well_known::Rfc3339};
 
 pub(super) async fn select_statement_in_transaction(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -21,11 +22,11 @@ pub(super) async fn select_statement_in_transaction(
     };
     let attachments =
         select_statement_attachments_in_transaction(transaction, tenant_id, statement_id).await?;
-    Ok(Some(StoredStatement {
-        statement: statement.0,
+    Ok(Some(StoredStatement::new(
+        statement.0,
         stored_at,
         attachments,
-    }))
+    )))
 }
 
 pub(super) async fn insert_statement_attachments_in_transaction(
@@ -105,6 +106,42 @@ pub(super) fn stored_statements_equivalent(
     left: &StoredStatement,
     right: &StoredStatement,
 ) -> bool {
-    statements_equivalent(&left.statement, &right.statement)
-        && left.attachments == right.attachments
+    let mut incoming = right.statement.clone();
+    if right.defaulted_substatement_timestamp
+        && let Some(object) = incoming.get_mut("object").and_then(Value::as_object_mut)
+    {
+        // Only the incoming omission authorizes reuse. An explicitly supplied
+        // nested timestamp still participates in immutable-content comparison.
+        if let Some(timestamp) = left.statement.pointer("/object/timestamp") {
+            object.insert("timestamp".to_owned(), timestamp.clone());
+        } else {
+            // Older records may predate nested timestamp defaulting. Preserve
+            // that absence instead of treating the generated value as an edit.
+            object.remove("timestamp");
+        }
+    }
+    let mut existing = left.statement.clone();
+    normalize_nested_timestamp_for_comparison(&mut existing);
+    normalize_nested_timestamp_for_comparison(&mut incoming);
+    statements_equivalent(&existing, &incoming) && left.attachments == right.attachments
+}
+
+fn normalize_nested_timestamp_for_comparison(statement: &mut Value) {
+    let Some(object) = statement.get_mut("object").and_then(Value::as_object_mut) else {
+        return;
+    };
+    if object.get("objectType").and_then(Value::as_str) != Some("SubStatement") {
+        return;
+    }
+    let Some(timestamp) = object
+        .get("timestamp")
+        .and_then(Value::as_str)
+        .and_then(|timestamp| OffsetDateTime::parse(timestamp, &Rfc3339).ok())
+    else {
+        return;
+    };
+    // Normalize comparison copies only; legacy JSON retains its stored spelling.
+    if let Ok(timestamp) = timestamp.to_offset(UtcOffset::UTC).format(&Rfc3339) {
+        object.insert("timestamp".to_owned(), Value::String(timestamp));
+    }
 }

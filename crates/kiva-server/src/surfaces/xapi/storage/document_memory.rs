@@ -17,8 +17,13 @@ impl MemoryDocumentRepository {
             .read()
             .await
             .iter()
-            .filter(|(key, _record)| key.starts_with(&scope.document_key_prefix))
+            .filter(|(key, record)| {
+                key.starts_with(&scope.document_key_prefix)
+                    && scope.since.is_none_or(|since| record.updated_at > since)
+            })
             .map(|(_key, record)| record.document_id.clone())
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
             .collect()
     }
 
@@ -73,6 +78,9 @@ impl MemoryDocumentRepository {
         match selection {
             DocumentSelection::Single(address) => {
                 let Some(existing) = documents.get(&address.document_key) else {
+                    if !preconditions_pass(None, preconditions) {
+                        return DocumentDeleteOutcome::PreconditionFailed;
+                    }
                     return DocumentDeleteOutcome::NotFound;
                 };
                 if !preconditions_pass(Some(existing), preconditions) {

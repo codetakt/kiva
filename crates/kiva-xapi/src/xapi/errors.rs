@@ -25,6 +25,10 @@ pub enum StatementFilterError {
     #[error("agent must be valid JSON")]
     InvalidAgentJson,
 
+    /// The `agent` query parameter is not a valid Agent or Group.
+    #[error("agent must be a valid Agent or identified Group")]
+    InvalidAgent,
+
     /// The `agent` query parameter lacks an inverse functional identifier.
     #[error("agent must include an inverse functional identifier")]
     AgentMissingInverseFunctionalIdentifier,
@@ -48,6 +52,7 @@ impl StatementFilterError {
     pub const fn message(self) -> &'static str {
         match self {
             Self::InvalidAgentJson => "agent must be valid JSON",
+            Self::InvalidAgent => "agent must be a valid Agent or identified Group",
             Self::AgentMissingInverseFunctionalIdentifier => {
                 "agent must include an inverse functional identifier"
             }
