@@ -19,13 +19,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--skip-source", action="store_true")
+    parser.add_argument("--definitions-only", action="store_true",
+                        help="Compatibility flag: all modes check static definitions; expansion uses fixed signature inputs")
+    parser.add_argument("--allow-review-pending", action="store_true",
+                        help="Compatibility option; all modes validate correspondence without a review receipt")
     args = parser.parse_args()
     subprocess.run(
         [
             sys.executable,
-            str(ROOT / "scripts/ci/generate_lrs_projection_cases.py"),
-            "--check",
+            "-B",
+            str(ROOT / "scripts/ci/lrs_generated_artifacts.py"),
+            "generate",
         ],
+        check=True,
+    )
+    subprocess.run(
+        [sys.executable, "-B", str(ROOT / "scripts/ci/generate_issued_test_projection.py"), "--check", "--require-complete"],
         check=True,
     )
     schema = json.loads(

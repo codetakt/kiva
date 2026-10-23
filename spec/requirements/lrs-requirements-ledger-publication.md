@@ -1,5 +1,17 @@
 # LRS requirements ledger
 
+This narrative records the ledger-only publication on main. The catalog and ten
+ledger files remain identical in the [test-projection successor](../conformance/issued-test-projection.md).
+The publication JSON records the current documentation/test-support identities.
+Git history preserves earlier inventories; file identity does not transfer semantic
+acceptance to changed files.
+
+In the test-projection branch, the assertion manifest and generated behavior
+cases in that historical publication inventory are reproducible artifacts.
+Materialize them using the [generation guide](../conformance/generated-artifacts.md)
+before running `lrs_ledger_publication.py --check`. The catalog and ten base-ledger
+files remain tracked and unchanged; this does not reopen their source review.
+
 The ledger describes requirements applicable to a Learning Record Store and the
 supporting data definitions, conditions, exceptions and role boundaries needed
 to interpret them. Its source is **IEEE Std 9274.1.1-2023**, identified by the

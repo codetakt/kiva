@@ -22,6 +22,8 @@ use time::{Duration, OffsetDateTime, format_description::well_known::Rfc3339};
 use url::Url;
 
 mod assertions;
+mod media_type;
+mod preservation;
 use assertions::Check;
 
 const DEFAULT_CASE_ROOT: &str = "tests/conformance/http";
@@ -147,6 +149,8 @@ pub fn load_endpoint_profile(path: &Path) -> Result<EndpointProfile, Error> {
 enum EndpointProfileCapability {
     TooLarge(TooLargeEndpointProfile),
     RateLimit(RateLimitEndpointProfile),
+    ParameterVocabulary(Vec<ParameterContext>),
+    ResourceAbsence(BTreeMap<String, String>),
 }
 
 #[derive(Debug, Clone)]
@@ -169,9 +173,25 @@ struct EndpointProfileDocument {
     profiles: BTreeMap<String, EndpointProfileConfig>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ParameterContext {
+    method: String,
+    path: String,
+    /// Independent deployment/configuration evidence, never inferred from responses.
+    evidence: String,
+    unrecognized: Vec<String>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct EndpointProfileConfig {
+    /// Independent evidence for exact case selectors, valid immediately before
+    /// that case and maintained throughout it; never inferred from its 404.
+    #[serde(default)]
+    case_evidence: BTreeMap<String, String>,
+    #[serde(default)]
+    contexts: Vec<ParameterContext>,
     #[serde(default)]
     max_request_body_bytes: Option<usize>,
     #[serde(default)]
@@ -389,6 +409,18 @@ pub struct CaseReport {
     /// Actual responses for status leaves excluded from the conformance claim.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub diagnostic_statuses: Vec<u16>,
+    /// Each bounded retrieval observation, including failures before completion.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub retrieval_attempts: Vec<RetrievalAttempt>,
+}
+
+/// A bounded retrieval observation; no earlier mandatory failure is discarded.
+#[derive(Debug, Clone, Serialize)]
+pub struct RetrievalAttempt {
+    step: Option<String>,
+    status: Option<u16>,
+    pending_visibility: bool,
+    failures: Vec<String>,
 }
 
 /// Safety classification for a conformance test case.
@@ -481,8 +513,18 @@ struct TestStep {
     /// Execute only when the immediately preceding, unconditional step returned this status.
     #[serde(default)]
     when_previous_status: Option<u16>,
+    /// Branch on an earlier unconditional admission, even after intervening reads.
+    #[serde(default)]
+    when_step_status: Option<StepStatusCondition>,
     request: RequestSpec,
     expect: ResponseExpectation,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StepStatusCondition {
+    step: String,
+    status: u16,
 }
 
 #[derive(Debug, Deserialize)]
@@ -494,6 +536,9 @@ struct RequestSpec {
     path: String,
     #[serde(default)]
     follow_more: Option<String>,
+    /// Collect a bounded complete `StatementResult` chain before set predicates.
+    #[serde(default)]
+    collect_statement_pages: Option<usize>,
     #[serde(default)]
     query: BTreeMap<String, String>,
     #[serde(default)]
@@ -506,6 +551,8 @@ struct RequestSpec {
     raw_body_hex: Option<String>,
     #[serde(default)]
     await_retrieval_ms: Option<u64>,
+    #[serde(default)]
+    unrecognized_parameter: Option<String>,
     #[serde(default)]
     raw_body_crlf_lines: Option<Vec<String>>,
     #[serde(default)]
@@ -549,6 +596,8 @@ enum StatusClassification {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct CaptureSpec {
+    #[serde(default)]
+    nonmatching_etag: bool,
     #[serde(default)]
     as_json: bool,
     #[serde(default)]
@@ -617,6 +666,7 @@ fn collect_case_paths(inputs: &[PathBuf]) -> Result<Vec<PathBuf>, Error> {
     };
     let mut paths = Vec::new();
     for root in roots {
+        require_generated_case_files(&root)?;
         collect_case_path(&root, &mut paths)?;
     }
     paths.sort();
@@ -626,6 +676,42 @@ fn collect_case_paths(inputs: &[PathBuf]) -> Result<Vec<PathBuf>, Error> {
         ));
     }
     Ok(paths)
+}
+
+// A fresh repository checkout must not silently run only the handwritten
+// subset. Explicit custom case files/directories remain supported.
+fn require_generated_case_files(root: &Path) -> Result<(), Error> {
+    if !root.ends_with(DEFAULT_CASE_ROOT) {
+        return Ok(());
+    }
+    let inventory_path = root.join("../../../spec/conformance/lrs-generated-artifacts.json");
+    let bytes = fs::read(&inventory_path).map_err(|source| Error::Read {
+        path: inventory_path.clone(),
+        source,
+    })?;
+    let inventory: Value = serde_json::from_slice(&bytes)
+        .map_err(|error| Error::Validation(format!("invalid artifact inventory: {error}")))?;
+    let stages = inventory["stages"]
+        .as_array()
+        .ok_or_else(|| Error::Validation("artifact inventory is missing stages".to_owned()))?;
+    for stage in stages {
+        let outputs = stage["outputs"]
+            .as_array()
+            .ok_or_else(|| Error::Validation("artifact stage is missing outputs".to_owned()))?;
+        for output in outputs {
+            let name = output
+                .as_str()
+                .ok_or_else(|| Error::Validation("artifact output must be a path".to_owned()))?;
+            if let Some(relative) = name.strip_prefix("tests/conformance/http/")
+                && !root.join(relative).is_file()
+            {
+                return Err(Error::Validation(format!(
+                    "missing generated case file {name}; run python -B scripts/ci/lrs_generated_artifacts.py generate"
+                )));
+            }
+        }
+    }
+    Ok(())
 }
 
 fn collect_case_path(path: &Path, output: &mut Vec<PathBuf>) -> Result<(), Error> {
@@ -831,6 +917,7 @@ fn validate_case_steps(label: &str, case: &TestCase) -> Result<(), Error> {
     if let (Some(request), Some(expectation)) = (&case.request, &case.expect) {
         validate_request(&format!("{label} request"), request, &available_captures)?;
         validate_expectation(&format!("{label} expect"), expectation, &available_captures)?;
+        validate_page_collection(label, request, expectation)?;
         return register_captures(
             &format!("{label} expect"),
             &expectation.capture,
@@ -840,10 +927,12 @@ fn validate_case_steps(label: &str, case: &TestCase) -> Result<(), Error> {
 
     let mut step_ids = BTreeSet::new();
     let mut previous_step: Option<&TestStep> = None;
+    let mut prior_steps: BTreeMap<&str, &TestStep> = BTreeMap::new();
     for step in &case.steps {
         if let Some(status) = step.when_previous_status {
             let valid_guard = previous_step.is_some_and(|previous| {
                 previous.when_previous_status.is_none()
+                    && previous.when_step_status.is_none()
                     && previous.expect.status_classification == StatusClassification::Required
                     && (status == previous.expect.status
                         || previous.expect.status_in.contains(&status))
@@ -855,6 +944,25 @@ fn validate_case_steps(label: &str, case: &TestCase) -> Result<(), Error> {
                 )));
             }
         }
+        if let Some(condition) = &step.when_step_status {
+            let valid_guard = step.when_previous_status.is_none()
+                && prior_steps
+                    .get(condition.step.as_str())
+                    .is_some_and(|prior| {
+                        prior.when_previous_status.is_none()
+                            && prior.when_step_status.is_none()
+                            && prior.expect.status_classification == StatusClassification::Required
+                            && (condition.status == prior.expect.status
+                                || prior.expect.status_in.contains(&condition.status))
+                    });
+            if !valid_guard {
+                return Err(Error::Validation(format!(
+                    "{label} step {}: when_step_status requires an allowed status from an earlier unconditional step and cannot combine guards",
+                    step.id
+                )));
+            }
+        }
+        prior_steps.insert(&step.id, step);
         previous_step = Some(step);
         let step_label = format!("{label} step {}", step.id);
         if step.id.is_empty() {
@@ -878,6 +986,7 @@ fn validate_case_steps(label: &str, case: &TestCase) -> Result<(), Error> {
             &step.expect,
             &available_captures,
         )?;
+        validate_page_collection(&step_label, &step.request, &step.expect)?;
         register_captures(
             &format!("{step_label} expect"),
             &step.expect.capture,
@@ -887,11 +996,58 @@ fn validate_case_steps(label: &str, case: &TestCase) -> Result<(), Error> {
     Ok(())
 }
 
+fn validate_page_collection(
+    label: &str,
+    request: &RequestSpec,
+    expectation: &ResponseExpectation,
+) -> Result<(), Error> {
+    if request.collect_statement_pages.is_some()
+        && (expectation.status != 200
+            || !expectation.status_in.is_empty()
+            || expectation.status_classification != StatusClassification::Required
+            || !expectation.capture.is_empty()
+            || expectation.body.is_some()
+            || expectation
+                .json
+                .as_ref()
+                .is_some_and(|json| json.pointers.keys().any(|p| p != "/statements"))
+            || expectation.checks.iter().any(|c| {
+                !matches!(
+                    c,
+                    Check::HeaderTime { .. } | Check::JsonOrder { .. } | Check::JsonShape { .. }
+                )
+            }))
+    {
+        return Err(Error::Validation(format!(
+            "{label}: collected pages require 200, no captures/body, aggregate /statements predicates and only shape/order/header-time checks"
+        )));
+    }
+    Ok(())
+}
+
+#[expect(
+    clippy::too_many_lines,
+    reason = "Keep request field and cross-field validation together with their diagnostic labels"
+)]
 fn validate_request(
     label: &str,
     request: &RequestSpec,
     available_captures: &BTreeSet<String>,
 ) -> Result<(), Error> {
+    if let Some(limit) = request.collect_statement_pages
+        && (limit == 0
+            || limit > 1000
+            || request.method != "GET"
+            || request.path != "/statements"
+            || request.follow_more.is_some()
+            || request.repeat.is_some()
+            || request.query.contains_key("statementId")
+            || request.query.contains_key("voidedStatementId"))
+    {
+        return Err(Error::Validation(format!(
+            "{label}: collect_statement_pages requires an initial multiple-Statement GET, no repeat, and 1..1000 pages"
+        )));
+    }
     if let Some(more) = &request.follow_more {
         validate_template_references(label, more, available_captures)?;
         if request.method != "GET" || !request.query.is_empty() {
@@ -1167,6 +1323,17 @@ fn validate_capture_specs(
     captures: &BTreeMap<String, CaptureSpec>,
 ) -> Result<(), Error> {
     for (name, capture) in captures {
+        if capture.nonmatching_etag
+            && (capture.as_json
+                || !capture
+                    .header
+                    .as_deref()
+                    .is_some_and(|h| h.eq_ignore_ascii_case("ETag")))
+        {
+            return Err(Error::Validation(format!(
+                "{label}: nonmatching_etag requires an ETag header capture"
+            )));
+        }
         if capture.as_json && capture.header.is_some() {
             return Err(Error::Validation(format!(
                 "{label}: as_json capture requires a JSON pointer"
@@ -1325,7 +1492,73 @@ fn endpoint_profile_capability(
     name: &str,
     config: &EndpointProfileConfig,
 ) -> Result<EndpointProfileCapability, Error> {
+    if name != "declared-resource-absence" && !config.case_evidence.is_empty() {
+        return Err(Error::Validation(
+            "case_evidence is only valid for declared-resource-absence".into(),
+        ));
+    }
     match name {
+        "declared-resource-absence" => {
+            if config.case_evidence.is_empty()
+                || config
+                    .case_evidence
+                    .iter()
+                    .any(|(case, evidence)| case.trim().is_empty() || evidence.trim().is_empty())
+            {
+                return Err(Error::Validation("resource absence needs per-case independent evidence, not response-derived absence".into()));
+            }
+            reject_endpoint_profile_fields(
+                path,
+                name,
+                &[
+                    ("contexts", !config.contexts.is_empty()),
+                    (
+                        "max_request_body_bytes",
+                        config.max_request_body_bytes.is_some(),
+                    ),
+                    ("probe_body_bytes", config.probe_body_bytes.is_some()),
+                    ("request_count", config.request_count.is_some()),
+                    ("window_seconds", config.window_seconds.is_some()),
+                    ("path", config.path.is_some()),
+                ],
+            )?;
+            Ok(EndpointProfileCapability::ResourceAbsence(
+                config.case_evidence.clone(),
+            ))
+        }
+        "declared-parameter-vocabulary" => {
+            if config.contexts.is_empty()
+                || config.contexts.iter().any(|c| {
+                    c.evidence.trim().is_empty()
+                        || !c.path.starts_with('/')
+                        || !matches!(
+                            c.method.as_str(),
+                            "GET" | "HEAD" | "PUT" | "POST" | "DELETE"
+                        )
+                        || c.unrecognized.is_empty()
+                        || c.unrecognized.iter().any(String::is_empty)
+                })
+            {
+                return Err(Error::Validation("parameter vocabulary needs method, path, independent evidence and nonempty unrecognized names".into()));
+            }
+            reject_endpoint_profile_fields(
+                path,
+                name,
+                &[
+                    (
+                        "max_request_body_bytes",
+                        config.max_request_body_bytes.is_some(),
+                    ),
+                    ("probe_body_bytes", config.probe_body_bytes.is_some()),
+                    ("request_count", config.request_count.is_some()),
+                    ("window_seconds", config.window_seconds.is_some()),
+                    ("path", config.path.is_some()),
+                ],
+            )?;
+            Ok(EndpointProfileCapability::ParameterVocabulary(
+                config.contexts.clone(),
+            ))
+        }
         ENDPOINT_PROFILE_TOO_LARGE => endpoint_profile_too_large(path, config),
         ENDPOINT_PROFILE_RATE_LIMIT => endpoint_profile_rate_limit(path, config),
         _ => Err(Error::Validation(format!(
@@ -1343,6 +1576,7 @@ fn endpoint_profile_too_large(
         path,
         ENDPOINT_PROFILE_TOO_LARGE,
         &[
+            ("contexts", !config.contexts.is_empty()),
             ("request_count", config.request_count.is_some()),
             ("window_seconds", config.window_seconds.is_some()),
             ("path", config.path.is_some()),
@@ -1391,6 +1625,7 @@ fn endpoint_profile_rate_limit(
         path,
         ENDPOINT_PROFILE_RATE_LIMIT,
         &[
+            ("contexts", !config.contexts.is_empty()),
             (
                 "max_request_body_bytes",
                 config.max_request_body_bytes.is_some(),
@@ -1522,7 +1757,11 @@ fn validate_endpoint_profile_name(label: &str, name: &str) -> Result<(), Error> 
     })?;
     if !matches!(
         name,
-        ENDPOINT_PROFILE_TOO_LARGE | ENDPOINT_PROFILE_RATE_LIMIT
+        ENDPOINT_PROFILE_TOO_LARGE
+            | ENDPOINT_PROFILE_RATE_LIMIT
+            | "declared-parameter-vocabulary"
+            | "signature-validation-context"
+            | "declared-resource-absence"
     ) {
         return Err(Error::Validation(format!(
             "{label} endpoint profile {name} is not supported"
@@ -1575,6 +1814,7 @@ fn validation_report(suites: Vec<LoadedSuite>) -> Report {
                     failures: Vec::new(),
                     not_run_reasons: Vec::new(),
                     diagnostic_statuses: Vec::new(),
+                    retrieval_attempts: Vec::new(),
                 })
                 .collect(),
         })
@@ -1651,8 +1891,12 @@ async fn execute_case(
 ) -> CaseReport {
     let mut failures = Vec::new();
     if case.safety.destructive && !allow_destructive {
-        failures.push("destructive case requires --allow-destructive".to_owned());
-        return case_report(case, CaseOutcome::Failed, failures);
+        let mut report = case_report(case, CaseOutcome::NotRun, Vec::new());
+        report.not_run_reasons.push(
+            "destructive case requires --allow-destructive; no HTTP request was executed"
+                .to_owned(),
+        );
+        return report;
     }
 
     let mut missing_profiles = missing_endpoint_profiles(&case, endpoint_profile);
@@ -1662,6 +1906,26 @@ async fn execute_case(
         .map(|step| &step.request)
         .chain(case.request.iter())
     {
+        if let Some(parameter) = &request.unrecognized_parameter {
+            let declared = endpoint_profile
+                .and_then(|p| p.get("declared-parameter-vocabulary"))
+                .is_some_and(|capability| match capability {
+                    EndpointProfileCapability::ParameterVocabulary(contexts) => {
+                        contexts.iter().any(|c| {
+                            c.method == request.method
+                                && c.path == request.path
+                                && c.unrecognized.contains(parameter)
+                        })
+                    }
+                    _ => false,
+                });
+            if !request.query.contains_key(parameter) || !declared {
+                missing_profiles.push(format!(
+                    "independent unrecognized parameter: {} {} {parameter}",
+                    request.method, request.path
+                ));
+            }
+        }
         if let Some(profile) = &request.auth_profile
             && !auth_profiles.contains_key(profile)
         {
@@ -1681,25 +1945,29 @@ async fn execute_case(
     }
 
     let mut diagnostic_statuses = Vec::new();
-    failures.extend(
-        execute_case_requests(
-            client,
-            endpoint,
-            common_headers,
-            auth_profiles,
-            endpoint_profile,
-            &case,
-            &mut diagnostic_statuses,
-        )
-        .await,
-    );
+    let (request_failures, retrieval_pending, retrieval_attempts) = execute_case_requests(
+        client,
+        endpoint,
+        common_headers,
+        auth_profiles,
+        endpoint_profile,
+        &case,
+        &mut diagnostic_statuses,
+    )
+    .await;
+    failures.extend(request_failures);
 
-    let mut report = if failures.is_empty() {
+    let mut report = if retrieval_pending {
+        let mut report = case_report(case, CaseOutcome::NotRun, Vec::new());
+        report.not_run_reasons.extend(failures);
+        report
+    } else if failures.is_empty() {
         case_report(case, CaseOutcome::Passed, failures)
     } else {
         case_report(case, CaseOutcome::Failed, failures)
     };
     report.diagnostic_statuses = diagnostic_statuses;
+    report.retrieval_attempts = retrieval_attempts;
     report
 }
 
@@ -1711,10 +1979,16 @@ async fn execute_case_requests(
     endpoint_profile: Option<&EndpointProfile>,
     case: &TestCase,
     diagnostic_statuses: &mut Vec<u16>,
-) -> Vec<String> {
+) -> (Vec<String>, bool, Vec<RetrievalAttempt>) {
     let captures = match runtime_captures(endpoint_profile, &case.requires_endpoint_profiles) {
         Ok(captures) => captures,
-        Err(error) => return vec![format!("failed to create runtime captures: {error}")],
+        Err(error) => {
+            return (
+                vec![format!("failed to create runtime captures: {error}")],
+                false,
+                Vec::new(),
+            );
+        }
     };
     let context = HttpRequestContext {
         client,
@@ -1725,28 +1999,46 @@ async fn execute_case_requests(
     let mut state = HttpRequestState {
         captures,
         diagnostic_statuses,
+        retrieval_attempts: Vec::new(),
+        step: None,
         response_status: None,
+        retrieval_pending: false,
+        capability_unavailable: false,
+        visible_statements: BTreeMap::new(),
     };
     if case.steps.is_empty() {
-        return match (&case.request, &case.expect) {
+        let failures = match (&case.request, &case.expect) {
             (Some(request), Some(expectation)) => {
                 execute_http_request(&context, request, expectation, &mut state).await
             }
             _ => vec!["case has no executable request".to_owned()],
         };
+        return (
+            failures,
+            state.retrieval_pending || state.capability_unavailable,
+            state.retrieval_attempts,
+        );
     }
 
     let mut failures = Vec::new();
+    let mut step_statuses = BTreeMap::new();
     for step in &case.steps {
         if step
             .when_previous_status
             .is_some_and(|status| state.response_status != Some(status))
+            || step.when_step_status.as_ref().is_some_and(|condition| {
+                step_statuses.get(&condition.step) != Some(&condition.status)
+            })
         {
             state.response_status = None;
             continue;
         }
+        state.step = Some(step.id.clone());
         let step_failures =
             execute_http_request(&context, &step.request, &step.expect, &mut state).await;
+        if let Some(status) = state.response_status {
+            step_statuses.insert(step.id.clone(), status);
+        }
         if !step_failures.is_empty() {
             failures.extend(
                 step_failures
@@ -1756,7 +2048,11 @@ async fn execute_case_requests(
             break;
         }
     }
-    failures
+    (
+        failures,
+        state.retrieval_pending || state.capability_unavailable,
+        state.retrieval_attempts,
+    )
 }
 
 struct HttpRequestContext<'a> {
@@ -1769,7 +2065,14 @@ struct HttpRequestContext<'a> {
 struct HttpRequestState<'a> {
     captures: Captures,
     diagnostic_statuses: &'a mut Vec<u16>,
+    retrieval_attempts: Vec<RetrievalAttempt>,
+    step: Option<String>,
     response_status: Option<u16>,
+    retrieval_pending: bool,
+    capability_unavailable: bool,
+    // Key includes endpoint selector and effective credential context. Values
+    // are independently returned stored times, not submitted timestamps.
+    visible_statements: BTreeMap<String, String>,
 }
 
 // Bounded observation window for LRSs that make writes retrievable asynchronously.
@@ -1787,16 +2090,36 @@ async fn execute_http_request(
         let mut attempt = HttpRequestState {
             captures: state.captures.clone(),
             diagnostic_statuses: &mut attempt_diagnostics,
+            retrieval_attempts: Vec::new(),
+            step: state.step.clone(),
             response_status: None,
+            retrieval_pending: false,
+            capability_unavailable: false,
+            visible_statements: state.visible_statements.clone(),
         };
         let failures = execute_http_request_once(context, request, expectation, &mut attempt).await;
+        attempt.capability_unavailable |= !failures.is_empty()
+            && failures
+                .iter()
+                .all(|reason| reason.starts_with("ORACLE-UNAVAILABLE:"));
+        if request.await_retrieval_ms.is_some() {
+            state.retrieval_attempts.push(RetrievalAttempt {
+                step: state.step.clone(),
+                status: attempt.response_status,
+                pending_visibility: attempt.retrieval_pending,
+                failures: failures.clone(),
+            });
+        }
         state.response_status = attempt.response_status;
+        state.retrieval_pending = attempt.retrieval_pending;
+        state.capability_unavailable = attempt.capability_unavailable;
         if failures.is_empty() {
             state.captures = attempt.captures;
+            state.visible_statements = attempt.visible_statements;
             state.diagnostic_statuses.extend(attempt_diagnostics);
             return failures;
         }
-        if tokio::time::Instant::now() >= deadline {
+        if !attempt.retrieval_pending || tokio::time::Instant::now() >= deadline {
             state.diagnostic_statuses.extend(attempt_diagnostics);
             return failures;
         }
@@ -1804,6 +2127,10 @@ async fn execute_http_request(
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Preserve one ordered request lifecycle including header failures before unavailable bodies"
+)]
 async fn execute_http_request_once(
     context: &HttpRequestContext<'_>,
     request: &RequestSpec,
@@ -1828,7 +2155,14 @@ async fn execute_http_request_once(
     let request_url = if let Some(more) = &request.follow_more {
         match context.endpoint.join(more) {
             Ok(url) if url.origin() == context.endpoint.origin() => url,
-            _ => return vec!["more IRL must resolve on the supplied endpoint origin; configure the runner for this target's pagination topology".into()],
+            Ok(_) => {
+                // IEEE imposes no same-origin rule. This runner currently has
+                // no separately configured destination/credential capability.
+                // Do not forward endpoint credentials or report an IEEE FAIL.
+                state.capability_unavailable = true;
+                return vec!["ORACLE-UNAVAILABLE: cross-origin continuation requires an explicit destination and credential capability; more IRL origin alone is not an IEEE violation".into()];
+            }
+            Err(error) => return vec![format!("invalid continuation IRL: {error}")],
         }
     } else {
         build_request_url(context.endpoint, &request)
@@ -1877,10 +2211,36 @@ async fn execute_http_request_once(
 
         match request_builder.send().await {
             Ok(response) => {
+                if attempt < repeat_count {
+                    // Warm-up status/body can differ from the final threshold
+                    // response; universal header obligations cannot disappear.
+                    for (name, expected) in &expectation.headers {
+                        if name.eq_ignore_ascii_case("X-Experience-API-Version")
+                            || name.eq_ignore_ascii_case("X-Experience-API-Consistent-Through")
+                        {
+                            evaluate_header(
+                                name,
+                                expected,
+                                response
+                                    .headers()
+                                    .get(name.as_str())
+                                    .and_then(|value| value.to_str().ok()),
+                                &state.captures,
+                                &mut failures,
+                            );
+                        }
+                    }
+                    if failures
+                        .iter()
+                        .any(|error| !error.starts_with("ORACLE-UNAVAILABLE:"))
+                    {
+                        return failures;
+                    }
+                }
                 final_response = Some(response);
             }
             Err(error) => {
-                failures.push(format!("HTTP request attempt {attempt} failed: {error}"));
+                failures.push(format!("ORACLE-UNAVAILABLE: request transport did not complete at attempt {attempt}: {error}"));
                 return failures;
             }
         }
@@ -1897,14 +2257,364 @@ async fn execute_http_request_once(
         state.diagnostic_statuses.push(status.as_u16());
     }
     let headers = response.headers().clone();
+    let visibility_key =
+        statement_visibility_key(&request, &headers_for_visibility(context, &request));
+    let pending_retrieval = pending_statement_retrieval(&request, expectation, status);
+    let stored = visibility_key
+        .as_ref()
+        .and_then(|key| state.visible_statements.get(key))
+        .cloned();
     let body_bytes = match response.bytes().await {
         Ok(bytes) => bytes,
         Err(error) => {
-            failures.push(format!("failed to read response body: {error}"));
+            if pending_retrieval {
+                failures.extend(evaluate_pending_retrieval(
+                    expectation,
+                    &headers,
+                    state,
+                    stored.as_deref(),
+                    false,
+                ));
+            } else {
+                failures.extend(evaluate_status(expectation, status));
+                failures.extend(evaluate_headers(expectation, &headers, &state.captures));
+                for check in &expectation.checks {
+                    failures.extend(check.evaluate_without_body(&headers));
+                }
+            }
+            failures.push(format!(
+                "ORACLE-UNAVAILABLE: response body did not complete: {error}"
+            ));
             return failures;
         }
     };
-    evaluate_response(expectation, status, &headers, &body_bytes, state)
+    if let Some(limit) = request.collect_statement_pages {
+        return evaluate_statement_pages(
+            context,
+            &request,
+            expectation,
+            state,
+            status,
+            headers,
+            body_bytes.to_vec(),
+            limit,
+        )
+        .await;
+    }
+    if pending_retrieval {
+        failures.extend(evaluate_pending_retrieval(
+            expectation,
+            &headers,
+            state,
+            stored.as_deref(),
+            true,
+        ));
+        return failures;
+    }
+    failures.extend(evaluate_response(
+        expectation,
+        status,
+        &headers,
+        &body_bytes,
+        state,
+    ));
+    if failures.is_empty() {
+        if request.path == "/statements"
+            && matches!(request.method.as_str(), "PUT" | "POST" | "DELETE")
+        {
+            // An intervening mutation can change void/retention state. Do not
+            // carry a positive observation through an unmodelled mutation.
+            state.visible_statements.clear();
+        } else if status == StatusCode::OK
+            && let Some(key) = visibility_key
+            && let Ok(json) = serde_json::from_slice::<Value>(&body_bytes)
+            && let Some(stored) = json.get("stored").and_then(Value::as_str)
+            && request
+                .query
+                .get("statementId")
+                .or_else(|| request.query.get("voidedStatementId"))
+                .is_some_and(|id| json.get("id").and_then(Value::as_str) == Some(id.as_str()))
+        {
+            state.visible_statements.insert(key, stored.to_owned());
+        }
+    }
+    failures
+}
+
+// Page checks, prefix order and observed exclusions do not depend on completion.
+// Required membership and absence success require the terminal union.
+#[expect(
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    reason = "Page aggregation carries the already received response and preserves per-page failures before incomplete collection"
+)]
+async fn evaluate_statement_pages(
+    context: &HttpRequestContext<'_>,
+    request: &RequestSpec,
+    expectation: &ResponseExpectation,
+    state: &mut HttpRequestState<'_>,
+    mut status: StatusCode,
+    mut headers: HeaderMap,
+    mut bytes: Vec<u8>,
+    limit: usize,
+) -> Vec<String> {
+    let mut failures = Vec::new();
+    let mut statements = Vec::new();
+    let mut visited = BTreeSet::new();
+    let mut reported_order_failures = BTreeSet::new();
+    for page in 0..limit {
+        failures.extend(evaluate_status(expectation, status));
+        failures.extend(evaluate_headers(expectation, &headers, &state.captures));
+        for check in &expectation.checks {
+            // Root StatementResult order is checked over the observed union
+            // below. Other checks retain their page-local response context.
+            if !matches!(check, Check::JsonOrder { pointer, .. } if pointer == "/statements") {
+                failures.extend(check.evaluate(status.as_u16(), &headers, &bytes, &state.captures));
+            }
+        }
+        if status != StatusCode::OK {
+            failures.push("StatementResult page did not return 200".into());
+            return failures;
+        }
+        let document: Value = match serde_json::from_slice(&bytes) {
+            Ok(value) => value,
+            Err(error) => {
+                failures.push(format!("invalid StatementResult page JSON: {error}"));
+                return failures;
+            }
+        };
+        let Some(items) = document.get("statements").and_then(Value::as_array) else {
+            failures.push("StatementResult page lacks a statements array".into());
+            return failures;
+        };
+        statements.extend(items.iter().cloned());
+        for (index, check) in expectation.checks.iter().enumerate() {
+            // A known inversion must survive a later page/transport limit.
+            // Recheck the prefix for new defects, but report each check's
+            // identical diagnosis only once across subsequent pages.
+            for failure in check.evaluate_collected_order(&statements) {
+                if reported_order_failures.insert((index, failure.clone())) {
+                    failures.push(failure);
+                }
+            }
+        }
+        if let Some(predicate) = expectation
+            .json
+            .as_ref()
+            .and_then(|j| j.pointers.get("/statements"))
+        {
+            if predicate.present == Some(false) {
+                failures.push("JSON pointer /statements is present on an observed page".into());
+            }
+            if let Some(expected) = &predicate.equals {
+                match render_json_value(expected, &state.captures) {
+                    Ok(Value::Array(expected)) if statements.len() <= expected.len() => {
+                        match assertions::all_comparisons(
+                            statements
+                                .iter()
+                                .zip(&expected)
+                                .map(|(a, b)| assertions::json_equal(a, b)),
+                        ) {
+                            Ok(false) => failures.push(
+                                "Observed StatementResult prefix cannot equal the expected array"
+                                    .into(),
+                            ),
+                            Err(error) => failures.push(error),
+                            Ok(true) => {}
+                        }
+                    }
+                    Ok(_) => failures.push(
+                        "Observed StatementResult type/length cannot equal the expected value"
+                            .into(),
+                    ),
+                    Err(error) => failures.push(error),
+                }
+            }
+        }
+        if let Some(predicate) = expectation
+            .json
+            .as_ref()
+            .and_then(|j| j.pointers.get("/statements"))
+            && let Some(excluded) = &predicate.not_contains
+        {
+            match render_json_value(excluded, &state.captures)
+                .and_then(|value| json_contains(&Value::Array(statements.clone()), &value))
+            {
+                Ok(true) => failures.push(
+                    "JSON pointer /statements not_contains failed on an observed page".into(),
+                ),
+                // An unknown comparison must not erase a known match on a
+                // later page. Keep the unresolved obligation until completion.
+                Err(error) => failures.push(error),
+                Ok(false) => {}
+            }
+        }
+        let more = match document.get("more") {
+            None => "", // End-of-result omission remains in the unselected D-03 set.
+            Some(Value::String(value)) => value.as_str(),
+            _ => {
+                failures.push("StatementResult more is not a string".into());
+                return failures;
+            }
+        };
+        if more.is_empty() {
+            let aggregate = serde_json::json!({"statements": statements, "more": ""});
+            failures.extend(evaluate_body(
+                expectation,
+                aggregate.to_string().as_bytes(),
+                &mut state.captures,
+            ));
+            return failures;
+        }
+        if page + 1 == limit {
+            failures.push("ORACLE-UNAVAILABLE: continuation exceeds harness page bound; membership/absence not judged".into());
+            return failures;
+        }
+        let url = match context.endpoint.join(more) {
+            Ok(url) if url.origin() == context.endpoint.origin() => url,
+            _ => {
+                failures.push("ORACLE-UNAVAILABLE: continuation destination needs an explicit routing/credential capability".into());
+                return failures;
+            }
+        };
+        if !visited.insert(url.to_string()) {
+            failures.push("ORACLE-UNAVAILABLE: repeated continuation cannot be completed within this bounded collector".into());
+            return failures;
+        }
+        let request_headers =
+            match build_request_headers(context.common_headers, context.auth_profiles, request) {
+                Ok(value) => value,
+                Err(error) => {
+                    failures.push(error);
+                    return failures;
+                }
+            };
+        let response = match context
+            .client
+            .get(url)
+            .headers(request_headers)
+            .send()
+            .await
+        {
+            Ok(value) => value,
+            Err(error) => {
+                failures.push(format!(
+                    "ORACLE-UNAVAILABLE: continuation transport did not complete: {error}"
+                ));
+                return failures;
+            }
+        };
+        status = response.status();
+        headers = response.headers().clone();
+        bytes = match response.bytes().await {
+            Ok(value) => value.to_vec(),
+            Err(error) => {
+                failures.extend(evaluate_status(expectation, status));
+                failures.extend(evaluate_headers(expectation, &headers, &state.captures));
+                for check in &expectation.checks {
+                    failures.extend(check.evaluate_without_body(&headers));
+                }
+                failures.push(format!(
+                    "ORACLE-UNAVAILABLE: continuation body did not complete: {error}"
+                ));
+                return failures;
+            }
+        };
+    }
+    failures
+}
+
+fn headers_for_visibility(context: &HttpRequestContext<'_>, request: &RequestSpec) -> HeaderMap {
+    // Already validated before sending the request. This private map is never
+    // emitted in diagnostics; credential values must not enter report text.
+    build_request_headers(context.common_headers, context.auth_profiles, request)
+        .unwrap_or_default()
+}
+
+fn statement_visibility_key(request: &RequestSpec, headers: &HeaderMap) -> Option<String> {
+    if request.path != "/statements" || request.method != "GET" {
+        return None;
+    }
+    let (selector, id) = ["statementId", "voidedStatementId"]
+        .into_iter()
+        .find_map(|name| request.query.get(name).map(|value| (name, value)))?;
+    let identity: BTreeMap<_, _> = headers
+        .iter()
+        .filter(|(name, _)| {
+            !matches!(
+                name.as_str(),
+                "accept"
+                    | "accept-language"
+                    | "accept-encoding"
+                    | "content-type"
+                    | "content-length"
+            )
+        })
+        .map(|(name, value)| (name.as_str(), value.as_bytes()))
+        .collect();
+    Some(format!("{selector}:{id}:{identity:?}"))
+}
+
+fn pending_statement_retrieval(
+    request: &RequestSpec,
+    expectation: &ResponseExpectation,
+    status: StatusCode,
+) -> bool {
+    request.await_retrieval_ms.is_some()
+        && request.method == "GET"
+        && request.path == "/statements"
+        && (request.query.contains_key("statementId")
+            || request.query.contains_key("voidedStatementId"))
+        && expectation.status == 200
+        && status == StatusCode::NOT_FOUND
+}
+
+fn evaluate_pending_retrieval(
+    expectation: &ResponseExpectation,
+    headers: &HeaderMap,
+    state: &mut HttpRequestState<'_>,
+    stored: Option<&str>,
+    body_complete: bool,
+) -> Vec<String> {
+    // An observation deadline is a harness limit, not an IEEE deadline.
+    // Error headers still apply; success-only JSON and Last-Modified do not.
+    let mut failures = Vec::new();
+    for name in [
+        "X-Experience-API-Version",
+        "X-Experience-API-Consistent-Through",
+    ] {
+        if let Some(expected) = expectation.headers.get(name) {
+            evaluate_header(
+                name,
+                expected,
+                headers.get(name).and_then(|v| v.to_str().ok()),
+                &state.captures,
+                &mut failures,
+            );
+        }
+    }
+    if !failures.is_empty() {
+        return failures;
+    }
+    if let Some(stored) = stored {
+        // Positive visibility and received headers remain evidence even when
+        // this error response's body is unavailable.
+        let through = headers
+            .get("X-Experience-API-Consistent-Through")
+            .and_then(|v| v.to_str().ok());
+        if through.map(|v| assertions::compare_timestamps(v, stored))
+            == Some(Ok(std::cmp::Ordering::Greater))
+        {
+            failures.push("previously visible Statement disappeared with Consistent-Through strictly after its stored time in the same credential/selector context".into());
+        } else {
+            state.capability_unavailable = true;
+            failures.push("ORACLE-UNAVAILABLE: previously visible Statement is absent but its consistency watermark is not established; no initial-delay retry or PASS".into());
+        }
+    } else if body_complete {
+        state.retrieval_pending = true;
+        failures.push("Statement not yet retrievable within the configured observation window; no normative availability deadline is specified".to_owned());
+    }
+    failures
 }
 
 fn evaluate_response(
@@ -1915,11 +2625,9 @@ fn evaluate_response(
     state: &mut HttpRequestState<'_>,
 ) -> Vec<String> {
     let mut failures = Vec::new();
-    let body_text = String::from_utf8_lossy(body_bytes);
-
     failures.extend(evaluate_status(expectation, status));
     failures.extend(evaluate_headers(expectation, headers, &state.captures));
-    failures.extend(evaluate_body(expectation, &body_text, &mut state.captures));
+    failures.extend(evaluate_body(expectation, body_bytes, &mut state.captures));
     for check in &expectation.checks {
         failures.extend(check.evaluate(status.as_u16(), headers, body_bytes, &state.captures));
     }
@@ -1957,6 +2665,7 @@ fn render_request(request: &RequestSpec, captures: &Captures) -> Result<RequestS
             .as_ref()
             .map(|more| render_template(more, captures))
             .transpose()?,
+        collect_statement_pages: request.collect_statement_pages,
         query: render_string_map(&request.query, captures)?,
         headers: render_string_map(&request.headers, captures)?,
         body: request
@@ -1966,6 +2675,7 @@ fn render_request(request: &RequestSpec, captures: &Captures) -> Result<RequestS
             .transpose()?,
         raw_body_hex: request.raw_body_hex.clone(),
         await_retrieval_ms: request.await_retrieval_ms,
+        unrecognized_parameter: request.unrecognized_parameter.clone(),
         raw_body: request
             .raw_body
             .as_ref()
@@ -2081,6 +2791,9 @@ fn missing_endpoint_profiles(
     case.requires_endpoint_profiles
         .iter()
         .filter(|profile| {
+            if profile.as_str() == "declared-resource-absence" {
+                return !matches!(endpoint_profile.and_then(|p| p.get(profile)), Some(EndpointProfileCapability::ResourceAbsence(evidence)) if evidence.contains_key(&case.id));
+            }
             endpoint_profile
                 .as_ref()
                 .is_none_or(|endpoint_profile| !endpoint_profile.has_profile(profile))
@@ -2105,6 +2818,8 @@ fn add_endpoint_profile_captures(
             .get(profile)
             .ok_or_else(|| format!("endpoint profile {profile} was not supplied"))?;
         match capability {
+            EndpointProfileCapability::ParameterVocabulary(_)
+            | EndpointProfileCapability::ResourceAbsence(_) => {}
             EndpointProfileCapability::TooLarge(profile) => {
                 captures.insert(
                     ENDPOINT_CAPTURE_TOO_LARGE_BODY.to_owned(),
@@ -2269,7 +2984,9 @@ fn evaluate_header(
     }
     if let Some(expected) = &expectation.contains {
         match render_template(expected, captures) {
-            Ok(rendered) if actual.is_some_and(|actual_value| actual_value.contains(&rendered)) => {
+            Ok(rendered)
+                if actual
+                    .is_some_and(|actual_value| header_contains(name, actual_value, &rendered)) => {
             }
             Ok(rendered) => failures.push(format!(
                 "expected header {name} to contain {rendered:?}, received {actual:?}"
@@ -2287,25 +3004,48 @@ fn evaluate_header(
             "expected header {name} to contain an RFC3339 timestamp, received {actual:?}"
         ));
     }
-    if expectation.iso8601 == Some(true)
-        && actual.is_none_or(|value| assertions::parse_time(value).is_err())
-    {
-        failures.push(format!(
-            "expected header {name} to contain an ISO 8601 timestamp, received {actual:?}"
-        ));
+    if expectation.iso8601 == Some(true) {
+        match actual {
+            Some(value) => {
+                if let Err(error) = assertions::parse_time(value) {
+                    failures.push(error);
+                }
+            }
+            None => failures.push(format!("missing required ISO timestamp header {name}")),
+        }
     }
+}
+
+// Content-Type assertions name a media type, not a substring. Parameters in the
+// assertion constrain the response; additional response parameters are allowed.
+fn header_contains(name: &str, actual: &str, expected: &str) -> bool {
+    if !name.eq_ignore_ascii_case("content-type") {
+        return actual.contains(expected);
+    }
+    let (Ok(actual), Ok(expected)) = (
+        media_type::parse_http(actual),
+        media_type::parse_http(expected),
+    ) else {
+        return false;
+    };
+    actual.essence == expected.essence
+        && expected.ambiguous.is_empty()
+        && expected
+            .parameters
+            .iter()
+            .all(|(name, value)| actual.parameters.get(name) == Some(value))
 }
 
 fn evaluate_body(
     expectation: &ResponseExpectation,
-    body_text: &str,
+    body_bytes: &[u8],
     captures: &mut Captures,
 ) -> Vec<String> {
-    let mut failures = evaluate_plain_body(expectation, body_text, captures);
+    let mut failures = evaluate_plain_body(expectation, body_bytes, captures);
     if expectation.json.is_none() && !captures_json_body(expectation) {
         return failures;
     }
-    let body = match serde_json::from_str::<Value>(body_text) {
+    let body = match serde_json::from_slice::<Value>(body_bytes) {
         Ok(body) => body,
         Err(error) => {
             failures.push(format!("expected JSON response body: {error}"));
@@ -2331,7 +3071,7 @@ fn evaluate_body(
 
 fn evaluate_plain_body(
     expectation: &ResponseExpectation,
-    body_text: &str,
+    body_bytes: &[u8],
     captures: &Captures,
 ) -> Vec<String> {
     let Some(body_expectation) = &expectation.body else {
@@ -2339,11 +3079,15 @@ fn evaluate_plain_body(
     };
     let mut failures = Vec::new();
     if let Some(non_empty) = body_expectation.non_empty
-        && (body_text.is_empty() == non_empty)
+        && (body_bytes.is_empty() == non_empty)
     {
         failures.push(format!("expected response body non_empty={non_empty}"));
     }
     if let Some(expected) = &body_expectation.contains {
+        let Ok(body_text) = std::str::from_utf8(body_bytes) else {
+            failures.push("text response body is not valid UTF-8".to_owned());
+            return failures;
+        };
         match render_template(expected, captures) {
             Ok(rendered) if body_text.contains(&rendered) => {}
             Ok(rendered) => {
@@ -2367,61 +3111,38 @@ fn evaluate_json_pointer(
     {
         failures.push(format!("expected JSON pointer {pointer} present={present}"));
     }
-    if let Some(expected) = &expectation.equals {
-        match render_json_value(expected, captures) {
-            Ok(rendered)
-                if actual.is_some_and(|value| assertions::json_equal(value, &rendered)) => {}
-            Ok(rendered) => failures.push(format!(
-                "expected JSON pointer {pointer} to equal {rendered}, received {actual:?}"
+    for (expected, operation) in [
+        (&expectation.equals, "equals"),
+        (&expectation.not_equals, "not_equals"),
+        (&expectation.contains, "contains"),
+        (&expectation.not_contains, "not_contains"),
+    ] {
+        let Some(expected) = expected else {
+            continue;
+        };
+        let rendered = match render_json_value(expected, captures) {
+            Ok(value) => value,
+            Err(error) => {
+                failures.push(format!("failed to render JSON pointer {pointer}: {error}"));
+                continue;
+            }
+        };
+        let Some(actual) = actual else {
+            failures.push(format!("missing JSON pointer {pointer} for {operation}"));
+            continue;
+        };
+        let result = if matches!(operation, "contains" | "not_contains") {
+            json_contains(actual, &rendered)
+        } else {
+            assertions::json_equal(actual, &rendered)
+        };
+        let negated = matches!(operation, "not_equals" | "not_contains");
+        match result {
+            Ok(matched) if matched != negated => {}
+            Ok(_) => failures.push(format!(
+                "JSON pointer {pointer} {operation} failed for {rendered}"
             )),
-            Err(error) => failures.push(format!(
-                "failed to render JSON pointer {pointer} expectation: {error}"
-            )),
-        }
-    }
-    if let Some(expected) = &expectation.not_equals {
-        match render_json_value(expected, captures) {
-            Ok(rendered) => match actual {
-                Some(actual_value) if !assertions::json_equal(actual_value, &rendered) => {}
-                Some(_) => failures.push(format!(
-                    "expected JSON pointer {pointer} not to equal {rendered}"
-                )),
-                None => failures.push(format!(
-                    "expected JSON pointer {pointer} to be present and not equal {rendered}"
-                )),
-            },
-            Err(error) => failures.push(format!(
-                "failed to render JSON pointer {pointer} expectation: {error}"
-            )),
-        }
-    }
-    if let Some(expected) = &expectation.contains {
-        match render_json_value(expected, captures) {
-            Ok(rendered) => match actual {
-                Some(actual_value) if json_contains(actual_value, &rendered) => {}
-                _ => failures.push(format!(
-                    "expected JSON pointer {pointer} to contain {rendered}, received {actual:?}"
-                )),
-            },
-            Err(error) => failures.push(format!(
-                "failed to render JSON pointer {pointer} expectation: {error}"
-            )),
-        }
-    }
-    if let Some(expected) = &expectation.not_contains {
-        match render_json_value(expected, captures) {
-            Ok(rendered) => match actual {
-                Some(actual_value) if !json_contains(actual_value, &rendered) => {}
-                Some(_) => failures.push(format!(
-                    "expected JSON pointer {pointer} not to contain {rendered}"
-                )),
-                None => failures.push(format!(
-                    "expected JSON pointer {pointer} to be present and not contain {rendered}"
-                )),
-            },
-            Err(error) => failures.push(format!(
-                "failed to render JSON pointer {pointer} expectation: {error}"
-            )),
+            Err(error) => failures.push(format!("{error}; JSON pointer {pointer} {operation}")),
         }
     }
 }
@@ -2442,6 +3163,10 @@ fn capture_json_values(
             ));
             continue;
         };
+        if let Err(error) = assertions::require_exact_numbers(actual) {
+            failures.push(format!("{error}; capture {name} at {pointer}"));
+            continue;
+        }
         let serialized_value = if capture.as_json {
             Some(actual.to_string())
         } else {
@@ -2473,7 +3198,19 @@ fn capture_header_values(
             .and_then(|value| value.to_str().ok());
         match actual {
             Some(value) => {
-                captures.insert(name.clone(), value.to_owned());
+                if capture.nonmatching_etag {
+                    let opaque = value.strip_prefix("W/").unwrap_or(value);
+                    if !opaque.starts_with('"') || !opaque.ends_with('"') || opaque.len() < 2 {
+                        failures.push("ETag capture is not a quoted entity-tag".into());
+                        continue;
+                    }
+                    // Append within the quoted opaque tag, preserving every
+                    // existing byte. This strong tag cannot equal the source.
+                    let different = format!("{}!\"", &opaque[..opaque.len() - 1]);
+                    captures.insert(name.clone(), different);
+                } else {
+                    captures.insert(name.clone(), value.to_owned());
+                }
             }
             None => failures.push(format!("expected header {header} for capture {name}")),
         }
@@ -2497,32 +3234,28 @@ fn capture_scalar_value(value: &Value) -> Option<String> {
     }
 }
 
-fn json_contains(actual: &Value, expected: &Value) -> bool {
+fn json_contains(actual: &Value, expected: &Value) -> Result<bool, String> {
     match (actual, expected) {
-        (Value::Array(values), expected_value) => values
-            .iter()
-            .any(|value| json_matches_subset(value, expected_value)),
+        (Value::Array(values), expected_value) => assertions::any_comparison(
+            values
+                .iter()
+                .map(|value| json_matches_subset(value, expected_value)),
+        ),
         (Value::String(actual_value), Value::String(expected_value)) => {
-            actual_value.contains(expected_value)
+            Ok(actual_value.contains(expected_value))
         }
-        (Value::Object(actual_values), Value::Object(expected_values)) => {
-            expected_values.iter().all(|(key, value)| {
-                actual_values
-                    .get(key)
-                    .is_some_and(|actual| json_matches_subset(actual, value))
-            })
-        }
+        (Value::Object(_), Value::Object(_)) => json_matches_subset(actual, expected),
         (actual_value, expected_value) => assertions::json_equal(actual_value, expected_value),
     }
 }
 
-fn json_matches_subset(actual: &Value, expected: &Value) -> bool {
+fn json_matches_subset(actual: &Value, expected: &Value) -> Result<bool, String> {
     if let (Value::Object(values), Value::Object(subset)) = (actual, expected) {
-        return subset.iter().all(|(key, value)| {
+        return assertions::all_comparisons(subset.iter().map(|(key, value)| {
             values
                 .get(key)
-                .is_some_and(|actual| json_matches_subset(actual, value))
-        });
+                .map_or(Ok(false), |actual| json_matches_subset(actual, value))
+        }));
     }
     assertions::json_equal(actual, expected)
 }
@@ -2536,6 +3269,7 @@ fn case_report(case: TestCase, outcome: CaseOutcome, failures: Vec<String>) -> C
         failures,
         not_run_reasons: Vec::new(),
         diagnostic_statuses: Vec::new(),
+        retrieval_attempts: Vec::new(),
     }
 }
 
@@ -2557,6 +3291,825 @@ fn calculate_totals(suites: &[SuiteReport]) -> Totals {
 
 #[cfg(test)]
 mod tests {
+    async fn response_control(
+        request: serde_json::Value,
+        expect: serde_json::Value,
+        responses: Vec<String>,
+    ) -> super::CaseReport {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("local fixture");
+        let address = listener.local_addr().expect("fixture address");
+        let responder = std::thread::spawn(move || {
+            for response in responses {
+                let (mut stream, _) = listener.accept().expect("fixture request");
+                let mut request = [0_u8; 4096];
+                let _ = stream.read(&mut request).expect("request bytes");
+                stream
+                    .write_all(response.as_bytes())
+                    .expect("fixture response");
+            }
+        });
+        let case = serde_json::from_value(serde_json::json!({
+            "id":"response-control", "requirements":["fixture"],
+            "safety":{"destructive":false,"requires_isolated_lrs":true},
+            "request":request,"expect":expect
+        }))
+        .expect("fixture case");
+        super::validate_case_steps("response-control", &case).expect("valid fixture definition");
+        let report = super::execute_case(
+            &reqwest::Client::new(),
+            &url::Url::parse(&format!("http://{address}")).expect("fixture URL"),
+            &BTreeMap::new(),
+            &BTreeMap::new(),
+            None,
+            false,
+            case,
+        )
+        .await;
+        responder.join().expect("fixture thread");
+        report
+    }
+
+    fn control_response(status: u16, headers: &str, body: &str, truncated: bool) -> String {
+        let length = body.len() + usize::from(truncated);
+        format!(
+            "HTTP/1.1 {status} Response\r\n{headers}Content-Length: {length}\r\nConnection: close\r\n\r\n{body}"
+        )
+    }
+
+    #[test]
+    fn utc_offset_diagnostic_requires_a_clock() {
+        for text in [
+            "2026-01-01",
+            "2026-01",
+            "2026-01-01+09:00",
+            "2026-01-01T+09",
+            "2026-01-01 -01",
+        ] {
+            assert!(!super::assertions::has_explicit_non_utc_offset(text));
+            let submitted = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.org"},"verb":{"id":"urn:verb"},"object":{"id":"urn:activity"},"timestamp":"2026-01-01T00:00:00Z"});
+            let mut returned = submitted.clone();
+            returned["timestamp"] = text.into();
+            for definition in [
+                serde_json::json!({"kind":"json-time","pointer":"/timestamp","utc":true}),
+                serde_json::json!({"kind":"json-preservation","expected":submitted}),
+            ] {
+                let check: super::Check =
+                    serde_json::from_value(definition).expect("fixture check");
+                let failures = check.evaluate(
+                    200,
+                    &reqwest::header::HeaderMap::new(),
+                    returned.to_string().as_bytes(),
+                    &BTreeMap::new(),
+                );
+                assert_eq!(failures.len(), 1, "{text}: {failures:?}");
+                assert!(
+                    failures[0].contains("requires explicit combined date and time"),
+                    "{text}: {failures:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn timestamp_preservation_keeps_known_defects_in_either_operand() {
+        for unknown in ["2026-01-01T24:00:00Z", "2016-12-31T23:59:60Z"] {
+            for invalid in [
+                "2026-02-30T00:00:00Z",
+                "2026-01-01T25:00:00Z",
+                "2026-01-01T00:61:00Z",
+                "2026-01-01T00:00:00+24:00",
+                "2026-01-01",
+                "invalid",
+            ] {
+                for (sent, got) in [(unknown, invalid), (invalid, unknown)] {
+                    for definition in [
+                        serde_json::json!({"kind":"json-time","pointer":"/timestamp","expected":sent,"utc":true}),
+                        serde_json::json!({"kind":"json-preservation","expected":{"timestamp":sent}}),
+                    ] {
+                        let check: super::Check =
+                            serde_json::from_value(definition).expect("fixture check");
+                        let failures = check.evaluate(
+                            200,
+                            &reqwest::header::HeaderMap::new(),
+                            serde_json::json!({"timestamp":got}).to_string().as_bytes(),
+                            &BTreeMap::new(),
+                        );
+                        assert!(
+                            failures
+                                .iter()
+                                .any(|error| !error.starts_with("ORACLE-UNAVAILABLE:")),
+                            "{sent} / {got}: {failures:?}"
+                        );
+                    }
+                }
+            }
+            for (sent, got) in [
+                (unknown, "2026-01-02T00:00:00Z"),
+                ("2026-01-02T00:00:00Z", unknown),
+            ] {
+                assert!(
+                    super::assertions::timestamp_preserved(got, sent, true)
+                        .expect_err("provider still required")
+                        .starts_with("ORACLE-UNAVAILABLE:")
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn explicit_non_utc_survives_unavailable_instant_conversion() {
+        use super::CaseOutcome::{Failed, NotRun};
+        for clock in [
+            "2026-01-01T24:00:00",
+            "20260101T240000",
+            "2016-12-31T23:59:60",
+        ] {
+            for offset in [
+                "+09:00", "+0900", "+09", "-09:00", "-0900", "-09", "-00:00", "-0000", "-00",
+                "+00:00", "+0000", "+00", "Z",
+            ] {
+                let timestamp = format!("{clock}{offset}");
+                let expected_outcome = if offset.starts_with('-') || offset.contains('9') {
+                    Failed
+                } else {
+                    NotRun
+                };
+                let submitted = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.org"},"verb":{"id":"urn:verb"},"object":{"id":"urn:activity"},"timestamp":format!("{clock}Z")});
+                let mut returned = submitted.clone();
+                returned["timestamp"] = serde_json::json!(timestamp);
+                for check in [
+                    serde_json::json!({"kind":"json-time","pointer":"/timestamp","utc":true}),
+                    serde_json::json!({"kind":"json-preservation","expected":submitted}),
+                ] {
+                    let report = response_control(
+                        serde_json::json!({"method":"GET","path":"/fixture"}),
+                        serde_json::json!({"status":200,"checks":[check]}),
+                        vec![control_response(200, "", &returned.to_string(), false)],
+                    )
+                    .await;
+                    assert_eq!(report.outcome, expected_outcome, "{timestamp}: {report:?}");
+                    if expected_outcome == Failed {
+                        assert!(
+                            report
+                                .failures
+                                .iter()
+                                .any(|failure| failure.contains("UTC")),
+                            "{report:?}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn interrupted_header_time_keeps_presence_and_syntax_obligations() {
+        use super::CaseOutcome::{Failed, NotRun};
+        for context in ["single", "initial-page", "continuation-page", "pending"] {
+            for optional in [false, true] {
+                for header in [
+                    "",
+                    "Last-Modified: invalid\r\n",
+                    "Last-Modified: Thu, 01 Jan 2026 00:00:00 GMT\r\n",
+                ] {
+                    let collection = context.ends_with("page");
+                    let mut request = serde_json::json!({"method":"GET","path":"/statements"});
+                    let mut check = serde_json::json!({"kind":"header-time","header":"Last-Modified","optional_if_empty":optional});
+                    if collection {
+                        request["collect_statement_pages"] = 3.into();
+                        check["max_pointer"] = "/statements".into();
+                    } else {
+                        request["query"] = serde_json::json!({"statementId":"01000000-0000-4000-8000-000000000001"});
+                        check["equals_pointer"] = "/stored".into();
+                    }
+                    let mut responses = Vec::new();
+                    if context == "continuation-page" {
+                        responses.push(control_response(
+                            200,
+                            "Last-Modified: Thu, 01 Jan 2026 00:00:00 GMT\r\n",
+                            r#"{"statements":[{"stored":"2026-01-01T00:00:00Z"}],"more":"/next"}"#,
+                            false,
+                        ));
+                    }
+                    if context == "pending" {
+                        request["await_retrieval_ms"] = 1.into();
+                    }
+                    responses.push(control_response(
+                        if context == "pending" { 404 } else { 200 },
+                        header,
+                        "x",
+                        true,
+                    ));
+                    let report = response_control(
+                        request,
+                        serde_json::json!({"status":200,"checks":[check]}),
+                        responses,
+                    )
+                    .await;
+                    let defective = context != "pending"
+                        && (header.contains("invalid")
+                            || (header.is_empty() && !(collection && optional)));
+                    assert_eq!(
+                        report.outcome,
+                        if defective { Failed } else { NotRun },
+                        "{context}, optional={optional}, header={header:?}: {report:?}"
+                    );
+                    assert_eq!(
+                        report.failures.iter().any(|e| e.contains("Last-Modified")),
+                        defective
+                    );
+                    assert!(
+                        report
+                            .failures
+                            .iter()
+                            .chain(&report.not_run_reasons)
+                            .any(|e| e.contains("body did not complete"))
+                    );
+                    assert!(report.failures.iter().all(|e| !e.contains("requires JSON")));
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn collected_statement_order_spans_pages_and_incomplete_prefixes() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        for descending in [false, true] {
+            let (first, last) = if descending {
+                ("2026-01-01T00:00:02Z", "2026-01-01T00:00:01Z")
+            } else {
+                ("2026-01-01T00:00:01Z", "2026-01-01T00:00:02Z")
+            };
+            for (pages, bound, truncated, expected) in [
+                (vec![vec![first], vec![last]], false, false, Passed),
+                (vec![vec![last], vec![first]], false, false, Failed),
+                (vec![vec![first], vec![first]], false, false, Passed),
+                (
+                    vec![
+                        vec!["2026-01-01T00:00:00Z"],
+                        vec!["2026-01-01T01:00:00+01:00"],
+                    ],
+                    false,
+                    false,
+                    Passed,
+                ),
+                (vec![vec![first], vec![], vec![last]], false, false, Passed),
+                (vec![vec![last], vec![], vec![first]], false, false, Failed),
+                (
+                    vec![vec![first], vec!["2026-01-01T24:00:00Z"]],
+                    false,
+                    false,
+                    NotRun,
+                ),
+                (
+                    vec![vec![last], vec!["2026-01-01T24:00:00Z"], vec![first]],
+                    false,
+                    false,
+                    Failed,
+                ),
+                (vec![vec![last], vec![first]], true, false, Failed),
+                (vec![vec![first], vec![last]], true, false, NotRun),
+                (vec![vec![last], vec![first]], false, true, Failed),
+                (vec![vec![first], vec![last]], false, true, NotRun),
+                (
+                    vec![vec![last], vec![first], vec![], vec![first], vec![first]],
+                    false,
+                    false,
+                    Failed,
+                ),
+                (
+                    vec![vec![last], vec![first], vec![first]],
+                    true,
+                    false,
+                    Failed,
+                ),
+                (
+                    vec![vec![last], vec![first], vec![first]],
+                    false,
+                    true,
+                    Failed,
+                ),
+            ] {
+                let mut responses = Vec::new();
+                for (index, page) in pages.iter().enumerate() {
+                    let more = if index + 1 < pages.len() || bound || truncated {
+                        format!("/next/{}", index + 1)
+                    } else {
+                        String::new()
+                    };
+                    let statements: Vec<_> = page.iter().enumerate().map(|(item, stored)| {
+                        serde_json::json!({"id":format!("{index}-{item}"),"stored":stored})
+                    }).collect();
+                    let body = serde_json::json!({"statements":statements,"more":more}).to_string();
+                    responses.push(control_response(200, "", &body, false));
+                }
+                if truncated {
+                    responses.push(control_response(200, "", "x", true));
+                }
+                let limit = if bound { pages.len() } else { pages.len() + 1 };
+                let request = serde_json::json!({"method":"GET","path":"/statements","collect_statement_pages":limit});
+                let expect = serde_json::json!({"status":200,
+                    "json":{"pointers":{"/statements":{"contains":{"id":"0-0"}}}},
+                    "checks":[{"kind":"json-order","pointer":"/statements","by":"stored","descending":descending}]});
+                let report = response_control(request, expect, responses).await;
+                assert_eq!(
+                    report.outcome, expected,
+                    "descending={descending}, {pages:?}, bound={bound}, truncated={truncated}: {report:?}"
+                );
+                assert_eq!(
+                    report
+                        .failures
+                        .iter()
+                        .filter(|e| e.contains("not ordered by stored"))
+                        .count(),
+                    usize::from(expected == Failed)
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn collected_order_keeps_distinct_later_defects() {
+        let pages = [
+            serde_json::json!([{"stored":"2026-01-01T00:00:01Z"}]),
+            serde_json::json!([{"stored":"2026-01-01T24:00:00Z"}]),
+            serde_json::json!([{"stored":"2026-01-01T00:00:02Z"}]),
+            serde_json::json!([{"stored":42}]),
+            serde_json::json!([]),
+        ];
+        let responses = pages
+            .iter()
+            .enumerate()
+            .map(|(index, items)| {
+                let more = if index + 1 == pages.len() {
+                    String::new()
+                } else {
+                    format!("/next/{index}")
+                };
+                control_response(
+                    200,
+                    "",
+                    &serde_json::json!({"statements":items,"more":more}).to_string(),
+                    false,
+                )
+            })
+            .collect();
+        let report = response_control(
+            serde_json::json!({"method":"GET","path":"/statements","collect_statement_pages":5}),
+            serde_json::json!({"status":200,"checks":[{"kind":"json-order","pointer":"/statements","by":"stored","descending":true}]}),
+            responses,
+        ).await;
+        assert_eq!(report.outcome, super::CaseOutcome::Failed);
+        for reason in [
+            "ORACLE-UNAVAILABLE:",
+            "not ordered by stored",
+            "missing JSON timestamp string",
+        ] {
+            assert_eq!(
+                report
+                    .failures
+                    .iter()
+                    .filter(|e| e.contains(reason))
+                    .count(),
+                1,
+                "{report:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn definite_timestamp_defects_fail_even_on_expected_error_responses()
+    -> Result<(), serde_yaml::Error> {
+        let expectation: super::ResponseExpectation = serde_yaml::from_str(
+            "status: 400\nheaders:\n  X-Experience-API-Consistent-Through: {iso8601: true}",
+        )?;
+        for timestamp in [
+            "2026-02-30T00:00:00Z",
+            "2025-02-29T00:00:00Z",
+            "2026-00-01T00:00:00Z",
+            "2026-01-00T00:00:00Z",
+            "2026-10-01T25:00:00Z",
+            "2026-10-01T24:00:01Z",
+            "2026-10-01T24:00:00.1Z",
+            "2026-10-01T00:61:00Z",
+            "2026-10-01T00:00:61Z",
+            "2026-10-01T00:00:00+24:00",
+            "2026-10-01T00:00:00+09:60",
+            // Known violations must take precedence over leap-second delegation.
+            "2026-02-30T23:59:60Z",
+            "2026-06-30T25:59:60Z",
+            "2026-06-30T23:59:60+09:60",
+            "20260230T000000Z",
+            "2026-10-01T25Z",
+            "2026-10-01T25:00Z",
+            "2026-10-01T00:61Z",
+            "2026-10-01T25.5Z",
+            "2026-10-01T24.1Z",
+            "2026-10-01T09.5+24:00",
+        ] {
+            let mut failures =
+                super::evaluate_status(&expectation, reqwest::StatusCode::BAD_REQUEST);
+            assert!(failures.is_empty());
+            super::evaluate_header(
+                "X-Experience-API-Consistent-Through",
+                &expectation.headers["X-Experience-API-Consistent-Through"],
+                Some(timestamp),
+                &BTreeMap::new(),
+                &mut failures,
+            );
+            assert!(
+                failures
+                    .iter()
+                    .any(|error| !error.starts_with("ORACLE-UNAVAILABLE:")),
+                "invalid watermark must be a definite failure: {timestamp}"
+            );
+        }
+        for timestamp in ["2024-02-29T00:00:00Z", "2026-10-01T23:59:59.123456789012Z"] {
+            assert!(
+                super::assertions::parse_time(timestamp).is_ok(),
+                "{timestamp}"
+            );
+        }
+        for timestamp in [
+            "2026-10-01T24:00:00Z",
+            "2026-06-30T23:59:60Z",
+            "2026-10-01T09.5Z",
+            "2026-10-01T09:30.5Z",
+        ] {
+            assert!(
+                matches!(super::assertions::parse_time(timestamp), Err(error)
+                if error.starts_with("ORACLE-UNAVAILABLE:")),
+                "{timestamp}"
+            );
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn observation_deadline_is_incomplete_but_error_header_defects_fail() {
+        use std::io::{Read, Write};
+        for valid_headers in [true, false] {
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("local fixture");
+            let address = listener.local_addr().expect("fixture address");
+            let responder = std::thread::spawn(move || {
+                let (mut stream, _) = listener.accept().expect("fixture request");
+                let mut request = [0_u8; 4096];
+                let _ = stream.read(&mut request).expect("request bytes");
+                std::thread::sleep(std::time::Duration::from_millis(10));
+                let version = if valid_headers {
+                    "X-Experience-API-Version: 2.0.0\r\n"
+                } else {
+                    ""
+                };
+                write!(stream, "HTTP/1.1 404 Not Found\r\n{version}X-Experience-API-Consistent-Through: 2020-01-01T00:00:00Z\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").expect("fixture response");
+            });
+            let case = serde_yaml::from_str(
+                r"
+id: delayed-retrieval
+requirements: [xapi-lrs-4.1.6.1-statement-put]
+safety: {destructive: false, requires_isolated_lrs: false}
+request:
+  method: GET
+  path: /statements
+  query: {statementId: '01000000-0000-4000-8000-000000000001'}
+  await_retrieval_ms: 1
+expect:
+  status: 200
+  headers:
+    X-Experience-API-Version: {equals: '2.0.0'}
+    X-Experience-API-Consistent-Through: {iso8601: true}
+  json: {pointers: {'/id': {present: true}}}
+",
+            )
+            .expect("fixture case");
+            let report = super::execute_case(
+                &reqwest::Client::new(),
+                &url::Url::parse(&format!("http://{address}")).expect("fixture URL"),
+                &BTreeMap::new(),
+                &BTreeMap::new(),
+                None,
+                false,
+                case,
+            )
+            .await;
+            assert_eq!(
+                report.outcome,
+                if valid_headers {
+                    super::CaseOutcome::NotRun
+                } else {
+                    super::CaseOutcome::Failed
+                }
+            );
+            responder.join().expect("fixture thread");
+        }
+    }
+    #[test]
+    fn media_type_assertions_reject_substrings_and_accept_http_case_rules() {
+        for actual in [
+            "application/json",
+            "APPLICATION/JSON",
+            "application/json; charset=UTF-8",
+        ] {
+            assert!(super::header_contains(
+                "Content-Type",
+                actual,
+                "application/json"
+            ));
+        }
+        for actual in [
+            "application/jsonp",
+            "application/json+other",
+            "text/plain; note=application/json",
+            "application/json; broken",
+            "not application/json",
+        ] {
+            assert!(!super::header_contains(
+                "Content-Type",
+                actual,
+                "application/json"
+            ));
+        }
+        assert!(super::header_contains(
+            "content-type",
+            "text/plain; charset=UTF-8",
+            "TEXT/PLAIN; charset=utf-8"
+        ));
+        assert!(!super::header_contains(
+            "content-type",
+            "text/plain; charset=iso-8859-1",
+            "text/plain; charset=utf-8"
+        ));
+        assert!(super::header_contains("x-custom", "prefix-value", "value"));
+    }
+
+    #[test]
+    fn content_type_linear_whitespace_preserves_tokens_and_quoted_values() {
+        for (actual, expected) in [
+            ("application/json ; charset=utf-8", "application/json"),
+            (
+                "application/json\t;\tcharset=UTF-8",
+                "application/json; charset=utf-8",
+            ),
+            (
+                " APPLICATION/JSON ; charset=\"utf-8\" ",
+                "application/json ; charset=utf-8",
+            ),
+            (
+                "multipart/mixed ; boundary=\"a ; b\"",
+                "multipart/mixed; boundary=\"a ; b\"",
+            ),
+            (
+                "application/octet-stream ; name=\"a b\"",
+                "application/octet-stream",
+            ),
+        ] {
+            assert!(
+                super::header_contains("Content-Type", actual, expected),
+                "{actual}"
+            );
+        }
+        for (actual, expected) in [
+            ("application /json", "application/json"),
+            ("application/ json", "application/json"),
+            ("application/json; charset =utf-8", "application/json"),
+            ("application/json; charset= utf-8", "application/json"),
+            ("app lication/json ; charset=utf-8", "application/json"),
+            ("application/j son", "application/json"),
+            ("application/json; char set=utf-8", "application/json"),
+            ("application/json; charset=utf -8", "application/json"),
+            ("application/json; broken", "application/json"),
+            ("application/json (comment)", "application/json"),
+            (
+                "multipart/mixed; boundary=\"a ; b\"",
+                "multipart/mixed; boundary=\"a;b\"",
+            ),
+            (
+                "multipart/mixed; boundary=\"AbC\"",
+                "multipart/mixed; boundary=\"abc\"",
+            ),
+        ] {
+            assert!(
+                !super::header_contains("Content-Type", actual, expected),
+                "{actual}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn content_type_quoted_parameters_follow_http_grammar() {
+        for (actual, expected, valid) in [
+            (r#"application/json; note="a\"b""#, "application/json", true),
+            (r#"application/json; note="""#, "application/json", true),
+            (
+                r#"application/json; note="""#,
+                r#"application/json; note="""#,
+                true,
+            ),
+            (
+                r#"application/json; note="a\"b""#,
+                r#"application/json; note="a\"b""#,
+                true,
+            ),
+            (
+                r#"multipart/mixed; boundary="a\b""#,
+                "multipart/mixed; boundary=ab",
+                true,
+            ),
+            (
+                r#"application/json; note="a\\b""#,
+                r#"application/json; note="a\\b""#,
+                true,
+            ),
+            (
+                r#"application/json; note="a;=b""#,
+                r#"application/json; note="a;=b""#,
+                true,
+            ),
+            (
+                r#"application/json; charset="UT\F-8""#,
+                "application/json; charset=utf-8",
+                true,
+            ),
+            (
+                r#"application/json; note="a\"b""#,
+                r#"application/json; note="ab""#,
+                false,
+            ),
+            (
+                r#"multipart/mixed; boundary="A\b""#,
+                "multipart/mixed; boundary=ab",
+                false,
+            ),
+            (r#"application/json; note=""x"#, "application/json", false),
+            (r#"application/json; note="a\""#, "application/json", false),
+            (r#"application/json; note="a\"#, "application/json", false),
+            (r#"application/json; note="a"b""#, "application/json", false),
+            ("application/json; note=", "application/json", false),
+            ("application/json; note={x}", "application/json", false),
+            (
+                "application/json; note=x(comment)",
+                "application/json",
+                false,
+            ),
+        ] {
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements"}),
+                serde_json::json!({"status":200,"headers":{"Content-Type":{"contains":expected}}}),
+                vec![control_response(
+                    200,
+                    &format!("Content-Type: {actual}\r\n"),
+                    "{}",
+                    false,
+                )],
+            )
+            .await;
+            assert_eq!(
+                report.outcome,
+                if valid {
+                    super::CaseOutcome::Passed
+                } else {
+                    super::CaseOutcome::Failed
+                },
+                "{actual} / {expected}: {report:?}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Keep complete/interrupted response pairs in one visible classification matrix"
+    )]
+    async fn retrieval_preserves_visibility_and_header_classification() {
+        use super::CaseOutcome::{Failed, NotRun};
+        use std::io::{Read, Write};
+        // Initial delay, error headers, ordinary 404/500, and previously visible
+        // Statements must remain distinguishable when the body is truncated.
+        for ((status, wait, seen, version, through, outcome), truncated) in [
+            (404, true, false, "2.0.0", "2026-01-02T00:00:00Z", NotRun),
+            (404, true, false, "", "2026-01-02T00:00:00Z", Failed),
+            (404, true, false, "2.0.0", "2026-02-30T00:00:00Z", Failed),
+            (404, false, false, "2.0.0", "2026-01-02T00:00:00Z", Failed),
+            (500, true, false, "2.0.0", "2026-01-02T00:00:00Z", Failed),
+            (200, true, false, "2.0.0", "2026-01-02T00:00:00Z", NotRun),
+            (404, true, true, "2.0.0", "2026-01-02T00:00:00Z", Failed),
+            (404, true, true, "2.0.0", "2025-12-31T00:00:00Z", NotRun),
+            (404, true, true, "2.0.0", "2026-01-01T00:00:00Z", NotRun),
+            (404, true, true, "2.0.0", "2026-01-01T00:00:00.000Z", NotRun),
+            (
+                404,
+                true,
+                true,
+                "2.0.0",
+                "2026-01-01T09:00:00+09:00",
+                NotRun,
+            ),
+            (
+                404,
+                true,
+                true,
+                "2.0.0",
+                "2026-01-01T00:00:00.0000000001Z",
+                Failed,
+            ),
+        ]
+        .into_iter()
+        .flat_map(|scenario| [true, false].map(|truncated| (scenario, truncated)))
+        .filter(|(scenario, truncated)| *truncated || scenario.0 == 404)
+        {
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("local fixture");
+            let address = listener.local_addr().expect("fixture address");
+            let responder = std::thread::spawn(move || {
+                for first in (0..=usize::from(seen)).map(|i| seen && i == 0) {
+                    let (mut stream, _) = listener.accept().expect("fixture request");
+                    let mut request = [0_u8; 4096];
+                    let _ = stream.read(&mut request).expect("request bytes");
+                    let body = r#"{"id":"01000000-0000-4000-8000-000000000001","stored":"2026-01-01T00:00:00Z"}"#;
+                    if first {
+                        write!(stream, "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).expect("visible fixture");
+                    } else {
+                        // Exceed the 1ms observation window without a retry race.
+                        std::thread::sleep(std::time::Duration::from_millis(10));
+                        let length = if truncated { 100 } else { 1 };
+                        write!(stream, "HTTP/1.1 {status} Response\r\nX-Experience-API-Version: {version}\r\nX-Experience-API-Consistent-Through: {through}\r\nContent-Length: {length}\r\nConnection: close\r\n\r\nx").expect("retrieval fixture");
+                    }
+                }
+            });
+            let request = serde_json::json!({"method":"GET", "path":"/statements", "query":{"statementId":"01000000-0000-4000-8000-000000000001"}});
+            let mut read_request = request.clone();
+            if wait {
+                read_request["await_retrieval_ms"] = 1.into();
+            }
+            let mut steps = Vec::new();
+            if seen {
+                steps.push(
+                    serde_json::json!({"id":"visible", "request":request, "expect":{"status":200}}),
+                );
+            }
+            steps.push(serde_json::json!({"id":"read", "request":read_request, "expect":{"status":200,"headers":{
+                "X-Experience-API-Version":{"equals":"2.0.0"},
+                "X-Experience-API-Consistent-Through":{"iso8601":true},
+                "Content-Type":{"contains":"application/json"},
+                "Last-Modified":{"present":true}
+            }}}));
+            // Success-only headers must not be required on the initial 404.
+            if status == 200 {
+                steps.last_mut().expect("read step")["expect"]["headers"]
+                    .as_object_mut()
+                    .expect("headers")
+                    .retain(|name, _| name.starts_with("X-Experience"));
+            }
+            let case = serde_json::from_value(serde_json::json!({"id":"interrupted-retrieval", "requirements":["xapi-lrs-4.1.6.1-statement-put"],"safety":{"destructive":false,"requires_isolated_lrs":false},"steps":steps})).expect("fixture case");
+            let report = super::execute_case(
+                &reqwest::Client::new(),
+                &url::Url::parse(&format!("http://{address}")).expect("fixture URL"),
+                &BTreeMap::new(),
+                &BTreeMap::new(),
+                None,
+                false,
+                case,
+            )
+            .await;
+            responder.join().expect("fixture thread");
+            assert_eq!(
+                report.outcome, outcome,
+                "status={status}, wait={wait}, seen={seen}, version={version}, through={through}: {report:?}"
+            );
+            if wait && status == 404 {
+                assert!(report.failures.iter().all(|reason| {
+                    !reason.contains("expected status")
+                        && !reason.contains("Content-Type")
+                        && !reason.contains("Last-Modified")
+                }));
+            }
+            assert_eq!(
+                report
+                    .failures
+                    .iter()
+                    .chain(&report.not_run_reasons)
+                    .any(|reason| reason.contains("response body did not complete")),
+                truncated
+            );
+        }
+    }
+
+    #[test]
+    fn json_oracles_reject_invalid_utf8_without_rejecting_binary_documents() {
+        let expectation: super::ResponseExpectation = serde_yaml::from_str(
+            "status: 200\njson: {pointers: {'/version/0': {equals: '2.0.0'}}}\ncapture: {text: {pointer: /extra}}",
+        ).expect("JSON expectation");
+        let valid = b"{\"version\":[\"2.0.0\"],\"extra\":\"valid\"}";
+        let invalid = b"{\"version\":[\"2.0.0\"],\"extra\":\"\xff\"}";
+        assert!(super::evaluate_body(&expectation, valid, &mut BTreeMap::new()).is_empty());
+        let mut captures = BTreeMap::new();
+        assert!(!super::evaluate_body(&expectation, invalid, &mut captures).is_empty());
+        assert!(captures.is_empty());
+        let binary: super::ResponseExpectation =
+            serde_yaml::from_str("status: 200\nbody: {non_empty: true}")
+                .expect("binary expectation");
+        assert!(super::evaluate_body(&binary, &[0, 255, 128], &mut BTreeMap::new()).is_empty());
+    }
     #[tokio::test]
     async fn unavailable_target_fixtures_are_not_run_and_never_pass() {
         let document: super::SuiteDocument = serde_yaml::from_str(
@@ -2692,8 +4245,8 @@ headers:
                     source,
                 })?;
         super::validate_expectation("null", &expectation, &BTreeSet::new())?;
-        assert!(super::evaluate_body(&expectation, "null", &mut BTreeMap::new()).is_empty());
-        assert!(!super::evaluate_body(&expectation, "{}", &mut BTreeMap::new()).is_empty());
+        assert!(super::evaluate_body(&expectation, b"null", &mut BTreeMap::new()).is_empty());
+        assert!(!super::evaluate_body(&expectation, b"{}", &mut BTreeMap::new()).is_empty());
         Ok(())
     }
 
@@ -2796,12 +4349,14 @@ headers:
                     method: "GET".to_owned(),
                     path: "/about".to_owned(),
                     follow_more: None,
+                    collect_statement_pages: None,
                     query: BTreeMap::default(),
                     headers: BTreeMap::default(),
                     body: None,
                     raw_body: None,
                     raw_body_hex: None,
                     await_retrieval_ms: None,
+                    unrecognized_parameter: None,
                     raw_body_crlf_lines: None,
                     repeat: None,
                 }),
@@ -2847,12 +4402,14 @@ headers:
                     method: "GET".to_owned(),
                     path: "/about".to_owned(),
                     follow_more: None,
+                    collect_statement_pages: None,
                     query: BTreeMap::default(),
                     headers: BTreeMap::default(),
                     body: None,
                     raw_body: None,
                     raw_body_hex: None,
                     await_retrieval_ms: None,
+                    unrecognized_parameter: None,
                     raw_body_crlf_lines: None,
                     repeat: None,
                 }),
@@ -2878,11 +4435,16 @@ headers:
     }
 
     #[test]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The two-step fixture makes the previous-response capture dependency explicit"
+    )]
     fn accepts_capture_reference_from_previous_step() {
         let mut capture = BTreeMap::new();
         capture.insert(
             "captured_version".to_owned(),
             super::CaptureSpec {
+                nonmatching_etag: false,
                 as_json: false,
                 pointer: Some("/version".to_owned()),
                 header: None,
@@ -2911,18 +4473,21 @@ headers:
                 steps: vec![
                     super::TestStep {
                         when_previous_status: None,
+                        when_step_status: None,
                         id: "capture".to_owned(),
                         request: super::RequestSpec {
                             auth_profile: None,
                             method: "GET".to_owned(),
                             path: "/about".to_owned(),
                             follow_more: None,
+                            collect_statement_pages: None,
                             query: BTreeMap::default(),
                             headers: BTreeMap::default(),
                             body: None,
                             raw_body: None,
                             raw_body_hex: None,
                             await_retrieval_ms: None,
+                            unrecognized_parameter: None,
                             raw_body_crlf_lines: None,
                             repeat: None,
                         },
@@ -2939,18 +4504,21 @@ headers:
                     },
                     super::TestStep {
                         when_previous_status: None,
+                        when_step_status: None,
                         id: "use-capture".to_owned(),
                         request: super::RequestSpec {
                             auth_profile: None,
                             method: "GET".to_owned(),
                             path: "/about".to_owned(),
                             follow_more: None,
+                            collect_statement_pages: None,
                             query,
                             headers: BTreeMap::default(),
                             body: None,
                             raw_body: None,
                             raw_body_hex: None,
                             await_retrieval_ms: None,
+                            unrecognized_parameter: None,
                             raw_body_crlf_lines: None,
                             repeat: None,
                         },
@@ -2985,6 +4553,7 @@ headers:
         capture.insert(
             "captured_etag".to_owned(),
             super::CaptureSpec {
+                nonmatching_etag: false,
                 as_json: false,
                 pointer: None,
                 header: Some("ETag".to_owned()),
@@ -3013,18 +4582,21 @@ headers:
                 steps: vec![
                     super::TestStep {
                         when_previous_status: None,
+                        when_step_status: None,
                         id: "capture".to_owned(),
                         request: super::RequestSpec {
                             auth_profile: None,
                             method: "GET".to_owned(),
                             path: "/activities/state".to_owned(),
                             follow_more: None,
+                            collect_statement_pages: None,
                             query: BTreeMap::default(),
                             headers: BTreeMap::default(),
                             body: None,
                             raw_body: None,
                             raw_body_hex: None,
                             await_retrieval_ms: None,
+                            unrecognized_parameter: None,
                             raw_body_crlf_lines: None,
                             repeat: None,
                         },
@@ -3041,18 +4613,21 @@ headers:
                     },
                     super::TestStep {
                         when_previous_status: None,
+                        when_step_status: None,
                         id: "use-capture".to_owned(),
                         request: super::RequestSpec {
                             auth_profile: None,
                             method: "PUT".to_owned(),
                             path: "/activities/state".to_owned(),
                             follow_more: None,
+                            collect_statement_pages: None,
                             query: BTreeMap::default(),
                             headers,
                             body: None,
                             raw_body: None,
                             raw_body_hex: None,
                             await_retrieval_ms: None,
+                            unrecognized_parameter: None,
                             raw_body_crlf_lines: None,
                             repeat: None,
                         },
@@ -3102,12 +4677,14 @@ headers:
                     method: "GET".to_owned(),
                     path: "/about".to_owned(),
                     follow_more: None,
+                    collect_statement_pages: None,
                     query,
                     headers: BTreeMap::default(),
                     body: None,
                     raw_body: None,
                     raw_body_hex: None,
                     await_retrieval_ms: None,
+                    unrecognized_parameter: None,
                     raw_body_crlf_lines: None,
                     repeat: None,
                 }),
@@ -3153,6 +4730,7 @@ headers:
                     method: "PUT".to_owned(),
                     path: "/statements".to_owned(),
                     follow_more: None,
+                    collect_statement_pages: None,
                     query: BTreeMap::default(),
                     headers: BTreeMap::default(),
                     body: None,
@@ -3162,6 +4740,7 @@ headers:
                     )),
                     raw_body_hex: None,
                     await_retrieval_ms: None,
+                    unrecognized_parameter: None,
                     raw_body_crlf_lines: None,
                     repeat: None,
                 }),
@@ -3207,6 +4786,7 @@ headers:
                     method: "PUT".to_owned(),
                     path: "/statements".to_owned(),
                     follow_more: None,
+                    collect_statement_pages: None,
                     query: BTreeMap::default(),
                     headers: BTreeMap::default(),
                     body: None,
@@ -3216,6 +4796,7 @@ headers:
                     )),
                     raw_body_hex: None,
                     await_retrieval_ms: None,
+                    unrecognized_parameter: None,
                     raw_body_crlf_lines: None,
                     repeat: None,
                 }),
@@ -3269,7 +4850,7 @@ headers:
             }
         });
 
-        assert!(super::json_contains(&actual, &expected));
+        assert_eq!(super::json_contains(&actual, &expected), Ok(true));
     }
 
     #[test]
@@ -3287,16 +4868,16 @@ headers:
             "id": "00000000-0000-4000-8000-000000000307"
         });
 
-        assert!(!super::json_contains(&actual, &expected));
+        assert_eq!(super::json_contains(&actual, &expected), Ok(false));
     }
 
     #[test]
     fn json_membership_does_not_match_identifier_prefixes() {
         let actual = serde_json::json!([{"id":"https://example.org/activity-extra"}]);
         let prefix = serde_json::json!({"id":"https://example.org/activity"});
-        assert!(!super::json_contains(&actual, &prefix));
+        assert_eq!(super::json_contains(&actual, &prefix), Ok(false));
         let exact = serde_json::json!({"id":"https://example.org/activity-extra"});
-        assert!(super::json_contains(&actual, &exact));
+        assert_eq!(super::json_contains(&actual, &exact), Ok(true));
     }
 
     #[test]
@@ -3329,3 +4910,6 @@ headers:
         assert!(super::render_template("{{missing}}", &captures).is_err());
     }
 }
+
+#[cfg(test)]
+mod afc_tests;

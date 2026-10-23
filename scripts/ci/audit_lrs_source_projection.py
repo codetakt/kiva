@@ -219,7 +219,7 @@ def audit_policy_table_anchors(lines):
     return checked
 
 
-def audit(source, update_bindings):
+def audit(source, update_bindings, render_manifest=False):
     ledger = load_yaml(LEDGER.read_text())
     data = source.read_bytes() if source else None
     actual = (
@@ -291,7 +291,26 @@ def audit(source, update_bindings):
                 "tools/xapi-lrs-conformance/Cargo.toml",
                 "tools/xapi-lrs-conformance/src/lib.rs",
                 "tools/xapi-lrs-conformance/src/assertions.rs",
+                "tools/xapi-lrs-conformance/src/preservation.rs",
+                "tools/xapi-lrs-conformance/src/media_type.rs",
                 "tools/xapi-lrs-conformance/src/main.rs",
+                "scripts/ci/run_lrs_procedures.py",
+                "scripts/ci/lrs_procedure_definitions.py",
+                "scripts/ci/lrs_preservation.py",
+                "scripts/ci/issued_definition_contracts.py",
+                "spec/conformance/issued-definition-contracts.json",
+                "spec/conformance/issued-definition-source-anchors.json",
+                "spec/conformance/definition-contract-vectors.yaml",
+                "spec/conformance/issued-definition-tests.yaml",
+                "spec/conformance/reference/language-subtag-registry-20260917.txt",
+                "spec/conformance/issued-test-procedures.yaml",
+                "spec/conformance/issued-supplemental-tests.yaml",
+                "scripts/ci/issued_test_design.py",
+                "scripts/ci/lrs_issued_scenarios.py",
+                "scripts/ci/lrs_issued_interpretations.py",
+                "scripts/ci/lrs_projection_completion.py",
+                "scripts/ci/lrs_issued_bindings.py",
+                "scripts/ci/generate_issued_test_projection.py",
             ]
         },
         table_model_sha256=hashlib.sha256(
@@ -314,8 +333,8 @@ def audit(source, update_bindings):
         cases=cases,
         rule_bindings=rule_bindings,
     )
-    if update_bindings:
-        if source is None:
+    if update_bindings or render_manifest:
+        if update_bindings and source is None:
             raise ValueError(
                 "updating assertion bindings requires the pinned source bytes"
             )
@@ -388,9 +407,15 @@ def main():
         help="write a reviewable assertion manifest after an intentional change",
     )
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--render-manifest", action="store_true",
+        help="Render the derived index from pinned ledger identities; does not update the artifact lock, verify source bytes or grant acceptance",
+    )
     args = parser.parse_args()
+    if args.render_manifest and args.update_bindings:
+        parser.error("choose --render-manifest or --update-bindings")
     try:
-        report = audit(None if args.skip_source else args.source, args.update_bindings)
+        report = audit(None if args.skip_source else args.source, args.update_bindings, args.render_manifest)
     except (ValueError, KeyError, FileNotFoundError) as error:
         raise SystemExit(str(error)) from error
     print(

@@ -194,6 +194,8 @@ fi
 
 run_logged openapi-validation \
   python3 scripts/ci/validate_openapi.py spec/openapi/kiva-xapi.yaml
+run_logged lrs-artifact-generation \
+  python3 -B scripts/ci/lrs_generated_artifacts.py generate
 run_logged conformance-plan-validation \
   python3 scripts/ci/validate_conformance.py spec/conformance/xapi-lrs-discharge.yaml
 run_logged conformance-fixture-validation \

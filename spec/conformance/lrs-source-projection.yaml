@@ -59,6 +59,7 @@ rules:
   - 57
   case_selectors:
   - statement-utf8
+  - issued-utf8-
   - state-binary
   - agent-profile-binary
   - activity-profile-binary
@@ -69,6 +70,8 @@ rules:
   - 59
   - 106
   case_selectors:
+  - issued-audit-sha384-
+  - issued-audit-sha512-
   - attachment-
   - statement-attachments-
   - multipart-
@@ -375,6 +378,8 @@ rules:
   - 1131
   - 1147
   case_selectors:
+  - issued-audit-sha384-
+  - issued-audit-sha512-
   - attachment-attachments-
   - attachment-object-attachments-
   - attachment-put-
@@ -403,6 +408,13 @@ rules:
   - 1194
   - 1215
   case_selectors:
+  - issued-readback-
+  - issued-completion-
+  - issued-reject-
+  - issued-opaque-extension-
+  - issued-data-meaning-
+  - issued-characterstring-
+  - issued-mbox-sha1-
   - statement-
   - context-activities-array-
   - lrs-populates-

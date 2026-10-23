@@ -1,207 +1,208 @@
 suite:
   id: xapi-lrs-statement-immutability-isolated
   standard: IEEE/ISO/IEC 39274-1-1-2025
-  description: Destructive Statement immutability equivalence checks for disposable isolated LRS targets.
+  description: Destructive Statement immutability equivalence checks for disposable
+    isolated LRS targets.
 cases:
-  - id: statement-duplicate-conflict-preserves-immutable-properties
-    requirements:
-      - xapi-lrs-4.2-statement-immutability-preserve
-      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
-      - xapi-lrs-4.1.6.1-statement-consistent-through
-      - xapi-lrs-4.1.6.1-statement-last-modified
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    steps:
-      - id: put-original-statement
-        request:
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000801
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000801
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-immutability-original@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/immutability-original
-            result:
-              duration: PT1.23S
-            version: 2.0.0
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-      - id: put-conflicting-statement
-        request:
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000801
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000801
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-immutability-conflict@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/completed
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/immutability-conflict
-            result:
-              duration: PT9.99S
-            version: 2.0.0
-        expect:
-          status: 409
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          status_in:
-            - 204
-      - id: get-original-statement
-        request:
-          method: GET
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000801
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-            Last-Modified:
-              present: true
-          json:
-            pointers:
-              /actor/mbox:
-                equals: mailto:kiva-conformance-immutability-original@example.org
-              /verb/id:
-                equals: https://adlnet.gov/expapi/verbs/experienced
-              /object/id:
-                equals: https://example.org/kiva/conformance/activity/immutability-original
-              /result/duration:
-                equals: PT1.23S
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              equals_pointer: /stored
-  - id: statement-equivalence-ignores-excluded-timestamp
-    requirements:
-      - xapi-lrs-4.2-statement-immutability-ignore-excluded
-      - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
-      - xapi-lrs-4.1.6.1-statement-consistent-through
-      - xapi-lrs-4.1.6.1-statement-last-modified
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    steps:
-      - id: put-original-statement
-        request:
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000802
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000802
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-immutability-excluded@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/immutability-excluded
-            timestamp: '2025-01-01T00:00:00Z'
-            version: 2.0.0
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-      - id: put-equivalent-excluded-timestamp-statement
-        request:
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000802
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000802
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-immutability-excluded@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/immutability-excluded
-            timestamp: '2025-01-02T00:00:00Z'
-            version: 2.0.0
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          status_in:
-            - 409
-      - id: get-original-statement
-        request:
-          method: GET
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000802
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-            Last-Modified:
-              present: true
-          json:
-            pointers:
-              /timestamp:
-                equals: '2025-01-01T00:00:00Z'
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              equals_pointer: /stored
+- id: statement-duplicate-conflict-preserves-immutable-properties
+  requirements:
+  - xapi-lrs-4.2-statement-immutability-preserve
+  - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-original-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000801
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body: &original-statement
+        id: 00000000-0000-4000-8000-000000000801
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-immutability-original@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/immutability-original
+        result:
+          duration: PT1.23S
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: put-conflicting-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000801
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000801
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-immutability-conflict@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/completed
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/immutability-conflict
+        result:
+          duration: PT9.99S
+        version: 2.0.0
+    expect:
+      status: 409
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 204
+  - id: get-original-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000801
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      json:
+        pointers:
+          /actor/mbox:
+            equals: mailto:kiva-conformance-immutability-original@example.org
+          /verb/id:
+            equals: https://adlnet.gov/expapi/verbs/experienced
+          /object/id:
+            equals: https://example.org/kiva/conformance/activity/immutability-original
+      checks:
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      - kind: json-preservation
+        expected: *original-statement
+- id: statement-equivalence-ignores-excluded-timestamp
+  requirements:
+  - xapi-lrs-4.2-statement-immutability-ignore-excluded
+  - xapi-lrs-4.1.6.1-statement-put-duplicate-no-modification
+  - xapi-lrs-4.1.6.1-statement-consistent-through
+  - xapi-lrs-4.1.6.1-statement-last-modified
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-original-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000802
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000802
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-immutability-excluded@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/immutability-excluded
+        timestamp: '2025-01-01T00:00:00Z'
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: put-equivalent-excluded-timestamp-statement
+    request:
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000802
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000802
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-immutability-excluded@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/immutability-excluded
+        timestamp: '2025-01-02T00:00:00Z'
+        version: 2.0.0
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      status_in:
+      - 409
+  - id: get-original-statement
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000802
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+        Last-Modified:
+          present: true
+      checks:
+      - kind: json-time
+        pointer: /timestamp
+        expected: '2025-01-01T00:00:00Z'
+        utc: true
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored

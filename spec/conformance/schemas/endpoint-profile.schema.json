@@ -26,6 +26,12 @@
         },
         "deterministic-rate-limit-trigger": {
           "$ref": "#/$defs/rateLimitProfile"
+        },
+        "declared-parameter-vocabulary": {
+          "$ref": "#/$defs/parameterVocabulary"
+        },
+        "declared-resource-absence": {
+          "$ref": "#/$defs/resourceAbsence"
         }
       }
     }
@@ -72,6 +78,77 @@
         "path": {
           "type": "string",
           "pattern": "^/"
+        }
+      }
+    },
+    "parameterVocabulary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contexts"
+      ],
+      "properties": {
+        "contexts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "method",
+              "path",
+              "evidence",
+              "unrecognized"
+            ],
+            "properties": {
+              "method": {
+                "enum": [
+                  "GET",
+                  "HEAD",
+                  "PUT",
+                  "POST",
+                  "DELETE"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^/"
+              },
+              "evidence": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "unrecognized": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "resourceAbsence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_evidence"
+      ],
+      "properties": {
+        "case_evidence": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "description": "Independent fixture evidence keyed by exact current case id. Establish absence of every negatively queried Statement/document selector under the request credentials immediately before that case and maintain it throughout. A fresh/isolated label or the response under test is not evidence. The runner checks availability; fixture validity/integration is a later stage."
         }
       }
     }

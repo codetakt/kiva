@@ -1,34 +1,27 @@
 schema_version: 1
-profile: xapi-lrs-ieee-2023-interpretation-3
+profile: xapi-lrs-ieee-2023-interpretation-4-candidate
+successor_definition_contract: spec/conformance/issued-definition-contracts.json
+successor_state: optional-decisions-selected; successor-test-definition-adoption-held
+current_disposition_authority: spec/conformance/issued-test-definition-completion-amendment.md
+source_conflict_register: spec/conformance/issued-test-definition-source-residuals.json
+current_disposition_scope: Exact acceptance/adoption is recorded separately. D-01=A and D-05=A are selected project definitions; disputed IEEE facets remain source-indeterminate. Legacy metadata below does not supersede the explicit successor contracts or assert official adjudication.
 published_source_record: spec/conformance/lrs-published-source.yaml
-scope: Six published/public LRS issues plus explicit cross-review judgments; classifications are not an
-  exhaustive obligation inventory
+scope: Six published/public LRS issues plus explicit cross-review judgments; classifications are not an exhaustive obligation inventory
 principles:
-  authority: Read the published IEEE 2023 text with its common conditions; public corrections are declared
-    project interpretations until official status is established
-  coherence: Prefer the smallest interpretation that preserves the resource scope, dispatch semantics
-    and explicit requirements together
-  specific_scope: Apply a resource-specific body definition to that method; do not turn a general media-type
-    sentence into a different resource operation
-  strength: Preserve shall/should/may and their conditions; permitted alternatives and recommendations
-    are not unconditional failures
+  authority: Read the published IEEE 2023 text with its common conditions; public corrections are declared project interpretations until official status is established
+  coherence: Prefer the smallest interpretation that preserves the resource scope, dispatch semantics and explicit requirements together
+  specific_scope: Apply a resource-specific body definition to that method; do not turn a general media-type sentence into a different resource operation
+  strength: Preserve shall/should/may and their conditions; permitted alternatives and recommendations are not unconditional failures
   independence: Expected outcomes come from source reasoning, never from Kiva observed behavior
-  evidence: Preserve raw outcomes and failures; identify interpretation dependencies, including setup
-    and observation steps
-  reporting: No registered dependency means that the registered judgments were not identified, not definitive
-    conformance
-  identity: Qualify historical execution only when its report, case files and runner contracts are bound
-    to a supplied evidence receipt
+  evidence: Preserve raw outcomes and failures; identify interpretation dependencies, including setup and observation steps
+  reporting: No registered dependency means that the registered judgments were not identified, not definitive conformance
+  identity: Qualify historical execution only when its report, case files and runner contracts are bound to a supplied evidence receipt
 decisions:
 - id: state-list-selectors
   finding: state-list-selectors
   status: project-adopted
-  chosen_rule: Omit stateId for list GET/HEAD; supplying it selects a single document. since restricts
-    a list and does not select a single document
-  rationale: Section 4.1.6.2 explicitly defines dispatch by stateId presence; this agrees with the multiple-GET
-    description and multiple-DELETE table. The contradictory required cell would eliminate the list without
-    since The unreconciled required/forbidden condition exists only when both stateId and since are absent;
-    chapter 5 repeats it.
+  chosen_rule: Kiva D-05=A accepts valid no-stateId/no-since GET/HEAD as a 200 full ID list (HEAD bodyless). Supplying stateId selects a single document; since restricts a list. The no-id/no-since source conflict remains unresolved and this selected project rule is not an unqualified IEEE status verdict.
+  rationale: Section 4.1.6.2 explicitly defines dispatch by stateId presence; this agrees with the multiple-GET description and multiple-DELETE table. The contradictory required cell would eliminate the list without since The unreconciled required/forbidden condition exists only when both stateId and since are absent; chapter 5 repeats it.
   rejected_reading: Require stateId for a multiple-document GET without since
   official_adjudication: not-established
   request_selectors:
@@ -55,10 +48,8 @@ decisions:
 - id: activity-profile-list-scope
   finding: activity-profile-list-scope
   status: project-adopted
-  chosen_rule: Select Activity Profile lists with activityId; omit profileId for the list and use since
-    only as an optional exclusive time filter
-  rationale: PDF 5.1.6.6.5 explicitly requires activityId and makes since optional. Read the chapter 4
-    Agent cell through this redundant table; no condition is excluded.
+  chosen_rule: Select Activity Profile lists with activityId; omit profileId for the list and use since only as an optional exclusive time filter
+  rationale: PDF 5.1.6.6.5 explicitly requires activityId and makes since optional. Read the chapter 4 Agent cell through this redundant table; no condition is excluded.
   rejected_reading: Require agent to list Activity Profile documents
   official_adjudication: not-established
   request_selectors:
@@ -93,11 +84,8 @@ decisions:
 - id: formatted-identifiers
   finding: formatted-identifiers
   status: project-adopted
-  chosen_rule: Validate required identifier syntax, including scheme, mailto form and standard UUID string
-    form; do not require resolution, resource existence or real-world identity validation
-  rationale: Explicit format-rejection rules and the phrase data format, not values can both be retained
-    under this reading. The permission is not silently converted into mandatory resolution or a particular
-    UUID variant
+  chosen_rule: Validate required identifier syntax, including scheme, mailto form and standard UUID string form; do not require resolution, resource existence or real-world identity validation
+  rationale: Explicit format-rejection rules and the phrase data format, not values can both be retained under this reading. The permission is not silently converted into mandatory resolution or a particular UUID variant
   rejected_reading: Treat the permission as waiving all identifier syntax checks
   official_adjudication: not-established
   table_formats:
@@ -120,49 +108,36 @@ decisions:
     registration:
     - ''
     - not-a-uuid
-  selector_limit: Table format-value probes only; iri-array selects invalid string content, not null or
-    numeric items. Query literals conservatively retain the source-scope question rather than claim a
-    syntax waiver
+  selector_limit: Table format-value probes only; iri-array selects invalid string content, not null or numeric items. Query literals conservatively retain the source-scope question rather than claim a syntax waiver
 - id: put-single-and-batches
   finding: put-single-and-batches
   status: project-adopted
-  chosen_rule: Require valid single-Statement PUT and single/batch POST; do not infer an unconditional
-    PUT-array rejection obligation
-  rationale: Single PUT is explicit in section 4.1.6.1.1 and batch POST is explicit in section 4.1.6.1.2.
-    The general media-type batch wording does not settle the treatment of a PUT array
-  rejected_reading: Declare every implementation accepting a PUT batch nonconformant solely because of
-    the single PUT summary
+  chosen_rule: Kiva D-01=A requires single-object PUT and rejects empty/singleton/multiple arrays in JSON or the first multipart part with 400 and no writes; batch uses POST. Valid object PUT and batch POST retain their independent obligations. Array rejection is project policy, not an unconditional IEEE duty.
+  rationale: Single PUT is explicit in section 4.1.6.1.1 and batch POST is explicit in section 4.1.6.1.2. The general media-type batch wording does not settle the treatment of a PUT array
+  rejected_reading: Declare every implementation accepting a PUT batch nonconformant solely because of the single PUT summary
   official_adjudication: not-established
   request_selectors:
   - methods:
     - PUT
     path: /statements
     body_type: array
-  unresolved_probe: Current cases do not necessarily exercise PUT arrays. A missing probe is reported
-    as not exercised, never as acceptance or rejection established. Multipart PUT batches also require
-    a dedicated probe
+  defined_probes: issued-definition-OPEN-PUT-02 and issued-definition-OPEN-PUT-03 specify JSON/multipart object, empty, singleton and multiple-array controls, no-write evidence and separate IEEE/project grading. They are static manual definitions; no target execution or automatic coverage is claimed.
 - id: case-equivalence-and-iri-comparison
   finding: case-equivalence-and-iri-comparison
-  status: project-adopted
-  chosen_rule: Keep JSON keys and vocabulary values case sensitive and permitted RFC3987 comparisons.
-    Exclude only the conflicted signature mbox-case equivalence status leaf from the conformance verdict;
-    record its actual status diagnostically. Other headers and crypto assertions remain required.
-  rationale: RFC 3987 simple comparison and syntax normalization do not authorize unrestricted lowercasing
-    of an IRI path or an email local part. The broad Statement Case exclusion cannot silently override
-    every identifier comparison rule
+  status: definition-candidate
+  chosen_rule: Keep JSON keys and vocabulary values case sensitive and permitted RFC3987 comparisons. Apply SP-01 field-aware comparison to signatures. The mbox local-part case-change vector is non-equivalent and expects 400 under independently fixed signature validation conditions.
+  rationale: RFC 3987 simple comparison and syntax normalization do not authorize unrestricted lowercasing of an IRI path or an email local part. The broad Statement Case exclusion cannot silently override every identifier comparison rule
   rejected_reading: Lowercase all identifiers or treat JSON property-name case variants as valid
   official_adjudication: not-established
   explicit_cases:
   - signature-equivalence-excludes-case
-  unresolved_probe: Full RFC comparison boundaries and the scope of the Statement Case exclusion remain
-    separate review work
+  successor_basis: SP-01 in issued-definition-contracts.json; candidate semantic review pending.
+  historical_scope: The preceding profile excluded the mbox-case status leaf diagnostically; its exact adoption remains historical and does not approve this successor.
 - id: related-activities-public-correction
   finding: related-activities-public-correction
   status: project-adopted
-  chosen_rule: With related_activities=true, apply the Activity filter to Object, contextActivities and
-    contained SubStatements; related_agents separately expands the Agent filter
-  rationale: PDF 5.1 declares its tables redundant with 4.1. PDF 5.1.6.1 defines the Activity filter explicitly;
-    read the chapter 4 duplicated Agent prose through this chapter 5 row. No external overlay is required.
+  chosen_rule: With related_activities=true, apply the Activity filter to Object, contextActivities and contained SubStatements; related_agents separately expands the Agent filter
+  rationale: PDF 5.1 declares its tables redundant with 4.1. PDF 5.1.6.1 defines the Activity filter explicitly; read the chapter 4 duplicated Agent prose through this chapter 5 row. No external overlay is required.
   rejected_reading: Give related_activities the same Agent-filter meaning as related_agents
   official_adjudication: not-established
   request_selectors:
@@ -194,16 +169,11 @@ decisions:
     sha256: 5fb3880e44f546fe03161f83171ae80f17658ff17a34f1b9282cda345613df40
   historical_id_note: Stable id retained; prior overlay rationale superseded.
 release_conditions:
-  interpretation_profile: Record this exact profile and its digest in results; changing a decision requires
-    reviewing affected expectations and new evidence
-  projection: Review atomic LRS duties with actor, strength, conditions and actual assertions; broad groups
-    and heading counts alone do not close coverage
-  execution: Discharge applicable controlled-clock, delayed-visibility, policy and normative-reference
-    procedures; distinguish not run from failed
-  oracle_checks: Use positive/negative and preservation checks plus meaningful mutation controls; never
-    loosen an expectation to match Kiva
-  claim: Report success only for the executed scope under the named interpretation profile. A raw all-pass
-    HTTP result alone is not a whole-standard completeness verdict
+  interpretation_profile: Record this exact profile and its digest in results; changing a decision requires reviewing affected expectations and new evidence
+  projection: Review atomic LRS duties with actor, strength, conditions and actual assertions; broad groups and heading counts alone do not close coverage
+  execution: Discharge applicable controlled-clock, delayed-visibility, policy and normative-reference procedures; distinguish not run from failed
+  oracle_checks: Use positive/negative and preservation checks plus meaningful mutation controls; never loosen an expectation to match Kiva
+  claim: Report success only for the executed scope under the named interpretation profile. A raw all-pass HTTP result alone is not a whole-standard completeness verdict
 additional_judgments:
 - id: state-delete-without-registration
   finding: R4
@@ -214,14 +184,8 @@ additional_judgments:
   - 514
   - 525
   actor: LRS
-  chosen_rule: For State lists and multiple DELETE, absent registration selects every registration in
-    the specified Activity/Agent context; present registration restricts the scope to that registration.
-    Other Agents and Activities remain outside the scope.
-  rationale: The optional qualifier [+ registration if specified] restricts the context only when supplied.
-    Treating absence as an implicit null-registration selector adds a restriction the summary does not
-    state. This is a source judgment rather than an official adjudication. The identical qualifier in
-    the multiple GET summary (line 498) receives the same reading; applying a different default to list
-    and delete would be incoherent.
+  chosen_rule: For State lists and multiple DELETE, absent registration selects every registration in the specified Activity/Agent context; present registration restricts the scope to that registration. Other Agents and Activities remain outside the scope.
+  rationale: The optional qualifier [+ registration if specified] restricts the context only when supplied. Treating absence as an implicit null-registration selector adds a restriction the summary does not state. This is a source judgment rather than an official adjudication. The identical qualifier in the multiple GET summary (line 498) receives the same reading; applying a different default to list and delete would be incoherent.
   rejected_reading: Interpret omitted registration as listing or deleting only unregistered state
   official_adjudication: not-established
   explicit_cases:
@@ -240,22 +204,10 @@ additional_judgments:
   - 1044
   - 1198
   actor: LRS
-  chosen_rule: Default/exact returns the ordered Attachment metadata array as received. attachments=true
-    includes all raw data needed for attachments without fileUrl. MIME data-part order is not fixed. Attachment
-    differences do not affect logical equivalence or signature equivalence.
-  rationale: The project reads the explicit Ordered array type at lines 880/1044 as making metadata sequence
-    part of returned data. The Any attachments exemption explicitly governs logical equivalence and preservation
-    as described above (immutability); this judgment does not extend it to retrieval ordering or required
-    MIME completeness. Line 351 only enumerates Agent/Activity/Verb/Group and is not asserted to explicitly
-    cover Attachment Objects. Preserving received Attachment order is a declared project interpretation
-    of the table and retrieval contract, to be adjudicated in this re-review, not an official IEEE resolution.
-    Line 1198 says return serialization may differ for properties excepted by Section 4.2. Reading that
-    exception as incorporating the Any attachments item in line 837 into retrieval is the strongest contrary
-    reading; it could permit metadata array reordering. This candidate retains the ordered-array reading
-    as a declared project interpretation, with this contrary evidence disclosed. The unconditional requirement
-    to return all required raw Attachment parts (line 384) remains independent of the order judgment.
-  rejected_reading: Use the logical-immutability exemption to permit reordered exact response metadata
-    or missing required MIME parts
+  chosen_rule: Default/exact returns the ordered Attachment metadata array as received. attachments=true includes all raw data needed for attachments without fileUrl. MIME data-part order is not fixed. Attachment differences do not affect logical equivalence or signature equivalence.
+  rationale: The project reads the explicit Ordered array type at lines 880/1044 as making metadata sequence part of returned data. The Any attachments exemption explicitly governs logical equivalence and preservation as described above (immutability); this judgment does not extend it to retrieval ordering or required MIME completeness. Line 351 only enumerates Agent/Activity/Verb/Group and is not asserted to explicitly cover Attachment Objects. Preserving received Attachment order is a declared project interpretation of the table and retrieval contract, to be adjudicated in this re-review, not an official IEEE resolution. Line 1198 says return serialization may differ for properties excepted by Section 4.2. Reading that exception as incorporating the Any attachments item in line 837 into retrieval is the strongest contrary reading; it could permit metadata array reordering. This candidate retains the ordered-array reading as a declared project interpretation, with this contrary evidence
+    disclosed. The unconditional requirement to return all required raw Attachment parts (line 384) remains independent of the order judgment.
+  rejected_reading: Use the logical-immutability exemption to permit reordered exact response metadata or missing required MIME parts
   official_adjudication: not-established
   explicit_cases:
   - attachment-two-file-urls
@@ -270,13 +222,9 @@ additional_judgments:
   - 1111
   - 1124
   actor: LRS
-  chosen_rule: 'Require 400 for present relevantTypes: []; omission denotes the generic zero-relationship
-    case. A present property requires one or more IRIs.'
-  rationale: The zero-or-more prose covers absence; the optional property table requires one-or-more when
-    present. This coherent reading preserves both texts and supersedes interpretation-1 acceptance/rejection
-    alternatives.
-  rejected_reading: Treat the zero-or-more prose as permission for a present empty array, disregarding
-    the property-specific one-or-more table.
+  chosen_rule: 'Require 400 for present relevantTypes: []; omission denotes the generic zero-relationship case. A present property requires one or more IRIs.'
+  rationale: The zero-or-more prose covers absence; the optional property table requires one-or-more when present. This coherent reading preserves both texts and supersedes interpretation-1 acceptance/rejection alternatives.
+  rejected_reading: Treat the zero-or-more prose as permission for a present empty array, disregarding the property-specific one-or-more table.
   official_adjudication: not-established
   explicit_cases:
   - context-agent-context-contextAgents-0-relevantTypes-value-0
@@ -297,13 +245,8 @@ additional_judgments:
   - 1082
   - 1083
   actor: LRS
-  chosen_rule: Accept empty arrays where the table specifies an array/list without a minimum cardinality.
-    Anonymous Group still needs member, identified Group still needs its IFI, and required property presence
-    remains independently enforced.
-  rationale: Statement/SubStatement attachments, Group member, Context relationship arrays and Context
-    Activities list values specify no nonempty minimum. CorrectResponsesPattern/components also specify
-    no minimum and their optional interaction semantic validation does not add one. This is a per-table
-    cardinality judgment; [] is not null or a missing property.
+  chosen_rule: Accept empty arrays where the table specifies an array/list without a minimum cardinality. Anonymous Group still needs member, identified Group still needs its IFI, and required property presence remains independently enforced.
+  rationale: Statement/SubStatement attachments, Group member, Context relationship arrays and Context Activities list values specify no nonempty minimum. CorrectResponsesPattern/components also specify no minimum and their optional interaction semantic validation does not add one. This is a per-table cardinality judgment; [] is not null or a missing property.
   rejected_reading: Invent a nonempty minimum for every array from ordinary-language list/collection wording
   official_adjudication: not-established
   explicit_cases:
@@ -399,12 +342,8 @@ additional_judgments:
   - 1221
   - 1225
   actor: LRS
-  chosen_rule: Automated canonical probes check identity and one-language cardinality of returned Activity
-    maps. Which values/maps are available and language preference selection are checked against the declared
-    maintained inventory in canonical-language-negotiation.
-  rationale: The canonical definition is determined by the LRS; definition incorporation is SHOULD and
-    permission-dependent. Submitted metadata alone does not establish the maintained canonical inventory.
-    Direct cardinality remains mandatory when a map is returned.
+  chosen_rule: Automated canonical probes check identity and one-language cardinality of returned Activity maps. Which values/maps are available and language preference selection are checked against the declared maintained inventory in canonical-language-negotiation.
+  rationale: The canonical definition is determined by the LRS; definition incorporation is SHOULD and permission-dependent. Submitted metadata alone does not establish the maintained canonical inventory. Direct cardinality remains mandatory when a map is returned.
   rejected_reading: Assume every submitted definition is the canonical definition
   official_adjudication: not-established
   explicit_cases:
@@ -418,13 +357,9 @@ additional_judgments:
   - 859
   - 1204
   actor: LRS
-  chosen_rule: Duplicate properties, null outside extensions, and wrong key case are mandatory rejection
-    at all interaction/component placements. Interaction-specific remaining-property validity stays optional.
-  rationale: Clause 4.2.1 states these unconditional common rules. The later MAY permits optional interaction-specific
-    validation; it does not authorize malformed common JSON structure. All 48 prior optional structural
-    probes now require 400.
-  rejected_reading: Treat optional interaction validation as permission to ignore common null/duplicate/key-case
-    prohibitions
+  chosen_rule: Duplicate properties, null outside extensions, and wrong key case are mandatory rejection at all interaction/component placements. Interaction-specific remaining-property validity stays optional.
+  rationale: Clause 4.2.1 states these unconditional common rules. The later MAY permits optional interaction-specific validation; it does not authorize malformed common JSON structure. All 48 prior optional structural probes now require 400.
+  rejected_reading: Treat optional interaction validation as permission to ignore common null/duplicate/key-case prohibitions
   official_adjudication: not-established
   explicit_cases:
   - interaction-object-definition-interactionType-null
@@ -485,11 +420,8 @@ additional_judgments:
   finding: evaluation-C2
   status: project-adopted
   official_adjudication: not-established
-  chosen_rule: An otherwise valid application/json POST with no If-Match to an absent document stores
-    it and returns 204. If-Match on an absent document fails with 412.
-  rationale: The POST summary is updates/stores; body is stored/updated; the merge condition refers to
-    any existing document and does not require prior existence. This is a declared reading, not an official
-    adjudication.
+  chosen_rule: An otherwise valid application/json POST with no If-Match to an absent document stores it and returns 204. If-Match on an absent document fails with 412.
+  rationale: The POST summary is updates/stores; body is stored/updated; the merge condition refers to any existing document and does not require prior existence. This is a declared reading, not an official adjudication.
   rejected_reading: Interpret all POST requests as requiring an existing document and return 404 for creation.
   pdf_anchors:
   - source: ieee-pdf-extracted
@@ -509,11 +441,8 @@ additional_judgments:
   finding: evaluation-R7
   status: project-adopted
   official_adjudication: not-established
-  chosen_rule: Do not reject solely because Statement property order differs; two distinct raw JSON orders
-    must be accepted.
-  rationale: "Rejection Cases constrains rejection/acceptance. May not is read as negated permission to\
-    \ reject; permission not to reject would impose no constraint. \xA71.3 does not explicitly define\
-    \ this combination, so the prohibition is a disclosed author reading."
+  chosen_rule: Do not reject solely because Statement property order differs; two distinct raw JSON orders must be accepted.
+  rationale: Rejection Cases constrains rejection/acceptance. May not is read as negated permission to reject; permission not to reject would impose no constraint. §1.3 does not explicitly define this combination, so the prohibition is a disclosed author reading.
   rejected_reading: Treat may not as a vacuous permission to choose acceptance with no prohibition.
   pdf_anchors:
   - source: ieee-pdf-extracted
@@ -532,15 +461,9 @@ additional_judgments:
   - statement-member-order-is-unrestricted
 - id: unknown-local-offset-boundary
   status: project-adopted
-  chosen_rule: For the disputed -00:00 input, permit 200 or 400. If accepted, require the same instant
-    in UTC on readback. Rejection is not an LRS defect for this case.
-  rationale: PDF 5.2.7.5 imposes ISO 8601 and RFC 3339 simultaneously. RFC 3339 4.3 permits -00:00; RFC
-    9557 2.1-2.3 updates those semantics and states that ISO 8601:2000 and later do not permit that offset,
-    without formally deprecating RFC syntax. Neither unconditional acceptance nor unconditional rejection
-    is established for this combined boundary. PDF 4.2.7.5 still requires UTC conversion when input is
-    accepted.
-  rejected_reading: Require acceptance from RFC 3339 alone, or require rejection without addressing the
-    simultaneous references. Neither is claimed as the official resolution.
+  chosen_rule: For the disputed -00:00 input, permit 200 or 400. If accepted, require the same instant in UTC on readback. Rejection is not an LRS defect for this case.
+  rationale: PDF 5.2.7.5 imposes ISO 8601 and RFC 3339 simultaneously. RFC 3339 4.3 permits -00:00; RFC 9557 2.1-2.3 updates those semantics and states that ISO 8601:2000 and later do not permit that offset, without formally deprecating RFC syntax. Neither unconditional acceptance nor unconditional rejection is established for this combined boundary. PDF 4.2.7.5 still requires UTC conversion when input is accepted.
+  rejected_reading: Require acceptance from RFC 3339 alone, or require rejection without addressing the simultaneous references. Neither is claimed as the official resolution.
   official_adjudication: not-established
   source_route: explicit-project-interpretation
   reference_baseline_date: '2026-10-06'
@@ -577,5 +500,16 @@ additional_judgments:
     byte_start: 12886
     byte_length: 2206
     sha256: 07960270b06c9f7d85fd9b83b1cad6fec31fb2f1e09614476043974a577a7916
-  reading_limit: RFC 9557 sections 2.1-2.3 read directly; ISO 8601 original not read. Other syntax boundaries
-    remain pending.
+  reading_limit: RFC 9557 sections 2.1-2.3 read directly; ISO 8601 original not read. Other syntax boundaries remain pending.
+optional_product_selections:
+  definition: spec/conformance/issued-definition-contracts.json
+  selections:
+    D-02: A
+    D-03: A
+    D-04: A
+    D-07: A
+    D-08: A
+    D-09: A
+    D-10: A
+    D-11: A
+  scope: Kiva-specific expectations in issued-definition-contracts.json; generic IEEE outcome sets unchanged.

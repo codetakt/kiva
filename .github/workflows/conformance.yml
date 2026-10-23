@@ -21,6 +21,49 @@ permissions:
   contents: read
 
 jobs:
+  lrs-artifacts:
+    name: Reproduce LRS Definitions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          enable-flakehub-cache: "true"
+
+      - name: Reproduce and package static definitions
+        run: |
+          nix build .#checks.x86_64-linux.lrs-generated-artifacts \
+            --print-build-logs --out-link result-lrs-static
+          mkdir -p artifacts/lrs-static
+          cp -R --dereference result-lrs-static/. artifacts/lrs-static/
+
+      - name: Upload reproducible definition bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: lrs-static-${{ github.sha }}
+          path: artifacts/lrs-static/
+          retention-days: 14
+
+  lrs-oracles:
+    name: LRS Oracle Controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          enable-flakehub-cache: "true"
+
+      - name: Check Python oracle and evidence boundaries
+        run: nix build .#checks.x86_64-linux.lrs-oracle-controls --print-build-logs
+
   conformance:
     name: xAPI Conformance Evidence
     runs-on: ubuntu-latest

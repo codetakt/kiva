@@ -218,7 +218,10 @@
           "items": {
             "enum": [
               "deterministic-too-large-threshold",
-              "deterministic-rate-limit-trigger"
+              "deterministic-rate-limit-trigger",
+              "declared-parameter-vocabulary",
+              "signature-validation-context",
+              "declared-resource-absence"
             ]
           }
         }

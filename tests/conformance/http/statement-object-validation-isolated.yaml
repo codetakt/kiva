@@ -1,7 +1,8 @@
 suite:
   id: xapi-lrs-statement-object-validation-isolated
   standard: IEEE/ISO/IEC 39274-1-1-2025
-  description: Isolated Verb, Activity, SubStatement, timestamp, and Attachment admission checks.
+  description: Isolated Verb, Activity, SubStatement, timestamp, and Attachment admission
+    checks.
 cases:
 - id: statement-object-model-accepts-valid-shape
   requirements:
@@ -164,6 +165,8 @@ cases:
       headers:
         X-Experience-API-Consistent-Through:
           iso8601: true
+        X-Experience-API-Version:
+          equals: 2.0.0
       status_in:
       - 400
       checks:
@@ -194,6 +197,11 @@ cases:
         pointer: /timestamp
         expected: '2026-07-29T09:00:00Z'
         utc: true
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
     when_previous_status: 200
 - id: statement-rejects-invalid-attachment-metadata
   requirements:
@@ -259,24 +267,48 @@ cases:
   safety:
     destructive: true
     requires_isolated_lrs: true
-  request:
-    method: POST
-    path: /statements
-    headers:
-      Content-Type: application/json
-      X-Experience-API-Version: 2.0.0
-    body:
-      actor:
-        mbox: mailto:kiva-object-validation@example.org
-      verb:
-        id: https://example.org/verbs/experienced
-      object:
-        id: https://example.org/activities/non-legacy-version
-      version: 1.1.0
-  expect:
-    status: 200
-    headers:
-      X-Experience-API-Consistent-Through:
-        iso8601: true
-    status_in:
-    - 400
+  steps:
+  - id: submit-nondefault-version
+    request:
+      method: POST
+      path: /statements
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 32e45219-e9f2-4d64-9f72-9e284ae63c03
+        actor:
+          mbox: mailto:kiva-object-validation@example.org
+        verb:
+          id: https://example.org/verbs/experienced
+        object:
+          id: https://example.org/activities/non-legacy-version
+        version: 1.1.0
+    expect:
+      status: 200
+      status_in:
+      - 400
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: preserve-accepted-version
+    when_previous_status: 200
+    request:
+      method: GET
+      path: /statements
+      query:
+        statementId: 32e45219-e9f2-4d64-9f72-9e284ae63c03
+        format: exact
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /version:
+            equals: 1.1.0

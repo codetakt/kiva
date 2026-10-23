@@ -158,6 +158,44 @@
             "minimum": 100,
             "maximum": 599
           }
+        },
+        "retrieval_attempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "step",
+              "status",
+              "pending_visibility",
+              "failures"
+            ],
+            "properties": {
+              "step": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 100,
+                "maximum": 599
+              },
+              "pending_visibility": {
+                "type": "boolean"
+              },
+              "failures": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },

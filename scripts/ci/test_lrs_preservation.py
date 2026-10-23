@@ -1,0 +1,272 @@
+#!/usr/bin/env python3
+"""Conforming and single-defect controls for preservation oracles."""
+import copy
+import json
+from pathlib import Path
+import unittest
+from decimal import Decimal, localcontext
+
+from lrs_preservation import (
+    PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
+    statement_response_headers, snapshot_equal,
+)
+
+
+class PreservationControls(unittest.TestCase):
+    def test_snapshot_validates_both_timestamp_operands_before_deferral(self):
+        unknowns = ['2016-12-31T23:59:60Z', '2026-01-01T24:00:00Z']
+        invalid = ['not-a-timestamp', '2026-02-30T00:00:00Z', 42, None]
+        for pointer in ['/stored', '/timestamp', '/object/timestamp']:
+            for unknown in unknowns:
+                for bad in invalid:
+                    for left, right in [(unknown, bad), (bad, unknown)]:
+                        with self.subTest(pointer=pointer, left=left, right=right):
+                            self.assertIs(snapshot_equal(left, right, pointer), False)
+                for other in [unknown, '2026-01-02T00:00:00Z']:
+                    self.assertIsNone(snapshot_equal(unknown, other, pointer))
+                    self.assertIsNone(snapshot_equal(other, unknown, pointer))
+            self.assertIs(snapshot_equal('2026-01-01T09:00:00+09:00', '2026-01-01T00:00:00Z', pointer), True)
+            self.assertIs(snapshot_equal('2026-01-01T00:00:00Z', '2026-01-01T00:00:01Z', pointer), False)
+        # Extension names do not acquire timestamp semantics.
+        self.assertIs(snapshot_equal({'extensions': {'urn:x': {'stored': 'opaque'}}},
+                                     {'extensions': {'urn:x': {'stored': 'opaque'}}}), True)
+
+    def test_snapshot_keeps_json_type_changes_when_numbers_need_a_provider(self):
+        for nonnumber in ['original', True, False, None, {}, []]:
+            for left, right in [(nonnumber, 1.5), (1.5, nonnumber)]:
+                with self.subTest(left=left, right=right):
+                    self.assertIs(snapshot_equal(left, right), False)
+                    self.assertIs(snapshot_equal({'definition': {'name': {'en': left}}},
+                                                 {'definition': {'name': {'en': right}}}), False)
+        for number in [1, 1.5, Decimal('1.5')]:
+            self.assertIsNone(snapshot_equal(number, 1.5))
+            self.assertIsNone(snapshot_equal(1.5, number))
+        self.assertIs(snapshot_equal({'score': 1.5, 'name': 'original'},
+                                     {'score': 1.5, 'name': 1.5}), False)
+
+    def test_known_timestamp_defects_win_over_either_unavailable_operand(self):
+        unknown = ['2026-01-01T24:00:00Z', '2016-12-31T23:59:60Z']
+        invalid = ['2026-02-30T00:00:00Z', '2026-01-01T25:00:00Z',
+                   '2026-01-01T00:61:00Z', '2026-01-01T00:00:00+24:00',
+                   '2026-01-01', 'invalid']
+        for unavailable in unknown:
+            for bad in invalid:
+                for sent, got in [(unavailable, bad), (bad, unavailable)]:
+                    with self.subTest(sent=sent, got=got):
+                        self.assertIs(timestamp_preserved(sent, got), False)
+                        for pointer in ['/timestamp', '/object/timestamp']:
+                            self.assertEqual(preservation(sent, got, pointer)[0]['outcome'], 'failed')
+            for valid in ['2026-01-02T00:00:00Z', *unknown]:
+                for sent, got in [(unavailable, valid), (valid, unavailable)]:
+                    self.assertIsNone(timestamp_preserved(sent, got))
+
+    def test_explicit_non_utc_does_not_need_instant_conversion(self):
+        for clock in ['2026-01-01T24:00:00', '20260101T240000', '2016-12-31T23:59:60']:
+            for offset in ['+09:00', '+0900', '+09', '-09:00', '-0900', '-09',
+                           '-00:00', '-0000', '-00', '+00:00', '+0000', '+00', 'Z']:
+                got = clock + offset
+                non_utc = offset.startswith('-') or '9' in offset
+                with self.subTest(got=got):
+                    expected = False if non_utc else None
+                    self.assertIs(timestamp_preserved('2026-01-01T00:00:00Z', got), expected)
+                    # The input instant can also require a provider; known UTC defects still win.
+                    self.assertIs(timestamp_preserved(clock + 'Z', got), expected)
+                    for prefix in ['', 'object']:
+                        sent, returned = {'timestamp': clock + 'Z'}, {'timestamp': got}
+                        if prefix:
+                            sent, returned = {prefix: sent}, {prefix: returned}
+                        outcomes = preservation(sent, returned)
+                        self.assertEqual(outcomes[0]['outcome'], 'failed' if non_utc else 'not-run')
+
+    def test_case_schema_rejects_partial_preservation_expectations(self):
+        import jsonschema
+        root = Path(__file__).resolve().parents[2]
+        schema = json.loads((root / 'spec/conformance/schemas/conformance-case.schema.json').read_text())
+        submitted = {'actor': {'mbox': 'mailto:test@example.org'},
+                     'verb': {'id': 'https://example.org/verb'},
+                     'object': {'id': 'https://example.org/activity'},
+                     'result': {'duration': 'PT1S'}}
+        # Use the referenced check schema without the suite-level sibling rules.
+        validator = jsonschema.Draft202012Validator({'$defs': schema['$defs'], '$ref': '#/$defs/check'})
+        validator.validate({'kind': 'json-preservation', 'expected': submitted})
+        for key in ['actor', 'verb', 'object']:
+            with self.subTest(missing=key), self.assertRaises(jsonschema.ValidationError):
+                validator.validate({'kind': 'json-preservation',
+                                    'expected': {k: v for k, v in submitted.items() if k != key}})
+
+    def test_exact_property_additions_and_managed_boundaries(self):
+        path = Path(__file__).resolve().parents[2] / 'tests/conformance/fixtures/preservation-properties.json'
+        for row in json.loads(path.read_text(), parse_float=Decimal)['cases']:
+            with self.subTest(id=row['id']):
+                observations = preservation(row['submitted'], row['returned'])
+                self.assertEqual(all(o['outcome'] == 'passed' for o in observations), row['preserved'])
+                if not row['preserved']:
+                    self.assertTrue(any(o['outcome'] == 'failed' for o in observations))
+
+    def test_integer_endpoint_serializations_and_definite_changes(self):
+        for sent, got, valid in (
+                (100000008, 100000010, True), (-100000008, -100000010, True),
+                (100000007, 100000010, True), (100000009, 100000020, True),
+                (-100000009, -100000020, True),
+                (-9223372036854775808, -9223372000000000000, True),
+                (18446744073709551615, 18446742970000000000, True),
+                (100000008, 100000008, True), (16777217, 16777216, True),
+                (16777217, 16777218, True), (0, 0, True),
+                (100000008, 100000009, False), (-100000008, -100000009, False),
+                (100000008, 100000000, False), (100000008, 100000020, False),
+                (100000008, 0, False), (100000008, -100000010, False),
+                (9007199254740992, 9007199254740993, False),
+                (-9007199254740992, -9007199254740993, False),
+                (1, 2, False), (0, 1, False),
+                # Exact decimal multiples have coincident floor/ceiling bounds.
+                (1000000000, 1000000000, True), (-1000000000, -1000000000, True),
+                (1000000000, 1000000010, False), (1000000000, 999999990, False),
+                (-1000000000, -999999990, False), (-1000000000, -1000000010, False),
+                (10000000000, 10000000010, False), (-10000000000, -9999999990, False),
+                (10000000000, 10000000100, False), (-10000000000, -9999999900, False),
+                (999999999, 1000000010, False), (-1000000001, -999999990, False)):
+            with self.subTest(sent=sent, got=got):
+                self.assertIs(number_preserved(sent, got), valid)
+                self.assertEqual(preservation(
+                    {'result': {'score': {'raw': sent}}},
+                    {'result': {'score': {'raw': got}}})[0]['outcome'],
+                    'passed' if valid else 'failed')
+
+    def test_timestamp_precision_is_not_an_error_tolerance(self):
+        for prefix in ['2025-01-01T00:00:00', '1969-12-31T23:59:59']:
+            for suffix in ['.123Z', '.123456Z', '.12346Z', '.1235Z']:
+                self.assertTrue(timestamp_preserved(prefix + '.123456Z', prefix + suffix))
+            for suffix in ['.124Z', '.122Z', '.123457Z', '.12Z']:
+                self.assertFalse(timestamp_preserved(prefix + '.123456Z', prefix + suffix))
+            self.assertFalse(timestamp_preserved(prefix + '.123Z', prefix + '.124Z'))
+        self.assertTrue(timestamp_preserved('2025-01-01T09:00:00.9999+09:00', '2025-01-01T00:00:01Z'))
+        self.assertFalse(timestamp_preserved('2025-01-01T00:00:00Z', '2025-01-01T00:00:00-00:00'))
+        self.assertTrue(timestamp_preserved('2025-01-01T00:00:00.1234567819Z', '2025-01-01T00:00:00.123456782Z'))
+        self.assertFalse(timestamp_preserved('2025-01-01T00:00:00.123456789012345678901234567891Z', '2025-01-01T00:00:00.123456789012345678901234567892Z'))
+
+    def test_binary32_floor_is_allowed_but_lower_precision_is_not(self):
+        self.assertTrue(number_preserved(Decimal('.1'), Decimal('.10000000149011612')))
+        self.assertFalse(number_preserved(Decimal('.123456789'), Decimal('.1234')))
+        self.assertFalse(number_preserved(1, True))
+        self.assertTrue(number_preserved(Decimal('-.1'), Decimal('-.10000000149011612')))
+        for sign in ('', '-'):
+            # An exactly represented binary32 input may be serialized directly
+            # as binary32 or after widening to the runtime's binary64 float.
+            exact = Decimal(sign + '.100000001490116119384765625')
+            self.assertTrue(number_preserved(exact, Decimal(sign + '.1')))
+            self.assertTrue(number_preserved(exact, Decimal(sign + '.10000000149011612')))
+            self.assertTrue(number_preserved(exact, Decimal(sign + '.100000002')))
+        # Sharing the binary32 rounding bin alone must not allow arbitrary drift.
+        self.assertFalse(number_preserved(Decimal('.1'), Decimal('.1000000025')))
+        self.assertTrue(number_preserved(Decimal('.3'), Decimal('.300000012')))
+
+    def test_binary32_serialization_is_not_limited_to_shortest_or_nine_digits(self):
+        # Independent fixed decimal outputs: ordinary, maximum and subnormal
+        # endpoints, nearest and directed rounding, both signs and >9 digits.
+        cases = [
+            (Decimal('.3'), '.300000012'),
+            (Decimal('.3'), '.3000000119209289551'),
+            (Decimal('.1'), '.100000001'),
+            (Decimal('.1'), '.100000002'),
+            (Decimal('.1'), '.10000000149011611938476563'),
+            (2**128 - 2**104, '3.40282347e38'),
+            (2**128 - 2**104, '3.4028234663852885981e38'),
+            (Decimal('1.40129846432481707092372958328991613128026194187651577175706828388979108268586060148663818836212158203125e-45'),
+             '1.40129846e-45'),
+        ]
+        for sent, spelling in cases:
+            for sign in ('', '-'):
+                with self.subTest(sent=sent, spelling=sign + spelling):
+                    original = Decimal(sign + str(sent))
+                    got = Decimal(sign + spelling)
+                    for rounding in ('ROUND_DOWN', 'ROUND_UP'):
+                        with localcontext() as context:
+                            context.prec = 6
+                            context.rounding = rounding
+                            self.assertIs(number_preserved(original, got), True)
+                    self.assertEqual(preservation(original, got)[0]['outcome'], 'passed')
+        for sent, got in [('.3', '.30000005'), ('.33333334', '.33333337'),
+                          ('.1', '.1000000025'), ('1', '1.0000000000000001')]:
+            self.assertIs(number_preserved(Decimal(sent), Decimal(got)), False)
+
+    def test_maximum_finite_binary32_keeps_decidable_changes(self):
+        maximum = 2**128 - 2**104
+        for endpoint in (maximum, -maximum):
+            with self.subTest(endpoint=endpoint):
+                sign = '-' if endpoint < 0 else ''
+                # Intermediate four-digit candidates overflow binary32, while
+                # the shortest correct representation needs eight digits.
+                self.assertIs(number_preserved(endpoint, 0), False)
+                self.assertIs(number_preserved(endpoint, -endpoint), False)
+                self.assertIs(number_preserved(endpoint, Decimal(sign + '3.4028235e38')), True)
+                self.assertIs(number_preserved(endpoint, Decimal(repr(float(endpoint)))), True)
+                self.assertIs(number_preserved(endpoint, endpoint), True)
+                self.assertIs(number_preserved(endpoint, Decimal(sign + '3.40282347e38')), True)
+
+    def test_definite_calendar_errors_are_distinct_from_delegated_forms(self):
+        for value in ('2026-02-30T00:00:00Z', '2025-02-29T00:00:00Z',
+                      '2026-10-01T25:00:00Z', '2026-10-01T24:00:00.1Z',
+                      '2026-10-01T00:61:00Z', '2026-10-01T00:00:61Z',
+                      '2026-10-01T00:00:00+09:60'):
+            with self.subTest(value=value):
+                try:
+                    timestamp_ns(value)
+                except PrimitiveUnavailable:
+                    self.fail('definite invalidity was hidden as provider unavailability')
+                except ValueError:
+                    pass
+                else:
+                    self.fail('invalid timestamp accepted')
+        for value in ('2026-10-01T24:00:00Z', '2026-06-30T23:59:60Z'):
+            with self.assertRaises(PrimitiveUnavailable):
+                timestamp_ns(value)
+
+    def test_reduced_clock_defects_fail_before_provider_delegation(self):
+        for suffix in ('T25Z', 'T25:00Z', 'T00:61Z', 'T25.5Z', 'T24.1Z',
+                       'T09.5+24:00', 'T2500Z', 'T24:01Z'):
+            value = '2026-10-01' + suffix
+            with self.subTest(value=value):
+                self.assertEqual(statement_response_headers({
+                    'X-Experience-API-Version': '2.0.0',
+                    'X-Experience-API-Consistent-Through': value}), (True, False))
+        for value in ('2026-10-01T09Z', '2026-10-01T09:30Z',
+                      '2026-10-01T09.5Z', '2026-10-01T09:30.5Z',
+                      '2026-10-01T24Z', '2026-10-01T24:00:00Z',
+                      '2026-06-30T23:59:60Z', '0000-02-29T00:00:00Z',
+                      '+010000-10-01T09:00:00Z'):
+            with self.subTest(value=value):
+                with self.assertRaises(PrimitiveUnavailable):
+                    timestamp_ns(value)
+        for value in ('2026-02-30T09Z', '0000-02-30T09Z', '2026-13-01T09.5Z'):
+            with self.subTest(value=value):
+                self.assertIs(statement_response_headers({
+                    'X-Experience-API-Consistent-Through': value})[1], False)
+
+    def test_binary64_collapse_is_not_lossless_evidence(self):
+        self.assertFalse(number_preserved(9007199254740992, 9007199254740993))
+        self.assertIsNone(number_preserved(1, float('1.0000000000000001')))
+        self.assertIsNone(number_preserved(.1, .1))
+        self.assertEqual(preservation(.1, .1)[0]['outcome'], 'not-run')
+
+    def test_extension_names_do_not_acquire_xapi_semantics(self):
+        value = {'result': {'extensions': {'https://example.org/value': {
+            'timestamp': 'not a timestamp', 'duration': 'custom',
+            'member': [{'mbox': 'a'}, {'mbox': 'b'}],
+            'contextActivities': {'parent': {'id': 'opaque'}},
+        }}}}
+        self.assertTrue(all(o['outcome'] == 'passed' for o in preservation(value, value)))
+        for key, replacement in [('timestamp', 'other'), ('duration', 'other'), ('member', [{'mbox':'b'}, {'mbox':'a'}]), ('contextActivities', {'parent':[{'id':'opaque'}]})]:
+            changed = copy.deepcopy(value)
+            changed['result']['extensions']['https://example.org/value'][key] = replacement
+            self.assertTrue(any(o['outcome'] == 'failed' for o in preservation(value, changed)), key)
+
+    def test_real_locations_retain_their_allowances(self):
+        sent = {'timestamp': '2025-01-01T09:00:00.123456+09:00', 'result': {'duration':'PT1.239S'}, 'context': {'contextActivities': {'parent': {'id':'urn:example:activity'}}}}
+        got = {'timestamp': '2025-01-01T00:00:00.123Z', 'result': {'duration':'PT1.23S'}, 'context': {'contextActivities': {'parent': [{'id':'urn:example:activity'}]}}}
+        self.assertTrue(all(o['outcome'] == 'passed' for o in preservation(sent, got)))
+        got['result']['duration'] = 'PT1.24S'
+        self.assertTrue(any(o['outcome'] == 'failed' for o in preservation(sent, got)))
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,177 +1,317 @@
+# CFC-01: historical case id retained. Both writes omit authority; trusted submitted-authority
+# retention is covered separately by authority-overwrite-policy and issued-authority-and-security-fixtures.
+# Compare captured semantic Agent/Group values without assuming a deployment-specific identity.
 suite:
   id: xapi-lrs-statement-authz-authority-isolated
   standard: IEEE/ISO/IEC 39274-1-1-2025
-  description: Credential-sensitive Statement authorization and authority checks for disposable isolated LRS targets.
+  description: Credential-sensitive Statement authorization and authority checks for disposable isolated
+    LRS targets.
 cases:
-  - id: statement-writer-authority-overwrite-is-deterministic
-    requirements:
-      - xapi-lrs-4.1.8-authorization-decisions
-      - xapi-lrs-4.2.4.2-authority-present
-      - xapi-lrs-4.2.4.2-authority-deterministic
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    steps:
-      - id: put-first-statement-as-writer
-        request:
-          auth_profile: statement_writer_a
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000701
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000701
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-authz-actor@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-              display:
-                en-US: experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/authz-authority-first
-            authority:
-              objectType: Agent
-              mbox: mailto:submitted-authority-one@example.org
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-      - id: get-first-authority
-        request:
-          auth_profile: statement_writer_a
-          method: GET
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000701
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          json:
-            pointers:
-              /authority:
-                contains:
-                  objectType: Agent
-                  account:
-                    homePage: https://example.org/kiva/conformance/auth
-                    name: statement-writer-a
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              equals_pointer: /stored
-      - id: put-second-statement-as-same-writer
-        request:
-          auth_profile: statement_writer_a
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000702
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000702
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-authz-actor@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-              display:
-                en-US: experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/authz-authority-second
-            authority:
-              objectType: Agent
-              mbox: mailto:submitted-authority-two@example.org
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-      - id: get-second-authority
-        request:
-          auth_profile: statement_writer_a
-          method: GET
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000702
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          json:
-            pointers:
-              /authority:
-                contains:
-                  objectType: Agent
-                  account:
-                    homePage: https://example.org/kiva/conformance/auth
-                    name: statement-writer-a
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              equals_pointer: /stored
-  - id: statement-write-rejected-for-read-only-credential
-    requirements:
-      - xapi-lrs-4.1.8-authorization-decisions
-      - xapi-lrs-4.1.5-forbidden
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
+- id: statement-writer-authority-overwrite-is-deterministic
+  requirements:
+  - xapi-lrs-4.1.8-authorization-decisions
+  - xapi-lrs-4.2.4.2-authority-present
+  - xapi-lrs-4.2.4.2-authority-deterministic
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  steps:
+  - id: put-first-statement-as-writer
     request:
-      auth_profile: statement_reader
+      auth_profile: statement_writer_a
       method: PUT
       path: /statements
       query:
-        statementId: 00000000-0000-4000-8000-000000000703
+        statementId: 00000000-0000-4000-8000-000000000701
       headers:
         Content-Type: application/json
         X-Experience-API-Version: 2.0.0
       body:
-        id: 00000000-0000-4000-8000-000000000703
+        id: 00000000-0000-4000-8000-000000000701
         actor:
           objectType: Agent
-          mbox: mailto:kiva-conformance-authz-readonly@example.org
+          mbox: mailto:kiva-conformance-authz-actor@example.org
         verb:
           id: https://adlnet.gov/expapi/verbs/experienced
           display:
             en-US: experienced
         object:
           objectType: Activity
-          id: https://example.org/kiva/conformance/activity/authz-readonly-write
+          id: https://example.org/kiva/conformance/activity/authz-authority-first
     expect:
-      status: 403
+      status: 204
       headers:
         X-Experience-API-Version:
           equals: 2.0.0
         X-Experience-API-Consistent-Through:
           iso8601: true
+  - id: get-first-authority
+    request:
+      auth_profile: statement_writer_a
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000701
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /authority:
+            present: true
+      checks:
+      - kind: json-shape
+        pointer: /authority
+        shape: &id007
+          any_of:
+          - &id001
+            type: object
+            required:
+            - mbox
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Agent
+              name:
+                type: string
+              mbox:
+                type: string
+          - &id002
+            type: object
+            required:
+            - mbox_sha1sum
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Agent
+              name:
+                type: string
+              mbox_sha1sum:
+                type: string
+          - &id003
+            type: object
+            required:
+            - openid
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Agent
+              name:
+                type: string
+              openid:
+                type: string
+          - &id004
+            type: object
+            required:
+            - account
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Agent
+              name:
+                type: string
+              account: &id006
+                type: object
+                required:
+                - homePage
+                - name
+                properties:
+                  homePage:
+                    type: string
+                  name:
+                    type: string
+                additional_properties: false
+          - type: object
+            required:
+            - objectType
+            - mbox
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Group
+              name:
+                type: string
+              member: &id005
+                type: array
+                items:
+                  any_of:
+                  - *id001
+                  - *id002
+                  - *id003
+                  - *id004
+              mbox:
+                type: string
+          - type: object
+            required:
+            - objectType
+            - mbox_sha1sum
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Group
+              name:
+                type: string
+              member: *id005
+              mbox_sha1sum:
+                type: string
+          - type: object
+            required:
+            - objectType
+            - openid
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Group
+              name:
+                type: string
+              member: *id005
+              openid:
+                type: string
+          - type: object
+            required:
+            - objectType
+            - account
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Group
+              name:
+                type: string
+              member: *id005
+              account: *id006
+          - type: object
+            required:
+            - objectType
+            - member
+            additional_properties: false
+            properties:
+              objectType:
+                enum:
+                - Group
+              name:
+                type: string
+              member: *id005
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      capture:
+        writer_authority:
+          pointer: /authority
+          as_json: true
+  - id: put-second-statement-as-same-writer
+    request:
+      auth_profile: statement_writer_a
+      method: PUT
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000702
+      headers:
+        Content-Type: application/json
+        X-Experience-API-Version: 2.0.0
+      body:
+        id: 00000000-0000-4000-8000-000000000702
+        actor:
+          objectType: Agent
+          mbox: mailto:kiva-conformance-authz-actor@example.org
+        verb:
+          id: https://adlnet.gov/expapi/verbs/experienced
+          display:
+            en-US: experienced
+        object:
+          objectType: Activity
+          id: https://example.org/kiva/conformance/activity/authz-authority-second
+    expect:
+      status: 204
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+  - id: get-second-authority
+    request:
+      auth_profile: statement_writer_a
+      method: GET
+      path: /statements
+      query:
+        statementId: 00000000-0000-4000-8000-000000000702
+      headers:
+        Accept: application/json
+        X-Experience-API-Version: 2.0.0
+      await_retrieval_ms: 5000
+    expect:
+      status: 200
+      headers:
+        X-Experience-API-Version:
+          equals: 2.0.0
+        X-Experience-API-Consistent-Through:
+          iso8601: true
+      json:
+        pointers:
+          /authority:
+            present: true
+      checks:
+      - kind: json-shape
+        pointer: /authority
+        shape: *id007
+      - kind: header-time
+        header: Last-Modified
+        equals_pointer: /stored
+      - kind: json-capture-equal
+        pointer: /authority
+        capture: writer_authority
+        agent_identity: true
+- id: statement-write-rejected-for-read-only-credential
+  requirements:
+  - xapi-lrs-4.1.8-authorization-decisions
+  - xapi-lrs-4.1.5-forbidden
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    auth_profile: statement_reader
+    method: PUT
+    path: /statements
+    query:
+      statementId: 00000000-0000-4000-8000-000000000703
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000703
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-authz-readonly@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+        display:
+          en-US: experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/authz-readonly-write
+  expect:
+    status: 403
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true

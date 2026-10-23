@@ -57,6 +57,7 @@
             "uuid",
             "timestamp",
             "iri",
+            "irl",
             "uri",
             "mailto-iri",
             "sha1"
@@ -167,12 +168,24 @@
           "required": [
             "count"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Final status/body oracle applies only to the last attempt; declared universally required version/Consistent-Through headers apply to every observed response. Earlier failures are retained; transport inability is incomplete."
         },
         "await_retrieval_ms": {
           "type": "integer",
           "minimum": 1,
           "maximum": 60000
+        },
+        "unrecognized_parameter": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Requires independent endpoint-profile method/path vocabulary identifying this query key as unrecognized; absent fixture produces NOT-RUN."
+        },
+        "collect_statement_pages": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Per-page headers/shape/order and known exclusions are checked immediately. Aggregate membership/absence success requires terminal traversal. Incomplete routing/transport is NOT-RUN while all already observed independent violations remain FAIL."
         }
       },
       "required": [
@@ -444,6 +457,10 @@
               },
               "as_json": {
                 "type": "boolean"
+              },
+              "nonmatching_etag": {
+                "type": "boolean",
+                "description": "Derive a guaranteed different strong entity-tag by appending ! within the captured quoted opaque tag. ETag header source only; not a literal stale-token assumption."
               }
             },
             "required": [],
@@ -480,6 +497,31 @@
                     "required": [
                       "header"
                     ]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "nonmatching_etag"
+                  ],
+                  "properties": {
+                    "nonmatching_etag": {
+                      "const": true
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "header"
+                  ],
+                  "properties": {
+                    "header": {
+                      "pattern": "^[Ee][Tt][Aa][Gg]$"
+                    },
+                    "as_json": {
+                      "const": false
+                    }
                   }
                 }
               }
@@ -522,6 +564,26 @@
           "minimum": 100,
           "maximum": 599,
           "description": "Run only after the immediately preceding unconditional step returns this allowed status."
+        },
+        "when_step_status": {
+          "type": "object",
+          "description": "Run only if a named earlier unconditional step returned this allowed status. Independent of intervening reads and skipped branches.",
+          "properties": {
+            "step": {
+              "type": "string",
+              "minLength": 1
+            },
+            "status": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            }
+          },
+          "required": [
+            "step",
+            "status"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -529,7 +591,13 @@
         "request",
         "expect"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "when_previous_status",
+          "when_step_status"
+        ]
+      }
     },
     "case": {
       "type": "object",
@@ -746,6 +814,10 @@
             },
             "not_equal": {
               "type": "boolean"
+            },
+            "agent_identity": {
+              "type": "boolean",
+              "description": "Bounded semantic authority comparison, with unordered Group members. Known identity differences fail; unsupported identifier or changing display facts require the full deterministic mapping contract and produce unavailable. No signature exclusion mask or identity-only full-completeness claim."
             }
           },
           "required": [
@@ -853,6 +925,57 @@
             "kind",
             "status",
             "non_empty"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "json-preservation"
+            },
+            "expected": {
+              "type": "object",
+              "required": ["actor", "verb", "object"]
+            }
+          },
+          "required": [
+            "kind",
+            "expected"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "statement-query"
+            },
+            "stored_captures": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "since_capture": {
+              "type": "string"
+            },
+            "until_capture": {
+              "type": "string"
+            },
+            "descending": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "stored_captures"
           ],
           "additionalProperties": false
         }

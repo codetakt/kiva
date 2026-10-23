@@ -97,7 +97,7 @@ def main():
                 expected = CHECKS if mode == 'invalid' else set()
                 if failed != expected:
                     raise RuntimeError('Unexpected procedure failure set: ' + str(failed ^ expected))
-                if {c['id'] for c in checks if c['outcome'] == 'not-run'} != {'full-external-grammar'}:
+                if {c['id'] for c in checks if c['outcome'] == 'not-run'} != {'full-external-grammar', 'person-association-inventory'}:
                     raise RuntimeError('Unexpected unexecuted Person condition')
                 if proc.returncode != (1 if mode == 'invalid' else 2):
                     raise RuntimeError('Wrong procedure exit code')
