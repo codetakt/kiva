@@ -1,0 +1,793 @@
+{
+  "scope": "Author controls for exact/default serialization property presence; independent shape and managed-value validation still apply. Default object types do not grant permission to add a property to an exact serialization.",
+  "rules": [
+    "IP-format-exact",
+    "IP-return-serialization",
+    "IP-create-id",
+    "IP-timestamp-default",
+    "IP-stored-overwrite",
+    "IP-authority-present",
+    "IP-field-presence-meaning",
+    "IP-substatement-default-time",
+    "IP-attachment-transmission-json"
+  ],
+  "cases": [
+    {
+      "id": "unchanged",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "preserved": true
+    },
+    {
+      "id": "actor-added-name",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org",
+          "name": "invented"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "actor-added-objectType",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org",
+          "objectType": "Agent"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "verb-added-display",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb",
+          "display": {
+            "en": "invented"
+          }
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "object-added-definition",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity",
+          "definition": {
+            "name": {
+              "en": "invented"
+            }
+          }
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "object-added-objectType",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity",
+          "objectType": "Activity"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "managed-root-id",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "id": "00000000-0000-4000-8000-000000000001"
+      },
+      "preserved": true
+    },
+    {
+      "id": "managed-root-stored",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "stored": "2026-10-23T00:00:00Z"
+      },
+      "preserved": true
+    },
+    {
+      "id": "managed-root-timestamp",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "timestamp": "2026-10-23T00:00:00Z"
+      },
+      "preserved": true
+    },
+    {
+      "id": "managed-root-authority",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "authority": {
+          "mbox": "mailto:lrs@example.org"
+        }
+      },
+      "preserved": true
+    },
+    {
+      "id": "managed-root-version",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "version": "2.0.0"
+      },
+      "preserved": true
+    },
+    {
+      "id": "invented-root-result",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "result": {
+          "success": true
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "group-member-addition",
+      "submitted": {
+        "actor": {
+          "objectType": "Group",
+          "member": [
+            {
+              "mbox": "mailto:a@example.org"
+            }
+          ]
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "returned": {
+        "actor": {
+          "objectType": "Group",
+          "member": [
+            {
+              "mbox": "mailto:a@example.org",
+              "name": "invented"
+            }
+          ]
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "singleton-array-allowance",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "context": {
+          "instructor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "contextActivities": {
+            "parent": {
+              "id": "urn:example:parent"
+            }
+          }
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "context": {
+          "instructor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "contextActivities": {
+            "parent": [
+              {
+                "id": "urn:example:parent"
+              }
+            ]
+          }
+        }
+      },
+      "preserved": true
+    },
+    {
+      "id": "singleton-array-extra-property",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "context": {
+          "instructor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "contextActivities": {
+            "parent": {
+              "id": "urn:example:parent"
+            }
+          }
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "context": {
+          "instructor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "contextActivities": {
+            "parent": [
+              {
+                "id": "urn:example:parent",
+                "definition": {}
+              }
+            ]
+          }
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "substatement-timestamp",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement",
+          "timestamp": "2026-10-23T00:00:00Z"
+        }
+      },
+      "preserved": true
+    },
+    {
+      "id": "substatement-extra-name",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement",
+          "name": "invented"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "substatement-extra-id",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement"
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "actor": {
+            "mbox": "mailto:a@example.org"
+          },
+          "verb": {
+            "id": "urn:example:verb"
+          },
+          "object": {
+            "id": "urn:example:activity"
+          },
+          "objectType": "SubStatement",
+          "id": "00000000-0000-4000-8000-000000000002"
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "attachment-file-url",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "attachments": [
+          {
+            "usageType": "urn:example:usage",
+            "display": {
+              "en": "file"
+            },
+            "contentType": "text/plain",
+            "length": 1,
+            "sha2": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "attachments": [
+          {
+            "usageType": "urn:example:usage",
+            "display": {
+              "en": "file"
+            },
+            "contentType": "text/plain",
+            "length": 1,
+            "sha2": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "fileUrl": "https://example.org/file"
+          }
+        ]
+      },
+      "preserved": true
+    },
+    {
+      "id": "attachment-extra-description",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "attachments": [
+          {
+            "usageType": "urn:example:usage",
+            "display": {
+              "en": "file"
+            },
+            "contentType": "text/plain",
+            "length": 1,
+            "sha2": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "attachments": [
+          {
+            "usageType": "urn:example:usage",
+            "display": {
+              "en": "file"
+            },
+            "contentType": "text/plain",
+            "length": 1,
+            "sha2": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "description": {
+              "en": "invented"
+            }
+          }
+        ]
+      },
+      "preserved": false
+    },
+    {
+      "id": "opaque-no-managed-allowance",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "result": {
+          "extensions": {
+            "urn:example:opaque": {}
+          }
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "result": {
+          "extensions": {
+            "urn:example:opaque": {
+              "timestamp": "2026-10-23T00:00:00Z"
+            }
+          }
+        }
+      },
+      "preserved": false
+    },
+    {
+      "id": "addition-wins-over-unavailable-number",
+      "submitted": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "result": {
+          "score": {
+            "raw": 0.1
+          }
+        }
+      },
+      "returned": {
+        "actor": {
+          "mbox": "mailto:a@example.org"
+        },
+        "verb": {
+          "id": "urn:example:verb"
+        },
+        "object": {
+          "id": "urn:example:activity"
+        },
+        "result": {
+          "score": {
+            "raw": 0.1
+          }
+        },
+        "extra": "invented"
+      },
+      "preserved": false
+    }
+  ]
+}

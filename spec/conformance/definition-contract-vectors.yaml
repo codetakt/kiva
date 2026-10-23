@@ -1,0 +1,1734 @@
+schema_version: 1
+scope: Authored abstract inputs and oracles; no keys, certificates, environments or execution receipts are constructed.
+contracts:
+  DC-TIME:
+  - id: offset-instant
+    input: Root and SubStatement timestamp 2025-01-01T09:00:00.123456+09:00; independent ISO provider supplies validity
+      and exact instant.
+    allowed: UTC equivalent at full precision, or truncation/rounding to at least three fractional second digits,
+      including basic ISO spelling if valid under the provider contract.
+    forbidden: 2025-01-01T00:00:00+09:00; unchanged nonzero offset; 2025-01-01T00:00:00.12Z; substring equality
+      as the sole oracle.
+  - id: combined-date-time
+    input: Consistent-Through on success and error responses; date-only 2025-01-01, a valid combined value, invalid
+      calendar values and provider-supported leap/end-of-day forms separately.
+    allowed: Only provider-valid combined date/time; missing grammar capability yields incomplete execution, never
+      automatic valid/invalid.
+    forbidden: Treating a date-only value as midnight; converting parser rejection of an unsupported valid form
+      into an IEEE failure.
+  - id: recording-and-default
+    input: Controlled recording instant R distinct from producer instant T; root timestamp missing/present, stored
+      missing/spoofed; repeat with SubStatement timestamp missing/present.
+    allowed: LRS stored corresponds to R, root missing timestamp equals stored, supplied timestamp follows the precision
+      relation. Nested missing timestamp is populated; D-07 chooses its instant only for Kiva.
+    forbidden: Producer-supplied stored surviving overwrite; missing root default; invented nested stored; treating
+      should-validate as a new mandatory rejection.
+  - id: fractional-boundaries
+    input: Values before/after epoch and whole-second carry; fractions .123456, .123500, .999999 and digits beyond
+      nanoseconds; independent decimal instant relation.
+    allowed: Exact or truncation/rounding at declared precision at least milliseconds; both adjacent choices at
+      an exact rounding tie; trailing zero spelling does not change the instant.
+    forbidden: Floating-point or nanosecond parsing inventing equality between distinct finer timestamps; rounding
+      to less than millisecond precision.
+  - id: dcr01-lossless-ordering
+    input: since=2025-01-01T00:00:00.0000000001Z and returned stored=.0000000002Z in the same second; reverse the
+      pair for JsonOrder; repeat across epoch, offsets and whole-second carry.
+    allowed: The later instant satisfies exclusive since; inclusive until and ascending/descending order use the
+      same exact seconds-and-fraction relation. HTTP-date comparison intentionally retains only whole seconds.
+    forbidden: Nanosecond or microsecond truncation making distinct instants equal, accepting reversed ordering,
+      or rejecting the later since result.
+  - id: dcr01-partial-executor-time
+    input: An invisible Statement stored at 1969-12-31T23:59:59Z and Consistent-Through=1969-12-31T23:59:59.0000001Z;
+      separately, an omission acceptance response with date-only stored/timestamp; valid provider-supported forms
+      beyond the bounded parser are separate inputs.
+    allowed: The watermark crossing the hidden record fails its safety subcondition; date-only fails the combined-time
+      field requirement. An unsupported valid representation is incomplete execution, not an invalid representation.
+    forbidden: Passing the hidden-record check after truncation; passing date-only added fields; converting PrimitiveUnavailable
+      to failed.
+  - id: fd01-required-header-before-provider
+    input: Nonempty StatementResult with a valid ordinary stored and separately valid provider-supported leap-second
+      stored 2016-12-31T23:59:60Z; omit mandatory Last-Modified in each.
+    allowed: 'FAIL in both cases: the required header is absent independently of temporal comparison.'
+    forbidden: Turning the leap-second variant into NOT-RUN before checking header presence.
+  - id: fd01-header-syntax-before-provider
+    input: Nonempty StatementResult with unsupported valid stored; Last-Modified is independently malformed as an
+      HTTP-date.
+    allowed: FAIL for the decidable header syntax defect.
+    forbidden: Unknown ISO comparison masking the malformed mandatory HTTP header.
+  - id: fd01-later-json-type
+    input: HeaderTime max collection or JsonOrder has an unsupported valid first stored, followed by a missing or
+      numeric stored field.
+    allowed: FAIL for the later missing/string-type violation; inspect items despite unavailable comparisons.
+    forbidden: Returning NOT-RUN at the first unsupported instant without checking later items.
+  - id: fd01-known-subsequence-order
+    input: An ascending sequence has known 2025-01-02, an unsupported valid timestamp, then known 2025-01-01; reverse
+      known endpoints for descending. All timestamps have full combined date/time syntax.
+    allowed: 'FAIL: the known subsequence is inverted regardless of the unknown intermediate instant.'
+    forbidden: Skipping comparisons across an unknown element or returning NOT-RUN before the definite inversion is
+      retained.
+  - id: fd01-known-maximum-lower-bound
+    input: Last-Modified represents a known HTTP second earlier than one known returned stored, with another unsupported
+      valid stored in the same nonempty collection.
+    allowed: 'FAIL: maximum stored cannot be smaller than its known member.'
+    forbidden: Unknown members hiding this proven lower-bound failure.
+  - id: fd01-unknown-without-known-defect
+    input: Required header is present and valid; all fields are strings and valid under the abstract provider. Some
+      stored instants are outside the bounded adapter and no known ordering or maximum-bound violation exists.
+    allowed: NOT-RUN for the unresolved required comparison. Preserve the difference between unavailable computation
+      and invalid data.
+    forbidden: PASS after discarding unknown timestamps, or FAIL merely because this adapter lacks the valid representation.
+  - id: fd01-ordinary-and-empty-controls
+    input: All-known ordered instants and correct nonempty maximum header; separately an established empty collection
+      with optional_if_empty=true and no header.
+    allowed: The existing applicable positive relationships remain satisfied; the empty max obligation has no returned-value
+      operand.
+    forbidden: Changing ordinary max/order semantics or inventing max(empty).
+  - id: fd01-query-independent-structure
+    input: An otherwise controlled StatementQuery includes a valid but adapter-unsupported captured instant; returned
+      statements is not an array, or exceeds the explicit nonzero limit.
+    allowed: FAIL for shape or limit independent of eligibility.
+    forbidden: Early NOT-RUN from the unrelated captured instant.
+    observed: null
+  - id: fd01-query-membership-and-type
+    input: At least one captured or bound time is adapter-unavailable. Return an unrelated ID, duplicate ID, known
+      boundary-excluded ID, or a later non-string stored field as separate variants.
+    allowed: FAIL for each established independent violation.
+    forbidden: Unknown time erasing membership, duplicate, known boundary or string-type evidence.
+    observed: null
+  - id: fd01-query-cardinality-bounds
+    input: One definitely eligible ID and one possibly eligible ID. Return zero results without more; separately return
+      the definite ID only, with the second eligibility unresolved.
+    allowed: First variant FAIL (known omission). Second variant NOT-RUN (unknown omission), not FAIL based on possible
+      count.
+    forbidden: Treating possible eligibility as definite or discarding uncertainty to PASS.
+    observed: null
+  - id: fd01-query-prefix-and-order
+    input: With unresolved unrelated timestamps, return a known newer ID ahead of an unreturned definitely eligible
+      older ID in ascending mode; separately return a known reversed pair across an unknown returned time.
+    allowed: FAIL for a definite prefix or subsequence inversion. An only-possibly-eligible unreturned predecessor
+      cannot prove prefix failure.
+    forbidden: Unknown entries hiding known failure, or possibly eligible witnesses creating false FAIL.
+    observed: null
+  - id: fd01-json-time-utc-and-fields
+    input: JsonTime UTC predicate with parseable non-UTC actual and unavailable expected instant; separately a valid
+      leap-second actual with explicit +09:00; separately actual unavailable with a required compared timestamp absent/non-string.
+    allowed: FAIL for independent UTC or required compared-field violation. Pure valid unsupported UTC without another
+      defect remains NOT-RUN.
+    forbidden: Unavailable preservation hiding known offset/type errors, or unsupported ISO representation alone causing
+      FAIL.
+    observed: null
+  - id: fd01-json-time-multiple-comparisons
+    input: Actual ordinary UTC instant; first expected comparison is unavailable and a later independently known equals_capture
+      or equals_pointer comparison is false.
+    allowed: FAIL for the known false equality even after an unavailable earlier comparison.
+    forbidden: Early NOT-RUN at the first comparison masking a later known mismatch.
+    observed: null
+  - id: fd01-empty-supplied-header
+    input: 'Established empty StatementResult with optional_if_empty=true: omit Last-Modified, send valid HTTP-date,
+      or send malformed HTTP-date.'
+    allowed: Omission has no maximum obligation; supplied header syntax is checked. Malformed header FAIL. Valid syntax
+      alone does not prove its representation-change/origination-time meaning; the branch procedure checks that with
+      independently established context.
+    forbidden: Skipping syntax of a supplied header or asserting max(empty).
+    observed: null
+  - id: fcar01-returned-boundary
+    input: Captured stored is valid but adapter-unavailable. Returned stored is known and <= known since, or > known
+      until. All other inputs valid.
+    allowed: 'FAIL: either stored preservation or the requested boundary is violated. Unknown capture cannot erase
+      returned evidence.'
+    forbidden: NOT-RUN masking the known returned-boundary contradiction.
+    observed: null
+  - id: fcar01-returned-prefix
+    input: 'Descending limit=1: first captured stored=2017-01-02T00:00:00Z, second capture=valid unsupported 2016-12-31T23:59:60Z;
+      return only second with stored=2017-01-01T00:00:00Z. Valid headers and body otherwise.'
+    allowed: 'FAIL: a definitely eligible known newer first record is omitted ahead of second; preservation or prefix
+      must be violated.'
+    forbidden: Using only unknown captured second time and yielding NOT-RUN.
+    observed: null
+  - id: fcar01-cross-known-order
+    input: 'Ascending no-bound query. First has known captured stored=2017-01-02T00:00:00Z but valid unsupported returned
+      stored; second has valid unsupported captured stored but returned known 2017-01-01T00:00:00Z. Reverse for descending.
+      Control: all known witnesses ordered, unknown comparisons remain.'
+    allowed: 'FAIL for inverted cross-known witnesses: preservation or order must fail. Ordered control remains NOT-RUN,
+      not PASS or a provider-driven FAIL.'
+    forbidden: Comparing only returned-to-returned or capture-to-capture and losing cross-side known evidence; inventing
+      equality for unknowns.
+    observed: null
+  DC-DURATION:
+  - id: grammar
+    input: Provider-certified ISO 8601:2004(E) 4.4.3.2 Y/M/D/W and T H/M/S forms, decimal point/comma on the lowest
+      component, zero; forbidden 4.4.3.3 forms separately, root and SubStatement Result.
+    allowed: Valid specified forms, including valid fine precision; other independent Statement conditions remain
+      satisfied.
+    forbidden: Rejecting solely because the duration is not PT...S; admitting the explicitly forbidden alternative
+      format.
+  - id: precision-and-calendar
+    input: PT1.239S, PT1,239S and calendar-unit values; compare preserved value and logical equivalence with independent
+      duration provider.
+    allowed: Preservation of PT1.239S or truncation to PT1.23S, equivalent decimal separator; logical comparison
+      ignores precision finer than 0.01s. Calendar components retain calendar semantics.
+    forbidden: PT1.2S or PT1S as a stored substitute for PT1.239S; month/year converted to an assumed fixed number
+      of seconds.
+  - id: ffcr-05-static-controls
+    input: original PT1S retained as PT1.00S after conflicting replay; original PT1.23S retained as PT1,23S; original
+      duration replaced by replay PT9S
+    allowed: original PT1S retained as PT1.00S after conflicting replay => PASS; original PT1.23S retained as PT1,23S
+      => PASS; original duration replaced by replay PT9S => FAIL
+    forbidden: Unknown converted to success or violation; known violation hidden; unselected order policy imposed;
+      fixed calendar-to-seconds conversion. Paper definitions only.
+    review_finding: FFCR-05
+    source_evidence: target/ieee-test-definition-ffcr-correction/20261018T180706Z/source-evidence.json
+  - id: ffcr-09-static-controls
+    input: PT1.234S retained as PT1,234S; PT1.230S retained as PT1,23S; PT1.234S truncated to PT1.23S; PT1.234S
+      reduced to PT1.2S; PT1.23S changed to PT2.23S; calendar-unit conversion outside bounded adapter
+    allowed: PT1.234S retained as PT1,234S => PASS; PT1.230S retained as PT1,23S => PASS; PT1.234S truncated to
+      PT1.23S => PASS; PT1.234S reduced to PT1.2S => FAIL; PT1.23S changed to PT2.23S => FAIL; calendar-unit conversion
+      outside bounded adapter => NOT-RUN
+    forbidden: Unknown converted to success or violation; known violation hidden; unselected order policy imposed;
+      fixed calendar-to-seconds conversion. Paper definitions only.
+    review_finding: FFCR-09
+    source_evidence: target/ieee-test-definition-ffcr-correction/20261018T180706Z/source-evidence.json
+  DC-NUMBER:
+  - id: exact-and-binary32
+    input: Exact JSON decimal 0.33333334, negative counterpart, exactly representable integers/fractions and values
+      on each side of a binary32 boundary; retain original decimal token.
+    allowed: Exact value or result inside the adjacent finite binary32 values enclosing the original, including
+      valid directed/nearest and higher precision conversions. The finite Python adapter additionally accepts
+      decimal spellings obtained by rounding either endpoint at any significant precision, provided they
+      round-trip to that endpoint, and its binary64 repr, even if the decimal value lies just outside the
+      closed interval. Directed decimal rounding brackets nearest/tie choices. Include shortest, nine-digit
+      and longer spellings; the ledger imposes no shortest-spelling restriction. Additional digits after the
+      exact terminating expansion only add zeros. This is an endpoint-serialization allowance, not equality
+      of all decimal values rounding to the same binary32.
+    forbidden: 0.33333337 for 0.33333334; same-rounded-bin comparison; arbitrary relative epsilon; boolean/string
+      coercion.
+  - id: zero-subnormal-range
+    input: Signed zero, positive/negative subnormals, smallest normal, largest finite binary32 and greater-magnitude
+      finite JSON numbers; independently specified representation/range and rounding capability.
+    allowed: Exact or at-least-binary32 preservation under the declared primitive contract; zero sign is not an
+      added xAPI identity requirement. Greater range/precision is allowed.
+    forbidden: NaN/Infinity as JSON, assuming unsupported finite range is a mandatory LRS rejection, classifying
+      missing provider capability as numeric PASS.
+  - id: field-constraints
+    input: Root/SubStatement score scaled/raw/min/max and opaque extension numbers; independent JSON numeric type
+      and per-field bounds.
+    allowed: Apply scaled bounds and score relations only at defined schema locations; extension-owned numeric values
+      do not inherit score bounds.
+    forbidden: Permitted rounding hiding a field-domain violation; nonnumeric values accepted by coercion; clamp
+      to an unrelated field's range.
+  - id: dcr02-exact-integer
+    input: Exact JSON integers expected=9007199254740992 and returned=9007199254740993; negative counterparts; exact
+      powers of two and both directed binary32 endpoints for 16777217; i64/u64 boundary values.
+    allowed: Retained integer values are compared before any lossy equality shortcut. An exactly binary32-representable
+      original has a singleton exact-value interval, plus the endpoint-serialization alternatives specified
+      by exact-and-binary32. For non-exact integers use both enclosing binary32 bounds and those endpoint
+      alternatives. For maximum finite binary32, 3.4028235e38, 3.40282347e38, longer correctly rounded spellings
+      and its binary64 repr are allowed; for 0.3, 0.300000012 is allowed. Corresponding negative spellings are
+      also allowed. The exact binary32 0.1 endpoint may serialize with directed decimal rounding as 0.100000002.
+    forbidden: Converting both unequal integers to equal binary64 values and passing the precision assertion;
+      arbitrary same-bin changes not produced by rounding an endpoint at any significant precision
+      (0.1 changed to 0.1000000025); rejecting a legitimate serialization solely because it is not shortest.
+      This finite adapter does not certify every decimal serialization or unavailable wider-range provider.
+  - id: dcr02-decimal-input-identity
+    input: Expected exact 1 and response JSON token 1.0000000000000001; other decimal/exponent forms, equal legitimate
+      decimals, fine subnormals and wider range.
+    allowed: The full DC-NUMBER relation uses original exact decimal inputs. The current Rust parsed-Value adapter
+      and Python float adapter return ORACLE-UNAVAILABLE/NOT-RUN for decimal inputs whose lexemes were lost; the
+      Python explicit Decimal path retains its declared exact input.
+    forbidden: Equality of pre-rounded binary64 values proving the original decimal relation; claiming the current
+      adapter certifies all decimal preservation.
+    adapter_boundary: NOT-RUN is a limit of the current executor, not a permitted LRS mutation or a changed normative
+      precision requirement.
+  - id: rrf01-all-numeric-entry-points
+    input: Declared exact source [1,"two",false]; readback [1.0000000000000001,"two",false]. Also 1 versus 1.0,
+      +/-9007199254740992 versus adjacent integer, i64/u64 edges, nested Group arrays, numeric enum, as_json capture
+      and MIME length 3 versus 3.0000000000000001. Apply separately at equals/not_equals, contains/subset/not_contains,
+      capture-followup and MIME length.
+    allowed: 'Lossless oracle: exact value 1 is equal to 1.0 but not 1.0000000000000001. Exact binary32 singleton
+      preservation rejects the changed value. Integers remain exact. Current rounded-decimal Value path reports
+      NOT-RUN; a known nonnumeric difference or independent mandatory failure retains FAIL. A membership match established
+      by an exact independent item remains a match. For the MIME consumer, pair 21.0 with matching and mismatching
+      Content-Type; only the former may remain unknown. Continue safe later-part and raw-completeness checks as
+      defined by rrfr01-independent-mime-failures.'
+    forbidden: PASS or FAIL inferred from already rounded floats; serialization of a rounded Value treated as original
+      lexeme; numeric capture used downstream despite unavailability; accepting arbitrary changes within a binary64
+      bin.
+    source_anchor_ids:
+    - RRF-01-S01
+    - RRF-01-S02
+    review_finding: RRF-01
+  - id: ffcr-02-static-controls
+    input: unchanged decidable Statement; sole undecidable decimal comparison; unknown score.scaled then changed
+      verb.id; nested ordered array unknown then changed later element; unordered members with no possible perfect
+      matching and some unknown comparisons; unordered members with possible but no proven matching
+    allowed: unchanged decidable Statement => PASS; sole undecidable decimal comparison => NOT-RUN; unknown score.scaled
+      then changed verb.id => FAIL; nested ordered array unknown then changed later element => FAIL; unordered members
+      with no possible perfect matching and some unknown comparisons => FAIL; unordered members with possible but
+      no proven matching => NOT-RUN
+    forbidden: Unknown converted to success or violation; known violation hidden; unselected order policy imposed;
+      fixed calendar-to-seconds conversion. Paper definitions only.
+    review_finding: FFCR-02
+    source_evidence: target/ieee-test-definition-ffcr-correction/20261018T180706Z/source-evidence.json
+  DC-LANGUAGE:
+  - id: registered-grandfathered-private
+    input: en, zh-Hant-CN, i-klingon, x-private, case variants and valid empty language maps, otherwise valid fresh
+      Statements. Use the pinned IANA registry in issued-definition-contracts.json.
+    allowed: Acceptance of valid tags; preservation of supplied strings. Grandfathered and private-use are valid
+      classes.
+    forbidden: Allowing either 204 or 400 indiscriminately for a valid tag; inferring tag validity solely from token
+      lengths.
+  - id: invalid-classes
+    input: Empty tag, abcdefghi, en-abcdefghi, unregistered abcdefgh, sl-rozaj-rozaj, en-a-foo-a-bar, and non-string
+      map values, each as the sole invalid cause.
+    allowed: 400 for invalid tag/type with no accepted Statement; mandatory validity and the minimum token check
+      are retained as distinct requirements.
+    forbidden: Accepting unregistered primary or repeated variant/extension singleton because lengths happen to
+      pass; attributing a map value type rejection to tag validation.
+  - id: placements-and-role
+    input: Every model-declared core Language Map placement, including Activity/Verb maps, interaction component
+      descriptions, attachment display/description at root and legal SubStatement positions. Extension-owned lookalikes
+      are separate controls.
+    allowed: Core tag rules at every core location; opaque extension values retain owner semantics; language-content
+      truth and producer regional-knowledge advice remain role-specific.
+    forbidden: Applying core map syntax to every extension property called name; inventing a receiver obligation
+      to verify which language the text actually uses.
+  DC-JWS:
+  - id: compact-header
+    clauses:
+    - 1
+    input: RS256/384/512 compact controls; independently vary segment count, padding/whitespace, base64url alphabet,
+      invalid UTF-8/header JSON, missing alg, rs256, none, HS256 and ES256.
+    allowed: Three correctly encoded segments with an object header and supported case-sensitive algorithm; exact
+      original signing input is retained.
+    forbidden: Accepting each isolated malformed shape or disallowed algorithm; substituting a fallback algorithm.
+  - id: header-options
+    clauses:
+    - 2
+    input: Unknown noncritical header, unknown critical header, empty crit, listed-but-absent crit name, missing
+      typ/cty and duplicate decoded names (including escaped equivalents).
+    allowed: Unknown noncritical and missing typ/cty do not fail by themselves; unsupported critical fails. Duplicate
+      names follow the explicit reject/lexically-last choice D-11. Malformed crit producer violations retain the
+      receiver MAY boundary.
+    forbidden: Turning every producer MUST into receiver SHALL; accepting an unsupported critical extension as verified;
+      silently inventing a required typ/cty.
+  - id: payload-and-equivalence
+    clauses:
+    - 3
+    input: Complete payload and received Statement; independently omit actor/verb/object, alter immutable identities,
+      change only listed excluded fields, reorder object members, permute Group members, alter IRI path/mailbox
+      local part, reorder or drop duplicate extension members.
+    allowed: Validate payload shape first; apply the field-aware equality matrix and SP-01/SP-03. Property order
+      alone is equal; duplicate multiplicity and opaque values are retained.
+    forbidden: Global case folding; treating payload bytes as the logical equivalence oracle; equating the lossless
+      multisets a:1,a:2 and a:2.
+  - id: cryptographic-input
+    clauses:
+    - 4
+    - 5
+    input: Independently certified RSA key at least 2048 bits for each supported hash; exact protectedSegment.payloadSegment.
+      Vary signature octet length, representative range, PKCS1 padding/DigestInfo/hash, bit corruption and reserialization
+      while keeping all other causes valid.
+    allowed: Verified only when the full called RFC3447 operation succeeds on original bytes with the alg-selected
+      hash and permitted key.
+    forbidden: Hash-prefix/partial padding acceptance, wrong key/algorithm, signature over reconstructed JSON, upgrading
+      cryptography not-evaluated to verified.
+  - id: certificate-and-key-policy
+    clauses:
+    - 6
+    - 7
+    input: x5c standard-base64 versus base64url/bad DER; valid signer-first chain; separately no x5c with no registered
+      key, known valid key and known failing key. Freeze D-10, trusted anchor, validation time, purpose and revocation
+      evidence.
+    allowed: x5c requires path plus signature success; no-x5c admission follows the separately declared Kiva choice,
+      with crypto verified/failed/not-evaluated recorded distinctly.
+    forbidden: Treating a received self-signed root as automatically trusted; key failure falling back to no-key
+      acceptance; x5c path indeterminate reported as valid.
+  - id: signer-identity
+    clauses:
+    - 8
+    input: A valid trusted signer whose certificate subject differs from actor and LRS hostname; independently authenticated
+      provider and authority mapping.
+    allowed: Signature/path checks succeed under their actual constraints; authority follows its separate authentication
+      contract.
+    forbidden: Inventing a TLS hostname check or a certificate-subject-equals-actor requirement for xAPI JWS.
+  - id: DV-J01
+    clauses:
+    - 1
+    - 3
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate two periods/three segments, empty payload, complete payload and partial payload. APPLIES: Statement Attachments with signature usageType"
+    allowed: "POSITIVE: Valid signature attachment and complete actor/verb/object payload → well-formed. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Remove only actor from the signature payload → 400. Do not reject the same bytes as JWS in a nonsignature attachment. ROLE/ALTERNATIVES: X.509 use and x5c inclusion are producer SHOULDs. Absence alone does not make every signature an IEEE violation."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J01
+    source_force: shall; receiver shall reject malformed with 400
+    actor: "Signature producer / receiving LRS"
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J02
+    clauses:
+    - 1
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Treat input length mod4, trailing pad bits, unnecessary padding and nonalphabet characters separately. APPLIES: Decoding a Compact segment or x5c string"
+    allowed: "POSITIVE: x5c encoding the same DER in standard base64 and valid base64url segments → each decoder succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Replace standard-base64 + or / with URL-alphabet characters in an x5c example requiring them; add = or whitespace in Compact → respective format failure. ROLE/ALTERNATIVES: Distinguish RFC4648 decoder MAY from canonical-encoder MUST; do not infer blanket rejection of noncanonical pad bits."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J02
+    source_force: MUST / specified serialization
+    actor: JWS producer / recipient
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J03
+    clauses:
+    - 1
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Treat escape-equivalent names, empty crit and a header listed in crit but absent independently. APPLIES: Parse a UTF-8 header as a complete JSON object"
+    allowed: "POSITIVE: Unknown noncritical member, absent typ/cty and alg=RS256 → no rejection solely for these facts. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Unknown unimplementable extension in crit → not verified. alg=rs256/none/HS256 → signature-requirement violation. ROLE/ALTERNATIVES: D-11 selection:null. Rejection/lexically-last for duplicate names remain an allowed set. Do not confuse producer violation for malformed crit with receiver MAY rejection."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J03
+    source_force: producer MUST unique; recipient reject OR lexically-last; crit rejection rules
+    actor: "Separate producer and recipient"
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J04
+    clauses:
+    - 4
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Define 2047/2048-bit keys, k-1/k/k+1 signature lengths, s=n-1/n and minimum PS length 8. APPLIES: Branches requiring or selecting cryptographic verification"
+    allowed: "POSITIVE: Original signing input for each alg with an allowed RSA key of at least 2048 bits → verified. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Separately use reserialized equivalent-JSON bytes, wrong hash, shortened PS, extra DigestInfo or representative >=n → failed. ROLE/ALTERNATIVES: This stage does not implement every SHA compression round or RSA. Fix algorithm names, editions and all comparison conditions in the calling contract."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J04
+    source_force: MUST / prescribed verification algorithm
+    actor: signature verifier
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J05
+    clauses:
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: x5c root included/omitted; self-signed S with/without preexisting trust. APPLIES: x5c present"
+    allowed: "POSITIVE: Trust input A, path A→I→S and JWS key S → valid+verified. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Same valid RSA signature, but only the anchor is untrusted or I expired → no success. ROLE/ALTERNATIVES: A received root is not automatically trusted. Path-construction methods are separate; do not omit required path inputs."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J05
+    source_force: MUST validate; invalid on any failure
+    actor: JWS recipient / path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J06
+    clauses:
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate unregistered key, unavailable key retrieval and known key with mathematical failure. APPLIES: x5c absent"
+    allowed: "POSITIVE: Evaluate structurally valid no-x5c under each permitted D-10 policy, retaining crypto not-evaluated. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): After verification fails with a known trusted key, no-key fallback must not return verified. ROLE/ALTERNATIVES: D-10 selection:null. Do not adopt A here. Keep IEEE-only duties and additional local rejection in separate fields."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J06
+    source_force: IEEE conditional shall; JWS successful-validation condition
+    actor: LRS / JWS consumer
+    applicability: conditional-and-unselected-policy
+    execution: definition only; not-run
+  - id: DV-J07
+    clauses:
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate duplicate extensions {a:1,a:2} versus {a:2}, Group member reordering and element changes. APPLIES: Comparing the complete pre-signature payload with the received Statement"
+    allowed: "POSITIVE: Object-member-order-only changes or permitted excluded-field-only changes → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): mailto:User@example.org versus mailto:user@example.org, or IRI path case changes → different under existing field contracts. ROLE/ALTERNATIVES: Do not import certificate-URI scheme normalization into xAPI IRIs. Supply separate evidence for IP-signature-equivalence.exception.1."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J07
+    source_force: shall validate logical equivalence
+    actor: LRS
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-J08
+    clauses:
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Fix legitimate independent authentication/authority checks and vary only name equality. APPLIES: Trusted third-party signer"
+    allowed: "POSITIVE: Valid signature whose trusted signer subject differs from actor and LRS hostname → no rejection solely for that difference. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Do not accept an untrusted path solely because subject equals actor. ROLE/ALTERNATIVES: This signature contract introduces no TLS-hostname matching. Separate authority duties remain."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: J08
+    source_force: "Scope of signature/path requirements"
+    actor: LRS / path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-X05
+    clauses:
+    - 4
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Each SHA-256/384/512, full padding/hash comparison and known/unknown key. APPLIES: Calling the pinned RSA+SHA algorithm"
+    allowed: "POSITIVE: Separate full-verification success/failure using abstract inputs with certified primitive results. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Converting absent provider to verified, or using a FIPS180-2 attachment digest as JWS SHS edition evidence → prohibited. ROLE/ALTERNATIVES: Retain referenced FIPS180-4 March2012. Record source availability/necessary further reading in the frontier."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X05
+    source_force: named algorithm verification contract
+    actor: crypto provider / test-definition author
+    applicability: delegated-required-interface
+    execution: definition only; not-run
+  - id: DV-X06
+    clauses:
+    - 6
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate reasons for an independent raw FAIL, provider indeterminate and unmet fixture premises. APPLIES: Adapter lacking signature-verification capability"
+    allowed: "POSITIVE: Missing required capability → NOT-RUN plus reason; retain defined expectations. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Counting NOT-RUN as PASS or replacing it with an LRS signature violation → prohibited. ROLE/ALTERNATIVES: No runner/Suite/crypto generation is executed in this work. Future provider implementation is not a completion condition of this review."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X06
+    source_force: engineering evidence boundary, not new IEEE modality
+    actor: test harness / reporter
+    applicability: review-evidence-control
+    execution: definition only; not-run
+  - id: DV-A01
+    clauses:
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Literal/escaped ASCII, backslash escapes and case-only differences; duplicate names compared after decoding. APPLIES: Header names/values after JSON escape processing; typ/cty retain their expressly different comparison rules."
+    allowed: 'POSITIVE: Escape-equivalent alg/name spellings select the same RS256; kid K1 and k1 remain different.
+      SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Raw escape spelling used as identity;
+      blanket casefold of alg/kid; applying typ/cty exceptions to all names. ROLE/ALTERNATIVES: Header names/values
+      after JSON escape processing; typ/cty retain their expressly different comparison rules.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A01
+    source_force: MUST decoded-string comparison with explicit member exceptions
+    actor: JWS recipient
+    applicability: required-extraction
+    execution: definition only; not-run
+  - id: DV-A02
+    clauses:
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: U+1D11E literal versus valid escaped pair; distinct non-BMP values; malformed/unpaired surrogate is not this valid-input alternative. APPLIES: Well-formed non-BMP scalar or valid surrogate pair in a JOSE header; declared JSON character capability."
+    allowed: 'POSITIVE: Correct preservation/comparison; alternatively rejection by an implementation unable to
+      preserve/compare it. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Replacing/dropping
+      the scalar, aliasing a different name, or failing a permitted limited-implementation rejection. ROLE/ALTERNATIVES:
+      Well-formed non-BMP scalar or valid surrogate pair in a JOSE header; declared JSON character capability.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A02
+    source_force: SHOULD preserve non-BMP; MUST reject if JSON capability cannot preserve/compare
+    actor: JWS recipient
+    applicability: required-extraction
+    execution: definition only; not-run
+  DC-PATH:
+  - id: path-and-anchor
+    clauses:
+    - 1
+    - 4
+    input: Fixed external anchor, signer and intermediate path, initial policy set, intended key use, evaluation
+      instant and status evidence. Change only anchor, chain order, repeated certificate, missing intermediate or
+      issuer link in separate variants.
+    allowed: Valid chain returns the policy tree, signer key/algorithm/parameters and actual input identities; configured
+      self-signed trust anchor is not counted as a path certificate.
+    forbidden: Success from nonempty x5c, matching CN or valid RSA math alone; automatic trust of a supplied root.
+  - id: certificate-checks
+    clauses:
+    - 2
+    - 3
+    input: Starting from a valid path, one-at-a-time expired/not-yet-valid intermediate, wrong signature, revoked
+      certificate, violated subject/SAN constraint, pathLen, missing CA or incompatible keyCertSign, policy counter/mapping
+      failure, unsupported critical extension and unsupported noncritical extension. At validity boundaries include
+      exact notBefore/notAfter.
+    allowed: Inclusive validity bounds; every mandatory path condition holds. Noncritical unknown extension alone
+      is allowed. Optional mapping support follows its critical-extension boundary.
+    forbidden: Ignoring an intermediate, unsupported critical extension or critical unsupported name-constraint
+      min/max; declaring every unknown noncritical extension invalid.
+  - id: usage-and-profile
+    clauses:
+    - 5
+    - 6
+    input: Explicit signature service and permitted purposes, KU absent/present and compatible/incompatible, contentCommitment
+      versus digitalSignature, EKU absent/compatible/incompatible, plus a decodable certificate deviating only from
+      an issuer profile recommendation.
+    allowed: Compatible intended use and actually supported RFC5280 receiver behavior. No universal codeSigning/serverAuth/emailProtection
+      EKU is required by xAPI.
+    forbidden: digitalSignature as the only permitted bit for every service; keyCertSign/cRLSign-only authorizing
+      payload signatures; blanket issuer-MUST rejection.
+  - id: pkix-time
+    clauses:
+    - 7
+    input: UTCTime years 49 and 50, GeneralizedTime, exact validity endpoints, malformed encodings and canonical
+      DER fractional GeneralizedTime versus the stricter issuer validity profile.
+    allowed: Called PKIX representations and 1950-2049 pivot; date arithmetic uses the authorized primitive, with
+      receiver/profile distinctions explicit.
+    forbidden: Interpreting 50 as 2050; using Statement.timestamp as verification time without an explicitly selected
+      historical validation mode.
+  - id: DV-P01
+    clauses:
+    - 1
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Do not count a self-signed trust anchor in n. Use length-one and intermediate-containing paths. APPLIES: x5c-chain path validation"
+    allowed: "POSITIVE: Trust input A, A→I→S path and fixed time/policies → signer key and policy result. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Duplicate certificate in path, issuer-link mismatch or missing anchor → not valid. ROLE/ALTERNATIVES: Path discovery is outside §6.1. Missing required path/anchor means indeterminate, not automatic trust under the specification."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P01
+    source_force: MUST functional equivalence; MUST NOT repeat certificate
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P02
+    clauses:
+    - 2
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Exactly notBefore/notAfter, immediately before/after and UTCTime49/50. APPLIES: Each certificate in the path"
+    allowed: "POSITIVE: notBefore<=t<=notAfter, correct issuer/signature for every certificate → next stage. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): One intermediate out of validity, invalid signature or mismatched issuer name → invalid. ROLE/ALTERNATIVES: Historical validation is an explicit mode. Do not implicitly use Statement.timestamp as evaluation time."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P02
+    source_force: MUST each certificate satisfies
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P03
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Empty subject+SAN, only one of multiple SANs violating constraints, empty versus unset permitted set. APPLIES: Names subject to name constraints"
+    allowed: "POSITIVE: S within constraints or the appropriate non-final self-issued-rollover exception → this check succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Put the same self-issued certificate last with a constraint violation → invalid. ROLE/ALTERNATIVES: Noncritical SAN names are also checked. Do not omit name checks based only on the critical flag."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P03
+    source_force: MUST; self-issued non-final skip
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P04
+    clauses:
+    - 2
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate permitted/inhibited anyPolicy, absent policy extension and empty tree with no explicit-policy requirement. APPLIES: Certificate policies and initial policy set"
+    allowed: "POSITIVE: Initial {p1}, p1 at every stage and required explicit policy → valid tree. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Empty final intersection with explicit_policy=0 → invalid. ROLE/ALTERNATIVES: Do not fail empty trees unconditionally. Label added local policy."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P04
+    source_force: functionally equivalent algorithm
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P05
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Counter0/1, an intervening non-final self-issued certificate and absent extension. APPLIES: Policy mappings/constraints present"
+    allowed: "POSITIVE: Supported mapping p1→p2 with permitting counter → correct policy result. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Required mapping with prohibiting counter=0, or unsupported critical mapping → invalid. ROLE/ALTERNATIVES: Policy-mapping support itself is OPTIONAL. Unsupported noncritical mapping is not a blanket IEEE violation."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P05
+    source_force: algorithm; optional support with critical rejection
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P06
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: CA=false, KU absent versus present without keyCertSign, self-issued rollover. APPLIES: Using a non-final certificate as a CA"
+    allowed: "POSITIVE: End entity directly below a pathLen=0 CA → within this constraint. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Add one non-self-issued intermediate below pathLen=0 → invalid. ROLE/ALTERNATIVES: Do not require keyCertSign for an end entity's payload signature."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P06
+    source_force: algorithm required checks
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P07
+    clauses:
+    - 3
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Same OID/data with critical false/true; critical min=1 or specified max, with/without the relevant name. APPLIES: Critical extension/constraint encountered"
+    allowed: "POSITIVE: Add only an unknown noncritical extension → no unconditional failure. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Add only an unknown critical extension → invalid. ROLE/ALTERNATIVES: Retain the boundary between optional support and required processing of critical extensions."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P07
+    source_force: MUST reject unsupported critical; process or reject
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P08
+    clauses:
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate absent KU/EKU, compatible EKU, incompatible EKU and local anyExtendedKeyUsage restrictions. APPLIES: Fixed intended signature service"
+    allowed: "POSITIVE: Signature permitted by digitalSignature or contentCommitment for a compatible intended service → purpose check succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Payload signature with only keyCertSign/cRLSign, or disjoint permitted KU/EKU purposes → purpose mismatch. ROLE/ALTERNATIVES: Distinguish required EKU presence/specific OIDs when these are local policy."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P08
+    source_force: MUST use only permitted purpose when extension present
+    actor: certificate user / path consumer
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P09
+    clauses:
+    - 5
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate serial sign/length, time-year convention and seconds/zone canonicality. APPLIES: Profile deviation in a decodable certificate"
+    allowed: "POSITIVE: Record DER-valid fractional GeneralizedTime as a profile deviation and judge receiver grounds separately. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Prohibit an oracle misclassifying that alone as invalid DER; genuine non-DER is a separate negative. ROLE/ALTERNATIVES: If the receiver adds profile checks, review the §6.1 recommendation and local-policy scope."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P09
+    source_force: "Classify issuer MUST separately from the receiver algorithm"
+    actor: CA issuer / path recipient
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P10
+    clauses:
+    - 1
+    - 2
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Distinguish path length1/n, initial any-policy/specific OID sets, each true/false flag and empty/unset subtrees. APPLIES: Start of validation"
+    allowed: "POSITIVE: Explicit initial policy flags for the same path → permitted result and final tree. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Reusing previous-path reasons/policy/name state to falsely validate this path → prohibited. ROLE/ALTERNATIVES: Identical internal algorithm variables are unnecessary; require the external input/result relation."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P10
+    source_force: specified initialization, functionally equivalent
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P11
+    clauses:
+    - 2
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Omitted name type retains the previous set; empty disjoint intersection; same/different key algorithm; parameters present/null/absent. APPLIES: After processing a non-final certificate"
+    allowed: "POSITIVE: Successive permitted example.com→foo.example.com narrows to foo.example.com. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Broadening permitted by union or retaining old parameters after algorithm change → prohibited. ROLE/ALTERNATIVES: One RSA-only success does not establish general path-parameter rules. Settle the mandatory algorithm repertoire in the frontier."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P11
+    source_force: specified transitions
+    actor: path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-P12
+    clauses:
+    - 2
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: An implementation rejecting the same v1/v2 is also allowed. v3 requires basicConstraints cA=true. APPLIES: A v1 or v2 intermediate"
+    allowed: "POSITIVE: v1/v2 intermediate with an independent CA-confirmation contract and acceptance policy → permitted acceptance. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Passing an old version without CA confirmation → prohibited. ROLE/ALTERNATIVES: Do not adopt this allowed set as a new mandatory Kiva choice."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: P12
+    source_force: v3 CA check; v1/v2 verify out-of-band OR reject
+    actor: path validator
+    applicability: incorporated-allowed-set
+    execution: definition only; not-run
+  - id: DV-X01
+    clauses:
+    - 1
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Missing required path/status → indeterminate/fixture incomplete, never falsely valid. APPLIES: Baseline defined using preprovided path/status"
+    allowed: "POSITIVE: Supply the same applicable path/CRL locally → definition evaluable if all inputs are present. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): IEEE nonconformance solely because networking is disabled → prohibited. ROLE/ALTERNATIVES: Enabling remote functionality requires its additional transport/PKIX-retrieval contract."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X01
+    source_force: construction outside scope; CRL cache assumption
+    actor: fixture designer / path provider
+    applicability: out-of-scope-mechanism-with-required-interface
+    execution: definition only; not-run
+  - id: DV-A03
+    clauses:
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: 1/8/9/19/20 octets; zero, negative and 21-octet issuer deviations classified separately. 01 followed by 18 zero octets and 01 versus 02 remain distinct. APPLIES: Otherwise valid certificate containing a canonical positive serial of up to 20 INTEGER content octets."
+    allowed: 'POSITIVE: Preserve and compare exact serial identity, including two 20-octet positive values differing
+      in their low byte. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Overflow/truncation/rounded
+      equality within required capacity; automatic rejection of nonpositive/longer values inferred solely from CA
+      duties. ROLE/ALTERNATIVES: Otherwise valid certificate containing a canonical positive serial of up to 20
+      INTEGER content octets.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A03
+    source_force: MUST capacity up to 20 octets; issuer profile and receiver separated
+    actor: Certificate user
+    applicability: required-extraction
+    execution: definition only; not-run
+  - id: DV-A05
+    clauses:
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Mandatory eight one by one; AKI/SKI/mappings recommendations and optional mapping boundary distinct; unrelated noncritical unknown is not automatic failure. APPLIES: Each mandatory extension appears individually with supported applicable semantics, plus unknown critical/noncritical controls."
+    allowed: 'POSITIVE: Recognize/process KU, policies, SAN, basicConstraints, nameConstraints, policyConstraints,
+      EKU, inhibitAnyPolicy. Keep permitted optional mapping support and critical rejection. SINGLE-CAUSE CONTRAST
+      (expected failure/result or prohibited oracle): Treating a mandatory form as optional; accepting its OID while
+      ignoring a relevant violating value; unknown critical extension silently ignored. ROLE/ALTERNATIVES: Each
+      mandatory extension appears individually with supported applicable semantics, plus unknown critical/noncritical
+      controls.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A05
+    source_force: MUST eight recognition forms; SHOULD AKI/SKI/mappings; §6.1 alternative retained
+    actor: PKIX recipient
+    applicability: required-extraction
+    execution: definition only; not-run
+  DC-REVOCATION:
+  - id: evidence-and-scope
+    clauses:
+    - 1
+    - 2
+    input: Current signed applicable complete CRL versus wrong issuer, distribution point, reason coverage, certificate
+      type, signer path/anchor, cRLSign, signature, stale time; a same-serial entry from an unrelated issuer is
+      a separate control. Include a current authentic applicable complete all-reasons CRL with revokedCertificates
+      absent; contrast with no CRL evidence.
+    allowed: UNREVOKED only with applicable complete fresh evidence; REVOKED on applicable revocation; unknown evidence
+      is INDETERMINATE. Preprovisioned evidence is valid without per-request network access. Such a valid empty
+      revocation list may establish UNREVOKED when all other validation conditions hold.
+    forbidden: Absent or unusable CRL evidence, or an unrelated CRL, proving non-revocation; mandatory online retrieval;
+      unknown status counted as success.
+  - id: delta-and-freshness
+    clauses:
+    - 3
+    - 4
+    input: Matching base/delta pair, mismatched AKI/issuer/IDP/numbers, certificateIssuer, removeFromCRL, multiple
+      reason masks, missing nextUpdate with and without independently trusted freshness evidence.
+    allowed: Apply delta and complete CRL rules with full coverage. Missing freshness evidence yields INDETERMINATE
+      under this contract; missing nextUpdate alone is not labelled universal malformed-certificate rejection.
+    forbidden: Treating a partial reason mask as complete; applying unrelated delta; turning an issuer profile condition
+      into an extra unconditional LRS error.
+  - id: other-status-provider
+    clauses:
+    - 5
+    input: Authenticated status-provider records bound to issuer/certificate and validation time, with good/revoked/unknown
+      and unbound or stale controls.
+    allowed: Evaluate the abstract trusted-status contract; wire OCSP remains outside this baseline unless separately
+      selected.
+    forbidden: Unauthenticated or wrong-certificate good status proving non-revocation; silently assuming an OCSP
+      implementation.
+  - id: DV-R01
+    clauses:
+    - 1
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate good/revoked/unknown, absent evidence and absent service capability. APPLIES: Each path certificate and evaluation time"
+    allowed: "POSITIVE: Authentic good bound to target certificate+issuer+t → UNREVOKED. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Different issuer/certificate or unauthenticated good → not UNREVOKED. ROLE/ALTERNATIVES: Preprovisioned evidence is allowed. Do not implicitly mandate online retrieval or wire OCSP."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R01
+    source_force: MUST not revoked; mechanism alternatives
+    actor: path validator / status provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R02
+    clauses:
+    - 2
+    - 3
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Distinguish unspecified reasons=all from a partial mask. APPLIES: Selecting the CRL mechanism"
+    allowed: "POSITIVE: Current complete CRL covers every reason and has no matching entry → final UNREVOKED. A valid empty CRL without revokedCertificates is also positive UNREVOKED evidence if all other authenticity/applicability/all-reasons conditions hold. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Returning the initial empty-cache state as good is prohibited. ROLE/ALTERNATIVES: A limited-reasons environment is an additional configuration under the §6.3.2 note. Do not silently mix it into a baseline claiming full coverage."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R02
+    source_force: functionally equivalent §6.3 algorithm
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R03
+    clauses:
+    - 2
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Explicit branches for t=nextUpdate and absent nextUpdate with/without trusted freshness. APPLIES: Evidence evaluation time t"
+    allowed: "POSITIVE: thisUpdate<=t<nextUpdate with authentic, applicable, all-reasons evidence → candidate good. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Final good from stale CRL alone is prohibited. ROLE/ALTERNATIVES: Do not make every receiver behavior on absence mandatory RFC rejection. This contract uses insufficient-evidence INDETERMINATE."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R03
+    source_force: issuer MUST; receiver algorithm and unspecified omission boundary
+    actor: CRL issuer / validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R04
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Treat cRLIssuer matching without DP name and absent IDP independently. APPLIES: DP with/without cRLIssuer; IDP with/without distributionPoint"
+    allowed: "POSITIVE: CRL matching all name/issuer conditions → applicable. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Same serial under another issuer's CRL, or specified cRLIssuer with indirectCRL=false → inapplicable. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R04
+    source_force: required algorithm checks
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R05
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate CA-flag presence, onlyContainsCACerts and attribute-only cases. APPLIES: IDP onlyContains* present"
+    allowed: "POSITIVE: EE certificate with onlyContainsUserCerts=true → condition satisfied. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Treating a CA certificate as good under the same CRL → prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R05
+    source_force: required algorithm checks
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R06
+    clauses:
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate use-deltas=false, exact base number and complete CRLs older than/equal to/newer than delta. APPLIES: use-deltas true"
+    allowed: "POSITIVE: BaseCRLNumber<=completeCRLNumber<deltaCRLNumber with same scope/key → applicable candidate. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Break only one AKI, issuer, IDP or number relation → do not use that delta as good evidence. ROLE/ALTERNATIVES: An inapplicable delta alone does not necessarily invalidate other independently sufficient complete-CRL evidence."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R06
+    source_force: conditional algorithm when use-deltas
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R07
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate empty intersection, inclusion, disjoint sets and both DP/IDP omitted → all. APPLIES: One or more applicable CRLs"
+    allowed: "POSITIVE: Two CRLs cover every reason, neither with a target entry → UNREVOKED. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Repeating the same partial reasons leaves gaps → UNDETERMINED. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R07
+    source_force: required algorithm state transitions
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R08
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate KU absent/present, bad signature only on delta and indeterminate signer path. APPLIES: Authenticity of complete/delta CRLs"
+    allowed: "POSITIVE: Same anchor, valid signer, cRLSign permission and correct CRL signature → authentic evidence. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Mathematically correct CRL signature but different anchor or disallowed KU → not good. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R08
+    source_force: MUST same anchor; verify signature; KU if present
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R09
+    clauses:
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Omission in the first entry → CRL issuer; omission after an issuer change → previous issuer. APPLIES: Indirect CRL and entry sequence"
+    allowed: "POSITIVE: Entry with target issuer I and serial7 → matching revocation. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Do not mistake issuer J's serial7 for target I's revocation. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R09
+    source_force: required matching by issuer and serial
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R10
+    clauses:
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Absent reasonCode → unspecified; no delta entry → base; delta revocation → revoked. APPLIES: Applicable complete+delta"
+    allowed: "POSITIVE: Base hold, delta removeFromCRL, all reasons/current → UNREVOKED. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Promoting uncovered reasons to good solely from removeFromCRL → prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R10
+    source_force: ordered algorithm
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R11
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Distinguish early exit for established revoked, complete reason coverage and incomplete coverage. APPLIES: DP sequence alone leaves status undecided"
+    allowed: "POSITIVE: Additional issuer CRL fills missing reasons → UNREVOKED possible. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Good with absent/inapplicable/insufficient additional CRL is prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R11
+    source_force: algorithm completion
+    actor: CRL validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-R12
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Unknown critical entry extension, unsupported IDP and presence/absence of another sufficient CRL. APPLIES: Unknown critical extension on CRL or entry"
+    allowed: "POSITIVE: Sufficient CRL containing an unknown noncritical extension → do not discard all evidence solely for that extension. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Ignoring unknown critical CRL extension to mark an unlisted certificate good → prohibited. ROLE/ALTERNATIVES: IDP support itself is not mandatory. If unsupported, use unknown or another recognizable CRL."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: R12
+    source_force: MUST for unrecognized critical extension
+    actor: CRL consumer
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-X02
+    clauses:
+    - 1
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate unavailable transport from normatively revoked. APPLIES: Baseline uses CRL or trusted abstract status"
+    allowed: "POSITIVE: Out-of-band good/revoked/unknown with all inputs bound → corresponding result. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Reusing a bare boolean true for an arbitrary certificate → prohibited. ROLE/ALTERNATIVES: Only selecting OCSP requires a separate applicable edition such as RFC6960 and a wire contract."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X02
+    source_force: alternative revocation mechanisms
+    actor: status evidence provider
+    applicability: optional-unselected-protocol
+    execution: definition only; not-run
+  - id: DV-A04
+    clauses:
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: 19/20 octets, equal base/complete, equal complete/delta, one-less/one-more; issuer 21-octet deviation separate. APPLIES: Applicable CRLNumber and delta/base numbers; declared delta support and otherwise valid issuer/key/scope."
+    allowed: 'POSITIVE: Exact BaseCRLNumber <= completeCRLNumber < deltaCRLNumber; adjacent positive 20-octet numbers
+      remain distinct. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Binary64/int64 collapse
+      or overflow changing the relation; rejecting an otherwise admissible 20-octet number because of host width.
+      ROLE/ALTERNATIVES: Applicable CRLNumber and delta/base numbers; declared delta support and otherwise valid
+      issuer/key/scope.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A04
+    source_force: MUST capacity up to 20 octets
+    actor: CRL verifier
+    applicability: required-extraction
+    execution: definition only; not-run
+  DC-NAMES:
+  - id: directory-strings
+    clauses:
+    - 1
+    - 2
+    - 3
+    - 4
+    input: UTF8String/PrintableString equivalent attributes; Unicode3.2 B.2/NFKC mapped pairs including FE00-FE0F
+      erratum correction; all-space and internal-space cases, accent/punctuation differences, reordered RDN members
+      versus reordered DN RDNs; optional unsupported string type.
+    allowed: RFC4518 stored-value preparation and exact type OID; unordered RDN, ordered DN, prefix subtree; optional
+      unsupported needed name yields no successful path.
+    forbidden: Modern runtime casefold substituted for pinned tables; IDNA preparation reused as DN preparation;
+      stripping arbitrary punctuation/accents; treating optional Teletex support as mandatory.
+  - id: dns-mail
+    clauses:
+    - 5
+    - 6
+    input: IDNA2003 dot variants, Unicode3.2 unassigned/prohibited/bidi and Punycode overflow/truncation; DNS label
+      case and boundaries; mailbox local-part case and host case, exact-host versus leading-dot constraints, legacy
+      emailAddress with absent SAN.
+    allowed: Pinned ToASCII with required flags, DNS host case-insensitive, mailbox local part exact, correctly
+      scoped name constraints.
+    forbidden: IDNA2008/UTS46 substitution; global mailbox lowercase; suffix substring matching across label boundaries.
+  - id: uri-and-other-names
+    clauses:
+    - 7
+    - 8
+    - 9
+    input: Certificate URI equivalent default ports for HTTP/HTTPS/FTP/LDAP, empty path, LDAP omitted versus explicit
+      defaults, reserved escapes and distinct userinfo/query/fragment, missing/non-DNS host under constraints; DNS/IP/DN
+      subtree controls and unknown attribute syntax.
+    allowed: Certificate-specific syntax AND scheme normalization; the separate xAPI IRI contract stays limited
+      to its own called sections. Unknown-type policy is declared; critical constraints are processed or fail.
+    forbidden: Applying certificate URI normalization wholesale to xAPI identifiers; ignoring reserved escapes;
+      DNS lookup, redirect, FTP login or LDAP lookup becoming a prerequisite.
+  - id: DV-N01
+    clauses:
+    - 1
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Same value with different tags; do not pass required name chaining when Teletex is unsupported. APPLIES: DN-attribute comparison"
+    allowed: "POSITIVE: Same OID with UTF8String Alice and PrintableString ALICE → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Treating unsupported UTF8String as an optional type and succeeding → prohibited. ROLE/ALTERNATIVES: Teletex mapping is a local matter under RFC4518. Optional decoder implementation is not required in this work."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N01
+    source_force: MUST UTF8String/PrintableString; OPTIONAL others
+    actor: PKIX recipient
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N02
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Empty input, empty after mapping, failure at prohibition and failure on only one side. APPLIES: DirectoryString comparison"
+    allowed: "POSITIVE: Distinct valid representations on both sides that become equal after prep → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Raw-string equality producing equal/path valid despite one-sided prep failure → prohibited. ROLE/ALTERNATIVES: Different internal order is allowed with identical external results. Distinguish Undefined, different and provider unavailable."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N02
+    source_force: MUST prepare both; failure gives Undefined
+    actor: name comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N03
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: FE00/FE0F and adjacent points; U+0009→space; U+200B→empty. APPLIES: DN caseIgnore profile"
+    allowed: "POSITIVE: Names with/without inserted U+00AD or U+FE00 → same prepared value. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Modern casefold accepting a Unicode3.2-unassigned point as a new character, or using the erroneous FF00–FE0F range unchanged → prohibited. ROLE/ALTERNATIVES: Applying erratum860 is an explicit proposed interpretation. Do not alter original RFC bytes. Do not mix substring corrections 1757/1758 into non-substring DN processing."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N03
+    source_force: shall mapping; B.2 required via RFC5280
+    actor: name-preparation provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N04
+    clauses:
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Empty/all-space, leading/trailing/internal runs and sequences containing U+0020 U+0301. APPLIES: After preceding preparation stages"
+    allowed: "POSITIVE: Alice<SP>Smith versus <SP>Alice<SP><SP>Smith<SP> → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Removing a combining-mark-associated space as ordinary space to create equality → prohibited. ROLE/ALTERNATIVES: Generic trim/collapse-to-one coincidentally passing the same examples does not prove the entire contract."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N04
+    source_force: specified stored/non-substring rule
+    actor: name comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N05
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Choose leading combining marks without starter, equal/different CCC and blocked composition from pinned tables. APPLIES: DN and Nameprep calling NFKC"
+    allowed: "POSITIVE: U+FF21 versus A, and e+U+0301 versus U+00E9 → equal respective NFKC/casefold results. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Dropping accents to equate e and é, or freely exchanging equal-CCC order → prohibited. ROLE/ALTERNATIVES: Do not reuse a latest-Unicode normalizer without edition evidence. Hashing thousands of data rows is not individual close reading."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N05
+    source_force: must equivalent normalization; Unicode3.2 profile
+    actor: normalization provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N06
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Hangul L/V/T first/last/out-of-range values, U+AC00/U+D7A3 and points adjacent to exclusions. APPLIES: Unicode3.2 normalization"
+    allowed: "POSITIVE: U+1100 U+1161→U+AC00; U+AC00 U+11A8→U+AC01. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Adding empty-final TBase as an actual T or recomposing an exclusion → prohibited. ROLE/ALTERNATIVES: Annex sample code alone is not the entire norm. Stop with a source residual if text and data conflict."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N06
+    source_force: normative resulting normalization; algorithmic Hangul
+    actor: normalization provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N07
+    clauses:
+    - 2
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate U+E000 private-use, U+FFFD, surrogate, noncharacter and points altered by mapping. APPLIES: Prohibition after mapping/normalization"
+    allowed: "POSITIVE: Characters removed by profile mapping disappear before prohibition. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Accepting Unicode3.2-unassigned U+1F600 because current Unicode assigns it → prohibited. ROLE/ALTERNATIVES: Do not universally merge DN and Nameprep prohibition sets."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N07
+    source_force: MUST table-based; profile-specific
+    actor: StringPrep provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N08
+    clauses:
+    - 2
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Choose RandAL edge positions, digits and combining marks from fixed D.1/D.2. APPLIES: Input explicitly selects DN or DNS-label profile"
+    allowed: "POSITIVE: Otherwise valid DN values are not Undefined solely for mixed bidi. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Nameprep mixing RandAL and L with successful ToASCII → prohibited. ROLE/ALTERNATIVES: Do not overapply DNS bidi rules to DN."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N08
+    source_force: RFC4518 ignores bidi; RFC3491 requires StringPrep check
+    actor: name-preparation provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N09
+    clauses:
+    - 2
+    - 11
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Legal names under X.501:2005 §9.3 do not repeat attribute-type OIDs within an RDN. Evaluate order/one-to-one matching using one/multiple RDNs and equal counts of distinct-type attributes. DER-decodable same-type duplicates are not positive legal-name controls. Add no blanket HTTP rejection. APPLIES: Legal names satisfying X.501:2005 §9.3 with distinct type OIDs within each RDN; prepared attribute sequences."
+    allowed: "POSITIVE: Reorder attributes within the same RDN → equal. Append a subordinate RDN at the DN end → inside base subtree. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Reorder DN RDNs or change only a type OID → different. ROLE/ALTERNATIVES: Do not substitute substring/prefix testing of stringified DNs."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N09
+    source_force: specified matching rules
+    actor: name comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N10
+    clauses:
+    - 1
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Same OID with different bytes, known OID with wrong syntax, unsupported necessary comparison. APPLIES: Unknown OID or non-DirectoryString syntax"
+    allowed: "POSITIVE: Unknown OID with identical bytes under declared binary-comparison policy → record that comparison result. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Guessing a type from unknown-attribute values to pass mandatory name constraints → prohibited. ROLE/ALTERNATIVES: Unknown-attribute support does not create a duty to implement all X.500. Record permitted local choices."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N10
+    source_force: mandatory standard attributes; MAY/SHOULD for unfamiliar attributes
+    actor: PKIX name comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N11
+    clauses:
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Label lengths1/63/64, U+3002/U+FF0E/U+FF61 and ASCII/non-ASCII branches. APPLIES: dNSName storage/IDN conversion"
+    allowed: "POSITIVE: bücher.example→xn--bcher-kva.example; ASCII-label case differences → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Passing leading/trailing hyphens, underscores or 64-octet labels under the relevant ToASCII settings → prohibited. ROLE/ALTERNATIVES: Do not silently substitute IDNA2008/UTS46. Do not copy every producer conversion duty into receiver rejection."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N11
+    source_force: MUST; AllowUnassigned false; STD3 true
+    actor: CA name encoder / recipient comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N12
+    clauses:
+    - 5
+    - 10
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: RFC4519 §2.4 stored-label lengths1/63/64, alphanumeric edges and LDH. example/1-example are legal; example.com/_srv are outside the storage profile. Separate input domain from comparison; infer no blanket HTTP rejection by receivers. APPLIES: domainComponent in a DN"
+    allowed: "POSITIVE: domainComponent EXAMPLE/example → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Applying whole-DN caseIgnore/space compression to domainComponent to equate distinct labels → prohibited. ROLE/ALTERNATIVES: Do not automatically extend §7.2 flags not stated in §7.3. Review the current contract's grouping of them."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N12
+    source_force: MUST ToASCII stored label; case-insensitive exact match
+    actor: domainComponent encoder / comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N13
+    clauses:
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: All-ASCII/basic-only, trailing delimiter and maximum processed value; do not mistake the original label after failure for valid ACE. APPLIES: Converting a non-ASCII label to ACE"
+    allowed: "POSITIVE: ASCII result matching pinned RFC3492 examples → conversion succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Truncated variable-length integers or wrapped overflow successfully producing a different label → prohibited. ROLE/ALTERNATIVES: Do not reuse ToUnicode display failure fallback for ToASCII failure."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N13
+    source_force: MUST full StringPrep profile; prescribed Punycode
+    actor: IDNA provider
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N14
+    clauses:
+    - 5
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Zero/one/multiple additional labels; distinguish terminal-dot validity from raw grammar. APPLIES: dNSName constraint"
+    allowed: "POSITIVE: www.host.example.com and HOST.EXAMPLE.COM → inside constraint. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): evilhost.example.com or host1.example.com → outside the same constraint. ROLE/ALTERNATIVES: Do not apply dNSName's zero-additional-label rule to URI/email leading-dot rules."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N14
+    source_force: MUST case-insensitive label comparison
+    actor: name constraint validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N15
+    clauses:
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Same local part+IDN host; do not host-convert an xn-- string in the local part. APPLIES: rfc822Name comparison"
+    allowed: "POSITIVE: User@EXAMPLE.COM and User@example.com → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Equating User@example.com with user@example.com → prohibited. ROLE/ALTERNATIVES: Do not implicitly adopt later standards such as SMTPUTF8. Check corrected xAPI mbox positives as a separate field."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N15
+    source_force: specified equality; MUST IDN host conversion
+    actor: PKIX mail comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N16
+    clauses:
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: SAN absent/present, case difference only in the target mailbox local part, single/multiple domain labels. APPLIES: rfc822Name constraint present"
+    allowed: "POSITIVE: u@a.example.com under .example.com → inside; u@example.com under example.com → inside. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): u@example.com under .example.com → outside. ROLE/ALTERNATIVES: SAN presence alone does not permit skipping constraints on that SAN."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N16
+    source_force: specified constraint semantics; MUST legacy fallback
+    actor: name constraint validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N17
+    clauses:
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Combining sequences, reserved separators, non-BMP scalars and unpaired surrogates. APPLIES: Storing an IRI in a certificate URI"
+    allowed: "POSITIVE: NFC-equivalent input IRIs → same specified mapping. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Reversing order and IDNA-converting beyond the host, or directly storing non-ASCII in IA5 → prohibited. ROLE/ALTERNATIVES: This is a different call from xAPI IRI-preservation rules."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N17
+    source_force: MUST NFC variant b and step2; MUST NOT premature ireg-name conversion
+    actor: certificate name encoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N18
+    clauses:
+    - 7
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: %7e/~, %2f/%2F and characters within userInfo/query/fragment separately. APPLIES: Certificate URI comparison"
+    allowed: "POSITIVE: http://EXAMPLE.COM/a/./b and http://example.com/a/b → equal. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Expanding %2F into a path separator to equate different segment structures → prohibited. ROLE/ALTERNATIVES: Do not extend to resource identity established by DNS lookup or redirects."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N18
+    source_force: MUST syntax-based normalization
+    actor: certificate URI comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N19
+    clauses:
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate nondefault/empty ports and ftp typecode/credential-condition differences from the source. APPLIES: http/https/ftp URI comparison"
+    allowed: "POSITIVE: Compare http://example.com:80 with http://example.com/, https :443 and ftp :21 under their specified rules. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Equating http path A/a or different userInfo/query/fragment by blanket lowercasing/removal → prohibited. ROLE/ALTERNATIVES: No FTP login or HTTP retrieval is needed. Defaults come from URI definitions, not connection results."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N19
+    source_force: MUST recognize four schemes
+    actor: certificate URI comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N20
+    clauses:
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Empty/omitted fields, explicit *, percent-escaped filter and presence/absence of overriding context. APPLIES: ldap URL without overriding context"
+    allowed: "POSITIVE: ldap://example.com and the same URI with omitted fields filled by explicit defaults → source-permitted equivalence. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Equating scope=sub or a changed filter to omitted defaults → prohibited. ROLE/ALTERNATIVES: Do not make directory search, semantic LDAP-filter equality or DN-alias resolution prerequisites for this normalization."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N20
+    source_force: called scheme-based normalization; context-sensitive defaults
+    actor: certificate URI comparator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N21
+    clauses:
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate the same URN without URI constraints and a certificate without the target URI. APPLIES: URI constraint present and a target SAN URI encountered"
+    allowed: "POSITIVE: .example.com constraint with https://a.example.com/x → inside. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Under the same constraint, https://example.com, urn:example:x or https://192.0.2.1/ → violation under the source. ROLE/ALTERNATIVES: No blanket URI rejection without the prerequisite constraint."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N21
+    source_force: MUST reject absent/non-DNS authority under URI constraint
+    actor: name constraint validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-N22
+    clauses:
+    - 7
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Mask boundaries, IPv4/IPv6 lengths, absent target name form and unsupported critical constraint. APPLIES: Constraints for each name form"
+    allowed: "POSITIVE: IPv4 192.0.2.1 is inside C0000200FFFFFF00; 192.0.3.1 is outside. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Allowing 192.0.20.1 via string prefix192.0.2 → prohibited. ROLE/ALTERNATIVES: Separate SHOULD support from MUST process-or-reject. Do not call an invented generic comparator for unspecified forms IEEE's settled answer."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: N22
+    source_force: directoryName MUST; others SHOULD; critical process-or-reject
+    actor: name constraint validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-X03
+    clauses:
+    - 2
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Explicitly state added scope if selecting another optional matching rule. APPLIES: DN equality/URI normalization"
+    allowed: "POSITIVE: Compare stored DNs with non-substring processing and obtain a result without wire LDAP. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Reusing substring one-space output for stored values or making display conversion mandatory validation → prohibited. ROLE/ALTERNATIVES: Retain execution capability and additional-definition conditions when optional support is selected."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X03
+    source_force: stored values MUST; display should
+    actor: name comparator
+    applicability: conditional-exclusion
+    execution: definition only; not-run
+  - id: DV-X04
+    clauses:
+    - 1
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Optional type needed for issuer linkage versus merely unknown noncritical supplementary information. APPLIES: Declared optional string/name support"
+    allowed: "POSITIVE: Required UTF8/Printable path using no optional legacy type → evaluable. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Silently skipping an unsupported critical constraint as out of scope → prohibited. ROLE/ALTERNATIVES: Bibliographic references to X.500/501/509/520:2005 alone do not require implementing all those standards."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: X04
+    source_force: MUST mandatory types; conditional critical checks
+    actor: name processor
+    applicability: optional-with-required-failure-boundary
+    execution: definition only; not-run
+  - id: DV-A07
+    clauses:
+    - 10
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: 1/63/64 ASCII characters, alphanumeric edges, interior hyphens; stored and query uses distinct. APPLIES: domainComponent stored value through RFC5280 §4.1.2.4; do not import a full LDAP service."
+    allowed: 'POSITIVE: example and 1-example are conforming; EXAMPLE/example compare case-insensitively. Preserve
+      named ToASCII stored/query distinction. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle):
+      Treating example.com, _srv, edge hyphen or 64-character label as conforming stored labels; inventing mandatory
+      HTTP rejection solely from storing-party responsibility. ROLE/ALTERNATIVES: domainComponent stored value through
+      RFC5280 §4.1.2.4; do not import a full LDAP service.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A07
+    source_force: attribute definition; storage responsibility distinct from LRS receiver rejection
+    actor: Stored-attribute producer; name comparator uses the called input domain
+    applicability: required-source-boundary
+    execution: definition only; not-run
+  - id: DV-A08
+    clauses:
+    - 12
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Whole frozen corpus later; present stage records the obligation and identity without executing a normalizer. APPLIES: Provider selected after definition completion; fixed Unicode3.2 normalization corpus and its header invariants."
+    allowed: 'POSITIVE: For NFKC, each c1..c5 result is c4 on the fixed corpus. Record provider/version/data identity
+      and results at the later verification stage. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited
+      oracle): Claiming corpus conformance from a few examples or hashes; treating unexecuted provider proof as
+      PASS or as a new LRS HTTP rejection. ROLE/ALTERNATIVES: Provider selected after definition completion; fixed
+      Unicode3.2 normalization corpus and its header invariants.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A08
+    source_force: later provider conformance evidence; not current xAPI execution
+    actor: Future NFKC provider verifier
+    applicability: later-provider-evidence
+    execution: not-run; later provider evidence
+  DC-DER:
+  - id: typed-encoding
+    clauses:
+    - 1
+    - 2
+    - 4
+    - 5
+    input: Independently typed certificate/CRL DER; mutate one tag/class/constructed bit, minimal length, INTEGER
+      sign padding, BOOLEAN, BIT STRING unused bits, DEFAULT presence, SET order, OID base128, explicit/implicit
+      wrapper, UTF8 scalar, IA5 or PrintableString alphabet at a time.
+    allowed: Canonical encodings under the pinned X.680/X.690 and RFC5280 schema; signed bytes are retained without
+      normalization.
+    forbidden: Generic TLV acceptance as proof of typed DER; accepting overlong length/INTEGER; broadening the character
+      alphabets.
+  - id: signed-bytes-and-time
+    clauses:
+    - 3
+    - 6
+    input: Original TBSCertificate/TBSCertList signatures, altered/reconstructed bytes, OID-typed extnValue with
+      unknown critical/noncritical controls, DER UTC/GeneralizedTime with Z/seconds and canonical nonzero fraction.
+    allowed: Verification uses original signed bytes; unknown noncritical data preserved; DER validity and issuer
+      certificate-time profile evaluated separately.
+    forbidden: Normalization before verification; globally rejecting every issuer profile deviation as malformed
+      DER.
+  - id: rsa-algorithms-and-scope
+    clauses:
+    - 7
+    - 8
+    input: rsaEncryption SPKI sequence(n,e) and NULL parameters; SHA256/384/512 RSA signature AlgorithmIdentifier
+      with NULL versus absent parameters; restricted PSS/OAEP key OIDs; unsupported optional ASN.1 capabilities.
+    allowed: Called RSA forms and required NULL/absent signature parameter interoperability; optional capabilities
+      explicitly scoped.
+    forbidden: Treating restricted keys as unrestricted PKCS1v1.5; requiring an entire ASN.1 compiler or hiding
+      mandatory path checks behind an optional-scope label.
+  - id: DV-D01
+    clauses:
+    - 1
+    - 2
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separately define high-tag short/long boundaries, CHOICE alternatives and extra components. APPLIES: x5c DER or CRL DER"
+    allowed: "POSITIVE: Certificate matching types, tags and mandatory components → typed decode succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Change only issuer Name tag/class or a mandatory SEQUENCE component → typed decode fails. ROLE/ALTERNATIVES: Do not arbitrarily rewrite RFC5280's hybrid ASN.1 module as pure 2002 schema grammar."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D01
+    source_force: ASN.1/DER shall; RFC5280 explicit schema
+    actor: typed certificate/CRL decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D02
+    clauses:
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Do not override imported type-tag defaults in the calling module. APPLIES: Reading a tagged type under its schema"
+    allowed: "POSITIVE: Schema-conforming [0] explicit version and implicit GeneralName → decode. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Add/remove one wrapper despite equal TLV length, or infer type solely from a context tag → failure. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D02
+    source_force: specified tagging rules
+    actor: typed decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D03
+    clauses:
+    - 1
+    - 4
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Length0/127/128, one byte short/extra versus declared length, and references outside nested scope. APPLIES: Length of every TLV"
+    allowed: "POSITIVE: Content lengths127 and128 in their respective minimal forms → acceptance. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Long form for127, leading-zero length octet or indefinite length → DER failure. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D03
+    source_force: shall definite minimum octets
+    actor: DER decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D04
+    clauses:
+    - 1
+    - 9
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: INTEGER0 is not empty. Do not conflate issuer-positive serial conditions with generic INTEGER syntax. Canonical controls: +127=02 01 7F; +128=02 02 00 80; -128=02 01 80; -129=02 02 FF 7F. Removing a content octet without changing length is a separate truncated encoding. APPLIES: Schema BOOLEAN/INTEGER/ENUMERATED"
+    allowed: "POSITIVE: Minimal INTEGER127/128/-128/-129 and TRUE FF → decode. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Redundant INTEGER sign octets (02 02 00 7F, 02 02 FF 80) and TRUE01 are DER failures. 02 01 80 decodes successfully as canonical -128, which differs from intended +128. Record positive-domain/profile judgment separately. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D04
+    source_force: shall canonical encoding
+    actor: DER decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D05
+    clauses:
+    - 1
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Unused count0..7/8, empty bitstring, all-zero named list and trailing-zero treatment. APPLIES: BIT STRING, OCTET STRING and restricted strings"
+    allowed: "POSITIVE: Minimal KU named bits and RSA signature BIT STRING unused=0 → decode. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Set an unused bit to1 or use constructed OCTET STRING → DER failure. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D05
+    source_force: shall primitive/canonical unused bits
+    actor: DER decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D06
+    clauses:
+    - 1
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Prefix-related encodings, different tags, same-tag SET OF and comparison padding for shorter encodings. APPLIES: Certificate SEQUENCE or Name RDN SET OF"
+    allowed: "POSITIVE: Semantically reorder attributes of the same RDN, then restore canonical DER order → same name. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Accepting DER with raw SET OF components in noncanonical order solely because signature verification succeeds → prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D06
+    source_force: shall schema sequence / canonical set order
+    actor: DER encoder/decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D07
+    clauses:
+    - 1
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Omitted default v1/explicit v2, default CA false and missing mandatory component. APPLIES: Typed fields such as version/default critical"
+    allowed: "POSITIVE: Omitted critical=false and explicit nondefault=true → canonical. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Explicitly encoding critical=false and treating it as DER success → prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D07
+    source_force: shall omit DEFAULT-equal component
+    actor: DER decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D08
+    clauses:
+    - 1
+    - 2
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: First arc0/1/2, second-arc boundaries and multioctet first subidentifier. APPLIES: OBJECT IDENTIFIER/AlgorithmIdentifier"
+    allowed: "POSITIVE: Known RSA OID with appropriate parameters schema → typed decode. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Truncated base128, nonminimal subidentifier or reusing another OID's parameters → failure. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D08
+    source_force: specified OID and parameter syntax
+    actor: typed decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D09
+    clauses:
+    - 5
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: UTF8 1/2/3/4-byte boundaries, truncated continuation and separate NUL syntax/profile judgments. APPLIES: Typed bytes such as DirectoryString/SAN"
+    allowed: "POSITIVE: Printable Alice+1, UTF8 é and IA5 ASCII host → respective type success. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): @ in Printable, non-ASCII in IA5 or UTF8 overlong/surrogate/>10FFFF → typed failure. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D09
+    source_force: shall typed repertoire; RFC3629 valid scalar encoding
+    actor: typed string decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D10
+    clauses:
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separate different encodings of the same meaning and agreement between outer signatureAlgorithm and TBS signature values. APPLIES: Certificate/CRL signature verification"
+    allowed: "POSITIVE: Correct issuer signature over the original TBS slice → verification succeeds. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Treating a signature valid only over normalized reconstructed bytes after decoding as proof of original bytes → prohibited. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D10
+    source_force: signature over DER TBS
+    actor: decoder / signature verifier
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D11
+    clauses:
+    - 2
+    - 3
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Separately check outer OCTET wrapper/inner DER and duplicate-OID profile/receiver conditions. APPLIES: Certificate extensions"
+    allowed: "POSITIVE: Retain original bytes of unknown noncritical extensions → no path failure solely for them. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Wrong type in a known extnValue or ignoring unknown critical extensions → required validation cannot succeed. ROLE/ALTERNATIVES: Allow other algorithms/providers producing the same external result. Insufficient capability does not prove result correctness."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D11
+    source_force: typed OCTET contents; unknown critical reject
+    actor: extension decoder / path validator
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D12
+    clauses:
+    - 4
+    - 6
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: UTCTime49/50, absent/nonzero fraction, missing seconds and inclusive validity endpoints. APPLIES: UTCTime/GeneralizedTime"
+    allowed: "POSITIVE: GeneralizedTime 19920722132100.3Z → generic DER syntax succeeds; judge profile separately. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): 19920722132100.30Z/.0Z, local offset or hour24 → DER failure. ROLE/ALTERNATIVES: Primitive date/time delegation is already authorized. Retain ASN.1/PKIX calling constraints here."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D12
+    source_force: DER shall; separate PKIX issuer MUST
+    actor: DER decoder / CA / path receiver
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D13
+    clauses:
+    - 7
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Different SPKI/signature parameter rules, inner/outer algorithm identity and unknown-OID capability. APPLIES: RSA keys and SHA2 RSA certificate signatures"
+    allowed: "POSITIVE: NULL/absent parameters in sha256WithRSAEncryption signature AlgorithmIdentifier → receiver compatibility. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Unconditionally converting PSS-only/OAEP-only keys into RS256 keys → prohibited. ROLE/ALTERNATIVES: Payload RS256/384/512 choice differs from the certificate-chain signature-algorithm repertoire."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D13
+    source_force: MUST/receiver interop requirements
+    actor: public-key and signature decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-D14
+    clauses:
+    - 4
+    - 8
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: Table/tag headings in each edition's raw PDF and derived text, common types and unused types. APPLIES: DER incorporated by RFC5280 and JWS"
+    allowed: "POSITIVE: Map equivalent canonical rules for Certificate/CRL types across editions. SINGLE-CAUSE CONTRAST (expected failure/result or prohibited oracle): Making types added in2008 or schemas absent in2002 mandatory certificate requirements → prohibited. ROLE/ALTERNATIVES: Excluding CER/PER/XML/full compilers is not grounds to omit used types."
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: D14
+    source_force: two explicit normative editions
+    actor: contract author / decoder
+    applicability: incorporated
+    execution: definition only; not-run
+  - id: DV-A06
+    clauses:
+    - 10
+    input: "Apply ISOLATION.md. Establish valid types, signatures, paths and input eligibility apart from the semantic dimension being changed. If a negative fixture does not meet its premises, it is invalid/NOT-RUN, not successful detection. INPUT/BOUNDARY: NULL absent, present empty, present nonempty, constructed NULL and wrong tag are separate controls. APPLIES: A schema/OID location whose value type is NULL; presence-versus-absence checked under that OID contract."
+    allowed: 'POSITIVE: 05 00 decodes as NULL. Signature AlgorithmIdentifier absent/NULL permitted alternatives
+      remain per RFC4055; rsaEncryption SPKI uses its distinct contract. SINGLE-CAUSE CONTRAST (expected failure/result
+      or prohibited oracle): 05 01 00 or constructed 25 00 accepted as NULL; requiring present NULL for every AlgorithmIdentifier.
+      ROLE/ALTERNATIVES: A schema/OID location whose value type is NULL; presence-versus-absence checked under that
+      OID contract.'
+    forbidden: "Contradicting the explicitly stated relation, losing its actor/force/conditions, or treating an unavailable required input as PASS. Separate delegated result / required IEEE behavior / harness capability / policy context."
+    review_clause_id: A06
+    source_force: shall primitive NULL with zero content octets
+    actor: Typed ASN.1 decoder
+    applicability: required-extraction
+    execution: definition only; not-run
+  DC-MIME:
+  - id: type-and-parameters
+    clauses:
+    - 1
+    - 2
+    - 3
+    input: multipart/mixed and Application/JSON case variants; boundary quoted/token/escaped with significant case,
+      lengths 1/70, permitted punctuation; nested comments and legal folded headers; parameter order, charset case
+      and case-sensitive unknown values.
+    allowed: Equivalent media types and parameters compare semantically. Boundary bytes retain case. Legal folding/comments
+      belong to headers only.
+    forbidden: Raw string equality for media types; folding/comments in boundary delimiters; missing/empty/too-long/trailing-space
+      boundary; merging comments into arbitrary tokens.
+  - id: framing-and-raw
+    clauses:
+    - 4
+    - 7
+    input: Preamble/epilogue, transport padding, raw attachment ending in CRLF, binary non-ASCII, nested multipart
+      as a single raw attachment and an outer delimiter interrupting inner structure.
+    allowed: Preserve every raw octet except framing CRLF; identify outer boundaries and retain nested attachment
+      as one byte sequence for its hash.
+    forbidden: Flattening nested MIME into xAPI attachment entries; removing an attachment's own trailing CRLF;
+      applying SMTP 7-bit limits or MIME encoded-word rendering.
+  - id: first-and-additional-headers
+    clauses:
+    - 5
+    input: First part explicit application/json, explicit text/plain and missing type; additional part Content-Type
+      present/absent, Content-Transfer-Encoding binary/absent, in receiver and producer/output roles separately.
+    allowed: First type explicitly JSON; optional additional Content-Type absence is advisory, and metadata match
+      is conditional on both values. LRS receiver binary-default SHOULD is not output's required binary header.
+    forbidden: Inferring first JSON type solely from body bytes; promoting every recommended attachment header into
+      mandatory receiver rejection.
+  - id: hash-and-completeness
+    clauses:
+    - 6
+    input: SHA-224/256/384/512 raw parts, shared hash across metadata, distinct missing raw part with/without fileUrl,
+      wrong raw octets/length/hash, attachments=true/false and metadata order variants.
+    allowed: Required returned raw complete and byte-correct; match by hash; D-09 metadata ordering policy is separate
+      from mandatory raw preservation.
+    forbidden: Missing required raw data hidden by comparison exclusions; ASCII character count substituted for
+      octet length; requiring raw MIME part order to equal metadata order.
+  - id: dcr03-structured-cte
+    clauses:
+    - 2
+    - 3
+    - 5
+    input: 'Otherwise valid returned multipart with Content-Transfer-Encoding: binary (raw octets), BiNaRy, nested/escaped
+      comments, legal folded whitespace; compare non-binary token, quoted mechanism, malformed comment and two-token
+      controls.'
+    allowed: One case-insensitive binary mechanism token with ignored legal comments and unfolded field whitespace.
+      Preserve required output header, independent hash/length/raw framing and first-part application/json checks.
+    forbidden: Rejecting a valid comment by raw string equality; admitting a non-binary mechanism or arbitrary trailing
+      token; weakening sender/output requirements to the receiver SHOULD assumption.
+  - id: rrf02-header-lexical-pairs
+    input: 'Single-fault pairs: binary (raw octets), BINARY (nested (note)), binary (escaped \) note), legal CRLF+HTAB
+      folding versus binary (日本語), binary (a<bare CR>b), bare LF continuation, orphan continuation, unmatched comment,
+      extra token and quoted mechanism. Repeat comment/physical-line probes in Content-Type.'
+    allowed: Legal structured comments/case/quoted-pair and CRLF folding are accepted by the oracle. Each independently
+      invalid header grammar is FAIL before removal. Non-ASCII attachment body remains valid; only headers have
+      ASCII constraint.
+    forbidden: Deleting invalid header octets or normalizing bare CR/LF to make them valid; suppressing first JSON
+      type, required CTE/hash or independent raw/length checks.
+    source_anchor_ids:
+    - RRF-02-S01
+    - RRF-02-S02
+    - RRF-02-S03
+    - RRF-02-S04
+    review_finding: RRF-02
+  - id: rrf03-boundary-partitions
+    input: Positive outer boundary independent-mime-vector-outer with raw line --independent-mime-vector-not-a-delimiter.
+      Negative same raw with outer boundary independent-mime-vector. Header boundaries "bad@boundary", "ends ",
+      71 copies of a, and legal quoted "good:boundary"; correct body delimiters for each. Include transport padding,
+      preamble/epilogue and raw own trailing CRLF.
+    allowed: Positive raw line is not a chosen-boundary prefix and is preserved. Reject malformed response boundary
+      BNF or body-part prefix collision. Malformed request is a separate invalid MIME branch, not a mandatory-204
+      positive. Legal quoted boundary and receiver transport padding remain allowed.
+    forbidden: Requiring acceptance of a request with forbidden line prefix; accepting response @/trailing-SP/71-char
+      boundary; stripping a raw body CRLF or treating padding as a header comment.
+    source_anchor_ids:
+    - RRF-03-S01
+    - RRF-03-S02
+    - RRF-03-S03
+    - RRF-03-boundary-BNF
+    review_finding: RRF-03
+  - id: rrf07-sha224-full-output
+    input: 'Transcribed FIPS180-2 Change Notice 1 example: raw ASCII abc = hex 616263, length 3, full SHA-224 23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7.
+      Metadata and X-Experience-API-Hash match. Test JSON/fileUrl preservation and multipart/no-fileUrl admission/readback
+      separately. Negative pairs: raw abd with same hash; abc with first hash digit changed to 3; abc with declared
+      length 4. No digest or fixture is generated in this phase.'
+    allowed: Valid full SHA-224 receives ordinary successful admission and retains metadata; returned raw/hash/length
+      association is checked independently. Each single-cause inconsistent input is rejected under the relevant
+      attachment rule. Retain separate SHA-256/384/512 partitions.
+    forbidden: Rejecting full 56-hex SHA-224 merely for length; confusing truncation with SHA-224; changing JWS
+      algorithms; using wrong length to stand in for wrong hash detection.
+    source_anchor_ids:
+    - RRF-07-S01
+    - RRF-07-S02
+    - RRF-07-S03
+    - RRF-07-S04
+    - RRF-07-S05
+    review_finding: RRF-07
+  - id: rrfr01-independent-mime-failures
+    input: 'Paper controls based on attachment-rfc-framing-folded-headers retrieval. Keep raw hex 706f727461626c650062696e617279ff6279746573
+      (21 bytes), existing SHA-256 13fc365da2ef41f756d160b40d4cdbfffd582ee569cf33fec523b00c366cbda5 and all status/version/Consistent-Through/framing/CTE
+      correct. Compare length token 21 versus 20 versus 21.0; metadata contentType application/octet-stream versus
+      part type application/octet-stream or text/plain. After a first length 21.0, separately vary: another matching
+      metadata entry with mismatching contentType; Content-Length 20; a later part missing hash, with wrong full
+      hash, non-binary CTE or malformed header; an additional no-fileUrl metadata entry with 64 zero hex sha2 and
+      no part. For expected_data mismatch use the already published SHA-224 abc vector with length 3.0 and valid
+      headers/digest while expected_data still requires the original 21-byte sequence. No wire fixture or digest
+      is generated.'
+    allowed: Exact 21 with all independent conditions correct is PASS. Exact 20 is FAIL for length. 21.0 with matching
+      type and all other independent conditions correct remains ORACLE-UNAVAILABLE/NOT-RUN in the current bounded
+      adapter (the complete lossless contract accepts this numeric equality). 21.0 plus any independently established
+      type/header/hash/length/required-raw/expected-data violation is FAIL at that violation. Repeat across same-item,
+      later metadata, later part and final completeness checks.
+    forbidden: An early ? or continue/return on numeric unknown skips later independent checks; reordering only
+      Content-Type ahead of length leaves later-part/completeness masking; numeric tolerance or float roundtrip
+      is used to turn unknown into PASS; unavailable provider is treated as an LRS violation; a known independent
+      FAIL becomes NOT-RUN.
+    source_anchor_ids:
+    - RRFR-01-S01
+    - RRFR-01-S02
+    review_finding: RRFR-01
+  - id: rrfr-f01-media-type-unavailable
+    input: 'Use the existing attachment-rfc-framing-folded-headers retrieve observation with exact metadata length
+      21 and existing raw/digest. Paper variations: FP-01: All original metadata and part headers valid; exact length
+      21; FP-02: Attachment part Content-Type application/octet-stream; x=1; x=1; everything else correct; FP-03:
+      FP-02 plus a later copy of the same raw data with first hash digit 0 instead of 1; FP-04: FP-02 plus Content-Length:
+      20 on the 21-byte attachment; FP-05: First part Content-Type application/json; charset=utf-8; charset=utf-8;
+      everything else correct; FP-06: FP-05 plus a later attachment part missing X-Experience-API-Hash; FP-07: Metadata
+      contentType application/octet-stream; x=1; x=1; attachment part Content-Type remains application/octet-stream;
+      FP-08: FP-07 plus the later wrong-hash part from FP-03; FP-09: FP-05 plus malformed JSON body in the first
+      part; FP-10: FP-02 plus additional metadata with no fileUrl and 64 zero hex sha2, without any corresponding
+      part; FP-11: FP-02, and expected_data additionally requires the three-byte sequence 616263 which no returned
+      part contains; FP-12: FP-05, plus the existing attachment part Content-Type text/plain against metadata application/octet-stream;
+      FP-13: FP-05 plus metadata length token 21.0; all other conditions correct; FP-14: Top-level Content-Type
+      multipart/mixed; boundary=a; boundary=b; boundary-dependent body checks unavailable; FP-15: First part Content-Type
+      text/plain without duplicate parameters; FP-16: First part Content-Type application (no slash or subtype);
+      FP-17: Attachment part Content-Type application (no slash or subtype), metadata valid; FP-18: Attachment part
+      Content-Type text/plain; metadata application/octet-stream, otherwise valid. No response fixture or digest
+      is generated.'
+    allowed: 'FP-01: PASS (all relevant predicates hold); FP-02: NOT-RUN (duplicate parameter disposition remains
+      unavailable); FP-03: FAIL (MIME attachment hash does not match raw data); FP-04: FAIL (MIME Content-Length
+      differs from raw data); FP-05: NOT-RUN (first-part parameter disposition unavailable; JSON and later checks
+      still run); FP-06: FAIL (missing MIME attachment hash); FP-07: NOT-RUN (left operand of media-type equivalence
+      unavailable); FP-08: FAIL (MIME attachment hash does not match raw data); FP-09: FAIL (invalid first MIME
+      JSON part); FP-10: FAIL (response omits attachment data without a fileUrl); FP-11: FAIL (multipart response
+      omitted or altered expected attachment data); FP-12: FAIL (MIME content type differs from attachment metadata);
+      FP-13: NOT-RUN (multiple local unknowns, no known violation; 21.0 is not itself invalid); FP-14: NOT-RUN (envelope
+      boundary cannot be selected safely; no invented framing result); FP-15: FAIL (first MIME part is not application/json);
+      FP-16: FAIL (missing MIME subtype separator); FP-17: FAIL (missing MIME subtype separator); FP-18: FAIL (MIME
+      content type differs from attachment metadata). A duplicate parameter alone remains ORACLE-UNAVAILABLE; it
+      is not an established LRS violation. A known later violation dominates local numeric or media-type unavailability.'
+    forbidden: Returning a local first-part or attachment media-type unknown before safely decidable later checks;
+      treating duplicate parameters as an established invalidity or success; guessing an ambiguous top-level boundary;
+      suppressing ordinary lexical errors/type mismatches; upgrading SHOULD into mandatory rejection.
+    source_anchor_ids:
+    - RRFR-01-S01
+    - RRFR-01-S02
+    review_finding: RRFR-F01
+  - id: ffcr-01-static-controls
+    input: valid multipart with unique boundary; text/plain; x=1; x=2; multipart/mixed; x=1; x=2 without boundary;
+      multipart/mixed with repeated boundary only; first part text/plain; x=1; x=2; unique boundary plus unrelated
+      duplicate parameter and later bad hash; unique boundary plus duplicate parameter only; duplicate parameter
+      followed by malformed parameter syntax
+    allowed: valid multipart with unique boundary => PASS; text/plain; x=1; x=2 => FAIL; multipart/mixed; x=1; x=2
+      without boundary => FAIL; multipart/mixed with repeated boundary only => NOT-RUN; first part text/plain; x=1;
+      x=2 => FAIL; unique boundary plus unrelated duplicate parameter and later bad hash => FAIL; unique boundary
+      plus duplicate parameter only => NOT-RUN; duplicate parameter followed by malformed parameter syntax => FAIL
+    forbidden: Unknown converted to success or violation; known violation hidden; unselected order policy imposed;
+      fixed calendar-to-seconds conversion. Paper definitions only.
+    review_finding: FFCR-01
+    source_evidence: target/ieee-test-definition-ffcr-correction/20261018T180706Z/source-evidence.json
+  - id: ffcr-03-static-controls
+    input: same two complete metadata associations in reversed order; one metadata association omitted; one association
+      duplicated instead of the other; sha2/contentType/fileUrl association changed; extension-owned array reversed
+    allowed: same two complete metadata associations in reversed order => PASS; one metadata association omitted
+      => FAIL; one association duplicated instead of the other => FAIL; sha2/contentType/fileUrl association changed
+      => FAIL; extension-owned array reversed => FAIL
+    forbidden: Unknown converted to success or violation; known violation hidden; unselected order policy imposed;
+      fixed calendar-to-seconds conversion. Paper definitions only.
+    review_finding: FFCR-03
+    source_evidence: target/ieee-test-definition-ffcr-correction/20261018T180706Z/source-evidence.json
+  - id: ffrr-08-parameter-knowledge
+    input: text/plain charset=UTF-8 versus text/plain absent charset plus duplicate x; explicit US-ASCII versus
+      text/plain absent charset; only duplicated unrelated parameter, otherwise equal; unknown charset default of
+      arbitrary subtype; known charset mismatch, later duplicate parameter
+    allowed: text/plain charset=UTF-8 versus text/plain absent charset plus duplicate x => FAIL; explicit US-ASCII
+      versus text/plain absent charset => PASS; only duplicated unrelated parameter, otherwise equal => NOT-RUN;
+      unknown charset default of arbitrary subtype => NOT-RUN; known charset mismatch, later duplicate parameter
+      => FAIL
+    forbidden: Do not hide a known mismatch behind unrelated ambiguity; do not invent generic subtype defaults.
+    review_finding: FFRR-08
+    source_evidence: target/ieee-test-definition-systematic-closure/20261018T232124Z/source-evidence.json
+  - id: ffsr-06-typed-parameter-relation
+    input: message/external-body access-type=LOCAL-FILE versus local-file; text/plain charset=UTF-8 versus utf-8;
+      multipart boundary=AA versus aa; unsupported comparison of x=One versus x=one; parameter established unrecognized
+      by full subtype contract; unknown x comparison plus known UTF-8/US-ASCII mismatch; unknown x comparison plus
+      differing known essence
+    allowed: message/external-body access-type=LOCAL-FILE versus local-file => PASS; text/plain charset=UTF-8 versus
+      utf-8 => PASS; multipart boundary=AA versus aa => FAIL; unsupported comparison of x=One versus x=one => NOT-RUN;
+      parameter established unrecognized by full subtype contract => ignore that parameter; compare recognized obligations;
+      unknown x comparison plus known UTF-8/US-ASCII mismatch => FAIL; unknown x comparison plus differing known
+      essence => FAIL
+    forbidden: Do not equate absent implementation with an unrecognized parameter. No universal case-sensitive comparison;
+      no universal lowercase; known independent mismatch remains FAIL.
+    review_finding: FFSR-06
+  DC-MAILTO:
+  - id: rrf05-mailbox-grammar
+    input: Positive mailto:a+b@example.org and MAILTO:user@example.org; negative mailto:a(b)@example.org, mailto:user..name@example.org,
+      empty local/domain and malformed percent %G0. Keep queried Person IFI and change one additional mbox element
+      only. Repeat every element position.
+    allowed: ASCII positive and negative partitions are classified directly, malformed percent rejected by IRI syntax.
+      Only the bad additional element fails; Agent/Group input waiver is graded separately.
+    forbidden: General IRI success treated as RFC6068 success; validating just the first Person element; requiring
+      actual delivery.
+    source_anchor_ids: &id001
+    - RRF-05-S01
+    - RRF-05-S02
+    - RRF-05-S03
+    - RRF-05-S04
+    review_finding: RRF-05
+  - id: rrf05-encoded-and-hfield-partitions
+    input: Legal quoted-local mailto:%22not%20me%22@example.org, encoded local delimiter, correctly encoded UTF-8
+      domain and bracketed literal; legal ?subject=Hello%20world&body=line1%0D%0Aline2; compare malformed escapes,
+      illegal raw delimiter or local comment, malformed hfield separator. Preserve original encoding and decode
+      once. Declare exact RFC6068 component parse for each input.
+    allowed: Complete contract classifies each parsed alternative and distinguishes URI producer guidance from LRS
+      receiver duties. Current encoded/query adapter yields NOT-RUN, including the valid quoted-local control, until
+      reference evidence is supplied. Invalid syntax remains FAIL where established independently.
+    forbidden: Calling unsupported quoted/domain/hfields invalid or valid by heuristic; double decoding; applying
+      SMTP composition duties as extra LRS rejection requirements.
+    source_anchor_ids: *id001
+    review_finding: RRF-05
+  DC-IRL:
+  - id: rrf06-locator-evidence
+    input: Positive https://example.invalid/account with declared HTTP resource access semantics but no network
+      resolution requirement; Unicode path https://example.invalid/学習 with independently specified UTF-8 percent
+      mapping. Negative urn:example:account only under a fixture declaration that this exact namespace object is
+      a pure name with no access mechanism. Unknown same lexical syntax without that semantic declaration is indeterminate.
+      Apply to each Account/moreInfo/fileUrl and each Person account element.
+    allowed: Known locators satisfy IRL even if unreachable; declared pure name violates the URL predicate; missing
+      evidence is NOT-RUN. Preserve a separate string/syntax/name-presence violation as FAIL. D-06 remains unselected;
+      this is the semantic field relation, not a new input-rejection policy.
+    forbidden: Generic IRI success counted as IRL success; an urn blanket ban; allowlisting only HTTP; fetching
+      resources as validity oracle; using absent fixture to hide an undefined relation.
+    source_anchor_ids:
+    - RRF-06-S01
+    - RRF-06-S02
+    - RRF-06-S03
+    - RRF-06-S04
+    - RRF-06-S05
+    - RRF-06-S06
+    review_finding: RRF-06
