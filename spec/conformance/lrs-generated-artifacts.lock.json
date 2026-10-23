@@ -9,8 +9,8 @@
   },
   "inputs": {
     ".github/workflows/conformance.yml": {
-      "sha256": "8e3eec085f7a7c5baf0828f170e8f103241440f3bc71986fb1742b39f02a8137",
-      "bytes": 2957
+      "sha256": "dd493e3988a868a91e09a6dfc992f5559f683003308aa138296dfbcbed48e6c2",
+      "bytes": 4281
     },
     "Cargo.lock": {
       "sha256": "da734c3a43d08a5a645747bfa9e0a2c49c2d5966a3e5f13f6a224be971a660b2",
@@ -21,8 +21,8 @@
       "bytes": 3087
     },
     "docs/architecture/conformance-claim.md": {
-      "sha256": "1d106066b7c19afe9c9dab73919883adc5c3af59d74ee189ccc1470eb8f8476b",
-      "bytes": 8944
+      "sha256": "5c55a0507c5c0786d11df6e37db573a1aa917ce5ba00793d3dce566335b72e8e",
+      "bytes": 13114
     },
     "flake.lock": {
       "sha256": "c82d242337f12b8f717c66d13db019d1fd45ae3460abbedc7461f23fadc7d404",
@@ -33,20 +33,28 @@
       "bytes": 5115
     },
     "nix/flake/checks.nix": {
-      "sha256": "8cad9ec0c127c00841cc3906c3410855fa9d03c753d45471a328684ff0813dd4",
-      "bytes": 47622
+      "sha256": "c07957ab488089dd08835ceb9a419face836073a25aed370fa9c464632d64d11",
+      "bytes": 45796
+    },
+    "nix/flake/conformance.nix": {
+      "sha256": "563354394ef9066982cbefe0bd81c7f9c64985733cd85d75c5520ad1691bcac4",
+      "bytes": 1624
     },
     "nix/flake/dev-shells.nix": {
       "sha256": "4caf15fa6050684a0120f2cb3cba0afb1f6984fc3eb6ef2992caca34c66fcffd",
       "bytes": 1234
     },
     "nix/flake/packages.nix": {
-      "sha256": "46199d6fbf107c0028b982c2bdc51cee31f72a354638a0d956a1da2036f9a0ff",
-      "bytes": 3986
+      "sha256": "e619403357709f8352e833884c0d5fadd414a8134d7c955d893b0452daa3189d",
+      "bytes": 4326
     },
     "scripts/ci/audit_lrs_source_projection.py": {
       "sha256": "5b4444956827fa708db4498a0c568f321d7eaaebfef8c938c6a402d71b65bd1e",
       "bytes": 18091
+    },
+    "scripts/ci/check_conformance_regressions.py": {
+      "sha256": "ea3c0c16c9b53cdc3fe5ce698a25ec6db064c407f057b2ae0a6961ce80c2b2bd",
+      "bytes": 17341
     },
     "scripts/ci/conformance_lib.sh": {
       "sha256": "0a8f1339e3216b1f0334b7d80f7b6c7908761670285244f714554aa4e661bb5e",
@@ -57,8 +65,8 @@
       "bytes": 15591
     },
     "scripts/ci/generate_issued_test_projection.py": {
-      "sha256": "7618cd2f3ad9e6354b1c8c3a7853ba434fa8e567a4ad7c5e2357c7a0a73da9d2",
-      "bytes": 16610
+      "sha256": "e6db505d8d0691bf4140eea374aaf704bbbc0ed4514970f76550645f0bfe89f3",
+      "bytes": 16757
     },
     "scripts/ci/generate_lrs_projection_cases.py": {
       "sha256": "ee64a0c9abfcee357cb30d53434c7484d5088affef0a70998a4fdca3dab3a98f",
@@ -160,6 +168,10 @@
       "sha256": "3cd17c19ed67656e5585da5906faa2b3d4c76a27c32cd917edd72dd6f48c5694",
       "bytes": 2260
     },
+    "scripts/ci/test_conformance_regressions.py": {
+      "sha256": "fd7c2ce1faf36c346fbc872b7fbec76737847d5fe0ddd32406ec803b201eaff0",
+      "bytes": 20499
+    },
     "scripts/ci/test_issued_execution_boundaries.py": {
       "sha256": "92415cb7252e1514a34f4287035fb7e68af70a06a707468892e4628ff488f2c9",
       "bytes": 3772
@@ -200,6 +212,10 @@
       "sha256": "ee71c67cc866b987bef6df0d374fc7436aa7db554545cdc8ab6d88d15ef78b07",
       "bytes": 289
     },
+    "spec/conformance/ci-execution-baseline.json": {
+      "sha256": "dfe73a21a461b5d11b0b4c764acd30dc94e7ec148ea1d3cf66af0aa6bd0bbc8d",
+      "bytes": 64502
+    },
     "spec/conformance/definition-contract-vectors.yaml": {
       "sha256": "e98a9efed0fba8fbe8cff9c41f16de93f2f7c00451e54d20a3ff5e036ffea404",
       "bytes": 160685
@@ -209,8 +225,8 @@
       "bytes": 283
     },
     "spec/conformance/generated-artifacts.md": {
-      "sha256": "29502d57677e828f3b82e01d1cbe36e33b4611baa36c2373956731f77da9d81e",
-      "bytes": 9000
+      "sha256": "b1a43a2412c3509b28cd3efaf9e689e440493cc62c8e4bed845a9cbdc5145f14",
+      "bytes": 10054
     },
     "spec/conformance/issued-definition-contracts.json": {
       "sha256": "a91d36027c1a243dbb94cd2eac274a27bf048a5246105cb0e412f4bd0a396f22",
@@ -245,8 +261,8 @@
       "bytes": 3609120
     },
     "spec/conformance/lrs-generated-artifacts.json": {
-      "sha256": "8e96892c489229685c791823ab5dfeaa8970bb4f9a1daed1846c5b192550438e",
-      "bytes": 4632
+      "sha256": "6e3ee5ab3a51bb233be855c72dbac3039f1e0627e5505135ab84223a3ddf8501",
+      "bytes": 4767
     },
     "spec/conformance/lrs-interpretation-policy.yaml": {
       "sha256": "8df00b62d8de2eea37c5a93c0c7c5381491a4db2800bdfd75b6791b25feaf843",
@@ -511,11 +527,11 @@
       "bytes": 99485
     },
     "spec/conformance/issued-test-projection.json": {
-      "sha256": "7ffb292ec70fb4e9f6127decf4d9cf22e5e8e457534022efceecd3425010b8f7",
-      "bytes": 51800573
+      "sha256": "eda80432ff1e0954eba1b79b22033e6540cdb67e57811cf46cf1204589e0f31d",
+      "bytes": 51801030
     },
     "spec/conformance/lrs-assertion-manifest.yaml": {
-      "sha256": "63b79c96436a5962e1397ff80113537e580d70b102cc0020c805be61d1dd58b2",
+      "sha256": "6454182f10decb8bbbd6e5f9216c316424eb5d429107989858907ecc8ee9c114",
       "bytes": 17135900
     },
     "spec/conformance/lrs-table-bindings.yaml": {

@@ -13,6 +13,69 @@ product revision conforms additionally requires the execution evidence below.
 Official review is the GitHub PR merge. The structural gate does not measure
 review acceptance, and no repository adoption record is required.
 
+## Temporary integration policy for PR #3
+
+The user selected ledger-first integration, with implementation completion in
+separate follow-up work. The required Nix `memory-conformance` and
+`postgres-conformance` checks therefore apply the explicit
+[CI execution baseline](../../spec/conformance/ci-execution-baseline.json).
+Their success means **no change from the reviewed, known-gap execution baseline**;
+it does not mean that the LRS conforms or that all cases were executed.
+
+The baseline contains 117 distinct residual cases: 10 FAIL and 104 NOT-RUN for
+memory, 13 FAIL and 104 NOT-RUN for PostgreSQL, out of 17,933 cases per backend.
+The 13 FAIL cases expose SHA-384/512 attachment support, comma decimal durations
+and PostgreSQL U+0000 persistence gaps. NOT-RUN retains missing signature,
+parameter-vocabulary and resource-absence prerequisites, plus numeric and IRL
+provider limitations. These are product/provider work items, not IEEE exceptions.
+
+The gate binds the entire case-file inventory and both fixture profiles. Every
+case must appear exactly once in the HTTP execution report; cases outside the
+baseline must PASS. Known gaps must match the exact case, definition, backend,
+outcome and failure/unavailability messages. New failures, new NOT-RUN cases,
+missing/duplicate cases, inconsistent totals, changed reasons and infrastructure
+errors reject the gate. A formerly failing/unavailable case that now passes also
+rejects a stale baseline: remove that residual after reviewing the improvement.
+There is no automatic baseline update or general `allow-not-run` flag.
+
+The wrapper creates fresh capture paths and preserves the runner's exit status,
+unaltered JSON/JUnit and execution log. The Nix packages
+`memory-conformance-evidence` and `postgres-conformance-evidence` save these
+artifacts and an input/output receipt even when the runner fails or cannot emit
+complete reports. These packages only capture evidence; their successful build
+does not accept the execution. The separate required checks validate the capture
+receipt and apply the strict regression gate. Missing artifacts, infrastructure
+errors and new regressions still fail those checks.
+
+CI builds and copies each evidence package before enforcing the checks. Its
+artifact upload runs even after a gate failure, preserving JSON/JUnit when emitted,
+execution receipts/logs and Nix build logs as `conformance-regression`. A rejected
+gate cannot prevent installation of the already built evidence dependency. The
+separate regression decision retains `conformance_complete: false`. Diagnostic
+comparison of a supplied report remains `report-comparison-only`; it is not a
+fresh execution receipt.
+
+An initial 404 from an awaited single-Statement GET is an observation delay only
+when the runner labels it `pending_visibility`, records exactly its initial-delay
+reason, and a later attempt of the same step returns 200 with no reasons beyond
+that case's exact baseline reasons, including their step IDs. The case's final
+outcome and complete reason lists must still match the baseline. A known
+NOT-RUN or FAIL remains such; resolving visibility does not establish conformance.
+The gate recognizes that resolved delay. It still rejects unlisted header defects,
+unresolved waits, loss of previously observed visibility and other-step success.
+
+Strict execution remains available through `run_memory_conformance.sh`,
+`run_postgres_conformance.sh` and the runner itself. They still exit nonzero for
+any FAIL or NOT-RUN. Release evidence generation continues to use those strict
+entry points, not the integration wrapper. Integration success leaves the
+implementation gaps open. The normal static gate separately checks ledger/test
+correspondence and reproducibility; it is not an adoption or review-acceptance gate.
+
+The baseline comes from the sealed R5 reviewer logs at `fd8d942`; applicability
+to `8d96de8` was reviewed as a bounded delta. This provenance is not a fresh
+measurement of later code. New backend checks must validate the chosen policy
+on the actual candidate; their evidence is recorded separately.
+
 ## Interface Scope
 
 The conformance aid targets the xAPI LRS HTTP interface. PDS, BI, OAuth/OIDC
@@ -77,8 +140,9 @@ uses `--skip-live` and therefore does not contain memory HTTP, PostgreSQL HTTP,
 or PostgreSQL execution-verification reports.
 
 For ordinary CI-style verification, `nix flake check` runs static contract
-validation plus live HTTP conformance checks against both the in-memory and
-PostgreSQL backends. The release-candidate evidence bundle remains the archival
+validation plus live HTTP regression checks against the explicitly enumerated
+integration baseline for both backends. It does not discharge the remaining
+product/provider gaps. The release-candidate evidence bundle remains the archival
 artifact because it records reports, logs, checksums, and git metadata for a
 specific revision.
 

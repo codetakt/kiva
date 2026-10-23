@@ -70,5 +70,7 @@ Other delegated capabilities and environment fixtures must also be supplied and
 verified before their execution can be complete.
 
 Execution reporting requires complete bound input/output evidence separately
-from structural coverage. Raw FAIL and NOT-RUN results remain failures or
-incomplete observations; static projection does not establish LRS conformance.
+from structural coverage. The [CI known-gap policy](../../docs/architecture/conformance-claim.md)
+checks exact regression outcomes while preserving raw FAIL and NOT-RUN results.
+A successful integration check does not establish LRS conformance. Hosted artifact
+collection is described in [the CI guide](hosted-conformance.md).

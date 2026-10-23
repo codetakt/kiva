@@ -53,6 +53,8 @@
     "tests/conformance/models/lrs-tables.yaml",
     "tools/xapi-lrs-conformance/Cargo.toml",
     "spec/conformance/schemas/conformance-case-matrix-report.schema.json",
+    "scripts/ci/check_conformance_regressions.py",
+    "spec/conformance/ci-execution-baseline.json",
     "spec/conformance/endpoint-profile.example.yaml",
     "spec/conformance/auth-profile.example.yaml",
     "scripts/ci/run_memory_conformance.sh",
@@ -61,6 +63,7 @@
     ".github/workflows/conformance.yml",
     "flake.nix",
     "nix/flake/packages.nix",
+    "nix/flake/conformance.nix",
     "tests/conformance/fixtures/preservation-properties.json"
   ],
   "input_globs": [

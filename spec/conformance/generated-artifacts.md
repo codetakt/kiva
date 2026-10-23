@@ -36,6 +36,7 @@ toolchain. Neither file records semantic acceptance.
 | --- | --- | --- |
 | Definition inputs | Merged catalog/ledger, table model, handwritten HTTP cases, Python scenario/selection definitions, interpretation/dependency contracts and fixed vectors | Tracked; change intentionally and assess affected meanings |
 | Review workflow | PR discussion and merge on GitHub; interim progress notes remain local | Not generation inputs or repository acceptance records |
+| CI integration baseline | `ci-execution-baseline.json`, exact known residuals and profile/case identities | Tracked; update only by explicit disposition, never by accepting a new failing run automatically |
 | Fixed signing inputs | `tests/conformance/fixtures/signing/cases.json` | Tracked; 42 exact public synthetic cases transcribed from commit `b505ffc9b69223ea48675f1e326a13f8757a19a8`; original source digest and selection recorded inside |
 | Case expansion | Five YAML files under `tests/conformance/http/generated/` | Ignored; regenerated from models/scenarios and fixed inputs |
 | Procedure expansion | `issued-definition-tests.yaml`, `issued-supplemental-tests.yaml` | Ignored; regenerated from contracts and scenario definitions |
@@ -89,9 +90,25 @@ The validator and CI/evidence entry points materialize locked artifacts before
 consuming them. The Rust runner rejects a missing generated case file when the
 standard case root is selected; deliberately selected custom subsets remain
 possible. Before invoking standalone reporting tools, run `generate` as above.
-Live execution remains separate from structural reproduction. The strict runner
-and backend scripts return nonzero for any FAIL or NOT-RUN. Product/provider
-gaps remain open; a successful static check does not establish LRS conformance.
+The two authorized local backend checks preserve raw FAIL/NOT-RUN results and
+produce a separate regression decision; see [the claim boundary](../../docs/architecture/conformance-claim.md).
+The commands for other live testing remain subject to the existing execution hold.
+
+For the two authorized local backend checks, evidence capture and gate enforcement
+are separate. For example:
+
+```sh
+nix build .#memory-conformance-evidence --out-link result-memory-evidence
+nix build .#checks.x86_64-linux.memory-conformance
+```
+
+The first package saves raw JSON/JUnit when produced, the execution log, original
+exit and a bound capture receipt. It does not claim success of the regression gate
+or of LRS conformance. The second checks that receipt and the exact residual
+baseline; its failure leaves the first package available for inspection. Substitute
+`postgres` for the other backend. CI copies both evidence outputs before the gates
+and uploads them even after failure. The runner's strict FAIL/NOT-RUN policy is
+unchanged; no baseline entry is added automatically from a failing run.
 
 ## Intentional definition changes
 
