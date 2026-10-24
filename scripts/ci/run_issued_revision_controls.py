@@ -3,6 +3,8 @@
 
 This peer implements only the selected inputs. It is not a reference LRS or a
 proof of the complete Suite. The real Rust runner sends and grades each case.
+Signature validation has no provider here: its one selected case must retain
+the exact missing-profile NOT-RUN. Control success does not certify that case.
 """
 import argparse
 import copy
@@ -25,6 +27,36 @@ VERSION = 'statement-accepts-semantic-version-outside-legacy-adl-range'
 FUTURE = 'statement-future-timestamp-is-not-rejected'
 SIGNATURE = 'signature-equivalence-excludes-case'
 DUPLICATE = 'issued-completion-identical-duplicate-batch-id'
+SIGNATURE_UNAVAILABLE = 'required target fixture profile(s) unavailable: signature-validation-context'
+
+
+def validate_control_results(report, selected, failures, exit_code):
+    """Check exact finite outcomes, including the sole unavailable prerequisite."""
+    if selected[SIGNATURE].get('requires_endpoint_profiles') != ['signature-validation-context']:
+        raise ValueError('signature control prerequisite changed')
+    cases=[case for suite in report['suites'] for case in suite['cases']]
+    outcomes={case['id']:case for case in cases}
+    if len(cases)!=len(outcomes) or set(outcomes)!=set(selected):
+        raise ValueError('missing, duplicate or unexpected control case')
+    if SIGNATURE in failures or not failures<=set(selected):
+        raise ValueError('invalid expected failure set')
+    for name,case in outcomes.items():
+        expected='not-run' if name==SIGNATURE else 'failed' if name in failures else 'passed'
+        if case['outcome']!=expected:
+            raise ValueError(f'{name}: expected {expected}, got {case["outcome"]}')
+        if bool(case['failures'])!=(expected=='failed'):
+            raise ValueError(f'{name}: inconsistent failure evidence')
+        reasons=[SIGNATURE_UNAVAILABLE] if name==SIGNATURE else []
+        if case.get('not_run_reasons',[])!=reasons:
+            raise ValueError(f'{name}: unexpected unavailable reason')
+    totals={'total':len(selected),'passed':len(selected)-len(failures)-1,
+            'failed':len(failures),'validated':0,'not_run':1}
+    if report['totals']!=totals or report['status']!=('failed' if failures else 'incomplete'):
+        raise ValueError('control report totals/status disagree with case outcomes')
+    # The strict runner still exits nonzero for the unavailable signature case.
+    if exit_code!=1:
+        raise ValueError(f'expected strict runner exit 1, got {exit_code}')
+    return outcomes
 
 
 def main():
@@ -157,24 +189,24 @@ def main():
         (args.out / (mode + '.stderr')).write_text(run.stderr)
         (args.out / (mode + '.wire.json')).write_text(json.dumps(wire, indent=2) + '\n')
         report = json.loads(run.stdout)
-        outcomes = {c['id']:c for s in report['suites'] for c in s['cases']}
+        outcomes = validate_control_results(report,selected,failures,run.returncode)
         actual = {name for name, c in outcomes.items() if c['outcome'] == 'failed'}
-        assert set(outcomes) == set(selected), set(outcomes) ^ set(selected)
-        assert actual == failures, (mode, actual ^ failures)
-        assert all(c['outcome'] in ['passed', 'failed'] for c in outcomes.values())
-        assert run.returncode == (1 if failures else 0), run.returncode
         if mode == 'future-margin-10s':
             assert not any(w['method'] == 'GET' and '000000000305' in w['path'] for w in wire)
         if mode == 'reject-version':
             assert not any(w['method'] == 'GET' and 'retained_version' in w['path'] for w in wire)
         results[mode] = dict(cases=len(outcomes), expected_failed=sorted(failures), actual_failed=sorted(actual),
-            messages={n:outcomes[n] for n in actual}, exit_code=run.returncode)
+            messages={n:outcomes[n] for n in actual}, exit_code=run.returncode,
+            expected_not_run={SIGNATURE:SIGNATURE_UNAVAILABLE},
+            not_run={SIGNATURE:outcomes[SIGNATURE]})
     inputs[str(args.runner)] = hashlib.sha256(args.runner.read_bytes()).hexdigest()
     inputs[str(Path(__file__).relative_to(ROOT))] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     (args.out / 'summary.json').write_text(json.dumps(dict(
         scope='Bounded runtime controls; not an LRS reference implementation or whole-suite proof',
+        controls_completed=True, signature_validation_complete=False,
         inputs=inputs, results=results), indent=2) + '\n')
-    print(json.dumps({m:dict(cases=r['cases'], failures=len(r['actual_failed'])) for m,r in results.items()}, indent=2))
+    print(json.dumps({m:dict(cases=r['cases'], failures=len(r['actual_failed']),
+                            not_run=len(r['not_run'])) for m,r in results.items()}, indent=2))
 
 
 if __name__ == '__main__':

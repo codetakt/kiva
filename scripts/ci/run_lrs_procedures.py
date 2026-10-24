@@ -434,10 +434,13 @@ class Executor:
                     if pair not in values:
                         values.append(pair)
         path = self.out / ('identifier-check-' + str(self.ordinal) + '.json')
+        if not values:
+            return {}
         path.write_text(compact([{'value': value, 'ascii_only': ascii_only} for value, ascii_only in values]))
         run = subprocess.run([str(self.args.runner), '--check-identifiers', str(path)], capture_output=True, text=True, check=True)
-        verdicts = json.loads(run.stdout)['valid']
-        if len(verdicts) != len(values) or any(type(v) is not bool for v in verdicts):
+        result = json.loads(run.stdout)
+        verdicts = result.get('valid') if isinstance(result,dict) else None
+        if not isinstance(verdicts,list) or len(verdicts) != len(values) or any(type(v) is not bool for v in verdicts):
             raise ValueError('Invalid grammar-check response')
         (path.with_suffix('.result.json')).write_text(run.stdout)
         return dict(zip(values, verdicts))
@@ -447,18 +450,36 @@ class Executor:
         for field,value in examples.items():
             reply=self.http('GET','/agents',{'agent':compact({field:value})}, expected_statuses=(200,))
             got=reply['json']
-            self.check(field+'-queried',reply['status']==200 and isinstance(got,dict) and value in got.get(field,[]),'Unknown Agents must return the queried IFI')
+            self.check(field+'-person',isinstance(got,dict) and got.get('objectType')=='Person',
+                'The returned Person must have objectType Person')
+            entries=got.get(field,[]) if isinstance(got,dict) else None
+            self.check(field+'-queried',reply['status']==200 and isinstance(entries,list) and value in entries,'Unknown Agents must return the queried IFI')
             if not isinstance(got,dict):continue
-            syntax = self.identifier_syntax(got)
-            for key in IFI:
+            # Record every local type defect before invoking a grammar adapter.
+            # An unavailable adapter must not abort later entries or IFI queries.
+            typed=[]
+            for key in ['name',*IFI]:
                 entries=got.get(key,[])
                 self.check(field+'-'+key+'-array',isinstance(entries,list))
                 if not isinstance(entries,list):continue
                 for index,item in enumerate(entries):
-                    valid=isinstance(item,str) and syntax.get((item,False),False) and mailbox_structure(item) if key=='mbox' else isinstance(item,str) and re.fullmatch(r'[0-9a-fA-F]{40}',item) is not None if key=='mbox_sha1sum' else isinstance(item,str) and syntax.get((item,True),False) if key=='openid' else isinstance(item,dict) and isinstance(item.get('homePage'),str) and syntax.get((item['homePage'],False),False) and isinstance(item.get('name'),str)
-                    if key == 'account' and valid:
-                        valid = None  # DC-IRL needs locator evidence, not just generic IRI syntax.
-                    self.check(field+'-'+key+'-'+str(index),valid,'All entries: field types plus DC-MAILTO/DC-IRL; None is an unavailable semantic adapter, never valid')
+                    valid=(isinstance(item,dict) and isinstance(item.get('homePage'),str)
+                           and isinstance(item.get('name'),str)) if key=='account' else isinstance(item,str)
+                    self.check(field+'-'+key+'-'+str(index)+'-type',valid)
+                    if valid and key!='name':typed.append((key,index,item))
+            try:syntax=self.identifier_syntax(got)
+            except (OSError,ValueError,subprocess.SubprocessError) as error:
+                syntax={}
+                self.check(field+'-identifier-grammar',None,'Grammar adapter unavailable; local defects retained',
+                    {'kind':type(error).__name__,'axis':'harness-or-evidence'})
+            for key,index,item in typed:
+                if key=='mbox':valid=all_decisions([syntax.get((item,False)),mailbox_structure(item)])
+                elif key=='mbox_sha1sum':valid=re.fullmatch(r'[0-9a-fA-F]{40}',item) is not None
+                elif key=='openid':valid=syntax.get((item,True))
+                else:
+                    # DC-IRL needs locator evidence even when generic IRI syntax passes.
+                    valid=False if syntax.get((item['homePage'],False)) is False else None
+                self.check(field+'-'+key+'-'+str(index),valid,'All entries: field types plus DC-MAILTO/DC-IRL; None is an unavailable semantic adapter, never valid')
         self.check('full-external-grammar',None,'Bounded ASCII mailto and generic URI/IRI grammar only; encoded mailto and locator evidence remain concrete DC-MAILTO/DC-IRL obligations')
         self.check('person-association-inventory',None,'Partial executor checks presence and syntax only. Independently controlled no-additional-information and Agent association inventories require the manual person-semantic-identifiers procedure; random identifiers do not establish fallback applicability.')
 
@@ -788,7 +809,7 @@ class Executor:
 
     def collect_statements(self, query, label, forbidden_ids=frozenset()):
         """Retain known exclusions per page; absence needs a terminal chain."""
-        rows=[];more=None;seen=set();base=None
+        rows=[];more=None;seen=set();base=None;complete=True
         for page in range(100):
             try:
                 reply=self.http('GET','/statements',query if more is None else None,continuation=more,
@@ -806,18 +827,23 @@ class Executor:
                 self.check(label+'-page-body',None,'Body transport incomplete; observed header failures retained')
                 return None
             value=reply['json']
-            valid=isinstance(value,dict) and isinstance(value.get('statements'),list) and all(isinstance(v,dict) for v in value['statements'])
-            self.check(label+'-page-shape',valid)
-            if not valid:return None
-            items=value['statements'];rows.extend(items)
-            self.check(label+'-observed-exclusions-'+str(page),not any(item.get('id') in forbidden_ids for item in items),
+            if not isinstance(value,dict) or not isinstance(value.get('statements'),list):
+                self.check(label+'-page-shape',False,'StatementResult must contain a statements array')
+                return None
+            items=value['statements']
+            valid_items=[item for item in items if isinstance(item,dict) and isinstance(item.get('id'),str)]
+            valid=len(valid_items)==len(items)
+            self.check(label+'-page-shape',valid,'Every returned Statement must be an object with a string id')
+            complete=complete and valid
+            rows.extend(valid_items)
+            self.check(label+'-observed-exclusions-'+str(page),not any(item['id'] in forbidden_ids for item in valid_items),
                 'A forbidden object already observed cannot be removed by later pages or transport failure')
             self.check(label+'-page-last-modified',self.page_last_modified(reply['headers'],items),
                 'Page header compared with this page; known defects retained before provider delegation')
             more=value.get('more','')
             if not isinstance(more,str):
                 self.check(label+'-more-type',False);return None
-            if more=='':return rows
+            if more=='':return rows if complete else None
             if not iri_reference_valid(more):
                 self.check(label+'-more-syntax',False,'Malformed continuation IRI reference');return None
             base=reply.get('url')

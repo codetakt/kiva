@@ -65,8 +65,8 @@
       "bytes": 15591
     },
     "scripts/ci/generate_issued_test_projection.py": {
-      "sha256": "e6db505d8d0691bf4140eea374aaf704bbbc0ed4514970f76550645f0bfe89f3",
-      "bytes": 16757
+      "sha256": "f39121c5cdfe7a87b01c7e207a366f5f47b427dd2436576e4a58a4c80781a2ef",
+      "bytes": 16815
     },
     "scripts/ci/generate_lrs_projection_cases.py": {
       "sha256": "ee64a0c9abfcee357cb30d53434c7484d5088affef0a70998a4fdca3dab3a98f",
@@ -156,9 +156,13 @@
       "sha256": "e82f3d1b572587b10d7ea41e40df578a5cd8b322ed19447a73137076b2610bda",
       "bytes": 15933
     },
+    "scripts/ci/run_issued_revision_controls.py": {
+      "sha256": "af8c43f78db8596305272f0b33ae5eec264403a75fc016f60d236bf91de0b798",
+      "bytes": 11383
+    },
     "scripts/ci/run_lrs_procedures.py": {
-      "sha256": "a17d21751dc2063ad6a572d49625cc1f969be653d6feccc49eec3757c78cd0fa",
-      "bytes": 65330
+      "sha256": "7ba4e5cdba30832216f699fdbb499329b2f2a51ad81b7a0b1503efbbb4401290",
+      "bytes": 66799
     },
     "scripts/ci/run_memory_conformance.sh": {
       "sha256": "25aa87f0470ef8aa385d2ffd596b118e8928576a8afa4d5a8443aeb933d931de",
@@ -180,6 +184,10 @@
       "sha256": "cb619add06f7fefa47061c76ece79af6d58d847938c005c960b00570cbff730f",
       "bytes": 7532
     },
+    "scripts/ci/test_issued_revision_controls.py": {
+      "sha256": "c44eac7ac46d073bf49421955729f5eb01e736ed4e78f0585ffc46fa5adf700c",
+      "bytes": 3466
+    },
     "scripts/ci/test_issued_test_design.py": {
       "sha256": "4b582039b2f2d9454048ed7e58ab7e2c9344a47211ac35209e33b661dda0b002",
       "bytes": 4240
@@ -192,9 +200,13 @@
       "sha256": "19bd1a9dcf23006bbfbdf3a4721600160a8dd0487587ec4a8540d4c1dfd1a7fe",
       "bytes": 17924
     },
+    "scripts/ci/test_lrs_procedure_types.py": {
+      "sha256": "1a2114a0698de7f1b989325d23b32bdda9bfd974af02bea73376607e8b8dba06",
+      "bytes": 6736
+    },
     "scripts/ci/test_lrs_procedure_visibility.py": {
-      "sha256": "d28faf8544f330f513a9895b0bb5f5cee6b55af26ee5e745cfed0a24ae52f4f3",
-      "bytes": 22608
+      "sha256": "16173f62f9f8b60e8a2e5041b1eaf361bf8038e01869bf5060987f20330756db",
+      "bytes": 22773
     },
     "scripts/ci/test_lrs_projection_headers.py": {
       "sha256": "f8be2548551047a69b57837cf12deaeec4106e92ad8e856855dc7b1b1cdf78db",
@@ -261,8 +273,8 @@
       "bytes": 3609120
     },
     "spec/conformance/lrs-generated-artifacts.json": {
-      "sha256": "6e3ee5ab3a51bb233be855c72dbac3039f1e0627e5505135ab84223a3ddf8501",
-      "bytes": 4767
+      "sha256": "e5b47fb1b0e1bf7c4708d8ef48366f87181db8cbeb8a7bf95ab52d66a3211509",
+      "bytes": 4817
     },
     "spec/conformance/lrs-interpretation-policy.yaml": {
       "sha256": "8df00b62d8de2eea37c5a93c0c7c5381491a4db2800bdfd75b6791b25feaf843",
@@ -527,11 +539,11 @@
       "bytes": 99485
     },
     "spec/conformance/issued-test-projection.json": {
-      "sha256": "26fc4b2592ef7910d15ec2eb7b86fc978649a6d1fc1446561c105fc9ebe347bb",
-      "bytes": 51801030
+      "sha256": "652f7bd65e4c816808fb3c32883e49244042bc6ea4e8efeda743b9a3926bfde5",
+      "bytes": 51801381
     },
     "spec/conformance/lrs-assertion-manifest.yaml": {
-      "sha256": "27ad23f4ff1455d3867ed1345fe85275412ca1101cfbaf2ecfffda3c5aebb3ee",
+      "sha256": "6efb00c029825251d815518b8bb2e6facb653bd452a8cbecc4ecb24ffce56443",
       "bytes": 17135900
     },
     "spec/conformance/lrs-table-bindings.yaml": {

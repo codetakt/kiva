@@ -208,6 +208,8 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
         headers={'x-experience-api-version':'2.0.0',
                  'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'}
         if header is not None:headers['last-modified']=header
+        # These controls vary timestamps, while retaining a well-typed identity.
+        items=[{'id':f'fixture-{index}',**item} for index,item in enumerate(items)]
         reply=Reply(status=200,headers=headers,json={'statements':items,'more':''},incomplete_body=incomplete)
         pages=[reply]
         if continuation:

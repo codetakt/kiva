@@ -25,6 +25,7 @@
     "scripts/ci/report_issued_test_results.py",
     "scripts/ci/report_lrs_interpretations.py",
     "scripts/ci/run_lrs_procedures.py",
+    "scripts/ci/run_issued_revision_controls.py",
     "scripts/ci/validate_conformance.py",
     "scripts/ci/validate_lrs_projection.py",
     "spec/conformance/definition-contract-vectors.yaml",
