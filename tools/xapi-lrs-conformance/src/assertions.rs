@@ -7,6 +7,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use iri_string::types::IriReferenceStr;
 use reqwest::header::HeaderMap;
 use serde::Deserialize;
 use serde_json::Value;
@@ -48,7 +49,7 @@ pub(super) enum Check {
         agent_identity: bool,
     },
     JsonPreservation {
-        expected: Value,
+        expected: super::lossless_json::Json,
     },
     StatementQuery {
         stored_captures: BTreeMap<String, String>,
@@ -385,6 +386,17 @@ impl Check {
                     .get("statements")
                     .and_then(Value::as_array)
                     .ok_or("statement-query needs statements array")?;
+                let more = json
+                    .get("more")
+                    .map(|value| {
+                        let reference = value
+                            .as_str()
+                            .ok_or("statement-query more must be a string")?;
+                        IriReferenceStr::new(reference)
+                            .map_err(|_| "statement-query more must be an IRI reference")?;
+                        Ok::<_, &str>(reference)
+                    })
+                    .transpose()?;
                 if *limit != 0 && array.len() > *limit {
                     return Err("statement-query exceeds requested limit".into());
                 }
@@ -435,18 +447,12 @@ impl Check {
                     }
                 };
                 let maximum_count = bounded_count(eligible.len());
-                let minimum_count =
-                    bounded_count(eligible.values().filter(|(_, definite)| *definite).count());
+                let known_results = eligible.values().filter(|(_, definite)| *definite).count();
                 if array.len() > maximum_count {
                     return Err("statement-query exceeds eligible set or requested limit".into());
                 }
                 // Fewer results are legal per page, with a more IRL for known omissions.
-                if array.len() < minimum_count
-                    && json
-                        .get("more")
-                        .and_then(Value::as_str)
-                        .is_none_or(str::is_empty)
-                {
+                if array.len() < known_results && more.is_none_or(str::is_empty) {
                     return Err("statement-query omits eligible results without pagination".into());
                 }
                 let mut previous_returned = None;
@@ -513,7 +519,7 @@ impl Check {
                 }
             }
             Self::JsonPreservation { expected } => {
-                super::preservation::compare_statement(expected, &json)?;
+                super::preservation::compare_statement_bytes(expected, bytes)?;
             }
             Self::HeaderTime {
                 header,
@@ -1667,6 +1673,61 @@ mod tests {
     use super::*;
 
     #[test]
+    fn preservation_retains_extension_member_multiplicity() -> Result<(), serde_json::Error> {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))?;
+        for row in fixture["duplicate_members"]
+            .as_array()
+            .expect("duplicate controls")
+        {
+            for placement in ["context", "result"] {
+                let wrap = |raw: &str| {
+                    format!(
+                        r#"{{"actor":{{"mbox":"mailto:fixture@example.test"}},"verb":{{"id":"urn:verb"}},"object":{{"id":"urn:activity"}},"{placement}":{{"extensions":{{"urn:x":{raw}}}}}}}"#
+                    )
+                };
+                let before = wrap(row["submitted"].as_str().expect("submitted JSON"));
+                let after = wrap(row["returned"].as_str().expect("returned JSON"));
+                // Deserialize the definition directly too, without a lossy Value intermediary.
+                let check: Check = serde_json::from_str(&format!(
+                    r#"{{"kind":"json-preservation","expected":{before}}}"#
+                ))?;
+                assert!(check.validate().is_ok());
+                let errors =
+                    check.evaluate(200, &HeaderMap::new(), after.as_bytes(), &BTreeMap::new());
+                let outcome = if errors.is_empty() {
+                    "passed"
+                } else if errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")) {
+                    "not-run"
+                } else {
+                    "failed"
+                };
+                assert_eq!(
+                    outcome,
+                    row["outcome"].as_str().expect("outcome"),
+                    "{placement}/{}: {errors:?}",
+                    row["id"]
+                );
+            }
+        }
+        for raw in [
+            r#"{"actor":{},"actor":{}}"#,
+            r#"{"context":{"extensions":{"urn:x":1,"urn:x":1}}}"#,
+        ] {
+            let check: Check = serde_json::from_str(&format!(
+                r#"{{"kind":"json-preservation","expected":{raw}}}"#
+            ))?;
+            let errors = check.evaluate(200, &HeaderMap::new(), raw.as_bytes(), &BTreeMap::new());
+            assert!(
+                errors.iter().any(|e| e.contains("duplicate property")),
+                "{errors:?}"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
     fn preservation_definition_requires_the_submitted_statement() {
         let submitted = serde_json::json!({
             "actor": {"mbox": "mailto:test@example.org"},
@@ -1676,7 +1737,7 @@ mod tests {
         });
         assert!(
             Check::JsonPreservation {
-                expected: submitted.clone()
+                expected: submitted.clone().into()
             }
             .validate()
             .is_ok()
@@ -1685,14 +1746,16 @@ mod tests {
             let mut partial = submitted.clone();
             partial.as_object_mut().expect("Statement").remove(key);
             assert!(
-                Check::JsonPreservation { expected: partial }
-                    .validate()
-                    .is_err()
+                Check::JsonPreservation {
+                    expected: partial.into()
+                }
+                .validate()
+                .is_err()
             );
         }
         assert!(
             Check::JsonPreservation {
-                expected: serde_json::json!({"result": {"duration": "PT1S"}})
+                expected: serde_json::json!({"result": {"duration": "PT1S"}}).into()
             }
             .validate()
             .is_err()
@@ -1707,7 +1770,7 @@ mod tests {
         ))?;
         for row in fixture["cases"].as_array().expect("property controls") {
             let check = Check::JsonPreservation {
-                expected: row["submitted"].clone(),
+                expected: row["submitted"].clone().into(),
             };
             let errors = check.evaluate(
                 200,
@@ -1972,7 +2035,7 @@ mod tests {
                     expected: source,
                 },
                 Check::JsonPreservation {
-                    expected: submitted,
+                    expected: submitted.into(),
                 },
             ]
             .map(|check| check.evaluate(200, &HeaderMap::new(), body.as_bytes(), &BTreeMap::new()));
@@ -2000,7 +2063,7 @@ mod tests {
                     expected: serde_json::json!(100_000_008),
                 },
                 Check::JsonPreservation {
-                    expected: serde_json::json!({"result":{"score":{"raw":100_000_008}}}),
+                    expected: serde_json::json!({"result":{"score":{"raw":100_000_008}}}).into(),
                 },
             ] {
                 let failures = check.evaluate(200, &HeaderMap::new(), body, &BTreeMap::new());

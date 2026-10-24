@@ -5,10 +5,49 @@
     reason = "Only sibling assertion code uses this oracle"
 )]
 
+use super::lossless_json::Json;
 use serde_json::Value;
 
-pub(super) fn compare_statement(expected: &Value, actual: &Value) -> Result<(), String> {
-    compare(expected, actual, "", false)
+pub(super) fn compare_statement_bytes(expected: &Json, bytes: &[u8]) -> Result<(), String> {
+    let actual: Json = serde_json::from_slice(bytes)
+        .map_err(|error| format!("preservation requires JSON: {error}"))?;
+    unique_core_members(expected, "", false)?;
+    unique_core_members(&actual, "", false)?;
+    compare(expected, &actual, "", false)
+}
+
+#[cfg(test)]
+fn compare_statement(expected: &Value, actual: &Value) -> Result<(), String> {
+    compare(&expected.clone().into(), &actual.clone().into(), "", false)
+}
+
+fn unique_core_members(value: &Json, path: &str, opaque: bool) -> Result<(), String> {
+    match value {
+        Json::Object(pairs) => {
+            let mut names = std::collections::BTreeSet::new();
+            for (key, child) in pairs {
+                if !opaque && !names.insert(key) {
+                    return Err(format!("duplicate property {key} at {path}"));
+                }
+                unique_core_members(
+                    child,
+                    &format!("{path}/{}", escape_key(key)),
+                    opaque || path.ends_with("/extensions"),
+                )?;
+            }
+        }
+        Json::Array(items) => {
+            for (index, item) in items.iter().enumerate() {
+                unique_core_members(item, &format!("{path}/{index}"), opaque)?;
+            }
+        }
+        Json::Scalar(_) => {}
+    }
+    Ok(())
+}
+
+fn escape_key(key: &str) -> String {
+    key.replace('~', "~0").replace('/', "~1")
 }
 
 /// Authority determinism concerns Agent/Group identity, not display members.
@@ -223,41 +262,60 @@ fn identifier_equal(left: &Value, right: &Value, field: &str) -> Result<bool, St
     )
 }
 
-fn compare(expected: &Value, actual: &Value, path: &str, opaque: bool) -> Result<(), String> {
+fn compare(expected: &Json, actual: &Json, path: &str, opaque: bool) -> Result<(), String> {
     if matches!(path, "/stored" | "/authority") {
         // Checked separately by managed-field/time/credential assertions.
         return Ok(());
     }
-    if !opaque && matches!(path, "/timestamp" | "/object/timestamp") {
-        return compare_timestamp(expected, actual, path);
-    }
-    if !opaque && matches!(path, "/result/duration" | "/object/result/duration") {
-        return compare_duration(expected, actual, path);
+    if !opaque
+        && matches!(
+            path,
+            "/timestamp" | "/object/timestamp" | "/result/duration" | "/object/result/duration"
+        )
+    {
+        let (Json::Scalar(left), Json::Scalar(right)) = (expected, actual) else {
+            return Err(format!("time value must be a string at {path}"));
+        };
+        return if path.ends_with("/timestamp") {
+            compare_timestamp(left, right, path)
+        } else {
+            compare_duration(left, right, path)
+        };
     }
     match (expected, actual) {
-        (Value::Object(left), Value::Object(right)) => {
+        (Json::Object(left), Json::Object(right))
+            if opaque && (expected.has_repeated_members() || actual.has_repeated_members()) =>
+        {
+            compare_object_multiset(left, right, path)
+        }
+        (Json::Object(left), Json::Object(right)) => {
             let mut unavailable = None;
             for (key, value) in left {
-                let child = format!("{path}/{}", key.replace('~', "~0").replace('/', "~1"));
-                let returned = right.get(key).ok_or_else(|| format!("missing {child}"))?;
+                let child = format!("{path}/{}", escape_key(key));
+                let returned = actual.get(key).ok_or_else(|| format!("missing {child}"))?;
                 defer_unknown(
-                    compare(value, returned, &child, opaque || key == "extensions"),
+                    compare(
+                        value,
+                        returned,
+                        &child,
+                        opaque || path.ends_with("/extensions"),
+                    ),
                     &mut unavailable,
                 )?;
             }
-            for key in right.keys().filter(|key| !left.contains_key(*key)) {
+            for (key, _) in right.iter().filter(|(key, _)| expected.get(key).is_none()) {
                 if opaque || !permitted_addition(expected, path, key) {
                     return Err(format!("unexpected returned property {key} at {path}"));
                 }
             }
             unavailable.map_or(Ok(()), Err)
         }
-        (Value::Object(_), Value::Array(right))
+        (Json::Object(_), Json::Array(right))
             if !opaque && context_activity_value(path) && right.len() == 1 =>
         {
             compare(expected, &right[0], &format!("{path}/0"), false)
         }
-        (Value::Array(left), Value::Array(right)) if left.len() == right.len() => {
+        (Json::Array(left), Json::Array(right)) if left.len() == right.len() => {
             if !opaque
                 && (path.ends_with("/member")
                     || matches!(path, "/attachments" | "/object/attachments"))
@@ -274,21 +332,59 @@ fn compare(expected: &Value, actual: &Value, path: &str, opaque: bool) -> Result
                 unavailable.map_or(Ok(()), Err)
             }
         }
-        (Value::Number(_), Value::Number(_)) => {
-            if numeric_precision(expected, actual)? {
+        (Json::Scalar(left), Json::Scalar(right)) => {
+            if left.is_number() && right.is_number() {
+                if numeric_precision(left, right)? {
+                    Ok(())
+                } else {
+                    Err(format!(
+                        "submitted number lost binary32 precision at {path}"
+                    ))
+                }
+            } else if left == right {
                 Ok(())
             } else {
-                Err(format!(
-                    "submitted number lost binary32 precision at {path}"
-                ))
+                Err(format!("submitted value changed at {path}"))
             }
         }
-        _ if expected == actual => Ok(()),
         _ => Err(format!("submitted value changed at {path}")),
     }
 }
 
-fn permitted_addition(expected: &Value, path: &str, key: &str) -> bool {
+fn compare_object_multiset(
+    left: &[(String, Json)],
+    right: &[(String, Json)],
+    path: &str,
+) -> Result<(), String> {
+    if left.len() != right.len() {
+        return Err(format!("extension member multiplicity changed at {path}"));
+    }
+    // Equal names may carry different values: find a full matching,
+    // retaining definite mismatches even when another pair is delegated.
+    let results: Vec<Vec<_>> = left
+        .iter()
+        .map(|(key, value)| {
+            right
+                .iter()
+                .map(|(name, returned)| {
+                    if key == name {
+                        compare(
+                            value,
+                            returned,
+                            &format!("{path}/{}", escape_key(key)),
+                            true,
+                        )
+                    } else {
+                        Err(format!("extension member name changed at {path}"))
+                    }
+                })
+                .collect()
+        })
+        .collect();
+    matching_result(&results, path)
+}
+
+fn permitted_addition(expected: &Json, path: &str, key: &str) -> bool {
     // Presence allowance only: shapes, values and credential/time relationships
     // are checked independently. An implicit object type is not an exact-output
     // property-addition permission. Never apply these exceptions in extensions.
@@ -296,7 +392,7 @@ fn permitted_addition(expected: &Value, path: &str, key: &str) -> bool {
         return matches!(key, "id" | "stored" | "authority" | "timestamp" | "version");
     }
     if path == "/object"
-        && expected.get("objectType").and_then(Value::as_str) == Some("SubStatement")
+        && expected.get("objectType").and_then(Json::as_str) == Some("SubStatement")
     {
         return key == "timestamp";
     }
@@ -322,7 +418,7 @@ fn defer_unknown(result: Result<(), String>, pending: &mut Option<String>) -> Re
 
 // Distinguish a definite perfect matching from a merely possible one. Greedily
 // consuming an unknown candidate can hide an unmatched member or invent a FAIL.
-fn compare_multiset(left: &[Value], right: &[Value], path: &str) -> Result<(), String> {
+fn compare_multiset(left: &[Json], right: &[Json], path: &str) -> Result<(), String> {
     let results: Vec<Vec<_>> = left
         .iter()
         .enumerate()
@@ -333,6 +429,10 @@ fn compare_multiset(left: &[Value], right: &[Value], path: &str) -> Result<(), S
                 .collect()
         })
         .collect();
+    matching_result(&results, path)
+}
+
+fn matching_result(results: &[Vec<Result<(), String>>], path: &str) -> Result<(), String> {
     let known: Vec<Vec<bool>> = results
         .iter()
         .map(|row| row.iter().map(Result::is_ok).collect())
@@ -533,7 +633,15 @@ fn compare_duration(expected: &Value, actual: &Value, path: &str) -> Result<(), 
 }
 
 fn duration_lexically_valid(text: &str) -> bool {
-    text.starts_with('P') && text.bytes().all(|b| b"0123456789PYMDWTHS.,".contains(&b))
+    text.starts_with('P')
+        && text.bytes().enumerate().all(|(index, byte)| {
+            b"0123456789PYMDWTHS.,".contains(&byte)
+                && (!matches!(byte, b'.' | b',')
+                    || text
+                        .as_bytes()
+                        .get(index + 1)
+                        .is_some_and(u8::is_ascii_digit))
+        })
 }
 
 fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
@@ -570,7 +678,8 @@ mod tests {
     #[test]
     fn duration_lexical_defects_do_not_reach_component_slices() {
         for invalid in [
-            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1\0S", "PT1e3S",
+            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1\0S", "PT1e3S", "PT1.S", "PT1,S",
+            "PT1.H", "P1,D", "PT1.",
         ] {
             assert!(super::duration_seconds(invalid).is_none());
             for other in ["PT1.239S", "P1M", invalid] {
@@ -585,6 +694,8 @@ mod tests {
         for (sent, got) in [
             ("PT1.239S", "PT1.23S"),
             ("PT1.239S", "PT1,23S"),
+            ("PT1S", "PT1.00S"),
+            ("PT1S", "PT1,00S"),
             ("P1W", "P1W"),
         ] {
             assert!(super::compare_duration(&json!(sent), &json!(got), "duration").is_ok());

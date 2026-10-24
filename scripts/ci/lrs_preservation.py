@@ -9,6 +9,30 @@ from decimal import Decimal, localcontext
 import re
 import struct
 import math
+import json
+
+
+class MemberObject(dict):
+    """Read-only response view with the complete decoded member sequence.
+
+    Ordinary consumers can inspect the mapping; preservation must use members()
+    so the mapping's last-value view never determines duplicate equivalence.
+    """
+    def __init__(self, pairs):
+        super().__init__(pairs)
+        self.pairs = tuple(pairs)
+
+
+def load_json_members(encoded):
+    return json.loads(encoded, object_pairs_hook=MemberObject)
+
+
+def members(value):
+    return value.pairs if isinstance(value, MemberObject) else tuple(value.items())
+
+
+def unique_members(value):
+    return len(members(value)) == len(value)
 
 
 class PrimitiveUnavailable(ValueError):
@@ -218,6 +242,7 @@ def duration_preserved(sent, got):
     if not isinstance(sent, str) or not isinstance(got, str):
         return False
     if any(not value.startswith('P') or any(c not in '0123456789PYMDWTHS.,' for c in value)
+           or re.search(r'[.,](?![0-9])',value)
            for value in [sent,got]):
         return False
     if sent == got:
@@ -356,9 +381,12 @@ def snapshot_equal(left, right, pointer='', opaque=False):
     if not opaque and pointer in ('/result/duration', '/object/result/duration'):
         return all_decisions([duration_preserved(left, right), duration_preserved(right, left)])
     if isinstance(left, dict) and isinstance(right, dict):
+        if opaque:
+            return multiset_equal(members(left), members(right), lambda a,b:
+                all_decisions([a[0] == b[0], snapshot_equal(a[1], b[1], pointer, True)]))
         return all_decisions([left.keys() == right.keys(), *[
-            snapshot_equal(v, right[k], pointer+'/'+k.replace('~','~0').replace('/','~1'), opaque or k=='extensions')
-            for k,v in left.items() if k in right]])
+            snapshot_equal(v, right[k], pointer+'/'+k.replace('~','~0').replace('/','~1'), pointer.endswith('/extensions'))
+            for k,v in left.items() if k in right], unique_members(left), unique_members(right)])
     if isinstance(left, list) and isinstance(right, list):
         if not opaque and (pointer.endswith('/member') or pointer in ('/attachments', '/object/attachments')):
             return multiset_equal(left, right, lambda a,b:snapshot_equal(a,b,pointer+'/0',opaque))
@@ -391,7 +419,17 @@ def preservation(sent, got, pointer=''):
             record(False, 'contextActivities singleton expands to one element')
         elif not isinstance(got, dict):
             record(False, 'object type preserved')
+        elif opaque and (not unique_members(sent) or not unique_members(got)):
+            def equal_pair(a, b):
+                if a[0] != b[0]:
+                    return False
+                checks = preservation(a[1], b[1], pointer + '/' + a[0].replace('~','~0').replace('/','~1'))
+                return all_decisions([None if o['outcome']=='not-run' else o['outcome']=='passed' for o in checks])
+            record(multiset_equal(members(sent), members(got), equal_pair),
+                   'Extension decoded member multiset with multiplicity preserved')
         else:
+            if not unique_members(sent) or not unique_members(got):
+                record(False, 'Duplicate core or extension-map property')
             for key, value in sent.items():
                 sub = pointer + '/' + key.replace('~', '~0').replace('/', '~1')
                 if key not in got:

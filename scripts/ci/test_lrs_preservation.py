@@ -8,20 +8,45 @@ from decimal import Decimal, localcontext
 
 from lrs_preservation import (
     PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
-    statement_response_headers, snapshot_equal, duration_preserved,
+    statement_response_headers, snapshot_equal, duration_preserved, load_json_members,
 )
 
 
 class PreservationControls(unittest.TestCase):
+    def test_extension_member_multiplicity_survives_decoding(self):
+        fixture = json.loads((Path(__file__).resolve().parents[2] / 'tests/conformance/fixtures/preservation-properties.json').read_text())
+        for row in fixture['duplicate_members']:
+            for placement in ['context', 'result']:
+                def wrap(raw):
+                    return load_json_members('{"' + placement + '":{"extensions":{"urn:x":' + raw + '}}}')
+                with self.subTest(id=row['id'], placement=placement):
+                    before, after = wrap(row['submitted']), wrap(row['returned'])
+                    outcomes = {o['outcome'] for o in preservation(before, after)}
+                    actual = 'failed' if 'failed' in outcomes else 'not-run' if 'not-run' in outcomes else 'passed'
+                    self.assertEqual(actual, row['outcome'])
+                    # Snapshot equality grants no second storage rounding.
+                    if row['id'] != 'greedy-matching-counterexample':
+                        expected = {'passed':True, 'failed':False, 'not-run':None}[row['outcome']]
+                        self.assertIs(snapshot_equal(before, after), expected)
+
+    def test_duplicate_core_and_extension_map_members_are_not_opaque(self):
+        for raw in ['{"actor":{},"actor":{}}',
+                    '{"context":{"extensions":{"urn:x":1,"urn:x":1}}}']:
+            value = load_json_members(raw)
+            self.assertIs(snapshot_equal(value, value), False)
+            self.assertTrue(any(o['outcome']=='failed' for o in preservation(value, value)))
+
     def test_duration_lexical_defects_precede_comparison_or_deferral(self):
-        for bad in ['PTé1S','PT🙂1S','PT１S','PT1éS','PT1.éS','PT1\x00S','PT1e3S','not-duration']:
+        for bad in ['PTé1S','PT🙂1S','PT１S','PT1éS','PT1.éS','PT1\x00S','PT1e3S','not-duration',
+                    'PT1.S','PT1,S','PT1.H','P1,D','PT1.']:
             for other in ['PT1.239S','P1M',bad]:
                 for left,right in [(other,bad),(bad,other)]:
                     with self.subTest(left=left,right=right):
                         self.assertIs(duration_preserved(left,right),False)
                         for pointer in ['/result/duration','/object/result/duration']:
                             self.assertEqual(preservation(left,right,pointer)[0]['outcome'],'failed')
-        for left,right in [('PT1.239S','PT1.23S'),('PT1.239S','PT1,23S'),('P1W','P1W')]:
+        for left,right in [('PT1.239S','PT1.23S'),('PT1.239S','PT1,23S'),('P1W','P1W'),
+                           ('PT1S','PT1.00S'),('PT1S','PT1,00S')]:
             self.assertIs(duration_preserved(left,right),True)
         self.assertIsNone(duration_preserved('P1M','P30D'))
 

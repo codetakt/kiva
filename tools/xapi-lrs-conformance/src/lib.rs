@@ -22,6 +22,7 @@ use time::{Duration, OffsetDateTime, format_description::well_known::Rfc3339};
 use url::Url;
 
 mod assertions;
+mod lossless_json;
 mod media_type;
 mod preservation;
 use assertions::Check;
@@ -2007,6 +2008,7 @@ async fn execute_case_requests(
         retrieval_pending: false,
         capability_unavailable: false,
         visible_statements: BTreeMap::new(),
+        known_statement_ids: BTreeSet::new(),
     };
     if case.steps.is_empty() {
         let failures = match (&case.request, &case.expect) {
@@ -2093,6 +2095,9 @@ struct HttpRequestState<'a> {
     // Key includes endpoint selector and effective credential context. Values
     // are independently returned stored times, not submitted timestamps.
     visible_statements: BTreeMap<StatementVisibilityKey, VisibleStatement>,
+    // Existence survives voiding and representation/credential changes within
+    // this endpoint. Resending an existing ID cannot introduce side effects.
+    known_statement_ids: BTreeSet<String>,
 }
 
 // Bounded observation window for LRSs that make writes retrievable asynchronously.
@@ -2118,6 +2123,7 @@ async fn execute_http_request(
             retrieval_pending: false,
             capability_unavailable: false,
             visible_statements: state.visible_statements.clone(),
+            known_statement_ids: state.known_statement_ids.clone(),
         };
         let failures = execute_http_request_once(context, request, expectation, &mut attempt).await;
         attempt.capability_unavailable |= !failures.is_empty()
@@ -2147,6 +2153,7 @@ async fn execute_http_request(
             state.response_url = attempt.response_url;
             state.capture_response_urls = attempt.capture_response_urls;
             state.visible_statements = attempt.visible_statements;
+            state.known_statement_ids = attempt.known_statement_ids;
             state.diagnostic_statuses.extend(attempt_diagnostics);
             return failures;
         }
@@ -2371,25 +2378,30 @@ async fn execute_http_request_once(
             && status.is_success()
         {
             invalidate_voided_observations(&request, &request_headers, state);
-        } else if status == StatusCode::OK
-            && let Some(key) = visibility_key
-            && let Ok(json) = serde_json::from_slice::<Value>(&body_bytes)
-            && let Some(stored) = json.get("stored").and_then(Value::as_str)
-            && request
-                .query
-                .get("statementId")
-                .or_else(|| request.query.get("voidedStatementId"))
-                .is_some_and(|id| json.get("id").and_then(Value::as_str) == Some(id.as_str()))
+            remember_submitted_ids(&request, &request_headers, &body_bytes, state);
+        } else if request.path == "/statements"
+            && request.method == "GET"
+            && status == StatusCode::OK
+            && let Some(json) = retrieved_document(&headers, &body_bytes)
         {
-            state.visible_statements.insert(
-                key,
-                VisibleStatement {
-                    stored: stored.to_owned(),
-                    voiding: json.pointer("/verb/id").and_then(Value::as_str)
-                        == Some("http://adlnet.gov/expapi/verbs/voided"),
-                    unresolved_mutation: false,
-                },
-            );
+            remember_retrieved_ids(&json, &mut state.known_statement_ids);
+            if let Some(key) = visibility_key
+                && let Some(stored) = json.get("stored").and_then(Value::as_str)
+                && json
+                    .get("id")
+                    .and_then(Value::as_str)
+                    .is_some_and(|id| canonical_statement_id(id) == key.id)
+            {
+                state.visible_statements.insert(
+                    key,
+                    VisibleStatement {
+                        stored: stored.to_owned(),
+                        voiding: json.pointer("/verb/id").and_then(Value::as_str)
+                            == Some("http://adlnet.gov/expapi/verbs/voided"),
+                        unresolved_mutation: false,
+                    },
+                );
+            }
         }
     }
     failures
@@ -2441,6 +2453,7 @@ async fn evaluate_statement_pages(
             failures.push("StatementResult page lacks a statements array".into());
             return failures;
         };
+        remember_retrieved_ids(&document, &mut state.known_statement_ids);
         statements.extend(items.iter().cloned());
         for (index, check) in expectation.checks.iter().enumerate() {
             // A known inversion must survive a later page/transport limit.
@@ -2619,18 +2632,104 @@ fn submitted_statements(request: &RequestSpec, headers: &HeaderMap) -> Option<Va
     }
 }
 
-fn void_targets(document: &Value) -> Option<BTreeSet<&str>> {
+fn canonical_statement_id(id: &str) -> String {
+    if assertions::standard_uuid(id) {
+        id.to_ascii_lowercase()
+    } else {
+        id.to_owned()
+    }
+}
+
+fn retrieved_document(headers: &HeaderMap, bytes: &[u8]) -> Option<Value> {
+    if headers
+        .get("Content-Type")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|kind| media_type::parse_http(kind).ok())
+        .is_some_and(|kind| kind.essence == "multipart/mixed")
+    {
+        assertions::multipart_document(headers, bytes, &[]).ok()
+    } else {
+        serde_json::from_slice(bytes).ok()
+    }
+}
+
+fn remember_retrieved_ids(document: &Value, known: &mut BTreeSet<String>) {
+    let statements = document
+        .get("statements")
+        .and_then(Value::as_array)
+        .or_else(|| document.as_array())
+        .map_or_else(|| std::slice::from_ref(document), Vec::as_slice);
+    for statement in statements {
+        if statement.get("stored").and_then(Value::as_str).is_some()
+            && let Some(id) = statement.get("id").and_then(Value::as_str)
+        {
+            known.insert(canonical_statement_id(id));
+        }
+    }
+}
+
+fn submitted_id<'a>(statement: &'a Value, request: &'a RequestSpec) -> Option<&'a str> {
+    if request.method == "PUT"
+        && let Some(id) = request.query.get("statementId")
+    {
+        return Some(id);
+    }
+    statement.get("id").and_then(Value::as_str)
+}
+
+fn remember_submitted_ids(
+    request: &RequestSpec,
+    headers: &HeaderMap,
+    response: &[u8],
+    state: &mut HttpRequestState<'_>,
+) {
+    if request.method == "PUT"
+        && let Some(id) = request.query.get("statementId")
+    {
+        state.known_statement_ids.insert(canonical_statement_id(id));
+    }
+    if let Some(document) = submitted_statements(request, headers) {
+        for statement in document
+            .as_array()
+            .map_or_else(|| std::slice::from_ref(&document), Vec::as_slice)
+        {
+            if let Some(id) = submitted_id(statement, request) {
+                state.known_statement_ids.insert(canonical_statement_id(id));
+            }
+        }
+    }
+    if request.method == "POST"
+        && let Ok(Value::Array(ids)) = serde_json::from_slice(response)
+    {
+        for id in ids.iter().filter_map(Value::as_str) {
+            state.known_statement_ids.insert(canonical_statement_id(id));
+        }
+    }
+}
+
+fn void_targets(
+    document: &Value,
+    request: &RequestSpec,
+    known: &BTreeSet<String>,
+) -> Option<BTreeSet<String>> {
     let statements = document
         .as_array()
         .map_or_else(|| std::slice::from_ref(document), Vec::as_slice);
     let mut targets = BTreeSet::new();
     for statement in statements {
+        if submitted_id(statement, request)
+            .is_some_and(|id| known.contains(&canonical_statement_id(id)))
+        {
+            continue;
+        }
         let verb = statement.pointer("/verb/id")?.as_str()?;
         if verb == "http://adlnet.gov/expapi/verbs/voided" {
             if statement.pointer("/object/objectType")?.as_str()? != "StatementRef" {
                 return None;
             }
-            targets.insert(statement.pointer("/object/id")?.as_str()?);
+            targets.insert(canonical_statement_id(
+                statement.pointer("/object/id")?.as_str()?,
+            ));
         }
     }
     Some(targets)
@@ -2644,8 +2743,21 @@ fn invalidate_voided_observations(
     if state.visible_statements.is_empty() {
         return;
     }
+    // Even an opaque PUT to a known ID cannot modify the target or any other
+    // Statement. Successful replay is immutable, including possible voids.
+    if request.method == "PUT"
+        && request.query.get("statementId").is_some_and(|id| {
+            state
+                .known_statement_ids
+                .contains(&canonical_statement_id(id))
+        })
+    {
+        return;
+    }
     let document = submitted_statements(request, headers);
-    let targets = document.as_ref().and_then(void_targets);
+    let targets = document
+        .as_ref()
+        .and_then(|document| void_targets(document, request, &state.known_statement_ids));
     state.visible_statements.retain(|key, observed| {
         // Ordinary writes are immutable. Only a void target loses ordinary
         // visibility; voided lookups and voiding Statements remain retrievable.
@@ -2653,12 +2765,7 @@ fn invalidate_voided_observations(
             return true;
         }
         if let Some(targets) = &targets {
-            // UUID hexadecimal spelling is case-insensitive. Nonstandard IDs
-            // admitted under a format policy retain exact string comparison.
-            return !targets.iter().any(|target| {
-                *target == key.id
-                    || (assertions::standard_uuid(target) && target.eq_ignore_ascii_case(&key.id))
-            });
+            return !targets.contains(&key.id);
         }
         // An opaque payload cannot authorize erasing prior evidence. Retain
         // the observation and defer a later absence instead of retrying to PASS.
@@ -2693,7 +2800,7 @@ fn statement_visibility_key(
         .collect();
     Some(StatementVisibilityKey {
         selector,
-        id: id.clone(),
+        id: canonical_statement_id(id),
         credentials: format!("{identity:?}"),
     })
 }
@@ -4660,11 +4767,13 @@ expect:
 
     #[tokio::test]
     async fn malformed_duration_remains_a_reported_failure() {
-        for invalid in ["PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS"] {
+        for invalid in [
+            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1.S", "PT1,S",
+        ] {
             for substatement in [false, true] {
                 let mut expected = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.test"},
                     "verb":{"id":"urn:example:verb"},"object":{"id":"urn:example:activity"},
-                    "result":{"duration":"PT1.239S"}});
+                    "result":{"duration":"PT1S"}});
                 if substatement {
                     expected["object"] = expected.clone();
                     expected["object"]["objectType"] = "SubStatement".into();
@@ -4688,6 +4797,192 @@ expect:
                 );
                 assert!(!report.failures.is_empty());
                 assert!(serde_json::to_string(&report).is_ok());
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn hidden_extension_members_remain_a_reported_failure() {
+        let expected = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.test"},
+            "verb":{"id":"urn:verb"},"object":{"id":"urn:activity"},
+            "result":{"extensions":{"urn:x":{"null":null}}}});
+        for member in [
+            r#""null":null"#,
+            r#""null":false,"null":null"#,
+            r#""null":null,"null":null"#,
+        ] {
+            let actual = expected.to_string().replace(r#""null":null"#, member);
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements"}),
+                serde_json::json!({"status":200,"checks":[{"kind":"json-preservation","expected":expected}]}),
+                vec![control_response(200, "", &actual, false)],
+            ).await;
+            assert_eq!(
+                report.outcome,
+                if member.contains(',') {
+                    super::CaseOutcome::Failed
+                } else {
+                    super::CaseOutcome::Passed
+                },
+                "{report:?}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn multipart_and_uuid_spellings_preserve_retrieval_evidence() {
+        let lower = "abcdef00-0000-4000-8000-000000000001";
+        let upper = lower.to_ascii_uppercase();
+        for multipart in [false, true] {
+            for (first, returned, last, same) in [
+                (lower, lower, lower, true),
+                (upper.as_str(), lower, lower, true),
+                (lower, upper.as_str(), upper.as_str(), true),
+                ("Custom", "Custom", "custom", false),
+            ] {
+                let document = serde_json::json!({"id":returned,"stored":"2026-01-01T00:00:00Z"});
+                let (kind, body) = if multipart {
+                    (
+                        "multipart/mixed; boundary=fixture",
+                        format!(
+                            "--fixture\r\nContent-Type: application/json\r\n\r\n{document}\r\n--fixture--\r\n"
+                        ),
+                    )
+                } else {
+                    ("application/json", document.to_string())
+                };
+                let headers = "X-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: 2026-01-02T00:00:00Z\r\n";
+                let checks = if multipart {
+                    serde_json::json!([{"kind":"multipart"}])
+                } else {
+                    serde_json::json!([])
+                };
+                let case = serde_json::json!({"id":"retrieval-evidence", "requirements":["fixture"],
+                "safety":{"destructive":false,"requires_isolated_lrs":true},"steps":[
+                    {"id":"first","request":{"method":"GET","path":"/statements",
+                        "query":{"statementId":first,"attachments":"true"}},
+                        "expect":{"status":200,"checks":checks}},
+                    {"id":"again","request":{"method":"GET","path":"/statements",
+                        "query":{"statementId":last,"attachments":"false"},"await_retrieval_ms":1},
+                        "expect":{"status":200,"headers":{
+                            "X-Experience-API-Consistent-Through":{"iso8601":true}}}}
+                ]});
+                let (report, paths) = timed_case_control(
+                    "",
+                    case,
+                    vec![
+                        control_response(
+                            200,
+                            &format!("{headers}Content-Type: {kind}\r\n"),
+                            &body,
+                            false,
+                        ),
+                        control_response(404, headers, "{}", false),
+                    ],
+                    std::time::Duration::from_millis(5),
+                )
+                .await;
+                assert_eq!(
+                    report.outcome,
+                    if same {
+                        super::CaseOutcome::Failed
+                    } else {
+                        super::CaseOutcome::NotRun
+                    },
+                    "{multipart}/{first}/{returned}/{last}: {report:?}"
+                );
+                assert_eq!(paths.len(), 2);
+                assert_eq!(report.retrieval_attempts.len(), 1);
+                assert_eq!(report.retrieval_attempts[0].pending_visibility, !same);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn an_existing_statement_id_cannot_introduce_a_voiding_effect() {
+        let a = "aaaaaaaa-0000-4000-8000-000000000001";
+        let b = "bbbbbbbb-0000-4000-8000-000000000002";
+        for method in ["PUT", "POST", "opaque-PUT"] {
+            for learned in ["GET", "PUT", "POST", "assigned", "collection", "pages"] {
+                let headers = "X-Experience-API-Consistent-Through: 2026-01-02T00:00:00Z\r\n";
+                let observed =
+                    |id| serde_json::json!({"id":id,"stored":"2026-01-01T00:00:00Z"}).to_string();
+                let mut establish = serde_json::json!({"method":learned,"path":"/statements"});
+                let (establish_status, establish_body) = match learned {
+                    "collection" | "pages" => {
+                        establish["method"] = "GET".into();
+                        establish["query"] = serde_json::json!({"limit":"1"});
+                        if learned == "pages" {
+                            establish["collect_statement_pages"] = 2.into();
+                        }
+                        (
+                            200,
+                            format!("{{\"statements\":[{}],\"more\":\"\"}}", observed(b)),
+                        )
+                    }
+                    "GET" => {
+                        establish["query"] = serde_json::json!({"statementId":b});
+                        (200, observed(b))
+                    }
+                    "PUT" => {
+                        establish["query"] = serde_json::json!({"statementId":b});
+                        establish["body"] = serde_json::json!({"verb":{"id":"urn:ordinary"}});
+                        (204, String::new())
+                    }
+                    _ => {
+                        establish["method"] = "POST".into();
+                        establish["body"] = serde_json::json!({"verb":{"id":"urn:ordinary"}});
+                        if learned == "POST" {
+                            establish["body"]["id"] = b.into();
+                        }
+                        (200, serde_json::json!([b]).to_string())
+                    }
+                };
+                let mut resend = serde_json::json!({"method":method,"path":"/statements",
+                    "body":{"id":b.to_ascii_uppercase(),"verb":{"id":"http://adlnet.gov/expapi/verbs/voided"},
+                            "object":{"objectType":"StatementRef","id":a}}});
+                if method == "POST" {
+                    resend["body"] = serde_json::json!([resend["body"].clone()]);
+                } else {
+                    resend["method"] = "PUT".into();
+                    resend["query"] = serde_json::json!({"statementId":b});
+                    if method == "opaque-PUT" {
+                        resend
+                            .as_object_mut()
+                            .expect("fixture request")
+                            .remove("body");
+                        resend["raw_body"] = "opaque accepted replay".into();
+                    }
+                }
+                let case = serde_json::json!({"id":"immutable-voiding-source", "requirements":["fixture"],
+                "safety":{"destructive":false,"requires_isolated_lrs":true},"steps":[
+                    {"id":"a","request":{"method":"GET","path":"/statements","query":{"statementId":a}},"expect":{"status":200}},
+                    {"id":"b","request":establish,"expect":{"status":establish_status}},
+                    {"id":"resend","request":resend,"expect":{"status":204}},
+                    {"id":"a-again","request":{"method":"GET","path":"/statements","query":{"statementId":a},
+                        "await_retrieval_ms":1},"expect":{"status":200,"headers":{
+                            "X-Experience-API-Consistent-Through":{"iso8601":true}}}}
+                ]});
+                let (report, paths) = timed_case_control(
+                    "",
+                    case,
+                    vec![
+                        control_response(200, headers, &observed(a), false),
+                        control_response(establish_status, headers, &establish_body, false),
+                        control_response(204, "", "", false),
+                        control_response(404, headers, "{}", false),
+                    ],
+                    std::time::Duration::from_millis(5),
+                )
+                .await;
+                assert_eq!(
+                    report.outcome,
+                    super::CaseOutcome::Failed,
+                    "{method}/{learned}: {report:?}"
+                );
+                assert_eq!(paths.len(), 4);
+                assert_eq!(report.retrieval_attempts.len(), 1);
+                assert!(!report.retrieval_attempts[0].pending_visibility);
             }
         }
     }

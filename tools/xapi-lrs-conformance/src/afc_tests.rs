@@ -2,6 +2,66 @@
 use super::*;
 
 #[test]
+fn query_pagination_witness_and_more_syntax_are_independent_of_page_limits() {
+    for timestamp in ["2026-01-01T00:00:00Z", "2016-12-31T23:59:60Z"] {
+        let captures = BTreeMap::from([
+            ("a".into(), timestamp.into()),
+            ("b".into(), timestamp.into()),
+        ]);
+        for limit in [0, 1, 2] {
+            let check: Check = serde_json::from_value(serde_json::json!({"kind":"statement-query",
+                "stored_captures":{"a":"a","b":"b"},"limit":limit}))
+            .unwrap();
+            for count in [0, 1, 2] {
+                for more in [
+                    None,
+                    Some(serde_json::json!("")),
+                    Some(serde_json::json!("?cursor=2")),
+                    Some(serde_json::json!("//[Vf.a:b]/next")),
+                    Some(serde_json::json!(42)),
+                    Some(serde_json::json!(null)),
+                    Some(serde_json::json!("\n")),
+                    Some(serde_json::json!("/next%xx")),
+                    Some(serde_json::json!("http://[broken")),
+                ] {
+                    let items: Vec<_> = ["a", "b"]
+                        .iter()
+                        .take(count)
+                        .map(|id| serde_json::json!({"id":id,"stored":timestamp}))
+                        .collect();
+                    let mut body = serde_json::json!({"statements":items});
+                    if let Some(value) = &more {
+                        body["more"] = value.clone();
+                    }
+                    let has_link = more.as_ref().is_some_and(|value| {
+                        matches!(value.as_str(), Some("?cursor=2" | "//[Vf.a:b]/next"))
+                    });
+                    let valid_syntax = more.as_ref().is_none_or(|value| {
+                        matches!(value.as_str(), Some("" | "?cursor=2" | "//[Vf.a:b]/next"))
+                    });
+                    let defect =
+                        !valid_syntax || count < 2 && !has_link || limit != 0 && count > limit;
+                    let errors = check.evaluate(
+                        200,
+                        &HeaderMap::new(),
+                        body.to_string().as_bytes(),
+                        &captures,
+                    );
+                    assert_eq!(
+                        errors.iter().any(|e| !e.starts_with("ORACLE-UNAVAILABLE:")),
+                        defect,
+                        "{timestamp}/{limit}/{count}/{more:?}: {errors:?}"
+                    );
+                    if !defect {
+                        assert_eq!(errors.is_empty(), timestamp.starts_with("2026"));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn query_ties_boundaries_order_and_page_limits() {
     for equal in [false, true] {
         let first = "2026-01-01T00:00:00Z";
@@ -57,7 +117,7 @@ fn query_ties_boundaries_order_and_page_limits() {
             (vec!["b", "a"], false),
         ] {
             let bytes = serde_json::to_vec(
-                &serde_json::json!({"statements":ids.iter().map(|id|item(id)).collect::<Vec<_>>()}),
+                &serde_json::json!({"statements":ids.iter().map(|id|item(id)).collect::<Vec<_>>(),"more":"?cursor=2"}),
             )
             .unwrap();
             assert_eq!(

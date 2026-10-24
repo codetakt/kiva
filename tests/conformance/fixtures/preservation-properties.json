@@ -1,5 +1,5 @@
 {
-  "scope": "Author controls for exact/default serialization property presence; independent shape and managed-value validation still apply. Default object types do not grant permission to add a property to an exact serialization.",
+  "scope": "Author controls for exact/default serialization property presence and extension-member multiplicity; independent shape and managed-value validation still apply. Default object types do not grant permission to add a property to an exact serialization. Deep extension objects retain decoded member multisets; core and extension-map properties remain unique.",
   "rules": [
     "IP-format-exact",
     "IP-return-serialization",
@@ -9,7 +9,9 @@
     "IP-authority-present",
     "IP-field-presence-meaning",
     "IP-substatement-default-time",
-    "IP-attachment-transmission-json"
+    "IP-attachment-transmission-json",
+    "IP-extension-values-domain",
+    "IP-extension-value-acceptance"
   ],
   "cases": [
     {
@@ -788,6 +790,104 @@
         "extra": "invented"
       },
       "preserved": false
+    }
+  ],
+  "duplicate_members": [
+    {
+      "id": "insert-hidden-duplicate",
+      "submitted": "{\"null\":null}",
+      "returned": "{\"null\":false,\"null\":null}",
+      "outcome": "failed"
+    },
+    {
+      "id": "drop-first-value",
+      "submitted": "{\"a\":1,\"a\":2}",
+      "returned": "{\"a\":2}",
+      "outcome": "failed"
+    },
+    {
+      "id": "duplicate-identical",
+      "submitted": "{\"a\":1}",
+      "returned": "{\"a\":1,\"a\":1}",
+      "outcome": "failed"
+    },
+    {
+      "id": "reorder-distinct",
+      "submitted": "{\"a\":1,\"a\":2}",
+      "returned": "{\"a\":2,\"a\":1}",
+      "outcome": "passed"
+    },
+    {
+      "id": "reorder-identical",
+      "submitted": "{\"a\":1,\"b\":2,\"a\":1}",
+      "returned": "{\"a\":1,\"a\":1,\"b\":2}",
+      "outcome": "passed"
+    },
+    {
+      "id": "changed-value",
+      "submitted": "{\"a\":1,\"a\":2}",
+      "returned": "{\"a\":2,\"a\":3}",
+      "outcome": "failed"
+    },
+    {
+      "id": "escaped-name",
+      "submitted": "{\"a\":1,\"a\":2}",
+      "returned": "{\"\\u0061\":2,\"a\":1}",
+      "outcome": "passed"
+    },
+    {
+      "id": "nested-array",
+      "submitted": "[{\"a\":1,\"a\":2},false]",
+      "returned": "[{\"a\":2,\"a\":1},false]",
+      "outcome": "passed"
+    },
+    {
+      "id": "array-order",
+      "submitted": "[{\"a\":1,\"a\":2},false]",
+      "returned": "[false,{\"a\":2,\"a\":1}]",
+      "outcome": "failed"
+    },
+    {
+      "id": "opaque-names",
+      "submitted": "{\"stored\":\"not-time\",\"member\":[1,2],\"stored\":null}",
+      "returned": "{\"member\":[1,2],\"stored\":null,\"stored\":\"not-time\"}",
+      "outcome": "passed"
+    },
+    {
+      "id": "duplicate-number-unknown",
+      "submitted": "{\"a\":0.1,\"a\":2}",
+      "returned": "{\"a\":2,\"a\":0.1}",
+      "outcome": "not-run"
+    },
+    {
+      "id": "duplicate-unknown-does-not-hide-loss",
+      "submitted": "{\"a\":0.1,\"a\":2}",
+      "returned": "{\"a\":0.1}",
+      "outcome": "failed"
+    },
+    {
+      "id": "duplicate-unknown-does-not-hide-type",
+      "submitted": "{\"a\":0.1,\"a\":2}",
+      "returned": "{\"a\":0.1,\"a\":true}",
+      "outcome": "failed"
+    },
+    {
+      "id": "duplicate-unknown-does-not-hide-key",
+      "submitted": "{\"a\":0.1,\"b\":2}",
+      "returned": "{\"a\":0.1,\"c\":2}",
+      "outcome": "failed"
+    },
+    {
+      "id": "nested-duplicate-loss",
+      "submitted": "{\"outer\":{\"a\":1,\"a\":2}}",
+      "returned": "{\"outer\":{\"a\":2}}",
+      "outcome": "failed"
+    },
+    {
+      "id": "greedy-matching-counterexample",
+      "submitted": "{\"a\":16777217,\"a\":16777216}",
+      "returned": "{\"a\":16777216,\"a\":16777218}",
+      "outcome": "passed"
     }
   ]
 }

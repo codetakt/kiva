@@ -7,12 +7,61 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from run_lrs_procedures import Executor, IFI
+from lrs_preservation import preservation, snapshot_equal
 
 
 class ResponseTypeTests(unittest.TestCase):
+    def test_http_decoding_retains_extension_duplicates_for_both_comparisons(self):
+        original = {'result':{'extensions':{'urn:x':{'null':None}}}}
+        for members, preserved in [('"null":null', True), ('"null":false,"null":null', False),
+                                   ('"null":null,"null":null', False)]:
+            with self.subTest(members=members), TemporaryDirectory() as directory:
+                executor=Executor.__new__(Executor)
+                executor.args=SimpleNamespace(endpoint='http://fixture.test')
+                executor.out=Path(directory); executor.headers={}; executor.docs=[]
+                executor.results={'probe':{'checks':[]}};executor.current='probe';executor.ordinal=0
+                connection=Mock();response=connection.getresponse.return_value
+                response.status=200
+                response.getheaders.return_value=[('X-Experience-API-Version','2.0.0'),
+                    ('X-Experience-API-Consistent-Through','2026-01-01T00:00:00Z')]
+                raw=('{"result":{"extensions":{"urn:x":{'+members+'}}}}').encode()
+                response.read.return_value=raw
+                with patch('run_lrs_procedures.http.client.HTTPConnection',return_value=connection):
+                    reply=executor.http('GET','/statements')
+                self.assertIs(snapshot_equal(original,reply['json']),preserved)
+                self.assertEqual(any(o['outcome']=='failed' for o in preservation(original,reply['json'])),not preserved)
+                # Raw evidence retains the full text even for ordinary map-view consumers.
+                self.assertEqual(reply['body_hex'],raw.hex())
+
+    def test_iri_returned_object_types_fail_without_aborting_later_inputs(self):
+        for bad in [None, [], {}, 42, 'activity', {'id':[]}, {'id':{}}, {'id':None}]:
+            with self.subTest(bad=bad), TemporaryDirectory() as directory:
+                executor=self.person_executor(directory, {}, unavailable=False)
+                executor.args.procedure=['iri-comparison-allowed-strategies']
+                executor.store=Mock(return_value={})
+                executor.read_visible=Mock(return_value={'json':{'object':bad}})
+                self.assertEqual(self.execute(executor),1)
+                checks=executor.results['iri-comparison-allowed-strategies']['checks']
+                self.assertFalse(any(c['id']=='execution-unavailable' for c in checks))
+                self.assertEqual(executor.read_visible.call_count,5)
+                failures=[c for c in checks if c['id'].endswith('-received-identity')]
+                self.assertEqual(len(failures),5)
+                self.assertTrue(all(c['outcome']=='failed' for c in failures))
+
+    def test_iri_valid_activity_retains_only_the_unimplemented_comparison_scope(self):
+        with TemporaryDirectory() as directory:
+            executor=self.person_executor(directory, {}, unavailable=False)
+            executor.args.procedure=['iri-comparison-allowed-strategies']
+            executor.store=Mock(return_value={})
+            executor.read_visible=Mock(side_effect=lambda body,admission:{'json':body})
+            self.assertEqual(self.execute(executor),2)
+            checks=executor.results['iri-comparison-allowed-strategies']['checks']
+            self.assertFalse(any(c['id']=='execution-unavailable' or c['outcome']=='failed' for c in checks))
+            self.assertEqual(executor.read_visible.call_count,5)
+
     @staticmethod
     def execute(executor):
         with redirect_stdout(io.StringIO()):

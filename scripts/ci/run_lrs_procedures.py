@@ -133,7 +133,8 @@ def ptr(value, pointer):
 
 
 from lrs_preservation import (preservation, timestamp_preserved, timestamp_ns, timestamp_pair, PrimitiveUnavailable,
-    statement_response_headers, agent_structure, agent_identity_equal, snapshot_equal, all_decisions)
+    statement_response_headers, agent_structure, agent_identity_equal, snapshot_equal, all_decisions,
+    load_json_members)
 
 
 def response_http_date(value):
@@ -251,7 +252,7 @@ class Executor:
         after=utc()
         reply={'status':response.status,'url':response_url,'headers':response_headers,'body_hex':encoded.hex(),'before':before,'after':after,'header_contract':header_result}
         if incomplete_body:reply['incomplete_body']=True
-        try:reply['json']=json.loads(encoded)
+        try:reply['json']=load_json_members(encoded)
         except (ValueError,UnicodeError):reply['json']=None
         if not incomplete_body and method=='GET' and response.status==200:
             if path in ('/about','/activities','/agents') or path=='/statements' and (query or {}).get('attachments') not in ('true',True):
@@ -895,7 +896,11 @@ class Executor:
             body=self.statement(object={'id':self.prefix+'/'+suffix})
             admission=self.store(body);reply=self.read_visible(body,admission)
             if reply is None:continue
-            self.check(suffix+'-received-identity',reply['json'].get('object',{}).get('id')==body['object']['id'])
+            document=reply['json']
+            activity=document.get('object') if isinstance(document,dict) else None
+            self.check(suffix+'-received-identity',isinstance(activity,dict)
+                and isinstance(activity.get('id'),str) and activity['id']==body['object']['id'],
+                'Returned Activity must be an object with the submitted string identifier')
         self.check('normalization-comparison-and-default-port',None,'Accepted IRI preservation does not establish equality strategy; external grammar/equality classes still open')
 
     def execute(self):
