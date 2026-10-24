@@ -1,10 +1,57 @@
 """Regression boundaries for positive, admitted Statement visibility observations."""
 import copy
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from run_lrs_procedures import Executor
 
 class VisibilityTests(unittest.TestCase):
+    def test_relative_continuation_requires_a_base_and_keeps_origin_boundary(self):
+        executor=Executor.__new__(Executor)
+        executor.args=SimpleNamespace(endpoint='http://example.test/xapi')
+        executor.headers={'Authorization':'fixture-credential'}
+        for base,more in [
+            (None,'?cursor=2'),
+            ('http://example.test/xapi/statements','//other.test/next'),
+            ('http://example.test/xapi/statements','https://example.test/next'),
+        ]:
+            with self.subTest(base=base,more=more), patch('run_lrs_procedures.http.client.HTTPConnection') as connection:
+                with self.assertRaises(ValueError):
+                    executor.http('GET','/statements',continuation=more,continuation_base=base)
+                connection.assert_not_called()
+
+    def test_relative_continuations_follow_each_page_url(self):
+        for continuations,expected in [
+            (['?cursor=2','pages/third?cursor=3','?cursor=4',''],
+             ['/xapi/statements?limit=1','/xapi/statements?cursor=2',
+              '/xapi/pages/third?cursor=3','/xapi/pages/third?cursor=4']),
+            (['pages/','next/','next/',''],
+             ['/xapi/statements?limit=1','/xapi/pages/',
+              '/xapi/pages/next/','/xapi/pages/next/next/']),
+        ]:
+            with self.subTest(continuations=continuations), TemporaryDirectory() as directory:
+                executor=Executor.__new__(Executor)
+                executor.args=SimpleNamespace(endpoint='http://example.test/xapi')
+                executor.out=Path(directory);executor.headers={};executor.docs=[]
+                executor.results={'probe':{'checks':[]}};executor.current='probe';executor.ordinal=0
+                connections=[]
+                for more in continuations:
+                    connection=Mock();response=connection.getresponse.return_value
+                    response.status=200
+                    response.getheaders.return_value=[('X-Experience-API-Version','2.0.0'),
+                        ('X-Experience-API-Consistent-Through','2026-01-01T00:00:00Z')]
+                    response.read.return_value=json.dumps({'statements':[],'more':more}).encode()
+                    connections.append(connection)
+                with patch('run_lrs_procedures.http.client.HTTPConnection',side_effect=connections) as factory:
+                    self.assertEqual(executor.collect_statements({'limit':'1'},'probe'),[])
+                self.assertEqual(factory.call_count,4)
+                self.assertEqual([c.request.call_args.args[1] for c in connections],expected)
+                records=[json.loads(line) for line in (executor.out/'http.jsonl').read_text().splitlines()]
+                self.assertEqual([r['response']['url'] for r in records],['http://example.test'+p for p in expected])
+
     invalid_response_dates = [
         'Thu, 01 Jan 2026 00:00 GMT',
         '01 Jan 2026 00:00:00 GMT',

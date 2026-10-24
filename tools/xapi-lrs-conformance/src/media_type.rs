@@ -122,9 +122,11 @@ fn token(byte: u8) -> bool {
 }
 
 fn without_comments(text: &str) -> Result<Vec<u8>, String> {
-    // Validate before discarding comments. Multipart readers must unfold only
-    // CRLF followed by LWSP; a bare CR/LF or non-ASCII octet is never hidden.
-    if !text.is_ascii() || text.contains(['\r', '\n']) {
+    // Multipart readers unfold CRLF + LWSP before parsing field values.
+    // RFC 822 section 3.3 permits every ASCII CHAR in quoted-pair. Qtext and
+    // ctext exclude their delimiters, backslash and CR, but otherwise permit
+    // controls too; their control characters are not restricted to HTAB.
+    if !text.is_ascii() || text.contains("\r\n") {
         return Err("invalid MIME field octet or unremoved folding".into());
     }
     let mut output = Vec::new();
@@ -137,6 +139,8 @@ fn without_comments(text: &str) -> Result<Vec<u8>, String> {
                 output.push(byte);
             }
             escaped = false;
+        } else if byte == b'\r' {
+            return Err("unquoted CR in MIME field".into());
         } else if byte == b'\\' && (quoted || depth > 0) {
             if depth == 0 {
                 output.push(byte);
@@ -226,9 +230,8 @@ pub(super) fn parse(text: &str) -> Result<MediaType, String> {
                 } else {
                     byte
                 };
-                if !(32..127).contains(&byte) && byte != b'\t' {
-                    return Err("invalid MIME quoted byte".into());
-                }
+                // without_comments validated ASCII and excluded unquoted CR;
+                // do not apply token's CTL restriction to qtext/quoted-pair.
                 value.push(char::from(byte));
             }
             value

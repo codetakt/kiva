@@ -10,7 +10,7 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use iri_string::types::{IriStr, UriStr};
+use iri_string::types::{IriReferenceStr, IriStr, UriStr};
 use reqwest::{
     Client, Method, StatusCode,
     header::{HeaderMap, HeaderName, HeaderValue},
@@ -2002,6 +2002,8 @@ async fn execute_case_requests(
         retrieval_attempts: Vec::new(),
         step: None,
         response_status: None,
+        response_url: None,
+        capture_response_urls: BTreeMap::new(),
         retrieval_pending: false,
         capability_unavailable: false,
         visible_statements: BTreeMap::new(),
@@ -2068,6 +2070,10 @@ struct HttpRequestState<'a> {
     retrieval_attempts: Vec<RetrievalAttempt>,
     step: Option<String>,
     response_status: Option<u16>,
+    response_url: Option<Url>,
+    // A captured relative reference keeps its source even across intervening
+    // requests. Literal references use the preceding response as their base.
+    capture_response_urls: BTreeMap<String, Url>,
     retrieval_pending: bool,
     capability_unavailable: bool,
     // Key includes endpoint selector and effective credential context. Values
@@ -2093,6 +2099,8 @@ async fn execute_http_request(
             retrieval_attempts: Vec::new(),
             step: state.step.clone(),
             response_status: None,
+            response_url: state.response_url.clone(),
+            capture_response_urls: state.capture_response_urls.clone(),
             retrieval_pending: false,
             capability_unavailable: false,
             visible_statements: state.visible_statements.clone(),
@@ -2114,7 +2122,16 @@ async fn execute_http_request(
         state.retrieval_pending = attempt.retrieval_pending;
         state.capability_unavailable = attempt.capability_unavailable;
         if failures.is_empty() {
+            for name in expectation.capture.keys() {
+                if let Some(url) = &attempt.response_url {
+                    attempt
+                        .capture_response_urls
+                        .insert(name.clone(), url.clone());
+                }
+            }
             state.captures = attempt.captures;
+            state.response_url = attempt.response_url;
+            state.capture_response_urls = attempt.capture_response_urls;
             state.visible_statements = attempt.visible_statements;
             state.diagnostic_statuses.extend(attempt_diagnostics);
             return failures;
@@ -2125,6 +2142,14 @@ async fn execute_http_request(
         }
         tokio::time::sleep(std::time::Duration::from_millis(50)).await;
     }
+}
+
+fn resolve_continuation(base: &Url, more: &str) -> Result<Url, String> {
+    // Preserve the relative-reference branch of the current more contract.
+    // This checks syntax without requiring reachability or a particular origin.
+    IriReferenceStr::new(more).map_err(|error| format!("invalid continuation IRL: {error}"))?;
+    base.join(more)
+        .map_err(|error| format!("invalid continuation IRL: {error}"))
 }
 
 #[expect(
@@ -2138,6 +2163,13 @@ async fn execute_http_request_once(
     state: &mut HttpRequestState<'_>,
 ) -> Vec<String> {
     let mut failures = Vec::new();
+    let continuation_base = request
+        .follow_more
+        .as_deref()
+        .and_then(|value| value.strip_prefix("{{")?.strip_suffix("}}"))
+        .and_then(|capture| state.capture_response_urls.get(capture))
+        .or(state.response_url.as_ref())
+        .unwrap_or(context.endpoint);
     let request = match render_request(request, &state.captures) {
         Ok(rendered) => rendered,
         Err(error) => {
@@ -2153,7 +2185,7 @@ async fn execute_http_request_once(
         return failures;
     }
     let request_url = if let Some(more) = &request.follow_more {
-        match context.endpoint.join(more) {
+        match resolve_continuation(continuation_base, more) {
             Ok(url) if url.origin() == context.endpoint.origin() => url,
             Ok(_) => {
                 // IEEE imposes no same-origin rule. This runner currently has
@@ -2162,7 +2194,7 @@ async fn execute_http_request_once(
                 state.capability_unavailable = true;
                 return vec!["ORACLE-UNAVAILABLE: cross-origin continuation requires an explicit destination and credential capability; more IRL origin alone is not an IEEE violation".into()];
             }
-            Err(error) => return vec![format!("invalid continuation IRL: {error}")],
+            Err(error) => return vec![error],
         }
     } else {
         build_request_url(context.endpoint, &request)
@@ -2252,6 +2284,7 @@ async fn execute_http_request_once(
     };
 
     let status = response.status();
+    state.response_url = Some(response.url().clone());
     state.response_status = Some(status.as_u16());
     if expectation.status_classification == StatusClassification::Diagnostic {
         state.diagnostic_statuses.push(status.as_u16());
@@ -2466,17 +2499,26 @@ async fn evaluate_statement_pages(
             ));
             return failures;
         }
+        // Definite syntax defects remain violations even when we cannot fetch
+        // another page. URL parsing alone can silently repair invalid IRIs.
+        let url = match resolve_continuation(
+            state.response_url.as_ref().unwrap_or(context.endpoint),
+            more,
+        ) {
+            Ok(url) => url,
+            Err(error) => {
+                failures.push(error);
+                return failures;
+            }
+        };
         if page + 1 == limit {
             failures.push("ORACLE-UNAVAILABLE: continuation exceeds harness page bound; membership/absence not judged".into());
             return failures;
         }
-        let url = match context.endpoint.join(more) {
-            Ok(url) if url.origin() == context.endpoint.origin() => url,
-            _ => {
-                failures.push("ORACLE-UNAVAILABLE: continuation destination needs an explicit routing/credential capability".into());
-                return failures;
-            }
-        };
+        if url.origin() != context.endpoint.origin() {
+            failures.push("ORACLE-UNAVAILABLE: continuation destination needs an explicit routing/credential capability".into());
+            return failures;
+        }
         if !visited.insert(url.to_string()) {
             failures.push("ORACLE-UNAVAILABLE: repeated continuation cannot be completed within this bounded collector".into());
             return failures;
@@ -2505,6 +2547,7 @@ async fn evaluate_statement_pages(
             }
         };
         status = response.status();
+        state.response_url = Some(response.url().clone());
         headers = response.headers().clone();
         bytes = match response.bytes().await {
             Ok(value) => value.to_vec(),
@@ -3312,29 +3355,46 @@ mod tests {
         expect: serde_json::Value,
         responses: Vec<String>,
     ) -> super::CaseReport {
+        let case = serde_json::json!({
+            "id":"response-control", "requirements":["fixture"],
+            "safety":{"destructive":false,"requires_isolated_lrs":true},
+            "request":request,"expect":expect
+        });
+        routed_case_control("", case, responses).await.0
+    }
+
+    async fn routed_case_control(
+        endpoint_path: &str,
+        definition: serde_json::Value,
+        responses: Vec<String>,
+    ) -> (super::CaseReport, Vec<String>) {
         use std::io::{Read, Write};
         let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("local fixture");
         let address = listener.local_addr().expect("fixture address");
         let responder = std::thread::spawn(move || {
+            let mut paths = Vec::new();
             for response in responses {
                 let (mut stream, _) = listener.accept().expect("fixture request");
                 let mut request = [0_u8; 4096];
-                let _ = stream.read(&mut request).expect("request bytes");
+                let size = stream.read(&mut request).expect("request bytes");
+                paths.push(
+                    String::from_utf8_lossy(&request[..size])
+                        .split_whitespace()
+                        .nth(1)
+                        .expect("request target")
+                        .to_owned(),
+                );
                 stream
                     .write_all(response.as_bytes())
                     .expect("fixture response");
             }
+            paths
         });
-        let case = serde_json::from_value(serde_json::json!({
-            "id":"response-control", "requirements":["fixture"],
-            "safety":{"destructive":false,"requires_isolated_lrs":true},
-            "request":request,"expect":expect
-        }))
-        .expect("fixture case");
+        let case = serde_json::from_value(definition).expect("fixture case");
         super::validate_case_steps("response-control", &case).expect("valid fixture definition");
         let report = super::execute_case(
             &reqwest::Client::new(),
-            &url::Url::parse(&format!("http://{address}")).expect("fixture URL"),
+            &url::Url::parse(&format!("http://{address}{endpoint_path}")).expect("fixture URL"),
             &BTreeMap::new(),
             &BTreeMap::new(),
             None,
@@ -3342,8 +3402,7 @@ mod tests {
             case,
         )
         .await;
-        responder.join().expect("fixture thread");
-        report
+        (report, responder.join().expect("fixture thread"))
     }
 
     fn control_response(status: u16, headers: &str, body: &str, truncated: bool) -> String {
@@ -3351,6 +3410,230 @@ mod tests {
         format!(
             "HTTP/1.1 {status} Response\r\n{headers}Content-Length: {length}\r\nConnection: close\r\n\r\n{body}"
         )
+    }
+
+    #[tokio::test]
+    async fn continuation_uses_each_actual_response_url_in_both_execution_modes() {
+        for collect in [true, false] {
+            let more = ["?cursor=2", "pages/third?cursor=3", "?cursor=4", ""];
+            let mut responses: Vec<_> = more
+                .iter()
+                .map(|more| {
+                    let body = serde_json::json!({"statements":[], "more":more}).to_string();
+                    control_response(200, "", &body, false)
+                })
+                .collect();
+            let mut case = serde_json::json!({"id":"relative-continuation","requirements":["fixture"],
+                "safety":{"destructive":false,"requires_isolated_lrs":true}});
+            if collect {
+                case["request"] = serde_json::json!({"method":"GET","path":"/statements","query":{"limit":"1"},"collect_statement_pages":4});
+                case["expect"] = serde_json::json!({"status":200});
+            } else {
+                case["steps"] = more.iter().enumerate().map(|(page, _)| {
+                    let request = if page == 0 {
+                        serde_json::json!({"method":"GET","path":"/statements","query":{"limit":"1"}})
+                    } else {
+                        serde_json::json!({"method":"GET","path":"/statements","follow_more":format!("{{{{more_{}}}}}",page-1)})
+                    };
+                    serde_json::json!({"id":format!("page-{page}"),"request":request,
+                        "expect":{"status":200,"capture":{format!("more_{page}"):{"pointer":"/more"}}}})
+                }).collect::<Vec<_>>().into();
+            }
+            let mut expected_paths = vec![
+                "/xapi/statements?limit=1",
+                "/xapi/statements?cursor=2",
+                "/xapi/pages/third?cursor=3",
+                "/xapi/pages/third?cursor=4",
+            ];
+            if !collect {
+                // A capture must retain its own base across unrelated requests.
+                case["steps"].as_array_mut().expect("steps").insert(
+                    1,
+                    serde_json::json!({
+                    "id":"intervening","request":{"method":"GET","path":"/unrelated"},
+                    "expect":{"status":200}}),
+                );
+                responses.insert(1, control_response(200, "", "{}", false));
+                expected_paths.insert(1, "/xapi/unrelated");
+            }
+            let (report, paths) = routed_case_control("/xapi", case, responses).await;
+            assert_eq!(report.outcome, super::CaseOutcome::Passed, "{report:?}");
+            assert_eq!(paths, expected_paths, "collect={collect}");
+        }
+    }
+
+    #[tokio::test]
+    async fn continuation_base_uses_the_url_after_a_redirect() {
+        let case = serde_json::json!({"id":"redirect-continuation","requirements":["fixture"],
+            "safety":{"destructive":false,"requires_isolated_lrs":true},
+            "request":{"method":"GET","path":"/statements","collect_statement_pages":2},
+            "expect":{"status":200}});
+        let responses = vec![
+            control_response(302, "Location: /xapi/pages/first\r\n", "", false),
+            control_response(200, "", r#"{"statements":[],"more":"?cursor=2"}"#, false),
+            control_response(200, "", r#"{"statements":[],"more":""}"#, false),
+        ];
+        let (report, paths) = routed_case_control("/xapi", case, responses).await;
+        assert_eq!(report.outcome, super::CaseOutcome::Passed, "{report:?}");
+        assert_eq!(
+            paths,
+            [
+                "/xapi/statements",
+                "/xapi/pages/first",
+                "/xapi/pages/first?cursor=2"
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn multipart_distinguishes_outer_http_from_part_mime_syntax() {
+        use super::CaseOutcome::{Failed, Passed};
+        for (outer, expected) in [
+            ("multipart / mixed; boundary=b", Failed),
+            ("multipart/ mixed; boundary=b", Failed),
+            ("multipart /mixed; boundary=b", Failed),
+            ("multipart/mixed; boundary =b", Failed),
+            ("multipart/mixed (comment); boundary=b", Failed),
+            ("multipart/mixed ; boundary=b", Passed),
+            ("MULTIPART/MIXED; boundary=\"b\"; note=\"a\\\"b\"", Passed),
+        ] {
+            // MIME permits this whitespace and comment in the inner part.
+            let body = "--b\r\nContent-Type: application / json (comment); note=\"\\\x01\"\r\n\r\n[]\r\n--b--\r\n";
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements"}),
+                serde_json::json!({"status":200,"checks":[{"kind":"multipart"}]}),
+                vec![control_response(
+                    200,
+                    &format!("Content-Type: {outer}\r\n"),
+                    body,
+                    false,
+                )],
+            )
+            .await;
+            assert_eq!(report.outcome, expected, "{outer:?}: {report:?}");
+        }
+    }
+
+    #[tokio::test]
+    async fn continuation_syntax_precedes_collector_limits_and_capabilities() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        for more in [
+            "http://[broken",
+            "/next page",
+            "/next%xx",
+            "/next\\page",
+            "/next\npage",
+            "https://elsewhere.invalid/next",
+        ] {
+            let invalid = !more.starts_with("https://elsewhere.invalid");
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements","follow_more":more}),
+                serde_json::json!({"status":200}),
+                vec![],
+            )
+            .await;
+            assert_eq!(
+                report.outcome,
+                if invalid { Failed } else { NotRun },
+                "explicit follow_more={more:?}: {report:?}"
+            );
+            for limit in [1, 2] {
+                let body = serde_json::json!({"statements":[],"more":more}).to_string();
+                let report = response_control(
+                    serde_json::json!({"method":"GET","path":"/statements","collect_statement_pages":limit}),
+                    serde_json::json!({"status":200}),
+                    vec![control_response(200, "", &body, false)],
+                ).await;
+                assert_eq!(
+                    report.outcome,
+                    if invalid { Failed } else { NotRun },
+                    "more={more:?}, limit={limit}: {report:?}"
+                );
+                assert_eq!(
+                    report
+                        .failures
+                        .iter()
+                        .any(|e| e.contains("invalid continuation IRL")),
+                    invalid
+                );
+            }
+        }
+        for more in ["/next?page=2", "?page=2", "next/日本語", "/next%20page"] {
+            let body = serde_json::json!({"statements":[],"more":more}).to_string();
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements","collect_statement_pages":2}),
+                serde_json::json!({"status":200}),
+                vec![control_response(200, "", &body, false),
+                     control_response(200, "", r#"{"statements":[],"more":""}"#, false)],
+            ).await;
+            assert_eq!(report.outcome, Passed, "more={more:?}: {report:?}");
+        }
+    }
+
+    #[tokio::test]
+    async fn multipart_quoted_pairs_and_qtext_follow_rfc822_ascii_grammar() {
+        use super::CaseOutcome::{Failed, Passed};
+        for byte in 0_u8..=127 {
+            for escaped in [true, false] {
+                if !escaped && matches!(byte, b'"' | b'\\' | b'\r') {
+                    continue;
+                }
+                let pair = format!("{}{}", if escaped { "\\" } else { "" }, char::from(byte));
+                let field = format!("application/json; note=\"{pair}\"");
+                let parsed = super::media_type::parse(&field).expect("valid MIME quoted value");
+                assert_eq!(parsed.parameters["note"], char::from(byte).to_string());
+                assert_eq!(super::media_type::equivalent(&field, &field), Ok(true));
+                let body =
+                    format!("--fixture\r\nContent-Type: {field}\r\n\r\n[]\r\n--fixture--\r\n");
+                let report = response_control(
+                    serde_json::json!({"method":"GET","path":"/statements"}),
+                    serde_json::json!({"status":200,"checks":[{"kind":"multipart"}]}),
+                    vec![control_response(
+                        200,
+                        "Content-Type: multipart/mixed; boundary=fixture\r\n",
+                        &body,
+                        false,
+                    )],
+                )
+                .await;
+                assert_eq!(
+                    report.outcome, Passed,
+                    "byte={byte}, escaped={escaped}: {report:?}"
+                );
+            }
+        }
+        for field in [
+            "application/json; note=\"bare\rCR\"",
+            "application/json; note=\"\\é\"",
+            "application/json; note=\"é\"",
+            "application/json; note=\"dangling\\",
+            "application/json; note=\x01",
+            "application/json; note=\"unclosed",
+            "application/json (bare\rCR)",
+            "application/json; note=\"unremoved\r\n folding\"",
+        ] {
+            assert!(super::media_type::parse(field).is_err(), "{field:?}");
+            // Valid folding is rejected by the unfolded-value parser but
+            // accepted after the multipart reader removes CRLF + LWSP.
+            let expected = if field.contains("\r\n ") {
+                Passed
+            } else {
+                Failed
+            };
+            let body = format!("--fixture\r\nContent-Type: {field}\r\n\r\n[]\r\n--fixture--\r\n");
+            let report = response_control(
+                serde_json::json!({"method":"GET","path":"/statements"}),
+                serde_json::json!({"status":200,"checks":[{"kind":"multipart"}]}),
+                vec![control_response(
+                    200,
+                    "Content-Type: multipart/mixed; boundary=fixture\r\n",
+                    &body,
+                    false,
+                )],
+            )
+            .await;
+            assert_eq!(report.outcome, expected, "{field:?}: {report:?}");
+        }
     }
 
     #[test]

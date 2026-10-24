@@ -1226,10 +1226,10 @@ fn one_language(value: &Value) -> Result<(), String> {
 
 fn mime_header<'a>(headers: &'a str, name: &str) -> Option<&'a str> {
     headers
-        .lines()
+        .split("\r\n")
         .filter_map(|line| line.split_once(':'))
         .find(|(key, _)| key.trim().eq_ignore_ascii_case(name))
-        .map(|(_, value)| value.trim())
+        .map(|(_, value)| value.trim_matches([' ', '\t']))
 }
 
 fn unfold_mime_headers(headers: &str) -> Result<String, String> {
@@ -1238,9 +1238,8 @@ fn unfold_mime_headers(headers: &str) -> Result<String, String> {
     }
     let mut result = String::new();
     for line in headers.split("\r\n") {
-        if line.contains(['\r', '\n']) {
-            return Err("bare CR/LF in MIME part header".into());
-        }
+        // Only CRLF delimits a physical field line. Quoted CR and bare LF
+        // can be RFC 822 field data; the structured field parser checks them.
         if line.starts_with([' ', '\t']) {
             if result.is_empty() {
                 return Err("MIME continuation has no preceding field".into());
@@ -1273,7 +1272,7 @@ fn verify_multipart(
         .get("Content-Type")
         .and_then(|value| value.to_str().ok())
         .ok_or("missing multipart Content-Type")?;
-    let parsed_type = super::media_type::parse(content_type)?;
+    let parsed_type = super::media_type::parse_http(content_type)?;
     if parsed_type.essence != "multipart/mixed" {
         return Err("response is not multipart/mixed".into());
     }

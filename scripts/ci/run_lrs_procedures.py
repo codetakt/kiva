@@ -142,18 +142,22 @@ class Executor:
         outcome = 'observed' if level == 'advisory' else 'not-run' if ok is None else 'passed' if ok else 'failed'
         self.results[self.current]['checks'].append({'id':name,'level':level,'outcome':outcome,'reason':reason,'details':details})
 
-    def http(self, method, path, query=None, body=None, headers=None, raw=None, continuation=None, retain_partial=False, expected_statuses=None):
+    def http(self, method, path, query=None, body=None, headers=None, raw=None, continuation=None, retain_partial=False, expected_statuses=None, continuation_base=None):
         request_headers = dict(self.headers)
         request_headers.update(headers or {})
         data = raw if raw is not None else compact(body).encode() if body is not None else None
         endpoint=urlsplit(self.args.endpoint)
-        target=endpoint.path.rstrip('/')+path+('?' + urlencode(query) if query else '')
+        dest=endpoint._replace(path=endpoint.path.rstrip('/')+path,
+                               query=urlencode(query) if query else '',fragment='')
         if continuation is not None:
-            dest=urlsplit(urljoin(self.args.endpoint,continuation))
+            if continuation_base is None:
+                raise ValueError('continuation source response URL unavailable')
+            dest=urlsplit(urljoin(continuation_base,continuation))
             origin=lambda u:(u.scheme,u.hostname,u.port or (443 if u.scheme=='https' else 80))
             if origin(dest)!=origin(endpoint):
                 raise ValueError('continuation needs separate destination/credential capability')
-            target=dest.path+('?' + dest.query if dest.query else '')
+        target=(dest.path or '/')+('?' + dest.query if dest.query else '')
+        response_url=dest._replace(fragment='').geturl()
         connection=(http.client.HTTPSConnection if endpoint.scheme=='https' else http.client.HTTPConnection)(endpoint.hostname,endpoint.port,timeout=30)
         before=utc()
         connection.request(method,target,body=data,headers=request_headers)
@@ -183,7 +187,7 @@ class Executor:
             encoded=b'';incomplete_body=True
             self.check('response-'+str(self.ordinal+1)+'-body',None,'Transport incomplete, not an empty target body')
         after=utc()
-        reply={'status':response.status,'headers':response_headers,'body_hex':encoded.hex(),'before':before,'after':after,'header_contract':header_result}
+        reply={'status':response.status,'url':response_url,'headers':response_headers,'body_hex':encoded.hex(),'before':before,'after':after,'header_contract':header_result}
         if incomplete_body:reply['incomplete_body']=True
         try:reply['json']=json.loads(encoded)
         except (ValueError,UnicodeError):reply['json']=None
@@ -722,10 +726,11 @@ class Executor:
 
     def collect_statements(self, query, label, forbidden_ids=frozenset()):
         """Retain known exclusions per page; absence needs a terminal chain."""
-        rows=[];more=None;seen=set()
+        rows=[];more=None;seen=set();base=None
         for page in range(100):
             try:
-                reply=self.http('GET','/statements',query if more is None else None,continuation=more,retain_partial=True, expected_statuses=(200,))
+                reply=self.http('GET','/statements',query if more is None else None,continuation=more,
+                                continuation_base=base,retain_partial=True, expected_statuses=(200,))
             except (OSError,ValueError,http.client.HTTPException):
                 self.check(label+'-pages',None,'Continuation transport/routing unavailable; no incomplete-set membership verdict')
                 return None
@@ -751,9 +756,13 @@ class Executor:
             if not isinstance(more,str):
                 self.check(label+'-more-type',False);return None
             if more=='':return rows
-            if more in seen:
+            base=reply.get('url')
+            try:destination=urljoin(base or '',more)
+            except ValueError:
+                self.check(label+'-more-syntax',False,'Malformed continuation reference');return None
+            if destination in seen:
                 self.check(label+'-pages',None,'Repeated continuation exceeds bounded collector capability');return None
-            seen.add(more)
+            seen.add(destination)
         self.check(label+'-pages',None,'Harness page bound reached; no normative size limit or absence verdict')
         return None
 
