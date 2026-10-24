@@ -2354,9 +2354,10 @@ async fn execute_http_request_once(
     if failures.is_empty() {
         if request.path == "/statements"
             && matches!(request.method.as_str(), "PUT" | "POST" | "DELETE")
+            && status.is_success()
         {
-            // An intervening mutation can change void/retention state. Do not
-            // carry a positive observation through an unmodelled mutation.
+            // Only an accepted mutation can change void/retention state.
+            // Expected rejections must retain earlier positive observations.
             state.visible_statements.clear();
         } else if status == StatusCode::OK
             && let Some(key) = visibility_key
@@ -4469,6 +4470,71 @@ expect:
                 },
                 "{actual} / {expected}: {report:?}"
             );
+        }
+    }
+
+    #[tokio::test]
+    async fn rejected_writes_preserve_observed_statement_visibility() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        for method in ["PUT", "POST", "DELETE"] {
+            for (write_status, through, truncated, outcome) in [
+                (409, "2026-01-02T00:00:00Z", false, Failed),
+                (409, "2026-01-02T00:00:00Z", true, Failed),
+                (400, "2026-01-02T00:00:00Z", false, Failed),
+                (403, "2026-01-02T00:00:00Z", false, Failed),
+                (409, "2026-01-01T00:00:00Z", false, NotRun),
+                (409, "2025-12-31T00:00:00Z", false, NotRun),
+                (204, "2026-01-02T00:00:00Z", false, Passed),
+            ] {
+                let request = serde_json::json!({"method":"GET","path":"/statements",
+                    "query":{"statementId":"01000000-0000-4000-8000-000000000001"}});
+                let mut read = request.clone();
+                read["await_retrieval_ms"] = 1000.into();
+                let case = serde_json::json!({
+                    "id":"visibility-after-write", "requirements":["fixture"],
+                    "safety":{"destructive":false,"requires_isolated_lrs":true},
+                    "steps":[
+                        {"id":"visible","request":request,"expect":{"status":200}},
+                        {"id":"write","request":{"method":method,"path":"/statements"},
+                         "expect":{"status":write_status}},
+                        {"id":"read","request":read,"expect":{"status":200,"headers":{
+                            "X-Experience-API-Version":{"equals":"2.0.0"},
+                            "X-Experience-API-Consistent-Through":{"iso8601":true}}}}
+                    ]
+                });
+                let body = r#"{"id":"01000000-0000-4000-8000-000000000001","stored":"2026-01-01T00:00:00Z"}"#;
+                let headers = format!(
+                    "X-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: {through}\r\n"
+                );
+                let mut responses = vec![
+                    control_response(200, &headers, body, false),
+                    control_response(write_status, "", "", false),
+                    control_response(404, &headers, "{}", truncated),
+                ];
+                if write_status == 204 {
+                    responses.push(control_response(200, &headers, body, false));
+                }
+                let (report, paths) = routed_case_control("", case, responses).await;
+                assert_eq!(
+                    report.outcome, outcome,
+                    "{method}/{write_status}/{through}/{truncated}: {report:?}"
+                );
+                assert_eq!(paths.len(), if write_status == 204 { 4 } else { 3 });
+                if write_status != 204 {
+                    assert_eq!(report.retrieval_attempts.len(), 1, "{report:?}");
+                    assert!(
+                        !report.retrieval_attempts[0].pending_visibility,
+                        "{report:?}"
+                    );
+                    if outcome == Failed {
+                        assert!(
+                            report.failures.iter().any(|reason| reason
+                                .contains("previously visible Statement disappeared")),
+                            "{report:?}"
+                        );
+                    }
+                }
+            }
         }
     }
 

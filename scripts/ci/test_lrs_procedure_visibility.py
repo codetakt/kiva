@@ -6,15 +6,73 @@ from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
-from run_lrs_procedures import Executor
+from run_lrs_procedures import Executor, iri_reference_valid
 
 class VisibilityTests(unittest.TestCase):
+    def test_continuation_iri_grammar_preserves_legal_reference_forms(self):
+        valid=['','/','//','///next','?cursor=2','../next','./one:two',
+               '/next%20page','/next%ff','/next%00','/次?値=二#節',
+               '/next?x=/?:@&y=1#fragment/?', 'urn:example:next',
+               '//user:password@host:80/next','http://example.test:99999/next',
+               '//[::1]/next','//[::ffff:192.0.2.1]:/next','//[Vf.a:b]/next',
+               '//example.test\uff1a80/next', '/\u00a0/\ud7ff/\uf900/\ufdf0/\uffef',
+               '/\U00010000/\U0001fffd/\U000dfffd/\U000e1000/\U000efffd',
+               '?q=\ue000\uf8ff\U000f0000\U000ffffd\U00100000\U0010fffd']
+        invalid=['/next%xx','/next%','/next%0','/next page','/next\\page',
+                 '\n/next','/next\r','/next\t','/next\x00','/next\x7f','/next\x9f',
+                 'http://[broken','//[127.0.0.1]/','//[::gg]/','//[v1.]/',
+                 '//[::1]tail/','//[::1]:bad/','//[::1%25zone]/','//host:bad/',
+                 '//user@@host/','//host%xy/','1http:next',':next','/next#one#two',
+                 '/next[page]','?q=[x]','/\ud800','/\ue000','#\uf8ff',
+                 '/\ufdd0','/\ufffe','/\U0001fffe','/\U000e0000','/\U000f0000',
+                 '?q=\U0010fffe']
+        for values,expected in [(valid,True),(invalid,False)]:
+            for value in values:
+                with self.subTest(value=value):
+                    self.assertEqual(iri_reference_valid(value),expected)
+
+    def test_valid_but_unsupported_resolution_remains_unavailable(self):
+        executor=Executor.__new__(Executor)
+        executor.results={'probe':{'checks':[]}};executor.current='probe'
+        executor.http=Mock(return_value={'status':200,'url':'http://example.test/xapi/statements',
+            'headers':{'x-experience-api-version':'2.0.0',
+                'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'},
+            'json':{'statements':[],'more':'//example.test\uff1a80/next'}})
+        self.assertIsNone(executor.collect_statements({},'probe'))
+        executor.http.assert_called_once()
+        self.assertFalse(any(c['outcome']=='failed' for c in executor.results['probe']['checks']))
+        self.assertEqual(executor.results['probe']['checks'][-1]['outcome'],'not-run')
+
+    def test_malformed_continuations_fail_before_resolution_or_transport(self):
+        for more in ['/next%xx','/next page','/next%','/next%2','/next\\page',
+                     '\n/next','/next\tpage','/next\rpage','/next\x00page',
+                     'http://[broken','//host:bad/next','//user@@host/next',
+                     '1http:next','/next#one#two','/next[page]']:
+            for last_page in [False,True]:
+                with self.subTest(more=more,last_page=last_page):
+                    executor=Executor.__new__(Executor)
+                    executor.results={'probe':{'checks':[]}};executor.current='probe'
+                    def reply(ordinal, reference):
+                        return {'status':200,'url':'http://example.test/xapi/statements?cursor='+str(ordinal),
+                            'headers':{'x-experience-api-version':'2.0.0',
+                                'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'},
+                            'json':{'statements':[],'more':reference}}
+                    prefix=[reply(i,'?cursor='+str(i+1)) for i in range(99)] if last_page else []
+                    # A successful next response must never erase malformed syntax.
+                    executor.http=Mock(side_effect=prefix+[reply(99,more),reply(100,'')])
+                    self.assertIsNone(executor.collect_statements({},'probe'))
+                    self.assertEqual(executor.http.call_count,len(prefix)+1)
+                    self.assertTrue(any(c['id']=='probe-more-syntax' and c['outcome']=='failed'
+                                        for c in executor.results['probe']['checks']))
+
     def test_relative_continuation_requires_a_base_and_keeps_origin_boundary(self):
         executor=Executor.__new__(Executor)
         executor.args=SimpleNamespace(endpoint='http://example.test/xapi')
         executor.headers={'Authorization':'fixture-credential'}
         for base,more in [
             (None,'?cursor=2'),
+            ('http://example.test/xapi/statements','/next%xx'),
+            ('http://example.test/xapi/statements','/next page'),
             ('http://example.test/xapi/statements','//other.test/next'),
             ('http://example.test/xapi/statements','https://example.test/next'),
         ]:

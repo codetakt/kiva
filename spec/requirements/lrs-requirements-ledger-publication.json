@@ -135,7 +135,7 @@
     },
     {
       "path": "spec/conformance/lrs-assertion-manifest.yaml",
-      "sha256": "f5b5cc93d714fbfff005aae9d9ee8b022e553407dc52f2676fcae2ec80973850"
+      "sha256": "c7f48db0a409ddc5010237c650103eb61cbdaceefd9ec0d9539e692ea4ee0b07"
     },
     {
       "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",

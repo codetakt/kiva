@@ -13,6 +13,7 @@ import datetime as dt
 import email.policy
 import hashlib
 import http.client
+import ipaddress
 import json
 import os
 import re
@@ -46,6 +47,65 @@ def mailbox_structure(value):
         if not all(atom.fullmatch(part) for part in local.split('.') + domain.split('.')):
             return False
     return True
+
+
+def iri_component(value, extra='', private=False):
+    """RFC3987 2.2 iunreserved / pct-encoded / sub-delims plus component delimiters."""
+    if re.search(r'%(?![0-9A-Fa-f]{2})',value):
+        return False
+    for char in re.sub(r'%[0-9A-Fa-f]{2}','',value):
+        code=ord(char)
+        if char in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;="+extra:
+            continue
+        if (0xA0<=code<=0xD7FF or 0xF900<=code<=0xFDCF or 0xFDF0<=code<=0xFFEF
+                or 0x10000<=code<=0xDFFFD and (code&0xFFFF)<=0xFFFD
+                or 0xE1000<=code<=0xEFFFD):
+            continue
+        if private and (0xE000<=code<=0xF8FF or 0xF0000<=code<=0xFFFFD or 0x100000<=code<=0x10FFFD):
+            continue
+        return False
+    return True
+
+
+def iri_reference_valid(value):
+    """Validate raw RFC3987 2.2 syntax before urllib strips or normalizes bytes.
+
+    Scheme-specific routing, origin authorization and transport support remain
+    separate capabilities; a valid reference need not be reachable by this host.
+    """
+    if not isinstance(value,str):
+        return False
+    hierarchy,_,fragment=value.partition('#')
+    hierarchy,_,query=hierarchy.partition('?')
+    if not iri_component(fragment,':@/?') or not iri_component(query,':@/?',private=True):
+        return False
+    if ':' in hierarchy.split('/',1)[0]:
+        scheme,_,hierarchy=hierarchy.partition(':')
+        if not re.fullmatch(r'[A-Za-z][A-Za-z0-9+.-]*',scheme):
+            return False
+    if hierarchy.startswith('//'):
+        authority,slash,path=hierarchy[2:].partition('/')
+        hierarchy=slash+path
+        user,separator,host=authority.rpartition('@')
+        if not separator:
+            host=authority
+        elif not iri_component(user,':'):
+            return False
+        if host.startswith('['):
+            literal=re.fullmatch(r'\[([^\]]+)\](?::[0-9]*)?',host)
+            if literal is None:
+                return False
+            address=literal[1]
+            if not re.fullmatch(r"[vV][0-9A-Fa-f]+\.[A-Za-z0-9._~!$&'()*+,;=:\-]+",address):
+                if '%' in address:
+                    return False
+                try:ipaddress.IPv6Address(address)
+                except ValueError:return False
+        else:
+            name,separator,port=host.partition(':')
+            if not iri_component(name) or separator and not re.fullmatch(r'[0-9]*',port):
+                return False
+    return iri_component(hierarchy,':@/')
 
 
 def host_stamp(value):
@@ -150,6 +210,8 @@ class Executor:
         dest=endpoint._replace(path=endpoint.path.rstrip('/')+path,
                                query=urlencode(query) if query else '',fragment='')
         if continuation is not None:
+            if not iri_reference_valid(continuation):
+                raise ValueError('malformed continuation IRI reference')
             if continuation_base is None:
                 raise ValueError('continuation source response URL unavailable')
             dest=urlsplit(urljoin(continuation_base,continuation))
@@ -756,10 +818,12 @@ class Executor:
             if not isinstance(more,str):
                 self.check(label+'-more-type',False);return None
             if more=='':return rows
+            if not iri_reference_valid(more):
+                self.check(label+'-more-syntax',False,'Malformed continuation IRI reference');return None
             base=reply.get('url')
             try:destination=urljoin(base or '',more)
             except ValueError:
-                self.check(label+'-more-syntax',False,'Malformed continuation reference');return None
+                self.check(label+'-pages',None,'Valid continuation needs unsupported resolution capability');return None
             if destination in seen:
                 self.check(label+'-pages',None,'Repeated continuation exceeds bounded collector capability');return None
             seen.add(destination)
