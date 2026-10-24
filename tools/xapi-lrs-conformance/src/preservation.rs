@@ -480,12 +480,15 @@ fn compare_timestamp(expected: &Value, actual: &Value, path: &str) -> Result<(),
 }
 
 fn compare_duration(expected: &Value, actual: &Value, path: &str) -> Result<(), String> {
-    if expected == actual {
-        return Ok(());
-    }
     let (Some(left), Some(right)) = (expected.as_str(), actual.as_str()) else {
         return Err(format!("duration type changed at {path}"));
     };
+    if !duration_lexically_valid(left) || !duration_lexically_valid(right) {
+        return Err(format!("invalid duration characters at {path}"));
+    }
+    if left == right {
+        return Ok(());
+    }
     // Preserve all calendar/time components. Only extra fractional seconds may
     // be truncated here; no conversion of months or years to seconds is made.
     if let Some(seconds) = left.strip_suffix('S')
@@ -529,7 +532,16 @@ fn compare_duration(expected: &Value, actual: &Value, path: &str) -> Result<(), 
     ))
 }
 
+fn duration_lexically_valid(text: &str) -> bool {
+    text.starts_with('P') && text.bytes().all(|b| b"0123456789PYMDWTHS.,".contains(&b))
+}
+
 fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
+    // Only ASCII designators/digits can enter byte-indexed component slicing.
+    // Other legal calendar relations still require the duration provider.
+    if !duration_lexically_valid(text) {
+        return None;
+    }
     let text = text.strip_suffix('S')?;
     if !text.starts_with('P') || !text.contains('T') {
         return None;
@@ -554,6 +566,35 @@ fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
+
+    #[test]
+    fn duration_lexical_defects_do_not_reach_component_slices() {
+        for invalid in [
+            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1\0S", "PT1e3S",
+        ] {
+            assert!(super::duration_seconds(invalid).is_none());
+            for other in ["PT1.239S", "P1M", invalid] {
+                for (sent, got) in [(other, invalid), (invalid, other)] {
+                    let error =
+                        super::compare_duration(&json!(sent), &json!(got), "/result/duration")
+                            .expect_err("lexical violation");
+                    assert!(!error.starts_with("ORACLE-UNAVAILABLE:"), "{error}");
+                }
+            }
+        }
+        for (sent, got) in [
+            ("PT1.239S", "PT1.23S"),
+            ("PT1.239S", "PT1,23S"),
+            ("P1W", "P1W"),
+        ] {
+            assert!(super::compare_duration(&json!(sent), &json!(got), "duration").is_ok());
+        }
+        assert!(
+            super::compare_duration(&json!("P1M"), &json!("P30D"), "duration")
+                .expect_err("calendar provider required")
+                .starts_with("ORACLE-UNAVAILABLE:")
+        );
+    }
 
     #[test]
     fn precision_allowances_and_extension_boundaries() {

@@ -1065,7 +1065,7 @@ pub(super) fn compare_timestamps(left: &str, right: &str) -> Result<std::cmp::Or
     Ok(exact_time(left)?.cmp(&exact_time(right)?))
 }
 
-fn standard_uuid(value: &str) -> bool {
+pub(super) fn standard_uuid(value: &str) -> bool {
     value.len() == 36
         && value.bytes().enumerate().all(|(index, byte)| {
             if matches!(index, 8 | 13 | 18 | 23) {
@@ -1259,15 +1259,23 @@ fn unfold_mime_headers(headers: &str) -> Result<String, String> {
     Ok(result)
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "MIME framing, hashes, and metadata are checked as a single ordered transmission"
-)]
 fn verify_multipart(
     headers: &HeaderMap,
     bytes: &[u8],
     expected_data: &[Vec<u8>],
 ) -> Result<(), String> {
+    multipart_document(headers, bytes, expected_data).map(|_| ())
+}
+
+#[expect(
+    clippy::too_many_lines,
+    reason = "MIME framing, hashes, and metadata are checked as a single ordered transmission"
+)]
+pub(super) fn multipart_document(
+    headers: &HeaderMap,
+    bytes: &[u8],
+    expected_data: &[Vec<u8>],
+) -> Result<Value, String> {
     let content_type = headers
         .get("Content-Type")
         .and_then(|value| value.to_str().ok())
@@ -1331,6 +1339,7 @@ fn verify_multipart(
     }
     let mut data_parts = Vec::new();
     let mut metadata = Vec::new();
+    let mut document = None;
     // A local numeric or media-type limit must not hide an independent violation.
     // Keep it pending until later metadata, parts and required raw data are checked.
     let mut unavailable = parsed_type.unavailable();
@@ -1380,6 +1389,7 @@ fn verify_multipart(
                     metadata.extend(array.iter().cloned());
                 }
             }
+            document = Some(json);
         } else {
             let hash = mime_header(part_headers, "X-Experience-API-Hash")
                 .ok_or("missing MIME attachment hash")?;
@@ -1469,7 +1479,10 @@ fn verify_multipart(
             return Err("multipart response omitted or altered expected attachment data".into());
         }
     }
-    unavailable.map_or(Ok(()), Err)
+    if let Some(error) = unavailable {
+        return Err(error);
+    }
+    document.ok_or_else(|| "missing first MIME JSON part".into())
 }
 
 pub(super) fn timestamp_preserved(

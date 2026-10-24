@@ -215,10 +215,13 @@ def duration_preserved(sent, got):
     Seconds spelling is compared without rounding. Other equivalent calendar
     representations require the delegated ISO duration oracle.
     """
-    if sent == got:
-        return True
     if not isinstance(sent, str) or not isinstance(got, str):
         return False
+    if any(not value.startswith('P') or any(c not in '0123456789PYMDWTHS.,' for c in value)
+           for value in [sent,got]):
+        return False
+    if sent == got:
+        return True
     pattern = r'(P(?:\d+(?:[.,]\d+)?[YMD])*T(?:\d+(?:[.,]\d+)?[HM])*)(\d+)(?:[.,](\d+))?S'
     before, after = re.fullmatch(pattern, sent), re.fullmatch(pattern, got)
     if not before or not after or before[1] != after[1]:

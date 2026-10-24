@@ -2064,6 +2064,20 @@ struct HttpRequestContext<'a> {
     auth_profiles: &'a BTreeMap<String, AuthProfile>,
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct StatementVisibilityKey {
+    selector: &'static str,
+    id: String,
+    credentials: String,
+}
+
+#[derive(Clone)]
+struct VisibleStatement {
+    stored: String,
+    voiding: bool,
+    unresolved_mutation: bool,
+}
+
 struct HttpRequestState<'a> {
     captures: Captures,
     diagnostic_statuses: &'a mut Vec<u16>,
@@ -2078,7 +2092,7 @@ struct HttpRequestState<'a> {
     capability_unavailable: bool,
     // Key includes endpoint selector and effective credential context. Values
     // are independently returned stored times, not submitted timestamps.
-    visible_statements: BTreeMap<String, String>,
+    visible_statements: BTreeMap<StatementVisibilityKey, VisibleStatement>,
 }
 
 // Bounded observation window for LRSs that make writes retrievable asynchronously.
@@ -2149,7 +2163,7 @@ fn resolve_continuation(base: &Url, more: &str) -> Result<Url, String> {
     // This checks syntax without requiring reachability or a particular origin.
     IriReferenceStr::new(more).map_err(|error| format!("invalid continuation IRL: {error}"))?;
     base.join(more)
-        .map_err(|error| format!("invalid continuation IRL: {error}"))
+        .map_err(|error| format!("ORACLE-UNAVAILABLE: valid continuation IRI requires unsupported URL resolution: {error}"))
 }
 
 #[expect(
@@ -2290,8 +2304,8 @@ async fn execute_http_request_once(
         state.diagnostic_statuses.push(status.as_u16());
     }
     let headers = response.headers().clone();
-    let visibility_key =
-        statement_visibility_key(&request, &headers_for_visibility(context, &request));
+    let request_headers = headers_for_visibility(context, &request);
+    let visibility_key = statement_visibility_key(&request, &request_headers);
     let pending_retrieval = pending_statement_retrieval(&request, expectation, status);
     let stored = visibility_key
         .as_ref()
@@ -2305,7 +2319,7 @@ async fn execute_http_request_once(
                     expectation,
                     &headers,
                     state,
-                    stored.as_deref(),
+                    stored.as_ref(),
                     false,
                 ));
             } else {
@@ -2339,7 +2353,7 @@ async fn execute_http_request_once(
             expectation,
             &headers,
             state,
-            stored.as_deref(),
+            stored.as_ref(),
             true,
         ));
         return failures;
@@ -2353,12 +2367,10 @@ async fn execute_http_request_once(
     ));
     if failures.is_empty() {
         if request.path == "/statements"
-            && matches!(request.method.as_str(), "PUT" | "POST" | "DELETE")
+            && matches!(request.method.as_str(), "PUT" | "POST")
             && status.is_success()
         {
-            // Only an accepted mutation can change void/retention state.
-            // Expected rejections must retain earlier positive observations.
-            state.visible_statements.clear();
+            invalidate_voided_observations(&request, &request_headers, state);
         } else if status == StatusCode::OK
             && let Some(key) = visibility_key
             && let Ok(json) = serde_json::from_slice::<Value>(&body_bytes)
@@ -2369,7 +2381,15 @@ async fn execute_http_request_once(
                 .or_else(|| request.query.get("voidedStatementId"))
                 .is_some_and(|id| json.get("id").and_then(Value::as_str) == Some(id.as_str()))
         {
-            state.visible_statements.insert(key, stored.to_owned());
+            state.visible_statements.insert(
+                key,
+                VisibleStatement {
+                    stored: stored.to_owned(),
+                    voiding: json.pointer("/verb/id").and_then(Value::as_str)
+                        == Some("http://adlnet.gov/expapi/verbs/voided"),
+                    unresolved_mutation: false,
+                },
+            );
         }
     }
     failures
@@ -2575,7 +2595,82 @@ fn headers_for_visibility(context: &HttpRequestContext<'_>, request: &RequestSpe
         .unwrap_or_default()
 }
 
-fn statement_visibility_key(request: &RequestSpec, headers: &HeaderMap) -> Option<String> {
+fn submitted_statements(request: &RequestSpec, headers: &HeaderMap) -> Option<Value> {
+    if let Some(body) = &request.body {
+        return Some(body.clone());
+    }
+    // Match the actual request-body precedence, after template rendering.
+    let bytes = if let Some(raw) = &request.raw_body {
+        raw.as_bytes().to_vec()
+    } else if let Some(hex) = &request.raw_body_hex {
+        assertions::decode_hex(hex).ok()?
+    } else {
+        request
+            .raw_body_crlf_lines
+            .as_ref()?
+            .join("\r\n")
+            .into_bytes()
+    };
+    let kind = headers.get("Content-Type")?.to_str().ok()?;
+    match media_type::parse_http(kind).ok()?.essence.as_str() {
+        "multipart/mixed" => assertions::multipart_document(headers, &bytes, &[]).ok(),
+        "application/json" => serde_json::from_slice(&bytes).ok(),
+        _ => None,
+    }
+}
+
+fn void_targets(document: &Value) -> Option<BTreeSet<&str>> {
+    let statements = document
+        .as_array()
+        .map_or_else(|| std::slice::from_ref(document), Vec::as_slice);
+    let mut targets = BTreeSet::new();
+    for statement in statements {
+        let verb = statement.pointer("/verb/id")?.as_str()?;
+        if verb == "http://adlnet.gov/expapi/verbs/voided" {
+            if statement.pointer("/object/objectType")?.as_str()? != "StatementRef" {
+                return None;
+            }
+            targets.insert(statement.pointer("/object/id")?.as_str()?);
+        }
+    }
+    Some(targets)
+}
+
+fn invalidate_voided_observations(
+    request: &RequestSpec,
+    headers: &HeaderMap,
+    state: &mut HttpRequestState<'_>,
+) {
+    if state.visible_statements.is_empty() {
+        return;
+    }
+    let document = submitted_statements(request, headers);
+    let targets = document.as_ref().and_then(void_targets);
+    state.visible_statements.retain(|key, observed| {
+        // Ordinary writes are immutable. Only a void target loses ordinary
+        // visibility; voided lookups and voiding Statements remain retrievable.
+        if key.selector == "voidedStatementId" || observed.voiding {
+            return true;
+        }
+        if let Some(targets) = &targets {
+            // UUID hexadecimal spelling is case-insensitive. Nonstandard IDs
+            // admitted under a format policy retain exact string comparison.
+            return !targets.iter().any(|target| {
+                *target == key.id
+                    || (assertions::standard_uuid(target) && target.eq_ignore_ascii_case(&key.id))
+            });
+        }
+        // An opaque payload cannot authorize erasing prior evidence. Retain
+        // the observation and defer a later absence instead of retrying to PASS.
+        observed.unresolved_mutation = true;
+        true
+    });
+}
+
+fn statement_visibility_key(
+    request: &RequestSpec,
+    headers: &HeaderMap,
+) -> Option<StatementVisibilityKey> {
     if request.path != "/statements" || request.method != "GET" {
         return None;
     }
@@ -2596,7 +2691,11 @@ fn statement_visibility_key(request: &RequestSpec, headers: &HeaderMap) -> Optio
         })
         .map(|(name, value)| (name.as_str(), value.as_bytes()))
         .collect();
-    Some(format!("{selector}:{id}:{identity:?}"))
+    Some(StatementVisibilityKey {
+        selector,
+        id: id.clone(),
+        credentials: format!("{identity:?}"),
+    })
 }
 
 fn pending_statement_retrieval(
@@ -2617,7 +2716,7 @@ fn evaluate_pending_retrieval(
     expectation: &ResponseExpectation,
     headers: &HeaderMap,
     state: &mut HttpRequestState<'_>,
-    stored: Option<&str>,
+    observed: Option<&VisibleStatement>,
     body_complete: bool,
 ) -> Vec<String> {
     // An observation deadline is a harness limit, not an IEEE deadline.
@@ -2639,13 +2738,18 @@ fn evaluate_pending_retrieval(
     if !failures.is_empty() {
         return failures;
     }
-    if let Some(stored) = stored {
+    if let Some(observed) = observed {
+        if observed.unresolved_mutation {
+            state.capability_unavailable = true;
+            failures.push("ORACLE-UNAVAILABLE: intervening accepted Statement payload could not be inspected for void targets; prior visibility retained without an initial-delay retry".into());
+            return failures;
+        }
         // Positive visibility and received headers remain evidence even when
         // this error response's body is unavailable.
         let through = headers
             .get("X-Experience-API-Consistent-Through")
             .and_then(|v| v.to_str().ok());
-        if through.map(|v| assertions::compare_timestamps(v, stored))
+        if through.map(|v| assertions::compare_timestamps(v, &observed.stored))
             == Some(Ok(std::cmp::Ordering::Greater))
         {
             failures.push("previously visible Statement disappeared with Consistent-Through strictly after its stored time in the same credential/selector context".into());
@@ -3369,6 +3473,21 @@ mod tests {
         definition: serde_json::Value,
         responses: Vec<String>,
     ) -> (super::CaseReport, Vec<String>) {
+        timed_case_control(
+            endpoint_path,
+            definition,
+            responses,
+            std::time::Duration::ZERO,
+        )
+        .await
+    }
+
+    async fn timed_case_control(
+        endpoint_path: &str,
+        definition: serde_json::Value,
+        responses: Vec<String>,
+        delay: std::time::Duration,
+    ) -> (super::CaseReport, Vec<String>) {
         use std::io::{Read, Write};
         let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("local fixture");
         let address = listener.local_addr().expect("fixture address");
@@ -3385,6 +3504,7 @@ mod tests {
                         .expect("request target")
                         .to_owned(),
                 );
+                std::thread::sleep(delay);
                 stream
                     .write_all(response.as_bytes())
                     .expect("fixture response");
@@ -3518,15 +3638,15 @@ mod tests {
     #[tokio::test]
     async fn continuation_syntax_precedes_collector_limits_and_capabilities() {
         use super::CaseOutcome::{Failed, NotRun, Passed};
-        for more in [
-            "http://[broken",
-            "/next page",
-            "/next%xx",
-            "/next\\page",
-            "/next\npage",
-            "https://elsewhere.invalid/next",
+        for (more, invalid) in [
+            ("http://[broken", true),
+            ("/next page", true),
+            ("/next%xx", true),
+            ("/next\\page", true),
+            ("/next\npage", true),
+            ("https://elsewhere.invalid/next", false),
+            ("//[Vf.a:b]/next", false),
         ] {
-            let invalid = !more.starts_with("https://elsewhere.invalid");
             let report = response_control(
                 serde_json::json!({"method":"GET","path":"/statements","follow_more":more}),
                 serde_json::json!({"status":200}),
@@ -4474,8 +4594,8 @@ expect:
     }
 
     #[tokio::test]
-    async fn rejected_writes_preserve_observed_statement_visibility() {
-        use super::CaseOutcome::{Failed, NotRun, Passed};
+    async fn rejected_and_unrelated_writes_preserve_observed_visibility() {
+        use super::CaseOutcome::{Failed, NotRun};
         for method in ["PUT", "POST", "DELETE"] {
             for (write_status, through, truncated, outcome) in [
                 (409, "2026-01-02T00:00:00Z", false, Failed),
@@ -4484,7 +4604,7 @@ expect:
                 (403, "2026-01-02T00:00:00Z", false, Failed),
                 (409, "2026-01-01T00:00:00Z", false, NotRun),
                 (409, "2025-12-31T00:00:00Z", false, NotRun),
-                (204, "2026-01-02T00:00:00Z", false, Passed),
+                (204, "2026-01-02T00:00:00Z", false, Failed),
             ] {
                 let request = serde_json::json!({"method":"GET","path":"/statements",
                     "query":{"statementId":"01000000-0000-4000-8000-000000000001"}});
@@ -4495,7 +4615,9 @@ expect:
                     "safety":{"destructive":false,"requires_isolated_lrs":true},
                     "steps":[
                         {"id":"visible","request":request,"expect":{"status":200}},
-                        {"id":"write","request":{"method":method,"path":"/statements"},
+                        {"id":"write","request":{"method":method,"path":"/statements",
+                            "body":{"id":"01000000-0000-4000-8000-000000000002",
+                                "verb":{"id":"urn:example:ordinary"}}},
                          "expect":{"status":write_status}},
                         {"id":"read","request":read,"expect":{"status":200,"headers":{
                             "X-Experience-API-Version":{"equals":"2.0.0"},
@@ -4506,36 +4628,210 @@ expect:
                 let headers = format!(
                     "X-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: {through}\r\n"
                 );
-                let mut responses = vec![
+                let responses = vec![
                     control_response(200, &headers, body, false),
                     control_response(write_status, "", "", false),
                     control_response(404, &headers, "{}", truncated),
                 ];
-                if write_status == 204 {
-                    responses.push(control_response(200, &headers, body, false));
-                }
                 let (report, paths) = routed_case_control("", case, responses).await;
                 assert_eq!(
                     report.outcome, outcome,
                     "{method}/{write_status}/{through}/{truncated}: {report:?}"
                 );
-                assert_eq!(paths.len(), if write_status == 204 { 4 } else { 3 });
-                if write_status != 204 {
-                    assert_eq!(report.retrieval_attempts.len(), 1, "{report:?}");
+                assert_eq!(paths.len(), 3);
+                assert_eq!(report.retrieval_attempts.len(), 1, "{report:?}");
+                assert!(
+                    !report.retrieval_attempts[0].pending_visibility,
+                    "{report:?}"
+                );
+                if outcome == Failed {
                     assert!(
-                        !report.retrieval_attempts[0].pending_visibility,
+                        report
+                            .failures
+                            .iter()
+                            .any(|reason| reason
+                                .contains("previously visible Statement disappeared")),
                         "{report:?}"
                     );
-                    if outcome == Failed {
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn malformed_duration_remains_a_reported_failure() {
+        for invalid in ["PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS"] {
+            for substatement in [false, true] {
+                let mut expected = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.test"},
+                    "verb":{"id":"urn:example:verb"},"object":{"id":"urn:example:activity"},
+                    "result":{"duration":"PT1.239S"}});
+                if substatement {
+                    expected["object"] = expected.clone();
+                    expected["object"]["objectType"] = "SubStatement".into();
+                }
+                let mut actual = expected.clone();
+                let pointer = if substatement {
+                    "/object/result/duration"
+                } else {
+                    "/result/duration"
+                };
+                *actual.pointer_mut(pointer).expect("fixture duration") = invalid.into();
+                let report = response_control(
+                    serde_json::json!({"method":"GET","path":"/statements"}),
+                    serde_json::json!({"status":200,"checks":[{"kind":"json-preservation","expected":expected}]}),
+                    vec![control_response(200, "", &actual.to_string(), false)],
+                ).await;
+                assert_eq!(
+                    report.outcome,
+                    super::CaseOutcome::Failed,
+                    "{invalid}: {report:?}"
+                );
+                assert!(!report.failures.is_empty());
+                assert!(serde_json::to_string(&report).is_ok());
+            }
+        }
+    }
+
+    #[tokio::test]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Exercise selector/target/body representation scope through complete request sequences"
+    )]
+    async fn successful_voids_only_invalidate_the_affected_observations() {
+        use super::CaseOutcome::{Failed, NotRun};
+        let id = "a1000000-0000-4000-8000-000000000001";
+        let upper = id.to_ascii_uppercase();
+        let other = "b1000000-0000-4000-8000-000000000002";
+        for method in ["PUT", "POST"] {
+            for encoding in [
+                "body",
+                "raw_body",
+                "raw_body_hex",
+                "raw_body_crlf_lines",
+                "opaque",
+            ] {
+                for (selector, voiding, target) in [
+                    ("statementId", false, id),
+                    ("statementId", false, upper.as_str()),
+                    ("statementId", false, other),
+                    ("voidedStatementId", false, id),
+                    ("statementId", true, id),
+                ] {
+                    let sent = serde_json::json!({"verb":{"id":"http://adlnet.gov/expapi/verbs/voided"},
+                        "object":{"objectType":"StatementRef","id":target}});
+                    let payload = if method == "POST" {
+                        serde_json::json!([{"verb":{"id":"urn:example:ordinary"}}, sent])
+                    } else {
+                        sent
+                    };
+                    let mut write = serde_json::json!({"method":method,"path":"/statements",
+                        "headers":{"Content-Type":"application/json","Authorization":"fixture-writer"}});
+                    match encoding {
+                        "body" => write[encoding] = payload,
+                        "raw_body" => write[encoding] = payload.to_string().into(),
+                        "raw_body_hex" => {
+                            let digits = b"0123456789abcdef";
+                            write[encoding] = payload
+                                .to_string()
+                                .bytes()
+                                .flat_map(|byte| {
+                                    [
+                                        char::from(digits[usize::from(byte >> 4)]),
+                                        char::from(digits[usize::from(byte & 15)]),
+                                    ]
+                                })
+                                .collect::<String>()
+                                .into();
+                        }
+                        "raw_body_crlf_lines" => {
+                            write["headers"]["Content-Type"] =
+                                "multipart/mixed; boundary=fixture".into();
+                            write[encoding] = serde_json::json!([
+                                "--fixture",
+                                "Content-Type: application/json",
+                                "",
+                                payload.to_string(),
+                                "--fixture--",
+                                ""
+                            ]);
+                        }
+                        _ => write["raw_body"] = "opaque accepted payload".into(),
+                    }
+                    let request = serde_json::json!({"method":"GET","path":"/statements",
+                        "query":{selector:id},"headers":{"Authorization":"fixture-reader"}});
+                    let mut read = request.clone();
+                    read["await_retrieval_ms"] = 1.into();
+                    let case = serde_json::json!({"id":"void-scope", "requirements":["fixture"],
+                    "safety":{"destructive":false,"requires_isolated_lrs":true},"steps":[
+                        {"id":"visible","request":request,"expect":{"status":200}},
+                        {"id":"write","request":write,"expect":{"status":204}},
+                        {"id":"read","request":read,"expect":{"status":200,"headers":{
+                            "X-Experience-API-Version":{"equals":"2.0.0"},
+                            "X-Experience-API-Consistent-Through":{"iso8601":true}}}}
+                    ]});
+                    let observed = serde_json::json!({"id":id,"stored":"2026-01-01T00:00:00Z",
+                        "verb":{"id":if voiding { "http://adlnet.gov/expapi/verbs/voided" } else { "urn:example:ordinary" }}});
+                    let headers = "X-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: 2026-01-02T00:00:00Z\r\n";
+                    let (report, paths) = timed_case_control(
+                        "",
+                        case,
+                        vec![
+                            control_response(200, headers, &observed.to_string(), false),
+                            control_response(204, "", "", false),
+                            control_response(404, headers, "{}", false),
+                        ],
+                        std::time::Duration::from_millis(5),
+                    )
+                    .await;
+                    let affected = selector == "statementId"
+                        && !voiding
+                        && (target.eq_ignore_ascii_case(id) || encoding == "opaque");
+                    assert_eq!(
+                        report.outcome,
+                        if affected { NotRun } else { Failed },
+                        "{method}/{encoding}/{selector}/{voiding}/{target}: {report:?}"
+                    );
+                    assert_eq!(paths.len(), 3);
+                    assert_eq!(report.retrieval_attempts.len(), 1);
+                    assert_eq!(
+                        report.retrieval_attempts[0].pending_visibility,
+                        affected && encoding != "opaque"
+                    );
+                    if affected && encoding == "opaque" {
                         assert!(
-                            report.failures.iter().any(|reason| reason
-                                .contains("previously visible Statement disappeared")),
+                            report
+                                .not_run_reasons
+                                .iter()
+                                .any(|reason| reason.contains("payload could not be inspected")),
                             "{report:?}"
                         );
                     }
                 }
             }
         }
+    }
+
+    #[tokio::test]
+    async fn unsupported_continuation_resolution_keeps_known_header_failures() {
+        let body = r#"{"statements":[],"more":"//[Vf.a:b]/next"}"#;
+        let report = response_control(
+            serde_json::json!({"method":"GET","path":"/statements","collect_statement_pages":2}),
+            serde_json::json!({"status":200,"headers":{"X-Experience-API-Version":{"equals":"2.0.0"}}}),
+            vec![control_response(200, "", body, false)],
+        ).await;
+        assert_eq!(report.outcome, super::CaseOutcome::Failed);
+        assert!(
+            report
+                .failures
+                .iter()
+                .any(|reason| reason.contains("X-Experience-API-Version"))
+        );
+        assert!(
+            !report
+                .failures
+                .iter()
+                .any(|reason| reason.contains("invalid continuation IRL"))
+        );
     }
 
     #[tokio::test]

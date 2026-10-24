@@ -8,11 +8,23 @@ from decimal import Decimal, localcontext
 
 from lrs_preservation import (
     PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
-    statement_response_headers, snapshot_equal,
+    statement_response_headers, snapshot_equal, duration_preserved,
 )
 
 
 class PreservationControls(unittest.TestCase):
+    def test_duration_lexical_defects_precede_comparison_or_deferral(self):
+        for bad in ['PTé1S','PT🙂1S','PT１S','PT1éS','PT1.éS','PT1\x00S','PT1e3S','not-duration']:
+            for other in ['PT1.239S','P1M',bad]:
+                for left,right in [(other,bad),(bad,other)]:
+                    with self.subTest(left=left,right=right):
+                        self.assertIs(duration_preserved(left,right),False)
+                        for pointer in ['/result/duration','/object/result/duration']:
+                            self.assertEqual(preservation(left,right,pointer)[0]['outcome'],'failed')
+        for left,right in [('PT1.239S','PT1.23S'),('PT1.239S','PT1,23S'),('P1W','P1W')]:
+            self.assertIs(duration_preserved(left,right),True)
+        self.assertIsNone(duration_preserved('P1M','P30D'))
+
     def test_snapshot_validates_both_timestamp_operands_before_deferral(self):
         unknowns = ['2016-12-31T23:59:60Z', '2026-01-01T24:00:00Z']
         invalid = ['not-a-timestamp', '2026-02-30T00:00:00Z', 42, None]
