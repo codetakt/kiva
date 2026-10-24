@@ -9,10 +9,39 @@ from decimal import Decimal, localcontext
 from lrs_preservation import (
     PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
     statement_response_headers, snapshot_equal, duration_preserved, duration_lexically_valid, load_json_members,
+    agent_validity, agent_identity_equal,
 )
 
 
 class PreservationControls(unittest.TestCase):
+    def test_generated_and_dedicated_authority_formats_agree(self):
+        import yaml
+        from generate_lrs_projection_cases import actor_output_shape, read_statement
+        root=Path(__file__).resolve().parents[2]
+        case=yaml.safe_load((root/'tests/conformance/http/statement-authz-authority-isolated.yaml').read_text())['cases'][0]
+        shape=actor_output_shape(identifiers=True)
+        for position in (1,3):
+            self.assertEqual(case['steps'][position]['expect']['checks'][0]['shape'],shape)
+        read=read_statement('00000000-0000-4000-8000-000000000001')
+        self.assertEqual(read['expect']['checks'][0]['shape']['properties']['authority'],shape)
+
+    def test_authority_identifiers_precede_identity_success_or_deferral(self):
+        fixture=json.loads((Path(__file__).resolve().parents[2]/'tests/conformance/fixtures/preservation-properties.json').read_text())['authority_identifiers']
+        for row in fixture:
+            expected={'passed':True,'failed':False,'not-run':None}[row['outcome']]
+            value=row['authority']
+            variants=[value]
+            if value.get('objectType','Agent')=='Agent':
+                variants += [dict(value,objectType='Group'), {'objectType':'Group','member':[value]}]
+            for variant in variants:
+                with self.subTest(id=row['id'],variant=variant):
+                    self.assertIs(agent_validity(variant),expected)
+                    self.assertIs(agent_identity_equal(variant,variant),expected)
+        unknown={'mbox':'mailto:%22not%20me%22@example.org'}
+        invalid={'mbox_sha1sum':'xyz'}
+        self.assertIs(agent_identity_equal(unknown,invalid),False)
+        self.assertIs(agent_identity_equal(invalid,unknown),False)
+
     def test_duration_designator_grammar_shared_controls(self):
         fixture=json.loads((Path(__file__).resolve().parents[2]/'tests/conformance/fixtures/preservation-properties.json').read_text())['duration_grammar']
         for group,values in fixture.items():

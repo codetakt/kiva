@@ -2161,6 +2161,10 @@ async fn execute_http_request(
         state.response_status = attempt.response_status;
         state.retrieval_pending = attempt.retrieval_pending;
         state.capability_unavailable = attempt.capability_unavailable;
+        // Observations survive unrelated assertion failures. Only captures
+        // require a completely successful step; response evidence does not.
+        state.visible_statements = attempt.visible_statements;
+        state.known_statement_ids = attempt.known_statement_ids;
         if failures.is_empty() {
             for name in expectation.capture.keys() {
                 if let Some(url) = &attempt.response_url {
@@ -2172,8 +2176,6 @@ async fn execute_http_request(
             state.captures = attempt.captures;
             state.response_url = attempt.response_url;
             state.capture_response_urls = attempt.capture_response_urls;
-            state.visible_statements = attempt.visible_statements;
-            state.known_statement_ids = attempt.known_statement_ids;
             state.diagnostic_statuses.extend(attempt_diagnostics);
             return failures;
         }
@@ -2392,20 +2394,19 @@ async fn execute_http_request_once(
         &body_bytes,
         state,
     ));
-    if failures.is_empty() {
-        if request.path == "/statements"
-            && matches!(request.method.as_str(), "PUT" | "POST")
-            && status.is_success()
-        {
-            invalidate_voided_observations(&request, &request_headers, state);
-            remember_submitted_ids(&request, &request_headers, &body_bytes, state);
-        } else if request.path == "/statements"
-            && request.method == "GET"
-            && status == StatusCode::OK
-            && let Some(json) = retrieved_document(&headers, &body_bytes)
-        {
-            remember_retrieved_statements(&json, &request, &request_headers, state);
-        }
+    if failures.is_empty()
+        && request.path == "/statements"
+        && matches!(request.method.as_str(), "PUT" | "POST")
+        && status.is_success()
+    {
+        invalidate_voided_observations(&request, &request_headers, state);
+        remember_submitted_ids(&request, &request_headers, &body_bytes, state);
+    } else if request.path == "/statements"
+        && request.method == "GET"
+        && status == StatusCode::OK
+        && let Some(json) = retrieved_document(&headers, &body_bytes)
+    {
+        remember_retrieved_statements(&json, &request, &request_headers, state);
     }
     failures
 }
@@ -2857,6 +2858,11 @@ fn remember_retrieved_statements(
         let Some(stored) = statement.get("stored").and_then(Value::as_str) else {
             continue;
         };
+        if assertions::parse_time(stored).is_err()
+            || assertions::has_explicit_non_utc_offset(stored)
+        {
+            continue;
+        }
         let id = canonical_statement_id(id);
         let key = if let Some(key) = &direct_key {
             if key.id != id {
@@ -5263,6 +5269,95 @@ expect:
                 },
                 "{report:?}"
             );
+        }
+    }
+
+    #[tokio::test]
+    async fn unrelated_header_failure_does_not_erase_visibility_evidence() {
+        use std::io::{Read, Write};
+        for (id, stored, witnessed) in [
+            ("a", Some("2026-01-01T00:00:00Z"), true),
+            ("other", Some("2026-01-01T00:00:00Z"), false),
+            ("a", None, false),
+            ("a", Some("invalid"), false),
+            ("a", Some("2026-01-01T09:00:00+09:00"), false),
+        ] {
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("fixture");
+            let endpoint = url::Url::parse(&format!(
+                "http://{}",
+                listener.local_addr().expect("address")
+            ))
+            .expect("URL");
+            let first = control_response(
+                200,
+                "X-Experience-API-Version: 1.0.0\r\n",
+                &serde_json::json!({"id":id,"stored":stored}).to_string(),
+                false,
+            );
+            let last = control_response(
+                404,
+                "X-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: 2026-01-02T00:00:00Z\r\n",
+                "{}",
+                false,
+            );
+            let server = std::thread::spawn(move || {
+                for reply in [first, last] {
+                    let (mut stream, _) = listener.accept().expect("request");
+                    let mut buffer = [0; 4096];
+                    let _ = stream.read(&mut buffer).expect("request bytes");
+                    stream.write_all(reply.as_bytes()).expect("response");
+                }
+            });
+            let client = reqwest::Client::new();
+            let context = super::HttpRequestContext {
+                client: &client,
+                endpoint: &endpoint,
+                common_headers: &BTreeMap::new(),
+                auth_profiles: &BTreeMap::new(),
+            };
+            let mut diagnostics = Vec::new();
+            let mut state = super::HttpRequestState {
+                captures: BTreeMap::new(),
+                diagnostic_statuses: &mut diagnostics,
+                retrieval_attempts: Vec::new(),
+                step: None,
+                response_status: None,
+                response_url: None,
+                capture_response_urls: BTreeMap::new(),
+                retrieval_pending: false,
+                capability_unavailable: false,
+                visible_statements: BTreeMap::new(),
+                known_statement_ids: std::collections::BTreeSet::new(),
+            };
+            let mut request: super::RequestSpec = serde_json::from_value(serde_json::json!({
+                "method":"GET","path":"/statements","query":{"statementId":"a"}}))
+            .expect("request");
+            let expected: super::ResponseExpectation = serde_json::from_value(serde_json::json!({
+                "status":200,"headers":{"X-Experience-API-Version":{"equals":"2.0.0"}},
+                "capture":{"id":{"pointer":"/id"}}}))
+            .expect("expectation");
+            let failures =
+                super::execute_http_request(&context, &request, &expected, &mut state).await;
+            assert!(
+                failures
+                    .iter()
+                    .any(|error| error.contains("X-Experience-API-Version"))
+            );
+            assert!(state.captures.is_empty());
+            assert_eq!(state.visible_statements.len(), usize::from(witnessed));
+            request.await_retrieval_ms = Some(0);
+            let failures =
+                super::execute_http_request(&context, &request, &expected, &mut state).await;
+            assert!(!failures.is_empty());
+            assert_eq!(state.retrieval_pending, !witnessed, "{failures:?}");
+            assert_eq!(
+                failures
+                    .iter()
+                    .any(|error| error.contains("previously visible Statement disappeared")),
+                witnessed,
+                "{failures:?}"
+            );
+            server.join().expect("fixture thread");
         }
     }
 

@@ -923,7 +923,7 @@ impl Shape {
     }
 }
 
-fn check_string_format(format: &str, text: &str, pointer: &str) -> Result<(), String> {
+pub(super) fn check_string_format(format: &str, text: &str, pointer: &str) -> Result<(), String> {
     let valid = match format {
         "uuid" => standard_uuid(text),
         "timestamp" => return parse_time(text).map(|_| ()),

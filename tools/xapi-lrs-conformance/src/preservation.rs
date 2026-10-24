@@ -172,6 +172,15 @@ fn agent_identity_core(left: &Value, right: &Value) -> Result<bool, String> {
 /// Bounded authority comparison; display changes require the full mapping
 /// contract instead of being silently ignored. This is not signature equality.
 pub(super) fn agent_identity_equal(left: &Value, right: &Value) -> Result<bool, String> {
+    // Equality cannot certify an invalid IFI. Check all members independently,
+    // including display members of identified Groups, before possible deferral.
+    let validity = super::assertions::all_comparisons([
+        agent_identifier_validity(left),
+        agent_identifier_validity(right),
+    ]);
+    if matches!(validity, Ok(false)) {
+        return validity;
+    }
     let identity = agent_identity_core(left, right);
     if matches!(identity, Ok(false)) {
         return identity;
@@ -197,7 +206,7 @@ pub(super) fn agent_identity_equal(left: &Value, right: &Value) -> Result<bool, 
         .filter(|(k, _)| !ignored.contains(&k.as_str()))
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
-    let mut results = vec![identity];
+    let mut results = vec![validity, identity];
     results.push(if a == b {
         Ok(true)
     } else {
@@ -215,6 +224,37 @@ pub(super) fn agent_identity_equal(left: &Value, right: &Value) -> Result<bool, 
             else { results.push(Err("ORACLE-UNAVAILABLE: authority display membership requires full mapping contract".into())); }
         },
         _ => results.push(Err("ORACLE-UNAVAILABLE: changed authority membership presence requires full mapping contract".into())),
+    }
+    super::assertions::all_comparisons(results)
+}
+
+fn agent_identifier_validity(value: &Value) -> Result<bool, String> {
+    let mut results = Vec::new();
+    for (field, format) in [
+        ("mbox", "mailto-iri"),
+        ("mbox_sha1sum", "sha1"),
+        ("openid", "uri"),
+        // Identity/shape success establishes syntax only. Account locator
+        // semantics retain their separate DC-IRL procedure obligation.
+        ("account", "iri"),
+    ] {
+        if let Some(item) = value.get(field) {
+            let item = if field == "account" {
+                &item["homePage"]
+            } else {
+                item
+            };
+            results.push(item.as_str().map_or(Ok(false), |text| {
+                match super::assertions::check_string_format(format, text, field) {
+                    Ok(()) => Ok(true),
+                    Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => Err(error),
+                    Err(_) => Ok(false),
+                }
+            }));
+        }
+    }
+    if let Some(items) = value.get("member").and_then(Value::as_array) {
+        results.extend(items.iter().map(agent_identifier_validity));
     }
     super::assertions::all_comparisons(results)
 }
@@ -757,6 +797,60 @@ fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
+
+    #[test]
+    fn authority_identifiers_are_validated_before_equality() {
+        let fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))
+        .expect("identifier controls");
+        let suite: serde_json::Value = serde_yaml::from_str(include_str!(
+            "../../../tests/conformance/http/statement-authz-authority-isolated.yaml"
+        ))
+        .expect("authority case");
+        let definition = &suite["cases"][0]["steps"][1]["expect"]["checks"][0];
+        let shape: crate::Check =
+            serde_json::from_value(definition.clone()).expect("authority shape");
+        for row in fixture["authority_identifiers"].as_array().expect("rows") {
+            let authority = &row["authority"];
+            let mut variants = vec![authority.clone()];
+            if authority.get("objectType").is_none() {
+                let mut group = authority.clone();
+                group["objectType"] = "Group".into();
+                variants.extend([group, json!({"objectType":"Group","member":[authority]})]);
+            }
+            for value in variants {
+                let result = super::agent_identity_equal(&value, &value);
+                let observed = match result {
+                    Ok(true) => "passed",
+                    Ok(false) => "failed",
+                    Err(_) => "not-run",
+                };
+                assert_eq!(observed, row["outcome"], "{row}: {value}");
+                let failures = shape.evaluate(
+                    200,
+                    &reqwest::header::HeaderMap::new(),
+                    json!({"authority":value}).to_string().as_bytes(),
+                    &std::collections::BTreeMap::new(),
+                );
+                let observed = if failures.is_empty() {
+                    "passed"
+                } else if failures
+                    .iter()
+                    .all(|error| error.starts_with("ORACLE-UNAVAILABLE:"))
+                {
+                    "not-run"
+                } else {
+                    "failed"
+                };
+                assert_eq!(observed, row["outcome"], "{row}: {failures:?}");
+            }
+        }
+        let unknown = json!({"mbox":"mailto:%22not%20me%22@example.org"});
+        let invalid = json!({"mbox_sha1sum":"xyz"});
+        assert_eq!(super::agent_identity_equal(&unknown, &invalid), Ok(false));
+        assert_eq!(super::agent_identity_equal(&invalid, &unknown), Ok(false));
+    }
 
     #[test]
     fn duration_designator_grammar_uses_shared_controls() {

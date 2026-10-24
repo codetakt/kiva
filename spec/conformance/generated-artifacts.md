@@ -125,7 +125,7 @@ After generating definitions, build the pinned runner and exercise the selected
 
 ```sh
 nix develop -c cargo build --locked -p xapi-lrs-conformance
-python -B scripts/ci/run_issued_revision_controls.py \
+nix develop .#conformance-definitions -c python -B scripts/ci/run_issued_revision_controls.py \
   --runner target/debug/xapi-lrs-conformance \
   --out target/lrs-revision-controls
 ```

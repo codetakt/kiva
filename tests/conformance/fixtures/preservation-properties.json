@@ -1121,5 +1121,203 @@
       "value": "urn:example:file",
       "outcome": "not-run"
     }
-  ]
+  ],
+  "authority_identifiers": [
+    {
+      "id": "mbox-0",
+      "authority": {
+        "mbox": "mailto:a+b@example.org"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "mbox-1",
+      "authority": {
+        "mbox": "MAILTO:a@example.org"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "mbox-2",
+      "authority": {
+        "mbox": "https://example.org"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox-3",
+      "authority": {
+        "mbox": "mailto:a..b@example.org"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox-4",
+      "authority": {
+        "mbox": "mailto:a@"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox-5",
+      "authority": {
+        "mbox": "mailto:a%xx@example.org"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox-6",
+      "authority": {
+        "mbox": "mailto:%22not%20me%22@example.org"
+      },
+      "outcome": "not-run"
+    },
+    {
+      "id": "mbox_sha1sum-0",
+      "authority": {
+        "mbox_sha1sum": "xyz"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox_sha1sum-1",
+      "authority": {
+        "mbox_sha1sum": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "mbox_sha1sum-2",
+      "authority": {
+        "mbox_sha1sum": "gggggggggggggggggggggggggggggggggggggggg"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "mbox_sha1sum-3",
+      "authority": {
+        "mbox_sha1sum": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "openid-0",
+      "authority": {
+        "openid": "urn:example:identity"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "openid-1",
+      "authority": {
+        "openid": "scheme:"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "openid-2",
+      "authority": {
+        "openid": "https://[Vf.a:b]/id"
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "openid-3",
+      "authority": {
+        "openid": "/relative"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "openid-4",
+      "authority": {
+        "openid": "https://example.org/with space"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "openid-5",
+      "authority": {
+        "openid": "https://example.org/学習"
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "account-0",
+      "authority": {
+        "account": {
+          "homePage": "https://example.org/id",
+          "name": "a"
+        }
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "account-1",
+      "authority": {
+        "account": {
+          "homePage": "/relative",
+          "name": "a"
+        }
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "account-2",
+      "authority": {
+        "account": {
+          "homePage": "https://example.org/%xx",
+          "name": "a"
+        }
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "account-3",
+      "authority": {
+        "account": {
+          "homePage": null,
+          "name": "a"
+        }
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "anonymous-empty",
+      "authority": {
+        "objectType": "Group",
+        "member": []
+      },
+      "outcome": "passed"
+    },
+    {
+      "id": "mixed-unknown-invalid",
+      "authority": {
+        "objectType": "Group",
+        "member": [
+          {
+            "mbox": "mailto:%22not%20me%22@example.org"
+          },
+          {
+            "mbox_sha1sum": "xyz"
+          }
+        ]
+      },
+      "outcome": "failed"
+    },
+    {
+      "id": "identified-invalid-member",
+      "authority": {
+        "objectType": "Group",
+        "mbox": "mailto:a@example.org",
+        "member": [
+          {
+            "mbox_sha1sum": "xyz"
+          }
+        ]
+      },
+      "outcome": "failed"
+    }
+  ],
+  "authority_identifier_scope": "Necessary output IFI types and syntax before identity comparison; Account locator semantics remain the separate DC-IRL procedure obligation. Neither shape nor identity success certifies locator evidence."
 }

@@ -20,6 +20,29 @@ class AuthorityCompletionTests(unittest.TestCase):
     procedure = 'related-agents-returned-authority'
     identifier = '00000000-0000-4000-8000-000000000001'
 
+    def test_child_identity_is_stable_across_bootstrap_stopping_points(self):
+        for stop in ('PUT','GET',None):
+            with self.subTest(stop=stop),TemporaryDirectory() as directory:
+                code,outcome,_,_=self.probe(directory,stop)
+                _,result,_=self.parent(directory,code,outcome)
+                children={c['id']:c for c in outcome['checks']}
+                self.assertEqual(len(children),len(outcome['checks']))
+                parent={c['id']:c for c in result['checks']}
+                for identity,check in children.items():
+                    self.assertEqual(parent['authority-helper-'+identity]['outcome'],check['outcome'])
+                self.assertIn('authority-helper-bootstrap-put-version-1',parent)
+                self.assertNotIn('authority-helper-0',parent)
+
+    def test_missing_or_duplicate_child_ids_never_complete(self):
+        for checks in [[{'outcome':'passed'}],
+                       [{'id':'query','outcome':'passed'}]*2,
+                       [{'id':[],'outcome':'failed'}]]:
+            with self.subTest(checks=checks),TemporaryDirectory() as directory:
+                outcome={'status':'failed','execution_complete':True,'checks':checks}
+                _,result,incomplete=self.parent(directory,1,outcome)
+                self.assertEqual(incomplete,[self.procedure])
+                self.assertFalse(any(c['id']=='execution-unavailable' for c in result['checks']))
+
     def probe(self, directory, stop=None, members=False):
         output=Path(directory)/'child'
         identity={'mbox':'mailto:authority@example.org'}
@@ -120,6 +143,23 @@ class AuthorityCompletionTests(unittest.TestCase):
 
 class ResponseTypeTests(unittest.TestCase):
     document_procedure = 'document-updated-time-boundary'
+
+    def test_authority_procedure_checks_every_returned_identifier(self):
+        rows=json.loads((Path(__file__).resolve().parents[2]/'tests/conformance/fixtures/preservation-properties.json').read_text())['authority_identifiers']
+        for row in rows:
+            with self.subTest(id=row['id']),TemporaryDirectory() as directory:
+                executor=self.person_executor(directory,{},False)
+                executor.current='authority-output'
+                executor.results[executor.current]={'checks':[]}
+                executor.fixture={'authority_policy':'declared'}
+                executor.store=Mock(return_value=True)
+                executor.read_visible=Mock(return_value={'json':{'authority':row['authority']}})
+                with patch.dict('os.environ',{'KIVA_CONFORMANCE_WRITER_A_TOKEN':'fixture'}):
+                    executor.authority()
+                checks=executor.results[executor.current]['checks']
+                compared=[c for c in checks if '-authority-present-' in c['id'] or c['id'].endswith('-deterministic')]
+                self.assertEqual(len(compared),6)
+                self.assertTrue(all(c['outcome']==row['outcome'] for c in compared),compared)
 
     def test_blocked_duplicate_retains_failures_and_unexecuted_checks(self):
         for failure_at in ['initial','PUT','POST','none']:

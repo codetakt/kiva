@@ -160,16 +160,22 @@ def step(name, req, exp):
     return dict(id=name, request=req, expect=exp)
 
 
-def actor_output_shape():
+def actor_output_shape(*, identifiers=False):
+    # Submitted actor formats have their own preservation/grammar duties.
+    # Server-produced authority IFIs also need independent lexical checks.
+    formats = {"mbox": "mailto-iri", "mbox_sha1sum": "sha1", "openid": "uri"}
+    def identifier_shape(field):
+        return {"type": "string", **({"format": formats[field]} if identifiers else {})}
     account = {
         "type": "object",
         "required": ["homePage", "name"],
-        "properties": {"homePage": {"type": "string"}, "name": {"type": "string"}},
+        # This necessary syntax check does not discharge DC-IRL locator semantics.
+        "properties": {"homePage": {"type": "string", **({"format": "iri"} if identifiers else {})}, "name": {"type": "string"}},
         "additional_properties": False,
     }
     agents, groups = [], []
     for ifi in ["mbox", "mbox_sha1sum", "openid", "account"]:
-        field_shape = account if ifi == "account" else {"type": "string"}
+        field_shape = account if ifi == "account" else identifier_shape(ifi)
         agent = {
             "type": "object",
             "required": [ifi],
@@ -192,7 +198,7 @@ def actor_output_shape():
                     "objectType": {"enum": ["Group"]},
                     "name": {"type": "string"},
                     "member": member,
-                    ifi: account if ifi == "account" else {"type": "string"},
+                    ifi: account if ifi == "account" else identifier_shape(ifi),
                 },
             }
         )
@@ -239,7 +245,7 @@ def read_statement(identifier, pointers=None, checks=None):
                         "properties": {
                             "id": {"type": "string", "format": "uuid"},
                             "actor": actor_output_shape(),
-                            "authority": actor_output_shape(),
+                            "authority": actor_output_shape(identifiers=True),
                             "verb": {
                                 "type": "object",
                                 "required": ["id"],

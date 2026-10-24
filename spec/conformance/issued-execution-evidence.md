@@ -42,6 +42,17 @@ for dependent observations. Replay procedures also record skipped PUT/POST and
 comparison items. A failure therefore cannot make an unfinished procedure count
 as fully executed.
 
+Authority observations validate returned IFIs independently of deterministic
+identity comparison, including members of identified and anonymous Groups.
+Identical invalid identifiers cannot establish a PASS. SHA-1 uses 40 hexadecimal
+digits; OpenID uses absolute URI syntax; mbox uses the bounded DC-MAILTO adapter;
+Account.homePage checks the necessary IRI syntax. Successful identity/shape
+checks do not establish Account locator semantics: the separate DC-IRL procedure
+still requires its provider evidence. Unsupported legal mailto forms remain
+NOT-RUN. An independent invalid member
+still fails when another member needs a provider. These output checks do not
+change the separate input-acceptance waivers or supply unavailable providers.
+
 In Python `http.jsonl`, request/response `body_hex` is the authoritative body
 evidence. Decode those bytes with the member-preserving JSON loader when checking
 extension member multiplicity. The convenience `json` field, and structured
@@ -52,6 +63,35 @@ the complete HTTP log alongside summaries. `incomplete_body` means the full body
 was not captured and cannot support a complete preservation verdict.
 
 ## Execution receipt
+
+### Known-gap diagnostic migration
+
+The POST readback correction in `b09d351` binds a successful response to the
+submitted Statement ID and uses that known ID for retrieval. It no longer
+captures `/0` from a rejected write. Six existing baseline entries therefore
+lost the secondary diagnostic `step store: expected JSON pointer /0 for capture issued_id`:
+
+| Cases in `ci-execution-baseline.json` | Retained primary failure | Backends |
+| --- | --- | --- |
+| `issued-completion-root-duration-comma-batch`, `issued-completion-root-duration-comma-post` | `step store: expected status 200, received 400` | memory, postgres |
+| `issued-completion-sub-duration-comma-batch`, `issued-completion-sub-duration-comma-post` | `step store: expected status 200, received 400` | memory, postgres |
+| `issued-utf8-valid-boundaries-batch`, `issued-utf8-valid-boundaries-post` | `step store: expected status 200, received 500` | postgres |
+
+All six remain FAIL. No gap was removed or relabeled, and the other baseline
+outcomes and reason strings were preserved. Their case hashes and enclosing
+file hashes were rebound to the corrected definitions. This is a change in
+diagnostic collection, not a resolution of the comma-Duration or U+0000 product
+defects. The gate still requires the exact recorded failure sets and rejects
+any subsequent drift, including an unexpected PASS.
+
+The later authority-identifier correction strengthens the generated readback
+shapes and the dedicated authority case. Its baseline update changes only five
+enclosing case-file hashes and 46 existing gap case hashes. All 117 gap entries
+retain their identities, backend scopes, outcomes and exact diagnostic strings.
+The added authority checks must pass the same regression gate; this rebinding
+does not exempt any new failure or unavailable result.
+
+### Receipt fields
 
 Supply `--evidence-receipt run-receipt.json` in addition to `--case-receipt`.
 The former is an execution input/output receipt; the latter identifies case

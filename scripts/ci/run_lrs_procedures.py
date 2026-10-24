@@ -31,23 +31,6 @@ ROOT = Path(__file__).resolve().parents[2]
 IFI = ['mbox', 'mbox_sha1sum', 'openid', 'account']
 
 
-def mailbox_structure(value):
-    """Bounded DC-MAILTO adapter: True/False/None (needs full contract)."""
-    scheme, separator, rest = value.partition(':')
-    if not separator or scheme.lower() != 'mailto' or '#' in rest:
-        return False
-    if '%' in rest or '?' in rest or not rest.isascii():
-        return None
-    atom = re.compile(r"[A-Za-z0-9!$'*+_~\-]+")
-    for address in rest.split(','):
-        local, separator, domain = address.rpartition('@')
-        if not separator or not local or not domain:
-            return False
-        if not all(atom.fullmatch(part) for part in local.split('.') + domain.split('.')):
-            return False
-    return True
-
-
 def host_stamp(value):
     """Only this executor's own utc() clock samples, never target values."""
     return dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
@@ -73,8 +56,8 @@ def ptr(value, pointer):
 
 
 from lrs_preservation import (preservation, timestamp_preserved, timestamp_ns, timestamp_pair, PrimitiveUnavailable,
-    statement_response_headers, agent_structure, agent_identity_equal, snapshot_equal, all_decisions,
-    load_json_members, iri_reference_valid)
+    statement_response_headers, agent_identity_equal, snapshot_equal, all_decisions,
+    load_json_members, iri_reference_valid, mailbox_structure, agent_validity)
 
 
 def response_http_date(value):
@@ -726,7 +709,7 @@ class Executor:
                 reply=self.read_visible(body,admission)
                 if reply is None:continue
                 value=reply['json'].get('authority') if isinstance(reply['json'],dict) else None
-                self.check(name+'-authority-present-'+body['id'],agent_structure(value),'Agent, identified Group or anonymous Group with an Agent member array; no invented minimum cardinality')
+                self.check(name+'-authority-present-'+body['id'],agent_validity(value),'Agent/Group IFI types and syntax, including every member; unsupported mailto is unavailable; this check does not discharge separate DC-IRL locator semantics')
                 current.append(value)
             self.check(name+'-deterministic',agent_identity_equal(current[0],current[1]) if len(current)==2 else None,'Both admitted Statements observable; bounded mapping comparison permits unordered members; changing display facts require full declared mapping contract')
             authorities.append(current)
@@ -744,11 +727,16 @@ class Executor:
         self.check('actual-returned-authority-true-default-false',verdict,'Explicit helper result; unavailable fixture/child incomplete is never a target failure or pass',{'exit_code':run.returncode,'helper_outcome':outcome})
         checks=outcome.get('checks')
         valid=isinstance(checks,list) and bool(checks) and all(isinstance(c,dict) for c in checks)
+        identified=False
         if valid:
-            for i,check in enumerate(checks):
+            ids=[c.get('id') for c in checks]
+            identified=(all(isinstance(identity,str) and identity for identity in ids)
+                        and len(set(ids))==len(ids))
+            for check in checks:
                 observed={'passed':True,'failed':False}.get(check.get('outcome'))
-                self.check('authority-helper-'+str(i),observed,check.get('reason','Child response observation'),check)
-        complete=(valid and outcome.get('execution_complete') is True
+                identity=check.get('id') if isinstance(check.get('id'),str) and check['id'] else 'unidentified'
+                self.check('authority-helper-'+identity,observed,check.get('reason','Child response observation'),check)
+        complete=(valid and identified and outcome.get('execution_complete') is True
                   and all(c.get('outcome') in ('passed','failed') for c in checks))
         self.check('authority-required-checks-completed',True if complete else None,
                    'Every applicable query must be observed; a bootstrap or child FAIL cannot complete skipped queries')

@@ -77,6 +77,7 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     observations = []
+    observation_counts = {}
     query_checks = [{'id': 'authority-queries-' + mode, 'outcome': 'not-run',
                      'reason': 'Authority fixture was not established; required query was not run'}
                     for mode in ('default', 'false', 'true')]
@@ -108,6 +109,11 @@ def main():
     }
 
     def http(method, query, value=None):
+        def observe(kind, **fields):
+            identity='bootstrap-'+method.lower()+'-'+kind
+            observation_counts[identity]=observation_counts.get(identity,0)+1
+            observations.append({'id':identity+'-'+str(observation_counts[identity]),
+                                 'method':method, **fields})
         req = Request(
             args.endpoint.rstrip("/") + "/statements?" + urlencode(query),
             data=dumps(value).encode() if value else None,
@@ -119,19 +125,19 @@ def main():
         except HTTPError as error:
             response = error
         except (URLError, OSError, TimeoutError):
-            observations.append({'outcome': 'not-run', 'reason': 'bootstrap transport unavailable'})
+            observe('transport', outcome='not-run', reason='bootstrap transport unavailable')
             return None, b''
         with response:
             if (method == 'PUT' and response.status != 204) or (method == 'GET' and response.status not in (200, 404)):
-                observations.append({'outcome': 'failed', 'reason': 'unexpected bootstrap status', 'method': method, 'status': response.status})
+                observe('status', outcome='failed', reason='unexpected bootstrap status', status=response.status)
             version, consistent = statement_response_headers(dict(response.headers.items()))
             for name, result in [('version', version), ('consistent-through', consistent)]:
-                observations.append({'method': method, 'status': response.status, 'header': name,
-                                     'outcome': 'not-run' if result is None else 'passed' if result else 'failed'})
+                observe(name, status=response.status, header=name,
+                        outcome='not-run' if result is None else 'passed' if result else 'failed')
             try:
                 return response.status, response.read()
             except (OSError, TimeoutError, HTTPException):
-                observations.append({'outcome': 'not-run', 'reason': 'bootstrap body unavailable'})
+                observe('body', outcome='not-run', reason='bootstrap body unavailable')
                 return None, b''
 
     def observed_failure():

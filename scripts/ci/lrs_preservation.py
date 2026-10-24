@@ -355,6 +355,23 @@ def multiset_equal(left, right, compare):
     return True if perfect(False) else None if perfect(True) else False
 
 
+def mailbox_structure(value):
+    """Bounded DC-MAILTO adapter: True/False/None (needs full contract)."""
+    scheme, separator, rest = value.partition(':')
+    if not separator or scheme.lower() != 'mailto' or '#' in rest:
+        return False
+    if '%' in rest or '?' in rest or not rest.isascii():
+        return None
+    atom = re.compile(r"[A-Za-z0-9!$'*+_~\-]+")
+    for address in rest.split(','):
+        local, separator, domain = address.rpartition('@')
+        if not separator or not local or not domain:
+            return False
+        if not all(atom.fullmatch(part) for part in local.split('.') + domain.split('.')):
+            return False
+    return True
+
+
 def agent_structure(value, member=False):
     """Structural identifying fields; lexical IFI validation is a separate duty."""
     if not isinstance(value, dict):
@@ -381,6 +398,27 @@ def agent_structure(value, member=False):
         if 'member' in value and (not isinstance(members, list) or not all(agent_structure(v, True) for v in members)):
             return False
     return True
+
+
+def agent_validity(value):
+    """Validate IFIs independently of equality and of other unavailable fields."""
+    if not agent_structure(value):
+        return False
+    decisions=[]
+    for field in ('mbox','mbox_sha1sum','openid','account'):
+        if field not in value:continue
+        item=value[field]['homePage'] if field=='account' else value[field]
+        if field=='mbox_sha1sum':
+            decisions.append(re.fullmatch(r'[0-9A-Fa-f]{40}',item) is not None)
+            continue
+        syntax=(re.match(r'[A-Za-z][A-Za-z0-9+.-]*:',item) is not None
+                and iri_reference_valid(item) and (field!='openid' or item.isascii()))
+        if not syntax:decisions.append(False)
+        elif field=='mbox':decisions.append(mailbox_structure(item))
+        else:decisions.append(True)  # Account's DC-IRL locator semantics remain a separate duty.
+    if value.get('objectType')=='Group':
+        decisions.extend(agent_validity(member) for member in value.get('member',[]))
+    return all_decisions(decisions)
 
 
 def identifier_equal(left, right, field):
@@ -421,6 +459,9 @@ def agent_identity_equal(left, right):
     order succeeds. Other changing display facts require the full declared
     deterministic mapping, rather than being silently ignored or rejected.
     """
+    validity = all_decisions([agent_validity(left), agent_validity(right)])
+    if validity is False:
+        return False
     identity = _agent_identity_core(left, right)
     if identity is False:
         return False
@@ -436,7 +477,7 @@ def agent_identity_equal(left, right):
             members = None
     else:
         members = True if ('member' in left) == ('member' in right) else None
-    return all_decisions([identity, extra, members])
+    return all_decisions([validity, identity, extra, members])
 
 
 def snapshot_equal(left, right, pointer='', opaque=False):

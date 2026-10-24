@@ -87,6 +87,7 @@ cases:
                 type: string
               mbox:
                 type: string
+                format: mailto-iri
           - &id002
             type: object
             required:
@@ -100,6 +101,7 @@ cases:
                 type: string
               mbox_sha1sum:
                 type: string
+                format: sha1
           - &id003
             type: object
             required:
@@ -113,6 +115,7 @@ cases:
                 type: string
               openid:
                 type: string
+                format: uri
           - &id004
             type: object
             required:
@@ -132,6 +135,8 @@ cases:
                 properties:
                   homePage:
                     type: string
+                    # Necessary syntax only; DC-IRL locator evidence is separate.
+                    format: iri
                   name:
                     type: string
                 additional_properties: false
@@ -156,6 +161,7 @@ cases:
                   - *id004
               mbox:
                 type: string
+                format: mailto-iri
           - type: object
             required:
             - objectType
@@ -170,6 +176,7 @@ cases:
               member: *id005
               mbox_sha1sum:
                 type: string
+                format: sha1
           - type: object
             required:
             - objectType
@@ -184,6 +191,7 @@ cases:
               member: *id005
               openid:
                 type: string
+                format: uri
           - type: object
             required:
             - objectType

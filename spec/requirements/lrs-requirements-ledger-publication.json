@@ -135,7 +135,7 @@
     },
     {
       "path": "spec/conformance/lrs-assertion-manifest.yaml",
-      "sha256": "61b0d9e616116fbb1ffc0b0f192bec8c4d3c22b22bea87dd431a264829bdc67b"
+      "sha256": "fe042b80fae63c1404e770082db6e52374d32bafee7876ee143fa887269870bb"
     },
     {
       "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",
@@ -215,7 +215,7 @@
     },
     {
       "path": "tests/conformance/http/generated/behaviors.yaml",
-      "sha256": "8d1f3b1fe23a4f3482e4a82a8f94817e31686d41c222a81904537d14e5b6db98"
+      "sha256": "01cada50781f3591ca73c4f638fa91999d7510a6927f00833d3aa62df9fbc445"
     }
   ],
   "inventory_boundary": "The ledger publication's historical 53 paths, with explicit successor documentation/test-support identities. This is not the full test-projection PR inventory. Materialize generated members using the artifact lock; Git binds this inventory."
