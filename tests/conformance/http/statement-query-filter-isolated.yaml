@@ -822,6 +822,7 @@ cases:
             pointer: /stored
     - id: query-default-descending-limit-one
       request:
+        collect_statement_pages: 100
         method: GET
         path: /statements
         query:
@@ -854,6 +855,7 @@ cases:
           limit: 1
     - id: query-ascending-limit-zero
       request:
+        collect_statement_pages: 100
         method: GET
         path: /statements
         query:
@@ -887,6 +889,7 @@ cases:
           limit: 0
     - id: query-until-first-stored
       request:
+        collect_statement_pages: 100
         method: GET
         path: /statements
         query:
@@ -921,6 +924,7 @@ cases:
           until_capture: first_stored
     - id: query-since-first-stored
       request:
+        collect_statement_pages: 100
         method: GET
         path: /statements
         query:

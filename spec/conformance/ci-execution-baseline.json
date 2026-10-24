@@ -27,8 +27,8 @@
     "tests/conformance/http/authentication-errors.yaml": "495d43e1d8f3a36a3f4f8735c920ad84bc87994702116b56e60923c96cfb3b4c",
     "tests/conformance/http/error-profile-sensitive-isolated.yaml": "a449273957647bc9069eb3edce89eeb9a4d04ba3cb5d2f966e2a43270e231a1b",
     "tests/conformance/http/generated/behaviors.yaml": "8d1f3b1fe23a4f3482e4a82a8f94817e31686d41c222a81904537d14e5b6db98",
-    "tests/conformance/http/generated/issued-completion.yaml": "8c3ca2865ad5e8413c0d2b51ce7cb959e6bbdef4858b7578916763752f8d5377",
-    "tests/conformance/http/generated/issued-readback.yaml": "9832b007be7e254f2523a7285268164090e2d7777ac1ebe1dd8db2ed29d78811",
+    "tests/conformance/http/generated/issued-completion.yaml": "1ded149acd6a57986edbbbc5983055006ef526a1c301dc916b426d569eefd639",
+    "tests/conformance/http/generated/issued-readback.yaml": "6f40b72f93bc2fd0fbf37b1cfbbe2b4bbdda31b66fe909acf939ed9ce47b6ce6",
     "tests/conformance/http/generated/issued-rejection.yaml": "57c2fa8be04f38a44b7969835371204a1deae94bac52fc5084a48dc5aa88bbb0",
     "tests/conformance/http/generated/tables.yaml": "a0cd11e908be14e6b9833d3ba361139d2ee401b6d1057d07e5238b873821eac9",
     "tests/conformance/http/state-document-isolated.yaml": "36bd8decd4a44799689e4539334387ce273c4db3b1595ed1a3bbf1530485a914",
@@ -41,7 +41,7 @@
     "tests/conformance/http/statement-immutability-isolated.yaml": "c42c15eb423bd0bceaa9a1cad78a86239a626ba33ff2bccd9b777fe7e30da0a6",
     "tests/conformance/http/statement-normalization-isolated.yaml": "bbfde5546aeae935274f0da22042e196026cd5ef90e2c3263ea42e9a1f579603",
     "tests/conformance/http/statement-object-validation-isolated.yaml": "c9c7d56b88bd5401389320d388542445b4ab8ac75e1d3a2c1f4a14167100cb9f",
-    "tests/conformance/http/statement-query-filter-isolated.yaml": "18a24f9832f49d0ad01367139dfe72f186bf5b4704b75b4251edc483f4d82ea0",
+    "tests/conformance/http/statement-query-filter-isolated.yaml": "546b10e0aecbec0098626609ded50d9128f6315971b9e1e198f0c5de8f089fdf",
     "tests/conformance/http/statement-query-validation.yaml": "9e49dc520bb8c38a7cb35f8b74d0ed53f973dd5413511a58efafb741f2e7db6e",
     "tests/conformance/http/statement-reference-isolated.yaml": "531f9b62f54a8b8e2551c5a8bf44c58d212eb2cad5355417eb3e07ab0977faea",
     "tests/conformance/http/statement-result-validation-isolated.yaml": "0c64bb7575b0a09d6fc721ceb7478d6904f9bc05583e4d41f0fbaa4be01ec37d",
@@ -1160,15 +1160,14 @@
     {
       "suite": "xapi-lrs-issued-completion",
       "case": "issued-completion-root-duration-comma-batch",
-      "case_sha256": "ca9840abecee8844942ef3d9d66332be200944b37c725571fd0d8d42bb1fd6be",
+      "case_sha256": "84707da200b68364c10e728872a501500e2a254bd5f91fe250b274b287e12b8d",
       "backends": [
         "memory",
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 400",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 400"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"
@@ -1176,15 +1175,14 @@
     {
       "suite": "xapi-lrs-issued-completion",
       "case": "issued-completion-root-duration-comma-post",
-      "case_sha256": "10a6a9a603ffcfa77ea7360f1806773a732ad94da1e2df22259d5b46928392c8",
+      "case_sha256": "5f69c56cb02c7e2c72ff581c91672b1617e6a0901dd640ece9e55365ec7bd0e7",
       "backends": [
         "memory",
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 400",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 400"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"
@@ -1208,15 +1206,14 @@
     {
       "suite": "xapi-lrs-issued-completion",
       "case": "issued-completion-sub-duration-comma-batch",
-      "case_sha256": "087e780470abd7519dc60696f7ae81c614ae955bb49f3bae446e15a8c3805397",
+      "case_sha256": "0d5f22efffcda11642b2d864c79f23abd46a4e6273f239779414f7929af2477d",
       "backends": [
         "memory",
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 400",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 400"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"
@@ -1224,15 +1221,14 @@
     {
       "suite": "xapi-lrs-issued-completion",
       "case": "issued-completion-sub-duration-comma-post",
-      "case_sha256": "fa211dbba97b4510e4f0f24761ca18803e1bd90a7ea2fe95000484e9c994eef7",
+      "case_sha256": "9cdcfc94efa114b976f7b12987cf329eb7b55d51ddd86acc73c3ba41e6c8b6e3",
       "backends": [
         "memory",
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 400",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 400"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"
@@ -1256,7 +1252,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-en-GB-batch",
-      "case_sha256": "9675c916c1e29fda486489e1aaa462109f0a266ca38136d026c4ee786f5d88d7",
+      "case_sha256": "fb8ddaf9fd585c678a1c7a9623677e132b324d70db26a75d68b3e3c8eb03cae5",
       "backends": [
         "memory",
         "postgres"
@@ -1271,7 +1267,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-en-GB-post",
-      "case_sha256": "11f3e921ba9030d5a05b440b94d9631209c0deb5453f36b5342a3afc5fb3db70",
+      "case_sha256": "8cc3e7227bcd783eafe9ea2f14d8724834e74204b8c5f418e5c166e34b3f50db",
       "backends": [
         "memory",
         "postgres"
@@ -1301,7 +1297,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-ja-batch",
-      "case_sha256": "e3921dfa85957524c405495cfbcebf14daab72d6c3c4839218dd7cf5bd70e8f0",
+      "case_sha256": "3ccd5377f3c325f8d9065dc16a5d17055b21451a0184e6557f43f1b690551d3f",
       "backends": [
         "memory",
         "postgres"
@@ -1316,7 +1312,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-ja-post",
-      "case_sha256": "d5b6e755e96e29587c65f1045d90d1e79dd8a4934284ccc517dc79733b836547",
+      "case_sha256": "c1a618c04804510823f5b81c909747062007e0db1a21eea5971ee16be94ea763",
       "backends": [
         "memory",
         "postgres"
@@ -1346,7 +1342,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-omitted-batch",
-      "case_sha256": "4c66843089d4c1b3b23d6dcc9d4eecdcf9a2a14edc16326a253b8269dabaa033",
+      "case_sha256": "c2343bfc9b3655d5d32fa0831e409ddf0e14994ffcafe4b4b3ee755348bf9637",
       "backends": [
         "memory",
         "postgres"
@@ -1361,7 +1357,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-root-omitted-post",
-      "case_sha256": "7e87339b4db1467ba922cc8e58d21c702026f7891087c50d480acd655de563be",
+      "case_sha256": "1fdc6d3db118e4bf502f84d083e67d063aa1154abef39df7f8f2f31603f5b827",
       "backends": [
         "memory",
         "postgres"
@@ -1391,7 +1387,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-en-GB-batch",
-      "case_sha256": "25f55365a41815232533d85b89c3b89b2d36d98a313084a08a2f653b51b21ed8",
+      "case_sha256": "8bf625a9d45844ccc3886a4ae1ba2ca0218820f96a12f667f9f3a736a2a16f2b",
       "backends": [
         "memory",
         "postgres"
@@ -1406,7 +1402,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-en-GB-post",
-      "case_sha256": "7f32608ee122e47af04d418bd76762aad2cb1f7d7330df48605fb2423bcad5a3",
+      "case_sha256": "a73ec183764ae8b9b477b77a304fcc4feae1678fecb81b47a52e7515f7096d73",
       "backends": [
         "memory",
         "postgres"
@@ -1436,7 +1432,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-ja-batch",
-      "case_sha256": "23db19fca368b9f0bee7247024e46e6b063af3517430d7aef2dda48fccd20366",
+      "case_sha256": "4cf44f37ee19db059764299bca5530d36458c10365ba47c180702b180e222d30",
       "backends": [
         "memory",
         "postgres"
@@ -1451,7 +1447,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-ja-post",
-      "case_sha256": "9af10da1d87d1cd0da3aca639845346c0014d6e1865a0b83bbf95d8e4339d81c",
+      "case_sha256": "579db69292e096ee8e25048ceee8ce8969d3b18bf4728de4c65810b411b9042f",
       "backends": [
         "memory",
         "postgres"
@@ -1481,7 +1477,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-omitted-batch",
-      "case_sha256": "f63199c9bea038926fda1fcde8f54bda7bb8d5ecf113037d1eaad6b116e27f99",
+      "case_sha256": "c1696ef216ecb983aeffccda5bd0755c55d13c96c6d7a1bf0cfc536e4ff6b7e8",
       "backends": [
         "memory",
         "postgres"
@@ -1496,7 +1492,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-data-meaning-sub-omitted-post",
-      "case_sha256": "bfef906bc6bd400cc07cbe871b2090493a1c7457d5adba57ef8d4b2291624253",
+      "case_sha256": "80ffd8f66bac47688b48a04bc2e1eb71cdc14036dfe6c46412f768f233739170",
       "backends": [
         "memory",
         "postgres"
@@ -1526,7 +1522,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-object-result-score-raw-accepted-batch",
-      "case_sha256": "ad3978d07a1bd83b9e787bf9fdd5eb59fe64e2f8ff9548c45c30657932b2ddf0",
+      "case_sha256": "750220e5e47e34ee9d9e5062b4944bc0fe92edf7ec76c87cbe6b44c31dfea93d",
       "backends": [
         "memory",
         "postgres"
@@ -1541,7 +1537,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-object-result-score-raw-accepted-post",
-      "case_sha256": "eeee9d2b69b661c8ed8f3c3054135cd3db54c1afe37fffa97d3b5d19cd38b40f",
+      "case_sha256": "d685cfcaf2d5b3e0967fafcd8056a6c044aa3d6efedd5395bb2138d67a16e6cb",
       "backends": [
         "memory",
         "postgres"
@@ -1571,7 +1567,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-object-result-score-scaled-accepted-batch",
-      "case_sha256": "0c4a041e0768688ef2961f573bbdb4a9bbee824b6000d0d595cefe4748c00d7d",
+      "case_sha256": "8788f589362458c98510a318b5d3b656ed2f3a53900873cdea97226207c1db31",
       "backends": [
         "memory",
         "postgres"
@@ -1586,7 +1582,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-object-result-score-scaled-accepted-post",
-      "case_sha256": "bdd2d09a1719505c9be05897b785c36cf1290b4c41dcb46f878eb8cd9486a07d",
+      "case_sha256": "a4067e3af49014009fc29e53f95e67ebf3a9e8e2f5762480148d8e1da6d8dfaf",
       "backends": [
         "memory",
         "postgres"
@@ -1616,7 +1612,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-result-score-raw-accepted-batch",
-      "case_sha256": "c22086433b51041b7eff32157a760b11d528584ee3ee2e20c40172eb3bfba1b3",
+      "case_sha256": "476234fc10342ae65a4ab01a6cc4aa8d43168826f735ffa80a327fd0542ae6d7",
       "backends": [
         "memory",
         "postgres"
@@ -1631,7 +1627,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-result-score-raw-accepted-post",
-      "case_sha256": "051f96c7ffc476a34e237ab3ef4676d64d1e4e378ecf4a701182e28f47ce5941",
+      "case_sha256": "02b06629ea3d8227c2d06ecce8a0b40eebfdbc8ca65f4ef87c507c037cf43b9e",
       "backends": [
         "memory",
         "postgres"
@@ -1661,7 +1657,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-result-score-scaled-accepted-batch",
-      "case_sha256": "9fe41c2f0c962a386a6dbe5ed2ca74f116b5c44a3de111dffdecd18fdce04317",
+      "case_sha256": "da7adaff8f55c1ad64ca1db04c7ea146ce14c0a3641254eafd36d292162de644",
       "backends": [
         "memory",
         "postgres"
@@ -1676,7 +1672,7 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-readback-score-result-score-scaled-accepted-post",
-      "case_sha256": "b9e88d0dac7a4b31f6ecfa8cf13e9c124b24f952f4bdaaa47d892d2b6a3dc02f",
+      "case_sha256": "b076f8e14203bd9cdb415241ff0a6e4053c704c3bf2557c36ac4aba53fee180f",
       "backends": [
         "memory",
         "postgres"
@@ -1706,14 +1702,13 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-utf8-valid-boundaries-batch",
-      "case_sha256": "abba1dcb426d1037933751229804fa263eb60ee5903f6713d3a39968f8def208",
+      "case_sha256": "964d007e9ecd23c68797350db1af761c0e4a6e287250c109f003e6aae22e253e",
       "backends": [
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 500",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 500"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"
@@ -1721,14 +1716,13 @@
     {
       "suite": "xapi-lrs-issued-readback",
       "case": "issued-utf8-valid-boundaries-post",
-      "case_sha256": "2d74bfffd12785eae6372639e45b3a0586b7a368e36a3edde36588438fd4a6bd",
+      "case_sha256": "0e29cfb04380988545699543f3d7a284767eb1a006cb4df96d6756f3114a439b",
       "backends": [
         "postgres"
       ],
       "outcome": "failed",
       "failures": [
-        "step store: expected status 200, received 500",
-        "step store: expected JSON pointer /0 for capture issued_id"
+        "step store: expected status 200, received 500"
       ],
       "not_run_reasons": [],
       "finding": "R5-01"

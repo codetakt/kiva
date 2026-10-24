@@ -51,6 +51,9 @@ pub(super) enum Check {
     JsonPreservation {
         expected: super::lossless_json::Json,
     },
+    StatementIds {
+        expected: Vec<String>,
+    },
     StatementQuery {
         stored_captures: BTreeMap<String, String>,
         #[serde(default)]
@@ -170,6 +173,11 @@ impl Check {
     }
     pub(super) fn validate(&self) -> Result<(), String> {
         match self {
+            Self::StatementIds { expected } => {
+                if expected.is_empty() || expected.iter().any(|id| !standard_uuid(id)) {
+                    return Err("statement-ids requires a nonempty list of submitted UUIDs".into());
+                }
+            }
             Self::StatementQuery {
                 stored_captures, ..
             } => {
@@ -268,6 +276,11 @@ impl Check {
         bytes: &[u8],
         captures: &BTreeMap<String, String>,
     ) -> Vec<String> {
+        // The POST ID-array contract applies only to a successful response.
+        // A rejected write is diagnosed by the independent status expectation.
+        if matches!(self, Self::StatementIds { .. }) && status != 200 {
+            return Vec::new();
+        }
         if let Self::JsonShape {
             status: Some(expected),
             ..
@@ -329,6 +342,42 @@ impl Check {
         Vec::new()
     }
 
+    /// Check the observed union without imposing a per-page limit on the union.
+    pub(super) fn evaluate_collected_query(
+        &self,
+        statements: &[Value],
+        more: Option<&Value>,
+        captures: &BTreeMap<String, String>,
+    ) -> Vec<String> {
+        let Self::StatementQuery {
+            stored_captures,
+            since_capture,
+            until_capture,
+            descending,
+            ..
+        } = self
+        else {
+            return Vec::new();
+        };
+        let check = Self::StatementQuery {
+            stored_captures: stored_captures.clone(),
+            since_capture: since_capture.clone(),
+            until_capture: until_capture.clone(),
+            descending: *descending,
+            limit: 0,
+        };
+        let mut document = serde_json::json!({"statements":statements});
+        if let Some(more) = more {
+            document["more"] = more.clone();
+        }
+        check.evaluate(
+            200,
+            &HeaderMap::new(),
+            document.to_string().as_bytes(),
+            captures,
+        )
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "One dispatch preserves a single JSON parse for all assertion kinds"
@@ -374,6 +423,20 @@ impl Check {
         let json: Value = serde_json::from_slice(bytes)
             .map_err(|error| format!("response relationship requires JSON: {error}"))?;
         match self {
+            Self::StatementIds { expected } => {
+                let actual = json
+                    .as_array()
+                    .ok_or("POST response must be a UUID array")?;
+                if actual.len() != expected.len()
+                    || actual.iter().zip(expected).any(|(value, id)| {
+                        value.as_str().is_none_or(|value| {
+                            !standard_uuid(value) || !value.eq_ignore_ascii_case(id)
+                        })
+                    })
+                {
+                    return Err("POST response IDs differ from submitted Statement IDs".into());
+                }
+            }
             Self::StatementQuery {
                 stored_captures,
                 since_capture,

@@ -9,11 +9,150 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from run_lrs_procedures import Executor, IFI
+from run_lrs_procedures import Executor, IFI, Reply
 from lrs_preservation import preservation, snapshot_equal
 
 
 class ResponseTypeTests(unittest.TestCase):
+    document_procedure = 'document-updated-time-boundary'
+
+    def test_mime_nested_attachment_is_a_failed_response_without_aborting_probes(self):
+        for mode in ['valid','nested','corrupted','interrupted']:
+            with self.subTest(mode=mode), TemporaryDirectory() as directory:
+                executor=self.person_executor(directory,{},False)
+                executor.args.procedure=['mime-rfc-framing']
+                executor.read_visible=Mock(return_value={})
+                saved={}
+                def http(method,path,query=None,body=None,headers=None,raw=None,**kwargs):
+                    if method=='PUT':
+                        saved.update(raw=raw,media=headers['Content-Type'])
+                        return {'status':204}
+                    content=saved['raw']
+                    boundary=saved['media'].split('boundary=',1)[1].strip('"').encode()
+                    if mode=='nested':
+                        start=content.index(b'cOnTeNt-TyPe:')
+                        end=content.rindex(b'\r\n--'+boundary+b'--')
+                        content=(content[:start]+b'Content-Type: multipart/mixed; boundary=inner\r\n\r\n'
+                                 b'--inner\r\nContent-Type: application/octet-stream\r\n\r\npayload\r\n--inner--'
+                                 +content[end:])
+                    elif mode=='corrupted':
+                        content=content.replace(b'\x00binary\xff',b'\x00changed\xff')
+                    return Reply(status=200,headers={'content-type':saved['media']},body_hex=content.hex(),
+                                 incomplete_body=mode=='interrupted')
+                executor.http=Mock(side_effect=http)
+                self.assertEqual(self.execute(executor),1 if mode in ['nested','corrupted'] else 2)
+                checks={c['id']:c for c in executor.results['mime-rfc-framing']['checks']}
+                if mode=='interrupted':
+                    self.assertFalse(any(c['outcome']=='failed' for c in checks.values()))
+                    self.assertEqual(checks['execution-unavailable']['details']['kind'],'EvidenceUnavailable')
+                else:
+                    self.assertNotIn('execution-unavailable',checks)
+                    self.assertEqual(executor.http.call_count,4)
+                    for label in ['quoted','ordinary']:
+                        self.assertEqual(checks[label+'-returned-binary-hash']['outcome'],
+                                         'passed' if mode=='valid' else 'failed')
+                    self.assertEqual(checks['legal-folding-transfer-variations-full-rfc']['outcome'],'not-run')
+
+    def document_executor(self, directory, change=None, shared_clock=False):
+        root=Path(directory)
+        fixture=root/'fixture.json'
+        fixture.write_text(json.dumps({'axis':'bounded-control',
+            'host_clock_shared' if shared_clock else 'clock_control':True}))
+        runner=root/'runner'; runner.write_text('unused adapter fixture')
+        executor=Executor(SimpleNamespace(out=root, fixture=fixture, runner=runner,
+            endpoint='http://fixture.test', procedure=[self.document_procedure]))
+        executor.control=Mock()
+        reads={}; writes={}; deleted=False
+        def http(method, path, query=None, *args, **kwargs):
+            nonlocal deleted
+            key='stateId' if path=='/activities/state' else 'profileId'
+            if method=='PUT': writes[path]=writes.get(path,0)+1
+            if method=='DELETE': deleted=True
+            stamp='2026-10-06T00:00:03Z' if writes.get(path,0)>1 else '2026-10-06T00:00:01Z'
+            reply=Reply(status=200 if method=='GET' else 204, json=None,
+                headers={'last-modified':'Tue, 06 Oct 2026 00:00:0'+('3' if writes.get(path,0)>1 else '1')+' GMT'},
+                before=stamp, after='2026-10-06T00:00:04Z' if shared_clock and writes.get(path,0)>1 else stamp)
+            if method=='GET' and 'since' in query:
+                reads[path]=reads.get(path,0)+1
+                reply['json']=['clock'] if query['since']<'2026-10-06T00:00:03.750Z' else []
+                if change: change(path, reads[path], reply)
+            elif method=='GET':
+                reply['status']=404 if deleted and query.get(key)=='clock' else 200
+                reply['json']={'v':'sibling'} if query.get(key)=='preserved' else {'v':writes.get(path,0)}
+            return reply
+        executor.http=Mock(side_effect=http)
+        return executor
+
+    def test_document_equal_null_is_a_failed_response_and_later_checks_continue(self):
+        with TemporaryDirectory() as directory:
+            def change(path, index, reply):
+                if path=='/activities/state' and index==3: reply['json']=None
+            executor=self.document_executor(directory, change)
+            self.assertEqual(self.execute(executor),1)
+            report=json.loads((Path(directory)/'summary.json').read_text())
+            procedure=report['procedures'][self.document_procedure]
+            self.assertEqual(procedure['outcome'],'failed')
+            checks={c['id']:c['outcome'] for c in procedure['checks']}
+            self.assertEqual(checks['state-since-equal'],'failed')
+            self.assertNotIn('execution-unavailable',checks)
+            self.assertEqual(checks['activity-profile-since-equal'],'passed')
+            self.assertEqual(checks['state-delete-scope'],'passed')
+
+    def test_document_list_types_fail_for_every_family_and_boundary(self):
+        families=[('state','/activities/state'), ('agent-profile','/agents/profile'),
+                  ('activity-profile','/activities/profile')]
+        for family,path in families:
+            for index,label in enumerate(['before','after','equal'],1):
+                for bad in [None, {}, 'clock', 42, True, ['clock',None], ['clock',[]], ['clock',{}], ['clock',42]]:
+                    with self.subTest(family=family,label=label,bad=bad), TemporaryDirectory() as directory:
+                        def change(p,i,reply):
+                            if (p,i)==(path,index): reply['json']=bad
+                        executor=self.document_executor(directory,change)
+                        self.assertEqual(self.execute(executor),1)
+                        checks={c['id']:c['outcome'] for c in executor.results[self.document_procedure]['checks']}
+                        self.assertEqual(checks[family+'-since-'+label],'failed')
+                        self.assertNotIn('execution-unavailable',checks)
+                        self.assertEqual(checks['state-delete-scope'],'passed')
+
+    def test_document_list_valid_shapes_retain_exclusive_since_semantics(self):
+        for index in [None,1,2,3]:
+            with self.subTest(index=index), TemporaryDirectory() as directory:
+                def change(path,i,reply):
+                    if path=='/activities/state' and i==index:
+                        reply['json']=[] if index==1 else ['clock']
+                executor=self.document_executor(directory,change)
+                self.assertEqual(self.execute(executor),0 if index is None else 1)
+                checks=executor.results[self.document_procedure]['checks']
+                self.assertFalse(any(c['id']=='execution-unavailable' for c in checks))
+
+    def test_document_shared_clock_probes_preserve_observed_shape_violations(self):
+        for invalid_index,interrupt in [(None,False),(1,False),(2,False),(3,False),(1,True)]:
+            with self.subTest(index=invalid_index,interrupt=interrupt), TemporaryDirectory() as directory:
+                def change(path,index,reply):
+                    if path!='/activities/state': return
+                    if index==invalid_index: reply['json']=None
+                    if index==2 and interrupt: reply['incomplete_body']=True
+                executor=self.document_executor(directory,change,shared_clock=True)
+                self.assertEqual(self.execute(executor),2 if invalid_index is None else 1)
+                checks=executor.results[self.document_procedure]['checks']
+                self.assertEqual(any(c['id']=='execution-unavailable' for c in checks),interrupt)
+                if invalid_index is not None:
+                    self.assertTrue(any(c['outcome']=='failed' for c in checks))
+
+    def test_document_list_interrupted_body_remains_unavailable(self):
+        for index in [1,2,3]:
+            with self.subTest(index=index), TemporaryDirectory() as directory:
+                def change(path,i,reply):
+                    if path=='/activities/state' and i==index: reply['incomplete_body']=True
+                executor=self.document_executor(directory,change)
+                self.assertEqual(self.execute(executor),2)
+                checks=executor.results[self.document_procedure]['checks']
+                self.assertFalse(any(c['outcome']=='failed' for c in checks))
+                unavailable=[c for c in checks if c['id']=='execution-unavailable']
+                self.assertEqual(len(unavailable),1)
+                self.assertEqual(unavailable[0]['details']['kind'],'EvidenceUnavailable')
+                self.assertFalse(unavailable[0]['details']['target_violation'])
+
     def test_http_decoding_retains_extension_duplicates_for_both_comparisons(self):
         original = {'result':{'extensions':{'urn:x':{'null':None}}}}
         for members, preserved in [('"null":null', True), ('"null":false,"null":null', False),

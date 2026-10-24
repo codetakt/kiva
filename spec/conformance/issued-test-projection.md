@@ -52,6 +52,20 @@ forms unsupported by a bounded parser. Preservation validates both operands befo
 deferring their comparison. A previously retrieved Statement violates the
 Consistent-Through disappearance guarantee only when the watermark is strictly
 later than its stored instant; equality does not establish that guarantee.
+Direct, list, continuation-page and multipart retrievals retain returned `stored`
+evidence under the effective credentials and selector. List results establish
+ordinary `statementId` visibility, not `voidedStatementId` visibility.
+
+For POSTs with submitted IDs, `statement-ids` checks the response UUID array in
+request order, allowing hexadecimal case differences. Readback uses the submitted
+IDs. Server-assigned IDs are captured only when absent from the submitted body,
+after checking the response array's size and UUID syntax.
+
+`statement-query` requires bounded continuation collection. Each page respects
+the requested limit; the observed union preserves captured stored times, query
+boundaries, uniqueness and order. Complete membership requires a terminal page.
+A missing continuation response is a violation; transport or page-budget limits
+remain unavailable, while already observed violations remain FAIL.
 
 Numeric preservation retains exact input information and permits legitimate
 binary32 endpoint serializations. A shared rounded bin alone is insufficient.

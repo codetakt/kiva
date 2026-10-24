@@ -18,8 +18,11 @@ def storage_case(name, body, transport, requirements, *, following_steps=()):
     query = {'statementId': identifier} if method == 'PUT' else {}
     write_expect = expect(204 if method == 'PUT' else 200)
     if method == 'POST':
-        write_expect['capture'] = {'issued_id': {'pointer': '/0'}}
-        identifier = '{{issued_id}}'
+        if 'id' in body:
+            write_expect['checks'] = [{'kind':'statement-ids', 'expected':[identifier]}]
+        else:
+            write_expect['capture'] = {'issued_id': {'pointer': '/0'}}
+            identifier = '{{issued_id}}'
     read = read_statement(identifier, checks=[{'kind':'json-preservation', 'expected':body}])
     read['request']['query']['format'] = 'exact'
     return case(name, requirements, steps=[step('store', request(method, '/statements', query, payload), write_expect), read, *following_steps])

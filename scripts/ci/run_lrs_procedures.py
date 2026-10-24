@@ -373,6 +373,17 @@ class Executor:
         reply=self.read(body)
         self.check('released-retrieval',reply['status']==200 and reply['json'].get('id')==body['id'])
 
+    def document_ids(self, reply, label):
+        """Record complete list-response defects before membership or more IO.
+
+        Reply still raises EvidenceUnavailable for interrupted bodies, whose
+        undecoded content is not evidence of a target type violation.
+        """
+        ids=reply['json']
+        valid=reply['status']==200 and isinstance(ids,list) and all(isinstance(item,str) for item in ids)
+        self.check(label+'-shape',valid,'Document ID listing must be HTTP 200 with a JSON array of strings')
+        return ids if valid else None
+
     def documents(self):
         for family,path,scope,key in self.docs:
             q={**scope,key:'clock'}
@@ -400,7 +411,8 @@ class Executor:
                     self.check(family+'-since-'+label,None,'No independently controlled or declared shared clock; sender timestamps are not target update bounds')
                     continue
                 reply=self.http('GET',path,{**scope,'since':since}, expected_statuses=(200,))
-                valid = reply['status']==200 and isinstance(reply['json'],list)
+                ids = self.document_ids(reply,family+'-since-'+label)
+                valid = ids is not None
                 # A shared clock only establishes an inclusive write interval.
                 # At the lower bound a coarse target clock may equal before;
                 # equality cannot establish the strict since-positive branch.
@@ -408,11 +420,13 @@ class Executor:
                 if label == 'before' and not exact:
                     since = (host_stamp(updated['before']) - dt.timedelta(seconds=1)).isoformat().replace('+00:00','Z')
                     reply=self.http('GET',path,{**scope,'since':since}, expected_statuses=(200,))
-                    valid = valid and reply['status']==200 and isinstance(reply['json'],list)
-                self.check(family+'-since-'+label,valid and ('clock' in reply['json'])==present,'Independent controlled instant or declared shared-clock write bounds; since is exclusive')
+                    ids = self.document_ids(reply,family+'-since-'+label+'-earlier')
+                    valid = valid and ids is not None
+                self.check(family+'-since-'+label,valid and ('clock' in ids)==present,'Independent controlled instant or declared shared-clock write bounds; since is exclusive')
             if self.fixture.get('clock_control'):
                 reply=self.http('GET',path,{**scope,'since':'2026-10-06T00:00:03.750Z'}, expected_statuses=(200,))
-                self.check(family+'-since-equal',reply['status']==200 and 'clock' not in reply['json'],'Equal timestamp is controlled independently of Last-Modified')
+                ids = self.document_ids(reply,family+'-since-equal')
+                self.check(family+'-since-equal',ids is not None and 'clock' not in ids,'Equal timestamp is controlled independently of Last-Modified')
             else:self.check(family+'-since-equal',None,'Cannot control exact subsecond updated time; HTTP-date is insufficient')
         _,path,scope,key=self.docs[0]
         sibling={**scope,'activityId':self.prefix+'/other-scope',key:'preserved'}
@@ -678,7 +692,10 @@ class Executor:
                 returned=self.http('GET','/statements',{'statementId':body['id'],'attachments':'true'}, expected_statuses=(200,))
                 message=BytesParser(policy=email.policy.default).parsebytes(('Content-Type: '+returned['headers'].get('content-type','')+'\r\nMIME-Version: 1.0\r\n\r\n').encode()+bytes.fromhex(returned['body_hex']))
                 output=list(message.iter_parts()) if message.is_multipart() else []
-                self.check(label+'-returned-binary-hash',len(output)==2 and hashlib.sha256(output[1].get_payload(decode=True)).hexdigest()==digest and output[1].get_payload(decode=True)==data)
+                decoded=[part.get_payload(decode=True) for part in output] if len(output)==2 and all(not part.is_multipart() for part in output) else []
+                valid=len(decoded)==2 and all(isinstance(payload,bytes) for payload in decoded)
+                self.check(label+'-returned-part-structure',valid,'Expected two leaf MIME parts with decodable byte payloads')
+                self.check(label+'-returned-binary-hash',valid and hashlib.sha256(decoded[1]).hexdigest()==digest and decoded[1]==data)
         self.check('legal-folding-transfer-variations-full-rfc',None,'These two witnesses do not close all MIME framing/transport classes')
 
     def limits(self):
