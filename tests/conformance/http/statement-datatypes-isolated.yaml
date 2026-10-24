@@ -250,11 +250,12 @@ cases:
               iso8601: true
             Last-Modified:
               present: true
-          json:
-            pointers:
-              /timestamp:
-                contains: '2025-01-01T00:00:00'
           checks:
+            - kind: json-time
+              pointer: /timestamp
+              expected: '2025-01-01T09:00:00+09:00'
+              utc: true
+              allow_truncation_or_rounding: true
             - kind: header-time
               header: Last-Modified
               equals_pointer: /stored
@@ -292,13 +293,18 @@ cases:
             timestamp: '{{kiva_now_plus_30s}}'
             version: 2.0.0
         expect:
+          # The source deliberately leaves the acceptable future margin open.
+          # Observe this probe's acceptance/rejection; the declared-margin
+          # procedure supplies the policy oracle. Preserve accepted values.
           status: 204
+          status_in: [400]
           headers:
             X-Experience-API-Version:
               equals: 2.0.0
             X-Experience-API-Consistent-Through:
               iso8601: true
       - id: get-statement
+        when_previous_status: 204
         request:
           method: GET
           path: /statements
@@ -498,105 +504,125 @@ cases:
                 type: string
   - id: statement-activity-filter-does-not-use-scheme-based-iri-equivalence
     requirements:
-      - xapi-lrs-4.2.7-iri-comparison
-      - xapi-lrs-4.1.6.1-statement-consistent-through
-      - xapi-lrs-4.1.6.1-statement-last-modified
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
+    - xapi-lrs-4.2.7-iri-comparison
+    - xapi-lrs-4.1.6.1-statement-consistent-through
+    - xapi-lrs-4.1.6.1-statement-last-modified
+    - xapi-lrs-4.1.7-version-header-every-response
+    - xapi-lrs-4.1.7-version-header-latest-patch
     safety:
       destructive: true
       requires_isolated_lrs: true
     steps:
-      - id: put-statement
-        request:
-          method: PUT
-          path: /statements
-          query:
-            statementId: 00000000-0000-4000-8000-000000000306
-          headers:
-            Content-Type: application/json
-            X-Experience-API-Version: 2.0.0
-          body:
-            id: 00000000-0000-4000-8000-000000000306
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-datatypes@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-            object:
-              objectType: Activity
-              id: http://example.org:80/kiva/conformance/activity/iri-default-port
-            version: 2.0.0
-        expect:
-          status: 204
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-      - id: get-statements-by-identical-activity-iri
-        request:
-          method: GET
-          path: /statements
-          query:
-            activity: http://example.org:80/kiva/conformance/activity/iri-default-port
-            limit: '10'
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          json:
-            pointers:
-              /statements:
-                contains:
-                  id: 00000000-0000-4000-8000-000000000306
-                  object:
-                    id: http://example.org:80/kiva/conformance/activity/iri-default-port
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              max_pointer: /statements
-              optional_if_empty: true
-            - kind: json-order
-              pointer: /statements
-              by: stored
-              descending: true
-      - id: get-statements-by-default-port-normalized-activity-iri
-        request:
-          method: GET
-          path: /statements
-          query:
-            activity: http://example.org/kiva/conformance/activity/iri-default-port
-            limit: '10'
-          headers:
-            Accept: application/json
-            X-Experience-API-Version: 2.0.0
-          await_retrieval_ms: 5000
-        expect:
-          status: 200
-          headers:
-            X-Experience-API-Version:
-              equals: 2.0.0
-            X-Experience-API-Consistent-Through:
-              iso8601: true
-          json:
-            pointers:
-              /statements:
-                not_contains:
-                  id: 00000000-0000-4000-8000-000000000306
-          checks:
-            - kind: header-time
-              header: Last-Modified
-              max_pointer: /statements
-              optional_if_empty: true
-            - kind: json-order
-              pointer: /statements
-              by: stored
-              descending: true
+    - id: put-statement
+      request:
+        method: PUT
+        path: /statements
+        query:
+          statementId: 00000000-0000-4000-8000-000000000306
+        headers:
+          Content-Type: application/json
+          X-Experience-API-Version: 2.0.0
+        body:
+          id: 00000000-0000-4000-8000-000000000306
+          actor:
+            objectType: Agent
+            mbox: mailto:kiva-conformance-datatypes@example.org
+          verb:
+            id: https://adlnet.gov/expapi/verbs/experienced
+          object:
+            objectType: Activity
+            id: http://example.org:80/kiva/conformance/activity/iri-default-port
+          version: 2.0.0
+      expect:
+        status: 204
+        headers:
+          X-Experience-API-Version:
+            equals: 2.0.0
+          X-Experience-API-Consistent-Through:
+            iso8601: true
+    - id: visible-put-statement-0
+      request:
+        method: GET
+        path: /statements
+        query:
+          statementId: 00000000-0000-4000-8000-000000000306
+        headers:
+          X-Experience-API-Version: 2.0.0
+        await_retrieval_ms: 5000
+      expect:
+        status: 200
+        headers:
+          X-Experience-API-Version:
+            equals: 2.0.0
+          X-Experience-API-Consistent-Through:
+            iso8601: true
+        json:
+          pointers:
+            /id:
+              equals: 00000000-0000-4000-8000-000000000306
+    - id: get-statements-by-identical-activity-iri
+      request:
+        method: GET
+        path: /statements
+        query:
+          activity: http://example.org:80/kiva/conformance/activity/iri-default-port
+          limit: '10'
+        headers:
+          Accept: application/json
+          X-Experience-API-Version: 2.0.0
+        await_retrieval_ms: 5000
+      expect:
+        status: 200
+        headers:
+          X-Experience-API-Version:
+            equals: 2.0.0
+          X-Experience-API-Consistent-Through:
+            iso8601: true
+        json:
+          pointers:
+            /statements:
+              contains:
+                id: 00000000-0000-4000-8000-000000000306
+                object:
+                  id: http://example.org:80/kiva/conformance/activity/iri-default-port
+        checks:
+        - kind: header-time
+          header: Last-Modified
+          max_pointer: /statements
+          optional_if_empty: true
+        - kind: json-order
+          pointer: /statements
+          by: stored
+          descending: true
+    - id: get-statements-by-default-port-normalized-activity-iri
+      request:
+        method: GET
+        path: /statements
+        query:
+          activity: http://example.org/kiva/conformance/activity/iri-default-port
+          limit: '10'
+        headers:
+          Accept: application/json
+          X-Experience-API-Version: 2.0.0
+        await_retrieval_ms: 5000
+      expect:
+        status: 200
+        headers:
+          X-Experience-API-Version:
+            equals: 2.0.0
+          X-Experience-API-Consistent-Through:
+            iso8601: true
+        json:
+          pointers:
+            /statements:
+              not_contains:
+                id: 00000000-0000-4000-8000-000000000306
+        checks:
+        - kind: header-time
+          header: Last-Modified
+          max_pointer: /statements
+          optional_if_empty: true
+        - kind: json-order
+          pointer: /statements
+          by: stored
+          descending: true

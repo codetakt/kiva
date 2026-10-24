@@ -3,546 +3,578 @@ suite:
   standard: IEEE/ISO/IEC 39274-1-1-2025
   description: Destructive Statement validation rejection checks for disposable isolated LRS targets.
 cases:
-  - id: statement-post-rejects-duplicate-json-properties
-    requirements:
-      - xapi-lrs-4.2.1-statement-duplicate-properties
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      raw_body: '{"id":"00000000-0000-4000-8000-000000000201","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-validation@example.org"},"actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-duplicate@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/duplicate-properties"},"version":"2.0.0"}'
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-top-level-extra-property
-    requirements:
-      - xapi-lrs-4.2.1-statement-extra-properties
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000202
+- id: statement-post-rejects-duplicate-json-properties
+  requirements:
+  - xapi-lrs-4.2.1-statement-duplicate-properties
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    raw_body: '{"id":"00000000-0000-4000-8000-000000000201","actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-validation@example.org"},"actor":{"objectType":"Agent","mbox":"mailto:kiva-conformance-duplicate@example.org"},"verb":{"id":"https://adlnet.gov/expapi/verbs/experienced"},"object":{"objectType":"Activity","id":"https://example.org/kiva/conformance/activity/duplicate-properties"},"version":"2.0.0"}'
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-top-level-extra-property
+  requirements:
+  - xapi-lrs-4.2.1-statement-extra-properties
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000202
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/extra-property
+      kivaExtraOutsideExtensions: true
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-extension-key-that-is-not-iri
+  requirements:
+  - xapi-lrs-4.2.7-extension-key-iri
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000203
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-extension-key
+      context:
+        extensions:
+          not-an-iri: value
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-invalid-language-map-key
+  requirements:
+  - xapi-lrs-4.2.7-language-tags
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000204
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+        display:
+          en-abcdefghi: invalid language tag
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-language-tag
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-invalid-duration-format
+  requirements:
+  - xapi-lrs-4.2.7-duration-format
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000205
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-duration
+      result:
+        duration: not-a-duration
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-timepoint-like-duration
+  requirements:
+  - xapi-lrs-4.2.7-duration-format
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000206
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/timepoint-duration
+      result:
+        duration: '2025-01-01T00:00:00Z'
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-invalid-interaction-type
+  requirements:
+  - xapi-lrs-4.2.4.2-interaction-type
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000207
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/answered
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-interaction-type
+        definition:
+          interactionType: invalid-interaction-type
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-voiding-verb-with-non-statementref-object
+  requirements:
+  - xapi-lrs-4.2.5-voided-verb-rejection
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000208
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: http://adlnet.gov/expapi/verbs/voided
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-voiding-object
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-actor-with-multiple-ifis
+  requirements:
+  - xapi-lrs-4.2.4.2-actor-single-ifi
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000209
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+        account:
+          homePage: https://example.org/kiva/conformance/accounts
+          name: duplicate-ifi
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/multiple-ifis
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-group-member-that-is-group
+  requirements:
+  - xapi-lrs-4.2.4.2-no-group-member-group
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000210
+      actor:
+        objectType: Group
+        member:
+        - objectType: Group
+          mbox: mailto:kiva-conformance-nested-group@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/group-member-group
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-nested-substatement
+  requirements:
+  - xapi-lrs-4.2.4.2-no-nested-substatement
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000211
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: SubStatement
         actor:
           objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/extra-property
-        kivaExtraOutsideExtensions: true
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-extension-key-that-is-not-iri
-    requirements:
-      - xapi-lrs-4.2.7-extension-key-iri
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000203
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-extension-key
-        context:
-          extensions:
-            not-an-iri: value
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-invalid-language-map-key
-    requirements:
-      - xapi-lrs-4.2.7-language-tags
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000204
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-          display:
-            en-abcdefghi: invalid language tag
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-language-tag
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-invalid-duration-format
-    requirements:
-      - xapi-lrs-4.2.7-duration-format
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000205
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-duration
-        result:
-          duration: not-a-duration
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-timepoint-like-duration
-    requirements:
-      - xapi-lrs-4.2.7-duration-format
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000206
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/timepoint-duration
-        result:
-          duration: '2025-01-01T00:00:00Z'
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-invalid-interaction-type
-    requirements:
-      - xapi-lrs-4.2.4.2-interaction-type
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000207
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/answered
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-interaction-type
-          definition:
-            interactionType: invalid-interaction-type
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-voiding-verb-with-non-statementref-object
-    requirements:
-      - xapi-lrs-4.2.5-voided-verb-rejection
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000208
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: http://adlnet.gov/expapi/verbs/voided
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-voiding-object
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-actor-with-multiple-ifis
-    requirements:
-      - xapi-lrs-4.2.4.2-actor-single-ifi
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000209
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-          account:
-            homePage: https://example.org/kiva/conformance/accounts
-            name: duplicate-ifi
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/multiple-ifis
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-group-member-that-is-group
-    requirements:
-      - xapi-lrs-4.2.4.2-no-group-member-group
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000210
-        actor:
-          objectType: Group
-          member:
-            - objectType: Group
-              mbox: mailto:kiva-conformance-nested-group@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/group-member-group
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-nested-substatement
-    requirements:
-      - xapi-lrs-4.2.4.2-no-nested-substatement
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000211
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
+          mbox: mailto:kiva-conformance-substatement@example.org
         verb:
           id: https://adlnet.gov/expapi/verbs/experienced
         object:
           objectType: SubStatement
           actor:
             objectType: Agent
-            mbox: mailto:kiva-conformance-substatement@example.org
+            mbox: mailto:kiva-conformance-nested-substatement@example.org
           verb:
             id: https://adlnet.gov/expapi/verbs/experienced
           object:
-            objectType: SubStatement
-            actor:
-              objectType: Agent
-              mbox: mailto:kiva-conformance-nested-substatement@example.org
-            verb:
-              id: https://adlnet.gov/expapi/verbs/experienced
-            object:
-              objectType: Activity
-              id: https://example.org/kiva/conformance/activity/nested-substatement
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-invalid-actor-type
-    requirements:
-      - xapi-lrs-4.2.1-statement-type-validation
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000212
-        actor: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-actor-type
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-invalid-verb-iri
-    requirements:
-      - xapi-lrs-4.2.1-statement-invalid-iris
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000213
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: not-an-absolute-iri
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/invalid-verb-iri
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-missing-required-actor
-    requirements:
-      - xapi-lrs-4.2.1-statement-required-null-case
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000214
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/missing-actor
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-null-required-verb
-    requirements:
-      - xapi-lrs-4.2.1-statement-required-null-case
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: 00000000-0000-4000-8000-000000000215
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb: null
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/null-verb
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
-  - id: statement-post-rejects-non-uuid-statement-id
-    requirements:
-      - xapi-lrs-4.2.7-uuid-string
-      - xapi-lrs-4.1.5-error-most-appropriate
-      - xapi-lrs-4.1.7-version-header-every-response
-      - xapi-lrs-4.1.7-version-header-latest-patch
-    safety:
-      destructive: true
-      requires_isolated_lrs: true
-    request:
-      method: POST
-      path: /statements
-      headers:
-        Content-Type: application/json
-        X-Experience-API-Version: 2.0.0
-      body:
-        id: not-a-uuid
-        actor:
-          objectType: Agent
-          mbox: mailto:kiva-conformance-validation@example.org
-        verb:
-          id: https://adlnet.gov/expapi/verbs/experienced
-        object:
-          objectType: Activity
-          id: https://example.org/kiva/conformance/activity/non-uuid-id
-        version: 2.0.0
-    expect:
-      status: 400
-      headers:
-        X-Experience-API-Version:
-          equals: 2.0.0
-        X-Experience-API-Consistent-Through:
-          iso8601: true
+            objectType: Activity
+            id: https://example.org/kiva/conformance/activity/nested-substatement
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-invalid-actor-type
+  requirements:
+  - xapi-lrs-4.2.1-statement-type-validation
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000212
+      actor: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-actor-type
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-invalid-verb-iri
+  requirements:
+  - xapi-lrs-4.2.1-statement-invalid-iris
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000213
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: not-an-absolute-iri
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/invalid-verb-iri
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-missing-required-actor
+  requirements:
+  - xapi-lrs-4.2.1-statement-required-null-case
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000214
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/missing-actor
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-null-required-verb
+  requirements:
+  - xapi-lrs-4.2.1-statement-required-null-case
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-000000000215
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb: null
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/null-verb
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-non-uuid-statement-id
+  requirements:
+  - xapi-lrs-4.2.7-uuid-string
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: not-a-uuid
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: https://adlnet.gov/expapi/verbs/experienced
+      object:
+        objectType: Activity
+        id: https://example.org/kiva/conformance/activity/non-uuid-id
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true
+- id: statement-post-rejects-voiding-statementref-without-id
+  requirements:
+  - xapi-lrs-4.2.5-voided-verb-rejection
+  - xapi-lrs-4.1.5-error-most-appropriate
+  - xapi-lrs-4.1.7-version-header-every-response
+  - xapi-lrs-4.1.7-version-header-latest-patch
+  safety:
+    destructive: true
+    requires_isolated_lrs: true
+  request:
+    method: POST
+    path: /statements
+    headers:
+      Content-Type: application/json
+      X-Experience-API-Version: 2.0.0
+    body:
+      id: 00000000-0000-4000-8000-00000000f105
+      actor:
+        objectType: Agent
+        mbox: mailto:kiva-conformance-validation@example.org
+      verb:
+        id: http://adlnet.gov/expapi/verbs/voided
+      object:
+        objectType: StatementRef
+      version: 2.0.0
+  expect:
+    status: 400
+    headers:
+      X-Experience-API-Version:
+        equals: 2.0.0
+      X-Experience-API-Consistent-Through:
+        iso8601: true

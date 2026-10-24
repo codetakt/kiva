@@ -57,12 +57,34 @@ standard `/about` resource. It also sets the Statement body limit high enough
 for normal multipart and signed-Statement fixtures while keeping the generated
 oversized probe deterministic.
 
+The profile schema also accepts two declarations based on independent fixture
+evidence:
+
+- `declared-parameter-vocabulary`: `contexts` records a method, path, evidence
+  and nonempty `unrecognized` parameter list. A rejection response cannot
+  itself establish that the parameter is unknown to the target.
+- `declared-resource-absence`: `case_evidence` maps each exact case ID to
+  independent evidence that all negative selectors are absent for the request
+  credentials immediately before and throughout that case. A fresh-server
+  label or the response under test is insufficient. The runner checks evidence
+  availability; fixture validity and integration are separate later work.
+
+The case validator and report format additionally recognize
+`signature-validation-context`. It is a requirement-only name: the current
+profile schema cannot declare it and the runner does not supply its provider.
+Recognizing its name does not make signature-validation cases executable.
+
+The Python oracle controls compare the five prerequisite names in the Rust
+validator, Python case-matrix reporter and report schema. They also check that
+the four declarable profile types exclude the signature prerequisite. This
+guards duplicated vocabularies; it does not add a provider or certify fixtures.
+
 ## Runner Behavior
 
 Cases that need these fixtures declare `requires_endpoint_profiles`. Validation
 does not require a profile file, so the suite remains statically checkable in
-CI. HTTP execution fails a profile-sensitive case before sending requests if
-the required profile is missing.
+CI. A case with an unavailable required profile is NOT-RUN before sending any
+requests; it does not become a failed LRS observation.
 
 The runner exposes profile values as case-local captures:
 

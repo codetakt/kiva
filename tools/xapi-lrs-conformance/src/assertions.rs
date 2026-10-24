@@ -7,10 +7,11 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use iri_string::types::IriReferenceStr;
 use reqwest::header::HeaderMap;
 use serde::Deserialize;
 use serde_json::Value;
-use sha2::{Digest, Sha256, Sha384, Sha512};
+use sha2::{Digest, Sha224, Sha256, Sha384, Sha512};
 use time::{
     OffsetDateTime,
     format_description::well_known::{Iso8601, Rfc3339},
@@ -44,6 +45,25 @@ pub(super) enum Check {
         capture: String,
         #[serde(default)]
         not_equal: bool,
+        #[serde(default)]
+        agent_identity: bool,
+    },
+    JsonPreservation {
+        expected: super::lossless_json::Json,
+    },
+    StatementIds {
+        expected: Vec<String>,
+    },
+    StatementQuery {
+        stored_captures: BTreeMap<String, String>,
+        #[serde(default)]
+        since_capture: Option<String>,
+        #[serde(default)]
+        until_capture: Option<String>,
+        #[serde(default)]
+        descending: bool,
+        #[serde(default)]
+        limit: usize,
     },
     JsonOrder {
         pointer: String,
@@ -69,7 +89,7 @@ pub(super) enum Check {
     },
     NumericPrecision {
         pointer: String,
-        expected: f64,
+        expected: Value,
     },
     LanguageMaps {
         #[serde(default)]
@@ -119,6 +139,23 @@ pub(super) struct Shape {
 
 impl Check {
     pub(super) fn validate_captures(&self, names: &BTreeSet<String>) -> Result<(), String> {
+        if let Self::StatementQuery {
+            stored_captures,
+            since_capture,
+            until_capture,
+            ..
+        } = self
+        {
+            for name in stored_captures
+                .values()
+                .chain(since_capture.iter())
+                .chain(until_capture.iter())
+            {
+                if !names.contains(name) {
+                    return Err(format!("undefined check capture {name}"));
+                }
+            }
+        }
         let name = match self {
             Self::JsonTime {
                 equals_capture: Some(name),
@@ -136,6 +173,20 @@ impl Check {
     }
     pub(super) fn validate(&self) -> Result<(), String> {
         match self {
+            Self::StatementIds { expected } => {
+                if expected.is_empty() || expected.iter().any(|id| !standard_uuid(id)) {
+                    return Err("statement-ids requires a nonempty list of submitted UUIDs".into());
+                }
+            }
+            Self::StatementQuery {
+                stored_captures, ..
+            } => {
+                if stored_captures.is_empty() {
+                    return Err(
+                        "statement-query needs independently retrieved fixture timestamps".into(),
+                    );
+                }
+            }
             Self::HeaderTime {
                 header,
                 equals_pointer,
@@ -187,8 +238,8 @@ impl Check {
             }
             Self::NumericPrecision { pointer, expected } => {
                 validate_pointer(pointer)?;
-                if !expected.is_finite() {
-                    return Err("expected number must be finite".into());
+                if !expected.is_number() {
+                    return Err("expected value must be a JSON number".into());
                 }
             }
             Self::Bytes { hex } => {
@@ -205,6 +256,15 @@ impl Check {
                 return Err("status-body requires a valid HTTP status".into());
             }
             Self::StatusBody { .. } => {}
+            Self::JsonPreservation { expected } => {
+                if !expected.is_object()
+                    || ["actor", "verb", "object"]
+                        .iter()
+                        .any(|key| expected.get(key).is_none())
+                {
+                    return Err("json-preservation requires a submitted Statement object".into());
+                }
+            }
         }
         Ok(())
     }
@@ -216,6 +276,11 @@ impl Check {
         bytes: &[u8],
         captures: &BTreeMap<String, String>,
     ) -> Vec<String> {
+        // The POST ID-array contract applies only to a successful response.
+        // A rejected write is diagnosed by the independent status expectation.
+        if matches!(self, Self::StatementIds { .. }) && status != 200 {
+            return Vec::new();
+        }
         if let Self::JsonShape {
             status: Some(expected),
             ..
@@ -239,6 +304,78 @@ impl Check {
             .err()
             .into_iter()
             .collect()
+    }
+
+    /// Preserve obligations decidable from received headers when the body is unavailable.
+    pub(super) fn evaluate_without_body(&self, headers: &HeaderMap) -> Vec<String> {
+        let Self::HeaderTime {
+            header,
+            max_pointer,
+            optional_if_empty,
+            ..
+        } = self
+        else {
+            return Vec::new();
+        };
+        // Missing optional max(empty) is not a definite violation without the
+        // array. A supplied header must still have valid HTTP-date syntax.
+        if max_pointer.is_some() && *optional_if_empty && !headers.contains_key(header.as_str()) {
+            return Vec::new();
+        }
+        header_time(headers, header).err().into_iter().collect()
+    }
+
+    /// A declared `StatementResult` order also constrains the observed page prefix.
+    pub(super) fn evaluate_collected_order(&self, statements: &[Value]) -> Vec<String> {
+        if let Self::JsonOrder {
+            pointer,
+            by,
+            descending,
+        } = self
+            && pointer == "/statements"
+        {
+            return json_order(statements, pointer, by, *descending)
+                .err()
+                .into_iter()
+                .collect();
+        }
+        Vec::new()
+    }
+
+    /// Check the observed union without imposing a per-page limit on the union.
+    pub(super) fn evaluate_collected_query(
+        &self,
+        statements: &[Value],
+        more: Option<&Value>,
+        captures: &BTreeMap<String, String>,
+    ) -> Vec<String> {
+        let Self::StatementQuery {
+            stored_captures,
+            since_capture,
+            until_capture,
+            descending,
+            ..
+        } = self
+        else {
+            return Vec::new();
+        };
+        let check = Self::StatementQuery {
+            stored_captures: stored_captures.clone(),
+            since_capture: since_capture.clone(),
+            until_capture: until_capture.clone(),
+            descending: *descending,
+            limit: 0,
+        };
+        let mut document = serde_json::json!({"statements":statements});
+        if let Some(more) = more {
+            document["more"] = more.clone();
+        }
+        check.evaluate(
+            200,
+            &HeaderMap::new(),
+            document.to_string().as_bytes(),
+            captures,
+        )
     }
 
     #[expect(
@@ -286,35 +423,208 @@ impl Check {
         let json: Value = serde_json::from_slice(bytes)
             .map_err(|error| format!("response relationship requires JSON: {error}"))?;
         match self {
+            Self::StatementIds { expected } => {
+                let actual = json
+                    .as_array()
+                    .ok_or("POST response must be a UUID array")?;
+                if actual.len() != expected.len()
+                    || actual.iter().zip(expected).any(|(value, id)| {
+                        value.as_str().is_none_or(|value| {
+                            !standard_uuid(value) || !value.eq_ignore_ascii_case(id)
+                        })
+                    })
+                {
+                    return Err("POST response IDs differ from submitted Statement IDs".into());
+                }
+            }
+            Self::StatementQuery {
+                stored_captures,
+                since_capture,
+                until_capture,
+                descending,
+                limit,
+            } => {
+                // Structure, membership and limits are independent of the ISO adapter.
+                let array = json
+                    .get("statements")
+                    .and_then(Value::as_array)
+                    .ok_or("statement-query needs statements array")?;
+                let more = json
+                    .get("more")
+                    .map(|value| {
+                        let reference = value
+                            .as_str()
+                            .ok_or("statement-query more must be a string")?;
+                        IriReferenceStr::new(reference)
+                            .map_err(|_| "statement-query more must be an IRI reference")?;
+                        Ok::<_, &str>(reference)
+                    })
+                    .transpose()?;
+                if *limit != 0 && array.len() > *limit {
+                    return Err("statement-query exceeds requested limit".into());
+                }
+                let mut unavailable = None;
+                let captured_time = |name: &String| -> Result<ExactTime, String> {
+                    exact_time(
+                        captures
+                            .get(name)
+                            .ok_or_else(|| format!("missing capture {name}"))?,
+                    )
+                };
+                let since = match since_capture {
+                    Some(name) => defer_unavailable(captured_time(name), &mut unavailable)?,
+                    None => None,
+                };
+                let until = match until_capture {
+                    Some(name) => defer_unavailable(captured_time(name), &mut unavailable)?,
+                    None => None,
+                };
+                // Keep possibly eligible entries as well as definitely eligible ones.
+                // A missing bound and an unavailable bound are different facts.
+                let mut eligible = BTreeMap::new();
+                for (id, capture) in stored_captures {
+                    let time = defer_unavailable(captured_time(capture), &mut unavailable)?;
+                    let excluded = time.as_ref().is_some_and(|time| {
+                        since.as_ref().is_some_and(|bound| time <= bound)
+                            || until.as_ref().is_some_and(|bound| time > bound)
+                    });
+                    if !excluded {
+                        let definite = (since_capture.is_none()
+                            || time
+                                .as_ref()
+                                .zip(since.as_ref())
+                                .is_some_and(|(t, b)| t > b))
+                            && (until_capture.is_none()
+                                || time
+                                    .as_ref()
+                                    .zip(until.as_ref())
+                                    .is_some_and(|(t, b)| t <= b));
+                        eligible.insert(id.as_str(), (time, definite));
+                    }
+                }
+                let bounded_count = |count: usize| {
+                    if *limit == 0 {
+                        count
+                    } else {
+                        count.min(*limit)
+                    }
+                };
+                let maximum_count = bounded_count(eligible.len());
+                let known_results = eligible.values().filter(|(_, definite)| *definite).count();
+                if array.len() > maximum_count {
+                    return Err("statement-query exceeds eligible set or requested limit".into());
+                }
+                // Fewer results are legal per page, with a more IRL for known omissions.
+                if array.len() < known_results && more.is_none_or(str::is_empty) {
+                    return Err("statement-query omits eligible results without pagination".into());
+                }
+                let mut previous_returned = None;
+                for statement in array {
+                    let id = statement
+                        .get("id")
+                        .and_then(Value::as_str)
+                        .ok_or("statement-query missing id")?;
+                    let (time, _) = eligible
+                        .get(id)
+                        .ok_or(
+                            "statement-query returned duplicate, unrelated or boundary-excluded id",
+                        )?
+                        .clone();
+                    let returned =
+                        defer_unavailable(json_time(statement.get("stored")), &mut unavailable)?;
+                    if time
+                        .as_ref()
+                        .zip(returned.as_ref())
+                        .is_some_and(|(a, b)| a != b)
+                    {
+                        return Err("statement-query changed captured stored value".into());
+                    }
+                    if returned.as_ref().is_some_and(|time| {
+                        since.as_ref().is_some_and(|bound| time <= bound)
+                            || until.as_ref().is_some_and(|bound| time > bound)
+                    }) {
+                        return Err(
+                            "statement-query returned stored outside the requested boundary".into(),
+                        );
+                    }
+                    // A compliant result must preserve captured stored. After a known
+                    // inequality has failed above, either known side supplies a safe
+                    // ordering witness: otherwise preservation itself would be violated.
+                    let known_time = time.as_ref().or(returned.as_ref());
+                    if previous_returned
+                        .as_ref()
+                        .zip(known_time)
+                        .is_some_and(|(a, b)| if *descending { a < b } else { a > b })
+                    {
+                        return Err("statement-query is not stored-ordered".into());
+                    }
+                    if known_time.is_some_and(|time| {
+                        eligible.values().any(|(other, definite)| {
+                            *definite
+                                && other.as_ref().is_some_and(|other| {
+                                    if *descending {
+                                        other > time
+                                    } else {
+                                        other < time
+                                    }
+                                })
+                        })
+                    }) {
+                        return Err("statement-query is not a stored-ordered prefix".into());
+                    }
+                    if let Some(time) = known_time {
+                        previous_returned = Some(time.clone());
+                    }
+                    eligible.remove(id);
+                }
+                if let Some(error) = unavailable {
+                    return Err(error);
+                }
+            }
+            Self::JsonPreservation { expected } => {
+                super::preservation::compare_statement_bytes(expected, bytes)?;
+            }
             Self::HeaderTime {
                 header,
                 equals_pointer,
                 max_pointer,
                 optional_if_empty,
             } => {
-                let expected = if let Some(pointer) = equals_pointer {
-                    json_time(json.pointer(pointer))?
+                let sources: Vec<Option<&Value>> = if let Some(pointer) = equals_pointer {
+                    vec![json.pointer(pointer)]
                 } else if let Some(pointer) = max_pointer {
                     let array = json
                         .pointer(pointer)
                         .and_then(Value::as_array)
                         .ok_or_else(|| format!("{pointer} is not an array"))?;
                     if array.is_empty() && *optional_if_empty {
+                        // No max(empty) exists. A supplied header still has HTTP-date syntax.
+                        if headers.contains_key(header.as_str()) {
+                            header_time(headers, header)?;
+                        }
                         return Ok(());
                     }
-                    let times = array
-                        .iter()
-                        .map(|item| json_time(item.get("stored")))
-                        .collect::<Result<Vec<_>, _>>()?;
-                    *times
-                        .iter()
-                        .max()
-                        .ok_or("cannot compare an empty timestamp collection")?
+                    array.iter().map(|item| item.get("stored")).collect()
                 } else {
                     return Err("header-time requires a timestamp source".into());
                 };
+                // Presence and HTTP-date syntax do not depend on the ISO
+                // provider's ability to compare the returned stored values.
                 let actual = header_time(headers, header)?;
-                if actual.unix_timestamp() != expected.unix_timestamp() {
+                let (times, unavailable) = json_times(sources.into_iter())?;
+                let expected = times.iter().max();
+                // Even with unknown values, the maximum cannot precede a
+                // known member. Preserve that definite failure before deferral.
+                if expected.is_some_and(|time| time.seconds > actual.unix_timestamp()) {
+                    return Err(format!(
+                        "{header} precedes a returned JSON timestamp at HTTP-date second precision"
+                    ));
+                }
+                if let Some(error) = unavailable {
+                    return Err(error);
+                }
+                let expected = expected.ok_or("cannot compare an empty timestamp collection")?;
+                if actual.unix_timestamp() != expected.seconds {
                     return Err(format!(
                         "{header} does not equal the returned JSON timestamp at HTTP-date second precision"
                     ));
@@ -331,6 +641,7 @@ impl Check {
                 pointer,
                 capture,
                 not_equal,
+                agent_identity,
             } => {
                 let serialized_value = captures
                     .get(capture)
@@ -340,7 +651,12 @@ impl Check {
                 let actual = json
                     .pointer(pointer)
                     .ok_or_else(|| format!("missing {pointer}"))?;
-                if json_equal(actual, &expected) == *not_equal {
+                let equal = if *agent_identity {
+                    super::preservation::agent_identity_equal(actual, &expected)?
+                } else {
+                    json_equal(actual, &expected)?
+                };
+                if equal == *not_equal {
                     return Err(format!("{pointer} differs from JSON capture {capture}"));
                 }
             }
@@ -353,19 +669,7 @@ impl Check {
                     .pointer(pointer)
                     .and_then(Value::as_array)
                     .ok_or_else(|| format!("{pointer} is not an array"))?;
-                let times = array
-                    .iter()
-                    .map(|item| json_time(item.get(by)))
-                    .collect::<Result<Vec<_>, _>>()?;
-                if times.windows(2).any(|pair| {
-                    if *descending {
-                        pair[0] < pair[1]
-                    } else {
-                        pair[0] > pair[1]
-                    }
-                }) {
-                    return Err(format!("{pointer} is not ordered by {by}"));
-                }
+                json_order(array, pointer, by, *descending)?;
             }
             Self::JsonTime {
                 pointer,
@@ -376,48 +680,61 @@ impl Check {
                 allow_truncation_or_rounding,
             } => {
                 let value = json.pointer(pointer);
-                let actual = json_time(value)?;
-                if let Some(expected) = expected
-                    && !timestamp_preserved(
-                        actual,
-                        parse_time(expected)?,
-                        *allow_truncation_or_rounding,
-                    )
-                {
-                    return Err(format!("{pointer} changed the submitted timestamp"));
-                }
-                // Unknown local offset syntax must not survive the required UTC conversion.
+                let actual_text = value
+                    .and_then(Value::as_str)
+                    .ok_or("timestamp must be a string")?;
+                let mut unavailable = None;
+                let actual = defer_unavailable(parse_time(actual_text), &mut unavailable)?;
+                // These UTC violations are decidable without comparing calendar instants.
+                // The narrow suffix check does not claim a complete ISO grammar validator.
                 if *utc
-                    && (!actual.offset().is_utc()
-                        || value
-                            .and_then(Value::as_str)
-                            .is_some_and(|text| text.ends_with("-00:00")))
+                    && (has_explicit_non_utc_offset(actual_text)
+                        || actual.as_ref().is_some_and(|time| !time.offset().is_utc()))
                 {
                     return Err(format!("{pointer} is not returned in UTC"));
+                }
+                if let Some(expected) = expected
+                    && defer_unavailable(
+                        timestamp_preserved(actual_text, expected, *allow_truncation_or_rounding),
+                        &mut unavailable,
+                    )? == Some(false)
+                {
+                    return Err(format!("{pointer} changed the submitted timestamp"));
                 }
                 if let Some(name) = equals_capture {
                     let value = captures
                         .get(name)
                         .ok_or_else(|| format!("missing capture {name}"))?;
-                    let expected = parse_time(value)?;
-                    if actual != expected {
+                    if defer_unavailable(
+                        timestamp_preserved(actual_text, value, false),
+                        &mut unavailable,
+                    )? == Some(false)
+                    {
                         return Err(format!("{pointer} does not equal capture {name}"));
                     }
                 }
-                if let Some(pointer) = equals_pointer
-                    && actual != json_time(json.pointer(pointer))?
-                {
-                    return Err(format!("timestamp does not equal {pointer}"));
+                if let Some(pointer) = equals_pointer {
+                    let expected = json
+                        .pointer(pointer)
+                        .and_then(Value::as_str)
+                        .ok_or("compared timestamp must be a string")?;
+                    if defer_unavailable(
+                        timestamp_preserved(actual_text, expected, false),
+                        &mut unavailable,
+                    )? == Some(false)
+                    {
+                        return Err(format!("timestamp does not equal {pointer}"));
+                    }
+                }
+                if let Some(error) = unavailable {
+                    return Err(error);
                 }
             }
             Self::NumericPrecision { pointer, expected } => {
                 let actual = json
                     .pointer(pointer)
-                    .and_then(Value::as_f64)
                     .ok_or_else(|| format!("{pointer} is not numeric"))?;
-                let tolerance =
-                    expected.abs().max(f64::from(f32::MIN_POSITIVE)) * f64::from(f32::EPSILON);
-                if (actual - expected).abs() > tolerance {
+                if !super::preservation::numeric_precision(expected, actual)? {
                     return Err(format!("{pointer} loses IEEE 754 binary32 precision"));
                 }
             }
@@ -440,7 +757,7 @@ impl Shape {
         if self.format.as_deref().is_some_and(|kind| {
             !matches!(
                 kind,
-                "uuid" | "timestamp" | "iri" | "uri" | "mailto-iri" | "sha1"
+                "uuid" | "timestamp" | "iri" | "irl" | "uri" | "mailto-iri" | "sha1"
             )
         }) {
             return Err("unsupported JSON shape format".into());
@@ -482,43 +799,81 @@ impl Shape {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Ordered shape checks retain determinate violations while collecting unavailable comparisons"
+    )]
     fn check(&self, value: &Value, pointer: &str) -> Result<(), String> {
+        let mut unavailable = None;
+        // Collect capability limits, but still inspect independently decidable
+        // required fields and siblings. An unavailable IRL cannot hide a
+        // missing name or a malformed second Person identifier.
+        let mut retain = |result: Result<(), String>| -> Result<(), String> {
+            match result {
+                Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+                    unavailable = Some(error);
+                    Ok(())
+                }
+                result => result,
+            }
+        };
         if let Some(format) = self.format.as_deref() {
             let text = value.as_str().ok_or("formatted value is not a string")?;
-            check_string_format(format, text, pointer)?;
+            retain(check_string_format(format, text, pointer))?;
         }
-        if !self.any_of.is_empty()
-            && !self
-                .any_of
-                .iter()
-                .any(|shape| shape.check(value, pointer).is_ok())
-        {
-            return Err(format!("{pointer} does not satisfy any allowed JSON shape"));
+        if !self.any_of.is_empty() {
+            let result =
+                any_comparison(
+                    self.any_of
+                        .iter()
+                        .map(|shape| match shape.check(value, pointer) {
+                            Ok(()) => Ok(true),
+                            Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => Err(error),
+                            Err(_) => Ok(false),
+                        }),
+                );
+            retain(result.and_then(|matches| {
+                if matches {
+                    Ok(())
+                } else {
+                    Err(format!("{pointer} does not satisfy any allowed JSON shape"))
+                }
+            }))?;
         }
         let correct_type = self.value_type.as_deref().is_none_or(|kind| match kind {
             "object" => value.is_object(),
             "array" => value.is_array(),
             "string" => value.is_string(),
-            "number" => value.is_number(),
-            "integer" => {
-                value.is_i64()
-                    || value.is_u64()
-                    || value.as_f64().is_some_and(|number| {
-                        number.is_finite()
-                            && number.fract().classify() == std::num::FpCategory::Zero
-                    })
-            }
+            "number" | "integer" => value.is_number(),
             "boolean" => value.is_boolean(),
             "null" => value.is_null(),
             _ => false,
         });
-        if !correct_type
-            || self
-                .enum_values
-                .as_ref()
-                .is_some_and(|allowed| !allowed.iter().any(|item| json_equal(item, value)))
-        {
-            return Err(format!("{pointer} has an invalid type or enumerated value"));
+        if !correct_type {
+            return Err(format!("{pointer} has an invalid type"));
+        }
+        if self.value_type.as_deref() == Some("integer") {
+            if value
+                .as_f64()
+                .is_some_and(|number| number.fract().abs() > 0.0)
+            {
+                return Err(format!("{pointer} is not an integer"));
+            }
+            // Decimal spelling may be integral; it needs the original token.
+            retain(require_exact_numbers(value))?;
+        }
+        if let Some(allowed) = &self.enum_values {
+            retain(
+                any_comparison(allowed.iter().map(|item| json_equal(item, value))).and_then(
+                    |matches| {
+                        if matches {
+                            Ok(())
+                        } else {
+                            Err(format!("{pointer} has an invalid enumerated value"))
+                        }
+                    },
+                ),
+            )?;
         }
         if let Some(object) = value.as_object() {
             if self.required.iter().any(|name| !object.contains_key(name))
@@ -535,7 +890,7 @@ impl Shape {
             }
             for (name, shape) in &self.properties {
                 if let Some(item) = object.get(name) {
-                    shape.check(item, &format!("{pointer}/{name}"))?;
+                    retain(shape.check(item, &format!("{pointer}/{name}")))?;
                 }
             }
         }
@@ -547,31 +902,49 @@ impl Shape {
             }
             if let Some(shape) = &self.items {
                 for (index, item) in array.iter().enumerate() {
-                    shape.check(item, &format!("{pointer}/{index}"))?;
+                    retain(shape.check(item, &format!("{pointer}/{index}")))?;
                 }
             }
         }
-        if let Some(number) = value.as_f64()
-            && (self.minimum.is_some_and(|min| number < min)
-                || self.maximum.is_some_and(|max| number > max))
-        {
-            return Err(format!("{pointer} violates numeric bounds"));
+        if self.minimum.is_some() || self.maximum.is_some() {
+            match require_exact_numbers(value) {
+                Err(error) => retain(Err(error))?,
+                Ok(()) => {
+                    if let Some(number) = value.as_f64()
+                        && (self.minimum.is_some_and(|min| number < min)
+                            || self.maximum.is_some_and(|max| number > max))
+                    {
+                        return Err(format!("{pointer} violates numeric bounds"));
+                    }
+                }
+            }
         }
-        Ok(())
+        unavailable.map_or(Ok(()), Err)
     }
 }
 
-fn check_string_format(format: &str, text: &str, pointer: &str) -> Result<(), String> {
+pub(super) fn check_string_format(format: &str, text: &str, pointer: &str) -> Result<(), String> {
     let valid = match format {
         "uuid" => standard_uuid(text),
         "timestamp" => return parse_time(text).map(|_| ()),
         "iri" => crate::identifier_has_valid_syntax(text, false),
         "uri" => crate::identifier_has_valid_syntax(text, true),
+        "irl" => {
+            if !crate::identifier_has_valid_syntax(text, false) {
+                return Err(format!("{pointer} is not valid IRI syntax"));
+            }
+            return Err(format!(
+                "ORACLE-UNAVAILABLE: {pointer} requires DC-IRL locator/access-mechanism evidence; IRI syntax alone is insufficient"
+            ));
+        }
         "mailto-iri" => {
-            crate::identifier_has_valid_syntax(text, false)
-                && text.split_once(':').is_some_and(|(scheme, rest)| {
-                    scheme.eq_ignore_ascii_case("mailto") && !rest.is_empty()
-                })
+            if !crate::identifier_has_valid_syntax(text, false) {
+                false
+            } else if let Some((scheme, rest)) = text.split_once(':') {
+                scheme.eq_ignore_ascii_case("mailto") && mailbox_list(rest)?
+            } else {
+                false
+            }
         }
         "sha1" => text.len() == 40 && text.bytes().all(|byte| byte.is_ascii_hexdigit()),
         _ => return Err(format!("unknown string format {format}")),
@@ -583,13 +956,185 @@ fn check_string_format(format: &str, text: &str, pointer: &str) -> Result<(), St
     }
 }
 
-pub(super) fn parse_time(value: &str) -> Result<OffsetDateTime, String> {
-    OffsetDateTime::parse(value, &Rfc3339)
-        .or_else(|_| OffsetDateTime::parse(value, &Iso8601::DEFAULT))
-        .map_err(|error| format!("invalid JSON timestamp: {error}"))
+// Bounded RFC 6068 adapter. Encoded/quoted/internationalized addresses and
+// hfields need the complete DC-MAILTO contract, never a generic-IRI PASS.
+fn mailbox_list(rest: &str) -> Result<bool, String> {
+    if rest.contains('#') {
+        return Ok(false);
+    }
+    if rest.contains('%') || rest.contains('?') || !rest.is_ascii() {
+        return Err(
+            "ORACLE-UNAVAILABLE: DC-MAILTO percent/quoted/domain/hfield adapter required".into(),
+        );
+    }
+    let atom = |part: &str| {
+        !part.is_empty()
+            && part
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b"!$'*+-_~".contains(&b))
+    };
+    Ok(!rest.is_empty()
+        && rest.split(',').all(|address| {
+            let Some((local, domain)) = address.rsplit_once('@') else {
+                return false;
+            };
+            // Raw comments, whitespace, extra @, and non-atext fail this supported
+            // ASCII dot-atom partition. No DNS lookup or delivery test is required.
+            !local.is_empty()
+                && !domain.is_empty()
+                && local.split('.').all(&atom)
+                && domain.split('.').all(&atom)
+        }))
 }
 
-fn standard_uuid(value: &str) -> bool {
+// Classify definite violations in ordinary calendar/clock spellings before an
+// unsupported representation (leap seconds, end-of-day, etc.) is delegated.
+// This bounded check is not a replacement for a complete ISO date/time provider.
+fn check_common_time_components(value: &str) -> Result<(), String> {
+    let Some((date, clock)) = value.split_once(['T', 't', ' ']) else {
+        return Ok(());
+    };
+    let date_bytes = date.as_bytes();
+    if !(date_bytes.len() == 8 && date_bytes.iter().all(u8::is_ascii_digit)
+        || date_bytes.len() == 10
+            && date_bytes[4] == b'-'
+            && date_bytes[7] == b'-'
+            && date_bytes
+                .iter()
+                .enumerate()
+                .all(|(index, byte)| matches!(index, 4 | 7) || byte.is_ascii_digit()))
+    {
+        return Ok(());
+    }
+    let date = date.replace('-', "");
+    let year = date[..4].parse::<i32>().map_err(|e| e.to_string())?;
+    let month = date[4..6].parse::<u8>().map_err(|e| e.to_string())?;
+    let day = date[6..].parse::<u8>().map_err(|e| e.to_string())?;
+    let month = time::Month::try_from(month).map_err(|e| e.to_string())?;
+    time::Date::from_calendar_date(year, month, day).map_err(|e| e.to_string())?;
+
+    let (local, zone) = clock
+        .find(['Z', 'z', '+', '-'])
+        .map_or((clock, ""), |index| clock.split_at(index));
+    check_common_offset(zone)?;
+    let (local, fraction) = local.split_once(['.', ',']).unwrap_or((local, ""));
+    let clock_bytes = local.as_bytes();
+    if !(matches!(clock_bytes.len(), 2 | 4 | 6) && clock_bytes.iter().all(u8::is_ascii_digit)
+        || matches!(clock_bytes.len(), 5 | 8)
+            && clock_bytes[2] == b':'
+            && (clock_bytes.len() == 5 || clock_bytes[5] == b':')
+            && clock_bytes
+                .iter()
+                .enumerate()
+                .all(|(index, byte)| matches!(index, 2 | 5) || byte.is_ascii_digit()))
+    {
+        return Ok(());
+    }
+    let digits = local.replace(':', "");
+    let hour = digits[..2].parse::<u8>().map_err(|e| e.to_string())?;
+    let minute = digits
+        .get(2..4)
+        .unwrap_or("0")
+        .parse::<u8>()
+        .map_err(|e| e.to_string())?;
+    let second = digits
+        .get(4..6)
+        .unwrap_or("0")
+        .parse::<u8>()
+        .map_err(|e| e.to_string())?;
+    if hour > 24 || minute > 59 || second > 60 {
+        return Err("invalid calendar/time component".into());
+    }
+    if hour == 24 && (minute != 0 || second != 0 || fraction.bytes().any(|digit| digit != b'0')) {
+        return Err("end-of-day requires zero smaller components".into());
+    }
+    if hour == 24 {
+        return Err("ORACLE-UNAVAILABLE: ISO end-of-day provider required".into());
+    }
+    Ok(())
+}
+
+fn check_common_offset(zone: &str) -> Result<(), String> {
+    let Some(offset) = zone.strip_prefix(['+', '-']) else {
+        return Ok(());
+    };
+    let bytes = offset.as_bytes();
+    let ordinary = matches!(bytes.len(), 2 | 4) && bytes.iter().all(u8::is_ascii_digit)
+        || bytes.len() == 5
+            && bytes[2] == b':'
+            && bytes
+                .iter()
+                .enumerate()
+                .all(|(index, byte)| index == 2 || byte.is_ascii_digit());
+    if ordinary {
+        let digits = offset.replace(':', "");
+        let hour = digits[..2].parse::<u8>().map_err(|e| e.to_string())?;
+        let minute = digits
+            .get(2..)
+            .filter(|part| !part.is_empty())
+            .unwrap_or("0")
+            .parse::<u8>()
+            .map_err(|e| e.to_string())?;
+        if hour > 23 || minute > 59 {
+            return Err("invalid timezone offset component".into());
+        }
+    }
+    Ok(())
+}
+
+pub(super) fn parse_time(value: &str) -> Result<OffsetDateTime, String> {
+    if !value.as_bytes().windows(3).any(|w| {
+        matches!(w[0], b'T' | b't' | b' ') && w[1].is_ascii_digit() && w[2].is_ascii_digit()
+    }) {
+        return Err("timestamp requires explicit combined date and time".into());
+    }
+    check_common_time_components(value)?;
+    let clock = value.rsplit(['T', 't', ' ']).next().unwrap_or("");
+    let seconds_digits: String = clock
+        .chars()
+        .take_while(|c| c.is_ascii_digit() || *c == ':')
+        .filter(char::is_ascii_digit)
+        .collect();
+    if seconds_digits.len() == 6 && &seconds_digits[4..] == "60" {
+        return Err("ORACLE-UNAVAILABLE: leap-second identity needs delegated ISO provider; no clamp to second 59".into());
+    }
+    // The lossless fraction comparator below represents fractions of seconds.
+    // Fractional hours/minutes require a richer ISO provider, not this adapter.
+    if let Some((prefix, _)) = value.split_once(['.', ',']) {
+        let clock = prefix.rsplit(['T', 't', ' ']).next().unwrap_or("");
+        let digits = clock.bytes().filter(u8::is_ascii_digit).count();
+        if digits != 6 {
+            return Err(
+                "ORACLE-UNAVAILABLE: fractional hours/minutes require delegated ISO provider"
+                    .into(),
+            );
+        }
+    }
+    OffsetDateTime::parse(value, &Rfc3339)
+        .or_else(|_| OffsetDateTime::parse(value, &Iso8601::DEFAULT))
+        .map_err(|error| format!("ORACLE-UNAVAILABLE: ISO date/time provider cannot classify this representation: {error}"))
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+struct ExactTime {
+    seconds: i64,
+    fraction: String,
+}
+
+fn exact_time(value: &str) -> Result<ExactTime, String> {
+    Ok(ExactTime {
+        seconds: parse_time(value)?.unix_timestamp(),
+        // Trailing zeros are insignificant. Lexical ordering of these decimal
+        // fractions is exact, including proper prefixes and negative epochs.
+        fraction: timestamp_fraction(value),
+    })
+}
+
+pub(super) fn compare_timestamps(left: &str, right: &str) -> Result<std::cmp::Ordering, String> {
+    Ok(exact_time(left)?.cmp(&exact_time(right)?))
+}
+
+pub(super) fn standard_uuid(value: &str) -> bool {
     value.len() == 36
         && value.bytes().enumerate().all(|(index, byte)| {
             if matches!(index, 8 | 13 | 18 | 23) {
@@ -600,12 +1145,89 @@ fn standard_uuid(value: &str) -> bool {
         })
 }
 
-fn json_time(value: Option<&Value>) -> Result<OffsetDateTime, String> {
-    parse_time(
+fn json_time(value: Option<&Value>) -> Result<ExactTime, String> {
+    exact_time(
         value
             .and_then(Value::as_str)
             .ok_or("missing JSON timestamp string")?,
     )
+}
+
+/// Only provider uncertainty is deferred; definite malformed values still fail.
+fn defer_unavailable<T>(
+    result: Result<T, String>,
+    unavailable: &mut Option<String>,
+) -> Result<Option<T>, String> {
+    match result {
+        Ok(value) => Ok(Some(value)),
+        Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+            unavailable.get_or_insert(error);
+            Ok(None)
+        }
+        Err(error) => Err(error),
+    }
+}
+
+pub(super) fn has_explicit_non_utc_offset(text: &str) -> bool {
+    let Some((_, clock)) = text.rsplit_once(['T', 't', ' ']) else {
+        return false;
+    };
+    if !clock
+        .as_bytes()
+        .get(..2)
+        .is_some_and(|digits| digits.iter().all(u8::is_ascii_digit))
+    {
+        return false;
+    }
+    let Some(start) = clock.rfind(['+', '-']) else {
+        return false;
+    };
+    let suffix = &clock.as_bytes()[start..];
+    let digits = match suffix {
+        [_, h1, h2] => vec![*h1, *h2],
+        [_, h1, h2, m1, m2] | [_, h1, h2, b':', m1, m2] => vec![*h1, *h2, *m1, *m2],
+        _ => return false,
+    };
+    // Recognize extended/basic/reduced offsets independently of ISO parsing.
+    // Unknown-local-offset negative zero does not satisfy returned UTC.
+    digits.iter().all(u8::is_ascii_digit)
+        && (suffix[0] == b'-' || digits.iter().any(|b| *b != b'0'))
+}
+
+fn json_times<'a>(
+    values: impl Iterator<Item = Option<&'a Value>>,
+) -> Result<(Vec<ExactTime>, Option<String>), String> {
+    let mut times = Vec::new();
+    let mut unavailable = None;
+    for value in values {
+        match json_time(value) {
+            Ok(time) => times.push(time),
+            Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+                unavailable.get_or_insert(error);
+            }
+            Err(error) => return Err(error),
+        }
+    }
+    Ok((times, unavailable))
+}
+
+fn json_order(array: &[Value], pointer: &str, by: &str, descending: bool) -> Result<(), String> {
+    let (times, unavailable) = json_times(array.iter().map(|item| item.get(by)))?;
+    // A monotonic sequence has a monotonic known subsequence, even across
+    // page boundaries or legal timestamps that require provider support.
+    if times.windows(2).any(|pair| {
+        if descending {
+            pair[0] < pair[1]
+        } else {
+            pair[0] > pair[1]
+        }
+    }) {
+        return Err(format!("{pointer} is not ordered by {by}"));
+    }
+    if let Some(error) = unavailable {
+        return Err(error);
+    }
+    Ok(())
 }
 
 fn header_time(headers: &HeaderMap, name: &str) -> Result<OffsetDateTime, String> {
@@ -673,56 +1295,81 @@ fn one_language(value: &Value) -> Result<(), String> {
 
 fn mime_header<'a>(headers: &'a str, name: &str) -> Option<&'a str> {
     headers
-        .lines()
+        .split("\r\n")
         .filter_map(|line| line.split_once(':'))
         .find(|(key, _)| key.trim().eq_ignore_ascii_case(name))
-        .map(|(_, value)| value.trim())
+        .map(|(_, value)| value.trim_matches([' ', '\t']))
 }
 
-fn unfold_mime_headers(headers: &str) -> String {
+fn unfold_mime_headers(headers: &str) -> Result<String, String> {
+    if !headers.is_ascii() {
+        return Err("MIME part headers must be US-ASCII".into());
+    }
     let mut result = String::new();
-    for line in headers.lines() {
-        if line.starts_with([' ', '\t']) && !result.is_empty() {
-            result.push(' ');
-            result.push_str(line.trim());
+    for line in headers.split("\r\n") {
+        // Only CRLF delimits a physical field line. Quoted CR and bare LF
+        // can be RFC 822 field data; the structured field parser checks them.
+        if line.starts_with([' ', '\t']) {
+            if result.is_empty() {
+                return Err("MIME continuation has no preceding field".into());
+            }
+            // RFC 822 unfolding removes CRLF, preserving following LWSP.
         } else {
+            let (name, _) = line.split_once(':').ok_or("missing MIME field colon")?;
+            if name.is_empty() || !name.bytes().all(|b| (33..=126).contains(&b) && b != b':') {
+                return Err("invalid MIME field name".into());
+            }
             if !result.is_empty() {
                 result.push_str("\r\n");
             }
-            result.push_str(line);
         }
+        result.push_str(line);
     }
-    result
+    Ok(result)
+}
+
+fn verify_multipart(
+    headers: &HeaderMap,
+    bytes: &[u8],
+    expected_data: &[Vec<u8>],
+) -> Result<(), String> {
+    multipart_document(headers, bytes, expected_data).map(|_| ())
 }
 
 #[expect(
     clippy::too_many_lines,
     reason = "MIME framing, hashes, and metadata are checked as a single ordered transmission"
 )]
-fn verify_multipart(
+pub(super) fn multipart_document(
     headers: &HeaderMap,
     bytes: &[u8],
     expected_data: &[Vec<u8>],
-) -> Result<(), String> {
+) -> Result<Value, String> {
     let content_type = headers
         .get("Content-Type")
         .and_then(|value| value.to_str().ok())
         .ok_or("missing multipart Content-Type")?;
-    if !content_type
-        .split(';')
-        .next()
-        .is_some_and(|value| value.trim().eq_ignore_ascii_case("multipart/mixed"))
-    {
+    let parsed_type = super::media_type::parse_http(content_type)?;
+    if parsed_type.essence != "multipart/mixed" {
         return Err("response is not multipart/mixed".into());
     }
-    let boundary = content_type
-        .split(';')
-        .filter_map(|part| part.split_once('='))
-        .find(|(name, _)| name.trim().eq_ignore_ascii_case("boundary"))
-        .map(|(_, value)| value.trim().trim_matches('"'))
+    let boundary = parsed_type
+        .parameters
+        .get("boundary")
         .ok_or("missing MIME boundary")?;
-    if boundary.is_empty() || boundary.len() > 70 {
-        return Err("invalid MIME boundary length".into());
+    if parsed_type.ambiguous.contains("boundary") {
+        return Err(
+            "ORACLE-UNAVAILABLE: ambiguous MIME boundary prevents safe part framing".into(),
+        );
+    }
+    if boundary.is_empty()
+        || boundary.len() > 70
+        || boundary.ends_with(' ')
+        || !boundary
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"'()+_,-./:=? ".contains(&b))
+    {
+        return Err("invalid MIME boundary bchars/length/trailing space".into());
     }
     let delimiter = format!("--{boundary}").into_bytes();
     let mut positions = Vec::new();
@@ -746,6 +1393,9 @@ fn verify_multipart(
         if bytes[end..].starts_with(b"\r\n") {
             end += 2;
         } else if !closing || end != bytes.len() {
+            if !positions.is_empty() {
+                return Err("MIME boundary prefix collision inside a part".into());
+            }
             continue;
         }
         positions.push((index, end, closing));
@@ -758,6 +1408,10 @@ fn verify_multipart(
     }
     let mut data_parts = Vec::new();
     let mut metadata = Vec::new();
+    let mut document = None;
+    // A local numeric or media-type limit must not hide an independent violation.
+    // Keep it pending until later metadata, parts and required raw data are checked.
+    let mut unavailable = parsed_type.unavailable();
     for (number, pair) in positions.windows(2).enumerate() {
         let part = &bytes[pair[0].1..pair[1].0];
         let split = part
@@ -765,19 +1419,27 @@ fn verify_multipart(
             .position(|window| window == b"\r\n\r\n")
             .ok_or("missing MIME part headers")?;
         let raw_headers = std::str::from_utf8(&part[..split]).map_err(|error| error.to_string())?;
-        let unfolded = unfold_mime_headers(raw_headers);
+        let unfolded = unfold_mime_headers(raw_headers)?;
         let part_headers = unfolded.as_str();
         let data = part[split + 4..]
             .strip_suffix(b"\r\n")
             .ok_or("invalid MIME part termination")?;
         if number == 0 {
-            if !mime_header(part_headers, "Content-Type").is_some_and(|value| {
-                value
-                    .split(';')
-                    .next()
-                    .is_some_and(|kind| kind.trim().eq_ignore_ascii_case("application/json"))
-            }) {
-                return Err("first MIME part is not application/json".into());
+            // Absent Content-Type defaults to text/plain under RFC2045, so
+            // it cannot meet xAPI's first-part application/json requirement.
+            match super::media_type::parse(
+                mime_header(part_headers, "Content-Type").unwrap_or("text/plain; charset=us-ascii"),
+            ) {
+                Ok(kind) if kind.essence == "application/json" => {
+                    if let Some(error) = kind.unavailable() {
+                        unavailable.get_or_insert(error);
+                    }
+                }
+                Ok(_) => return Err("first MIME part is not application/json".into()),
+                Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+                    unavailable.get_or_insert(error);
+                }
+                Err(error) => return Err(error),
             }
             let json: Value = serde_json::from_slice(data)
                 .map_err(|error| format!("invalid first MIME JSON part: {error}"))?;
@@ -796,10 +1458,12 @@ fn verify_multipart(
                     metadata.extend(array.iter().cloned());
                 }
             }
+            document = Some(json);
         } else {
             let hash = mime_header(part_headers, "X-Experience-API-Hash")
                 .ok_or("missing MIME attachment hash")?;
             let digest = match hash.len() {
+                56 => format!("{:x}", Sha224::digest(data)),
                 64 => format!("{:x}", Sha256::digest(data)),
                 96 => format!("{:x}", Sha384::digest(data)),
                 128 => format!("{:x}", Sha512::digest(data)),
@@ -808,9 +1472,9 @@ fn verify_multipart(
             if !digest.eq_ignore_ascii_case(hash) {
                 return Err("MIME attachment hash does not match raw data".into());
             }
-            if !mime_header(part_headers, "Content-Transfer-Encoding")
-                .is_some_and(|value| value.eq_ignore_ascii_case("binary"))
-            {
+            let encoding = mime_header(part_headers, "Content-Transfer-Encoding")
+                .ok_or("missing MIME attachment transfer encoding")?;
+            if !super::media_type::transfer_encoding(encoding)?.eq_ignore_ascii_case("binary") {
                 return Err("MIME attachment is not binary".into());
             }
             let matching: Vec<_> = metadata
@@ -825,16 +1489,33 @@ fn verify_multipart(
                 return Err("MIME part has no matching attachment metadata".into());
             }
             for item in matching {
-                if !item
-                    .get("length")
-                    .is_some_and(|value| json_equal(value, &serde_json::json!(data.len())))
-                {
-                    return Err("MIME data length differs from attachment metadata".into());
+                let length = item.get("length").ok_or("missing attachment length")?;
+                match json_equal(length, &serde_json::json!(data.len())) {
+                    Ok(true) => {}
+                    Ok(false) => {
+                        return Err("MIME data length differs from attachment metadata".into());
+                    }
+                    Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+                        unavailable.get_or_insert(error);
+                    }
+                    Err(error) => return Err(error),
                 }
-                if let Some(kind) = mime_header(part_headers, "Content-Type")
-                    && item.get("contentType").and_then(Value::as_str) != Some(kind)
-                {
-                    return Err("MIME content type differs from attachment metadata".into());
+                if let Some(kind) = mime_header(part_headers, "Content-Type") {
+                    match super::media_type::equivalent(
+                        item.get("contentType")
+                            .and_then(Value::as_str)
+                            .ok_or("missing attachment contentType")?,
+                        kind,
+                    ) {
+                        Ok(true) => {}
+                        Ok(false) => {
+                            return Err("MIME content type differs from attachment metadata".into());
+                        }
+                        Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => {
+                            unavailable.get_or_insert(error);
+                        }
+                        Err(error) => return Err(error),
+                    }
                 }
             }
             if let Some(length) = mime_header(part_headers, "Content-Length")
@@ -867,26 +1548,84 @@ fn verify_multipart(
             return Err("multipart response omitted or altered expected attachment data".into());
         }
     }
-    Ok(())
+    if let Some(error) = unavailable {
+        return Err(error);
+    }
+    document.ok_or_else(|| "missing first MIME JSON part".into())
 }
 
-fn timestamp_preserved(actual: OffsetDateTime, expected: OffsetDateTime, rounding: bool) -> bool {
-    if actual == expected {
-        return true;
+pub(super) fn timestamp_preserved(
+    actual: &str,
+    expected: &str,
+    rounding: bool,
+) -> Result<bool, String> {
+    let mut unavailable = None;
+    let actual_time = defer_unavailable(parse_time(actual), &mut unavailable)?;
+    let expected_time = defer_unavailable(parse_time(expected), &mut unavailable)?;
+    let (Some(actual_time), Some(expected_time)) = (actual_time, expected_time) else {
+        return Err(unavailable.unwrap_or_else(|| {
+            "ORACLE-UNAVAILABLE: timestamp comparison requires both instants".into()
+        }));
+    };
+    let actual_second = actual_time.unix_timestamp();
+    let expected_second = expected_time.unix_timestamp();
+    let actual_fraction = timestamp_fraction(actual);
+    let expected_fraction = timestamp_fraction(expected);
+    if actual_second == expected_second && actual_fraction == expected_fraction {
+        return Ok(true);
     }
-    if !rounding {
-        return false;
+    if rounding {
+        // Decimal digits remain strings: neither binary64 nor nanosecond
+        // truncation may invent equality for finer input/output precision.
+        for precision in 3..=expected_fraction.len() {
+            let prefix = &expected_fraction[..precision];
+            if actual_second == expected_second && actual_fraction == prefix.trim_end_matches('0') {
+                return Ok(true);
+            }
+            if expected_fraction
+                .as_bytes()
+                .get(precision)
+                .is_some_and(|digit| *digit >= b'5')
+            {
+                let (carry, rounded) = increment_fraction(prefix);
+                if actual_second == expected_second + i64::from(carry)
+                    && actual_fraction == rounded.trim_end_matches('0')
+                {
+                    return Ok(true);
+                }
+            }
+        }
     }
-    // Try every decimal precision permitted by the source, never below milliseconds.
-    let actual = actual.unix_timestamp_nanos();
-    let expected = expected.unix_timestamp_nanos();
-    [1_000_000, 100_000, 10_000, 1_000, 100, 10, 1]
-        .into_iter()
-        .any(|resolution| {
-            let truncated = expected.div_euclid(resolution) * resolution;
-            let remainder = expected.rem_euclid(resolution);
-            actual == truncated || remainder * 2 >= resolution && actual == truncated + resolution
+    Ok(false)
+}
+
+fn timestamp_fraction(text: &str) -> String {
+    text.split_once(['.', ','])
+        .map_or_else(String::new, |(_, suffix)| {
+            suffix
+                .chars()
+                .take_while(char::is_ascii_digit)
+                .collect::<String>()
+                .trim_end_matches('0')
+                .to_owned()
         })
+}
+
+fn increment_fraction(text: &str) -> (bool, String) {
+    let mut digits = text.as_bytes().to_vec();
+    let mut carry = true;
+    for digit in digits.iter_mut().rev() {
+        if !carry {
+            break;
+        }
+        if *digit == b'9' {
+            *digit = b'0';
+        } else {
+            *digit += 1;
+            carry = false;
+        }
+    }
+    (carry, digits.into_iter().map(char::from).collect())
 }
 
 pub(super) fn decode_hex(hex: &str) -> Result<Vec<u8>, String> {
@@ -901,47 +1640,80 @@ pub(super) fn decode_hex(hex: &str) -> Result<Vec<u8>, String> {
         .collect()
 }
 
-pub(super) fn json_equal(left: &Value, right: &Value) -> bool {
-    match (left, right) {
-        (Value::Number(a), Value::Number(b)) => normalized_number(&a.to_string())
-            .zip(normalized_number(&b.to_string()))
-            .is_some_and(|(a, b)| a == b),
-        (Value::Array(a), Value::Array(b)) => {
-            a.len() == b.len() && a.iter().zip(b).all(|(a, b)| json_equal(a, b))
-        }
-        (Value::Object(a), Value::Object(b)) => {
-            a.len() == b.len()
-                && a.iter()
-                    .all(|(key, value)| b.get(key).is_some_and(|other| json_equal(value, other)))
-        }
-        _ => left == right,
+/// A binary64 Value is not evidence of the original JSON number token.
+/// Until a lossless decimal adapter is supplied, never turn it into PASS/FAIL
+/// by serializing the rounded Value back to text. Integer Values remain exact.
+pub(super) fn require_exact_numbers(value: &Value) -> Result<(), String> {
+    match value {
+        Value::Number(number) if number.is_f64() => Err(
+            "ORACLE-UNAVAILABLE: original decimal/exponent token required for exact JSON comparison/capture".into(),
+        ),
+        Value::Array(values) => values.iter().try_for_each(require_exact_numbers),
+        Value::Object(values) => values.values().try_for_each(require_exact_numbers),
+        _ => Ok(()),
     }
 }
 
-// Compare JSON numeric values without collapsing neighboring large integers
-// through a binary64 conversion. Integer and decimal spellings may differ.
-fn normalized_number(text: &str) -> Option<(bool, String, i64)> {
-    let (mantissa, exponent) =
-        text.split_once(['e', 'E'])
-            .map_or(Some((text, 0)), |(value, exponent)| {
-                exponent
-                    .parse::<i64>()
-                    .ok()
-                    .map(|exponent| (value, exponent))
-            })?;
-    let negative = mantissa.starts_with('-');
-    let unsigned = mantissa.trim_start_matches('-');
-    let fraction = unsigned.split_once('.').map_or(0, |(_, part)| part.len());
-    let digits: String = unsigned.chars().filter(|value| *value != '.').collect();
-    let leading_trimmed = digits.trim_start_matches('0');
-    if leading_trimmed.is_empty() {
-        return Some((false, "0".into(), 0));
+/// For conjunction, a known difference dominates an unavailable comparison.
+pub(super) fn all_comparisons(
+    values: impl IntoIterator<Item = Result<bool, String>>,
+) -> Result<bool, String> {
+    let mut unavailable = None;
+    for value in values {
+        match value {
+            Ok(false) => return Ok(false),
+            Ok(true) => {}
+            Err(error) => unavailable = Some(error),
+        }
     }
-    let coefficient = leading_trimmed.trim_end_matches('0');
-    let scale = exponent
-        .checked_sub(i64::try_from(fraction).ok()?)?
-        .checked_add(i64::try_from(leading_trimmed.len() - coefficient.len()).ok()?)?;
-    Some((negative, coefficient.into(), scale))
+    unavailable.map_or(Ok(true), Err)
+}
+
+/// For membership, a known match dominates an unavailable alternative.
+pub(super) fn any_comparison(
+    values: impl IntoIterator<Item = Result<bool, String>>,
+) -> Result<bool, String> {
+    let mut unavailable = None;
+    for value in values {
+        match value {
+            Ok(true) => return Ok(true),
+            Ok(false) => {}
+            Err(error) => unavailable = Some(error),
+        }
+    }
+    unavailable.map_or(Ok(false), Err)
+}
+
+pub(super) fn json_equal(left: &Value, right: &Value) -> Result<bool, String> {
+    match (left, right) {
+        (Value::Number(a), Value::Number(b)) => {
+            require_exact_numbers(left)?;
+            require_exact_numbers(right)?;
+            let integer = |value: &serde_json::Number| {
+                value
+                    .as_i64()
+                    .map(i128::from)
+                    .or_else(|| value.as_u64().map(i128::from))
+            };
+            Ok(integer(a) == integer(b))
+        }
+        (Value::Array(a), Value::Array(b)) => {
+            if a.len() != b.len() {
+                return Ok(false);
+            }
+            all_comparisons(a.iter().zip(b).map(|(a, b)| json_equal(a, b)))
+        }
+        (Value::Object(a), Value::Object(b)) => {
+            if a.len() != b.len() {
+                return Ok(false);
+            }
+            all_comparisons(a.iter().map(|(key, value)| {
+                b.get(key)
+                    .map_or(Ok(false), |other| json_equal(value, other))
+            }))
+        }
+        _ => Ok(left == right),
+    }
 }
 
 fn validate_pointer(pointer: &str) -> Result<(), String> {
@@ -962,6 +1734,211 @@ fn validate_pointer(pointer: &str) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn preservation_retains_extension_member_multiplicity() -> Result<(), serde_json::Error> {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))?;
+        for row in fixture["duplicate_members"]
+            .as_array()
+            .expect("duplicate controls")
+        {
+            for placement in ["context", "result"] {
+                let wrap = |raw: &str| {
+                    format!(
+                        r#"{{"actor":{{"mbox":"mailto:fixture@example.test"}},"verb":{{"id":"urn:verb"}},"object":{{"id":"urn:activity"}},"{placement}":{{"extensions":{{"urn:x":{raw}}}}}}}"#
+                    )
+                };
+                let before = wrap(row["submitted"].as_str().expect("submitted JSON"));
+                let after = wrap(row["returned"].as_str().expect("returned JSON"));
+                // Deserialize the definition directly too, without a lossy Value intermediary.
+                let check: Check = serde_json::from_str(&format!(
+                    r#"{{"kind":"json-preservation","expected":{before}}}"#
+                ))?;
+                assert!(check.validate().is_ok());
+                let errors =
+                    check.evaluate(200, &HeaderMap::new(), after.as_bytes(), &BTreeMap::new());
+                let outcome = if errors.is_empty() {
+                    "passed"
+                } else if errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")) {
+                    "not-run"
+                } else {
+                    "failed"
+                };
+                assert_eq!(
+                    outcome,
+                    row["outcome"].as_str().expect("outcome"),
+                    "{placement}/{}: {errors:?}",
+                    row["id"]
+                );
+            }
+        }
+        for raw in [
+            r#"{"actor":{},"actor":{}}"#,
+            r#"{"context":{"extensions":{"urn:x":1,"urn:x":1}}}"#,
+        ] {
+            let check: Check = serde_json::from_str(&format!(
+                r#"{{"kind":"json-preservation","expected":{raw}}}"#
+            ))?;
+            let errors = check.evaluate(200, &HeaderMap::new(), raw.as_bytes(), &BTreeMap::new());
+            assert!(
+                errors.iter().any(|e| e.contains("duplicate property")),
+                "{errors:?}"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn preservation_definition_requires_the_submitted_statement() {
+        let submitted = serde_json::json!({
+            "actor": {"mbox": "mailto:test@example.org"},
+            "verb": {"id": "https://example.org/verb"},
+            "object": {"id": "https://example.org/activity"},
+            "result": {"duration": "PT1S"}
+        });
+        assert!(
+            Check::JsonPreservation {
+                expected: submitted.clone().into()
+            }
+            .validate()
+            .is_ok()
+        );
+        for key in ["actor", "verb", "object"] {
+            let mut partial = submitted.clone();
+            partial.as_object_mut().expect("Statement").remove(key);
+            assert!(
+                Check::JsonPreservation {
+                    expected: partial.into()
+                }
+                .validate()
+                .is_err()
+            );
+        }
+        assert!(
+            Check::JsonPreservation {
+                expected: serde_json::json!({"result": {"duration": "PT1S"}}).into()
+            }
+            .validate()
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn exact_preservation_checks_additions_and_managed_field_boundaries()
+    -> Result<(), serde_json::Error> {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))?;
+        for row in fixture["cases"].as_array().expect("property controls") {
+            let check = Check::JsonPreservation {
+                expected: row["submitted"].clone().into(),
+            };
+            let errors = check.evaluate(
+                200,
+                &HeaderMap::new(),
+                row["returned"].to_string().as_bytes(),
+                &BTreeMap::new(),
+            );
+            let valid = row["preserved"].as_bool();
+            assert_eq!(
+                errors.is_empty(),
+                valid == Some(true),
+                "{}: {errors:?}",
+                row["id"]
+            );
+            if valid.is_none() {
+                assert!(
+                    errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")),
+                    "{errors:?}"
+                );
+            }
+            if valid == Some(false) {
+                assert!(
+                    errors.iter().any(|e| !e.starts_with("ORACLE-UNAVAILABLE:")),
+                    "{}: addition must be a definite failure: {errors:?}",
+                    row["id"]
+                );
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn added_values_retain_type_and_format_contracts() -> Result<(), serde_json::Error> {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))?;
+        for row in fixture["added_values"]
+            .as_array()
+            .expect("addition vectors")
+        {
+            for nested in [false, true] {
+                let mut submitted = fixture["cases"][0]["submitted"].clone();
+                if nested {
+                    let mut sub = submitted.clone();
+                    sub["objectType"] = "SubStatement".into();
+                    submitted["object"] = sub;
+                }
+                let parent = if nested { "/object" } else { "" };
+                let key = row["key"].as_str().expect("key");
+                let path = if key == "fileUrl" {
+                    submitted.pointer_mut(parent).expect("parent")["attachments"] =
+                        serde_json::json!([{"sha2":"a".repeat(64)}]);
+                    format!("{parent}/attachments/0")
+                } else {
+                    parent.into()
+                };
+                let mut returned = submitted.clone();
+                returned.pointer_mut(&path).expect("population parent")[key] = row["value"].clone();
+                let check = Check::JsonPreservation {
+                    expected: submitted.into(),
+                };
+                let errors = check.evaluate(
+                    200,
+                    &HeaderMap::new(),
+                    returned.to_string().as_bytes(),
+                    &BTreeMap::new(),
+                );
+                let outcome = if errors.is_empty() {
+                    "passed"
+                } else if errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")) {
+                    "not-run"
+                } else {
+                    "failed"
+                };
+                assert_eq!(
+                    outcome,
+                    row["outcome"].as_str().expect("outcome"),
+                    "{path}/{}: {errors:?}",
+                    row["id"]
+                );
+            }
+        }
+        for (timestamp, url) in [
+            (serde_json::json!("2016-12-31T23:59:60Z"), Value::Null),
+            (Value::Null, serde_json::json!("https://example.org/file")),
+        ] {
+            let check = Check::JsonPreservation {
+                expected:
+                    serde_json::json!({"object":{"objectType":"SubStatement","attachments":[{}]}})
+                        .into(),
+            };
+            let returned = serde_json::json!({"object":{"objectType":"SubStatement","timestamp":timestamp,"attachments":[{"fileUrl":url}]}});
+            let errors = check.evaluate(
+                200,
+                &HeaderMap::new(),
+                returned.to_string().as_bytes(),
+                &BTreeMap::new(),
+            );
+            assert!(
+                errors.iter().any(|e| !e.starts_with("ORACLE-UNAVAILABLE:")),
+                "{errors:?}"
+            );
+        }
+        Ok(())
+    }
 
     #[test]
     fn uri_iri_grammar_accepts_legal_alternatives_and_rejects_single_defects() {
@@ -1005,6 +1982,26 @@ mod tests {
             &std::collections::BTreeMap::new(),
         );
         assert!(errors.iter().any(|error| error.contains("/mbox/1")));
+        for address in [
+            "mailto:directory",
+            "mailto:@example.org",
+            "mailto:user@",
+            "mailto:user..name@example.org",
+        ] {
+            assert!(super::check_string_format("mailto-iri", address, "/mbox/0").is_err());
+        }
+        for address in ["mailto:a+b@example.org", "MAILTO:user@example.org"] {
+            assert!(super::check_string_format("mailto-iri", address, "/mbox/0").is_ok());
+        }
+        assert!(
+            super::check_string_format(
+                "mailto-iri",
+                "mailto:%22not%20me%22@example.org",
+                "/mbox/0"
+            )
+            .unwrap_err()
+            .starts_with("ORACLE-UNAVAILABLE:")
+        );
         let invalid = serde_json::json!({"openid": ["https://[::1]/person", "https://["]});
         let errors = check.evaluate(
             200,
@@ -1078,24 +2075,151 @@ mod tests {
     #[test]
     fn timestamp_precision_allows_only_permitted_rounding() -> Result<(), Box<dyn std::error::Error>>
     {
-        let expected = parse_time("2025-01-01T00:00:00.123456789Z")?;
+        let expected = "2025-01-01T00:00:00.123456789Z";
         for text in ["2025-01-01T00:00:00.123Z", "2025-01-01T00:00:00.1235Z"] {
-            assert!(timestamp_preserved(parse_time(text)?, expected, true));
+            assert!(timestamp_preserved(text, expected, true)?);
         }
         for text in ["2025-01-01T00:00:00.12Z", "2025-01-01T00:00:00.124Z"] {
-            assert!(!timestamp_preserved(parse_time(text)?, expected, true));
+            assert!(!timestamp_preserved(text, expected, true)?);
         }
         assert!(!timestamp_preserved(
-            parse_time("2025-01-01T00:00:00.123Z")?,
+            "2025-01-01T00:00:00.123Z",
             expected,
             false
-        ));
-        let expected = parse_time("2025-01-01T00:00:00.999987Z")?;
-        assert!(timestamp_preserved(
-            parse_time("2025-01-01T00:00:01Z")?,
-            expected,
+        )?);
+        let expected = "2025-01-01T00:00:00.999987Z";
+        assert!(timestamp_preserved("2025-01-01T00:00:01Z", expected, true)?);
+        assert!(!timestamp_preserved(
+            "2025-01-01T00:00:00.123000001Z",
+            "2025-01-01T00:00:00.123Z",
             true
-        ));
+        )?);
+        assert!(timestamp_preserved(
+            "2025-01-01T00:00:00.123456782Z",
+            "2025-01-01T00:00:00.1234567819Z",
+            true
+        )?);
+        assert!(!timestamp_preserved(
+            "2025-01-01T00:00:00.1234567811Z",
+            "2025-01-01T00:00:00.1234567819Z",
+            true
+        )?);
+        Ok(())
+    }
+
+    #[test]
+    fn timestamp_cross_field_equality_keeps_subnanosecond_digits() -> Result<(), serde_json::Error>
+    {
+        let earlier = "2025-01-01T00:00:00.1234567811Z";
+        let later = "2025-01-01T00:00:00.1234567819Z";
+        let captures = std::collections::BTreeMap::from([("stored".into(), later.into())]);
+        let headers = reqwest::header::HeaderMap::new();
+        for field in ["equals_pointer", "equals_capture"] {
+            let mut definition = serde_json::json!({"kind":"json-time", "pointer":"/timestamp"});
+            definition[field] = serde_json::json!(if field == "equals_pointer" {
+                "/stored"
+            } else {
+                "stored"
+            });
+            let check: Check = serde_json::from_value(definition)?;
+            for (timestamp, valid) in [(earlier, false), (later, true)] {
+                let body = serde_json::json!({"stored":later, "timestamp":timestamp}).to_string();
+                assert_eq!(
+                    check
+                        .evaluate(200, &headers, body.as_bytes(), &captures)
+                        .is_empty(),
+                    valid
+                );
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn integer_endpoint_serializations_agree_across_numeric_and_preservation_checks()
+    -> Result<(), serde_json::Error> {
+        for (expected, actual, valid) in [
+            ("100000008", "100000010", true),
+            ("-100000008", "-100000010", true),
+            ("100000007", "100000010", true),
+            ("100000009", "100000020", true),
+            ("-100000009", "-100000020", true),
+            ("-9223372036854775808", "-9223372000000000000", true),
+            ("18446744073709551615", "18446742970000000000", true),
+            ("100000008", "100000008", true),
+            ("16777217", "16777216", true),
+            ("16777217", "16777218", true),
+            ("0", "0", true),
+            ("100000008", "100000009", false),
+            ("-100000008", "-100000009", false),
+            ("100000008", "100000000", false),
+            ("100000008", "100000020", false),
+            ("100000008", "0", false),
+            ("100000008", "-100000010", false),
+            ("9007199254740992", "9007199254740993", false),
+            ("-9007199254740992", "-9007199254740993", false),
+            ("1", "2", false),
+            ("0", "1", false),
+            // Exact decimal multiples have coincident floor and ceiling bounds.
+            ("1000000000", "1000000000", true),
+            ("-1000000000", "-1000000000", true),
+            ("1000000000", "1000000010", false),
+            ("1000000000", "999999990", false),
+            ("-1000000000", "-999999990", false),
+            ("-1000000000", "-1000000010", false),
+            ("10000000000", "10000000010", false),
+            ("-10000000000", "-9999999990", false),
+            ("10000000000", "10000000100", false),
+            ("-10000000000", "-9999999900", false),
+            ("999999999", "1000000010", false),
+            ("-1000000001", "-999999990", false),
+        ] {
+            let source: Value = serde_json::from_str(expected)?;
+            let returned: Value = serde_json::from_str(actual)?;
+            let submitted = serde_json::json!({"result":{"score":{"raw":source}}});
+            let body = serde_json::json!({"result":{"score":{"raw":returned}}}).to_string();
+            let failures = [
+                Check::NumericPrecision {
+                    pointer: "/result/score/raw".into(),
+                    expected: source,
+                },
+                Check::JsonPreservation {
+                    expected: submitted.into(),
+                },
+            ]
+            .map(|check| check.evaluate(200, &HeaderMap::new(), body.as_bytes(), &BTreeMap::new()));
+            assert_eq!(
+                failures.each_ref().map(Vec::is_empty),
+                [valid; 2],
+                "{expected} -> {actual} [numeric-precision, json-preservation]: {failures:?}"
+            );
+            for failures in failures {
+                assert!(
+                    failures
+                        .iter()
+                        .all(|error| !error.starts_with("ORACLE-UNAVAILABLE:"))
+                );
+            }
+        }
+        // Lost decimal/exponent tokens still require a lossless provider.
+        for body in [
+            br#"{"result":{"score":{"raw":100000010.0}}}"#.as_slice(),
+            br#"{"result":{"score":{"raw":1.0000001e8}}}"#,
+        ] {
+            for check in [
+                Check::NumericPrecision {
+                    pointer: "/result/score/raw".into(),
+                    expected: serde_json::json!(100_000_008),
+                },
+                Check::JsonPreservation {
+                    expected: serde_json::json!({"result":{"score":{"raw":100_000_008}}}).into(),
+                },
+            ] {
+                let failures = check.evaluate(200, &HeaderMap::new(), body, &BTreeMap::new());
+                assert_eq!(failures.len(), 1);
+                assert!(failures[0].starts_with("ORACLE-UNAVAILABLE:"));
+            }
+        }
         Ok(())
     }
 
@@ -1104,10 +2228,10 @@ mod tests {
     -> Result<(), serde_json::Error> {
         let integer: Value = serde_json::from_str("{\"number\":1}")?;
         let decimal: Value = serde_json::from_str("{\"number\":1.0}")?;
-        assert!(json_equal(&integer, &decimal));
+        assert!(json_equal(&integer, &decimal).is_err());
         let lower: Value = serde_json::from_str("9007199254740992")?;
         let upper: Value = serde_json::from_str("9007199254740993")?;
-        assert!(!json_equal(&lower, &upper));
+        assert_eq!(json_equal(&lower, &upper), Ok(false));
         Ok(())
     }
 
@@ -1118,13 +2242,13 @@ mod tests {
         let data = b"data --boundary-like text\0\r\n--boundary--not-a-delimiter\r\nend";
         let hash = format!("{:x}", Sha256::digest(data));
         let metadata = serde_json::json!({"attachments":[{"sha2":hash,"length":data.len(),"contentType":"text/plain"}]});
-        let mut bytes = format!("preamble\r\n--boundary \t\r\nContent-Type:\r\n application/json\r\n\r\n{metadata}\r\n--boundary\t\r\nContent-Type: text/plain\r\nContent-Transfer-Encoding: binary\r\nX-Experience-API-Hash: {hash}\r\n\r\n").into_bytes();
+        let mut bytes = format!("preamble\r\n--outer-boundary \t\r\nContent-Type:\r\n application/json\r\n\r\n{metadata}\r\n--outer-boundary\t\r\nContent-Type: text/plain\r\nContent-Transfer-Encoding: binary\r\nX-Experience-API-Hash: {hash}\r\n\r\n").into_bytes();
         bytes.extend(data);
-        bytes.extend(b"\r\n--boundary--\t \r\nepilogue");
+        bytes.extend(b"\r\n--outer-boundary--\t \r\nepilogue");
         let mut headers = HeaderMap::new();
         headers.insert(
             "Content-Type",
-            "multipart/mixed; BOUNDARY=\"boundary\"".parse()?,
+            "multipart/mixed; BOUNDARY=\"outer-boundary\"".parse()?,
         );
         let check: Check = serde_yaml::from_str("kind: multipart")?;
         assert!(
@@ -1163,6 +2287,22 @@ mod tests {
             !check
                 .evaluate(200, &headers, body, &BTreeMap::new())
                 .is_empty()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn integer_shape_rejects_known_fractions_without_guessing_lost_tokens()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let shape: super::Shape = serde_yaml::from_str("type: integer")?;
+        for value in [serde_json::json!(1.5), serde_json::json!(-1.5)] {
+            assert!(
+                matches!(shape.check(&value, ""), Err(error) if !error.starts_with("ORACLE-UNAVAILABLE:"))
+            );
+        }
+        assert!(shape.check(&serde_json::json!(1), "").is_ok());
+        assert!(
+            matches!(shape.check(&serde_json::json!(1.0), ""), Err(error) if error.starts_with("ORACLE-UNAVAILABLE:"))
         );
         Ok(())
     }

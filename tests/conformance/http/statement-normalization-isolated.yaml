@@ -99,13 +99,15 @@ cases:
               iso8601: true
             Last-Modified:
               present: true
-          json:
-            pointers:
-              /stored:
-                equals: '{{stored_timestamp}}'
-              /timestamp:
-                equals: '{{stored_timestamp}}'
           checks:
+            - kind: json-time
+              pointer: /stored
+              equals_capture: stored_timestamp
+              utc: true
+            - kind: json-time
+              pointer: /timestamp
+              equals_capture: stored_timestamp
+              utc: true
             - kind: header-time
               header: Last-Modified
               equals_pointer: /stored

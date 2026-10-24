@@ -21,10 +21,56 @@ permissions:
   contents: read
 
 jobs:
+  lrs-artifacts:
+    name: Reproduce LRS Definitions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          enable-flakehub-cache: "true"
+
+      - name: Reproduce and package static definitions
+        run: |
+          nix build .#checks.x86_64-linux.lrs-generated-artifacts \
+            --print-build-logs --out-link result-lrs-static
+          mkdir -p artifacts/lrs-static
+          cp -R --dereference result-lrs-static/. artifacts/lrs-static/
+
+      - name: Upload reproducible definition bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: lrs-static-${{ github.sha }}
+          path: artifacts/lrs-static/
+          retention-days: 14
+
+  lrs-oracles:
+    name: LRS Oracle Controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          enable-flakehub-cache: "true"
+
+      - name: Check Python oracle and evidence boundaries
+        run: nix build .#checks.x86_64-linux.lrs-oracle-controls --print-build-logs
+
   conformance:
     name: xAPI Conformance Evidence
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,14 +81,40 @@ jobs:
           free-disk: "true"
           enable-flakehub-cache: "true"
 
-      - name: Build conformance checks
+      - name: Capture memory execution evidence
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p artifacts/conformance-regression/memory
+          nix build .#memory-conformance-evidence --print-build-logs \
+            --out-link result-memory-evidence 2>&1 | tee artifacts/conformance-regression/memory/build.log
+          cp -R --dereference result-memory-evidence/. artifacts/conformance-regression/memory/
+
+      - name: Capture postgres execution evidence
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p artifacts/conformance-regression/postgres
+          nix build .#postgres-conformance-evidence --print-build-logs \
+            --out-link result-postgres-evidence 2>&1 | tee artifacts/conformance-regression/postgres/build.log
+          cp -R --dereference result-postgres-evidence/. artifacts/conformance-regression/postgres/
+
+      - name: Enforce conformance checks
+        if: ${{ !cancelled() }}
         run: |
           nix build \
             .#checks.x86_64-linux.conformance-plan \
             .#checks.x86_64-linux.memory-conformance \
             .#checks.x86_64-linux.postgres-conformance \
             .#checks.x86_64-linux.postgres-verification \
-            --print-build-logs
+            --keep-going --print-build-logs 2>&1 | tee artifacts/conformance-regression/gates.log
+
+      - name: Upload live regression evidence (not full conformance)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-regression
+          path: artifacts/conformance-regression/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Build static conformance evidence bundle
         run: |

@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "standard": "IEEE Std 9274.1.1-2023",
+  "pdf_sha256": "fa57dbaa0fbc0800b8c5a693af884032e782110c1f446ef865797fd0e0811526",
+  "completion_contract": "spec/conformance/issued-test-definition-completion-amendment.md",
+  "topics": [
+    {
+      "id": "SRC-PUT",
+      "branches": [
+        "OPEN-PUT-02",
+        "OPEN-PUT-03"
+      ],
+      "source_anchor_ids": [
+        "IEEE:900-955",
+        "IEEE:1165-1208",
+        "IEEE:1228-1268",
+        "IEEE:1002-1008",
+        "IEEE:1075-1093",
+        "IEEE:1301-1351"
+      ],
+      "source_conflict": "IEEE's SHALL to accept PUT batches conflicts with the single-Statement-object body. No basis establishes precedence or applicability. Kiva's selection of A does not resolve the source conflict.",
+      "competing_clauses": "The batch-acceptance SHALL in §4.1.3.1 and multipart explicitly includes PUT. §4.1.6.1.1 specifies a single Statement object. Matching a singleton body ID to the query ID does not settle their relation. Array acceptance as an extension has interoperability benefits, but requires separate design for multiple-ID allocation and the single-body contract.",
+      "known_requirements": [
+        "Kiva: valid object PUT satisfies ordinary 204/storage/retransmission contracts. Array PUT 400 entails no writes.",
+        "Settled IEEE scope: valid POST batches return 200 and IDs in corresponding order; preserve normal object PUT and independent media/attachment requirements."
+      ],
+      "ieee_disputed_result_set": "not uniquely determined; no universal acceptance/rejection conformance verdict claimed",
+      "project_decision": {
+        "id": "D-01",
+        "selection": "A",
+        "reason": "Choose a design retaining the relation between one query ID and the body object and using already defined POST for multiple Statements. Introduce no truncation or custom ID allocation; rejection must not partially store information. This does not prove method-clause precedence from the source. Preserve the explicit PUT-batch SHALL versus single-object-body conflict.",
+        "options_and_impacts": [
+          {
+            "id": "A",
+            "behavior": "PUT accepts only a single Statement object. JSON arrays and Statement arrays in the first multipart part receive 400 with no writes regardless of element count. Use POST for batches.",
+            "assessment": {
+              "specification_consistency": "Consistent with the method-body definition. Retain the conflict with the general batch PUT SHALL; do not label this an unconditional IEEE rejection duty.",
+              "information_preservation": "Do not partially store a rejected array. The producer can send the same complete batch using POST.",
+              "interoperability": "Compatible with standard single-ID PUT clients. Clients depending on PUT arrays must switch to POST.",
+              "implementation_burden": "Only body-kind discrimination and atomic rejection are needed; no new ID-allocation mechanism.",
+              "test_expectations": "Fix array → 400/no change for Kiva. In the IEEE field, retain the conflict note and do not use status as an unconditional failure basis.",
+              "later_change": "A later extension to B broadens acceptance while preserving existing single-object/POST semantics."
+            }
+          },
+          {
+            "id": "B",
+            "behavior": "Unwrap only singleton arrays into single objects for PUT. Match the sole element ID to the query ID. Empty arrays and arrays with at least two elements yield 400/no change. Apply equally to JSON/multipart.",
+            "assessment": {
+              "specification_consistency": "Approaches singleton acceptance within general PUT batches, but the object-body difference and multiple-batch SHALL remain. This is an explicit Kiva extension.",
+              "information_preservation": "Preserve every field/attachment of the sole element. Do not truncate multiple elements to the first.",
+              "interoperability": "Compatible with singleton-PUT clients; still incompatible with clients expecting multiple-element PUT.",
+              "implementation_burden": "Requires an additional unwrap branch sharing ordinary PUT validation, ID matching and retransmission checks.",
+              "test_expectations": "Kiva singleton → ordinary PUT result; empty/multiple → 400. Additionally define the association between the sole multipart Statement and its attachments.",
+              "later_change": "Changing B to A breaks previously accepted clients. Usage notice and a migration period are required."
+            }
+          }
+        ]
+      },
+      "definition": "Kiva D-01=A: PUT accepts a single Statement object with a matching query statementId. Reject an empty, singleton or multiple-element array, whether JSON or the first multipart part, in its entirety with 400 and no writes. Use POST for batches. This array rejection is Kiva policy, not a uniquely mandatory IEEE rejection. Preserve ordinary object PUT, valid POST and independent MIME/authentication/storage duties.",
+      "source_state": "unresolved",
+      "project_definition_state": "Kiva policy is defined; the source conflict remains unresolved.",
+      "blocks_amended_completion": false,
+      "reopen_when": "A fixed official correction/update or newly adopted primary interpretation changes the competing clauses; recheck affected cases, manual procedures, reporting and preserved-client compatibility.",
+      "external_inquiry": {
+        "state": "prepared-not-sent",
+        "no_response_required_for_current_completion": true
+      },
+      "provider_environment": "Actual isolation, storage observation and visibility capabilities verified in later execution stage."
+    },
+    {
+      "id": "SRC-STATE",
+      "branches": [
+        "OPEN-STATE-02"
+      ],
+      "source_anchor_ids": [
+        "IEEE:1588-1607",
+        "IEEE:1713-1738"
+      ],
+      "source_conflict": "For multiple GET without stateId, Required unless since conflicts with optional since and list dispatch. The unique source status for no-id/no-since remains unsettled.",
+      "competing_clauses": "stateId Required unless since appears in the pinned PDF table and is repeated in clause 5. It cannot be reconciled uniquely with no stateId, optional since and otherwise returns available ids. The alternative of requiring since and returning 400 prioritizes the Required cell but conflicts with optional and adds client responsibility to choose a time covering all entries.",
+      "known_requirements": [
+        "Kiva: neither parameter yields 200 and all IDs in the isolated context. HEAD has no body.",
+        "Settled IEEE scope: since alone yields an exclusive filtered list, stateId alone a single document, and both an invalid combination. Scope, authentication and independent header duties remain."
+      ],
+      "ieee_disputed_result_set": "not uniquely determined; no universal acceptance/rejection conformance verdict claimed",
+      "project_decision": {
+        "id": "D-05",
+        "selection": "A",
+        "reason": "Choose a design following dispatch, list summary and optional since, without requiring an artificial minimum time for an initial listing. It preserves information and interoperates readily with ordinary listing clients. Existing 200 behavior is not source evidence.",
+        "options_and_impacts": [
+          {
+            "id": "A",
+            "behavior": "Return valid-context GET/HEAD with neither stateId nor since as a listing with 200.",
+            "assessment": {
+              "specification_consistency": "Consistent with dispatch, multiple-GET description and optional since. Explicitly retain the Required-cell conflict.",
+              "information_preservation": "Return all applicable State IDs without loss. Preserve settled scope rules when registration is absent.",
+              "interoperability": "Compatible with ordinary full-list clients; no artificial since is required for the first listing.",
+              "implementation_burden": "Retain current project policy; no added list-query restriction.",
+              "test_expectations": "Retain Kiva 200 expectations in state-list-scope and related cases. Keep the source-conflict note for the applicable condition.",
+              "later_change": "Switching to B makes existing listing clients receive 400; those clients must be updated."
+            }
+          },
+          {
+            "id": "B",
+            "behavior": "Require since for lists without stateId; neither parameter yields 400. With stateId, use ordinary single GET.",
+            "assessment": {
+              "specification_consistency": "Prioritizes Required unless since; retains conflict with optional since and the multiple-GET summary.",
+              "information_preservation": "IDs before since may be absent from the initial listing. Full-list clients bear added responsibility to choose a sufficiently early since.",
+              "interoperability": "Low interoperability because ordinary full-list calls break.",
+              "implementation_burden": "Adds one validation condition; requires guidance for an all-results time and client migration.",
+              "test_expectations": "Neither → 400/no HEAD body; since present → existing list expectations. Do not treat this as the unique IEEE result.",
+              "later_change": "Relaxing to A broadens acceptance. Adjust monitoring/usage contracts based on B."
+            }
+          }
+        ]
+      },
+      "definition": "Kiva D-05=A: GET in a valid context with neither stateId nor since returns 200 and all State IDs. HEAD returns the corresponding response without a body. Preserve the distinctions: since alone applies an exclusive filter, stateId alone selects a single document, both yield 400/no change. The no-id/no-since 200 is explicit Kiva policy; the conflict with the source's Required cell remains unresolved.",
+      "source_state": "unresolved",
+      "project_definition_state": "Kiva policy is defined; the source conflict remains unresolved.",
+      "blocks_amended_completion": false,
+      "reopen_when": "A fixed official correction/update or newly adopted primary interpretation changes the competing clauses; recheck affected cases, manual procedures, reporting and preserved-client compatibility.",
+      "external_inquiry": {
+        "state": "prepared-not-sent",
+        "no_response_required_for_current_completion": true
+      },
+      "provider_environment": "Actual isolation, storage observation and visibility capabilities verified in later execution stage."
+    }
+  ],
+  "topic_count": 2,
+  "branch_count": 3,
+  "official_adjudication": false,
+  "sent": false
+}

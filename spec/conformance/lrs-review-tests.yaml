@@ -5,13 +5,24 @@ notes:
 - An HTTP run cannot discharge them merely by passing an associated case.
 - Record source revision, target revision/configuration, observations, and pass/fail/not-applicable with justification.
 - Advisory outcomes must be kept separate from mandatory conformance outcomes.
+common_expectations:
+  response-observations: On every received xAPI setup, error, readback and continuation response, independently
+    check mandatory version and applicable Consistent-Through before consuming the body. Preserve already observed
+    violations. Transport, fixture or oracle inability is incomplete, never a target FAIL; it cannot erase another
+    known violation. A complete invalid JSON representation is a target violation. Legacy routing requires its own
+    version contract; do not impose 2.0.0 blindly on a successfully routed legacy response.
+  status-before-body: Record each call-specific known HTTP status obligation immediately after receiving status/headers,
+    before body acquisition or subsequent requests. Previously recorded failures survive a later unavailable body
+    or request. A visible-read allowance for initial 404 does not create a normative delay deadline. Pure fixture
+    control is outside LRS status grading; accepted legacy routing retains its own version contract but never loses
+    mandatory response-header presence.
 tests:
 - id: conflict-resolution-explanation
   level: required
   setup: Run each of the three generated unconditional document PUT conflict cases; preserve its 409 response body.
   action: Read the explanation in the language returned by the LRS.
   expected: It instructs the provider to check the current resource and retry with If-Match set to the current ETag.
-    A generic conflict message or a nonempty body alone is insufficient.
+    A generic conflict message or a nonempty body alone is insufficient. {{common:response-observations}} {{common:status-before-body}}
 - id: consistent-through-visibility
   level: required
   setup: Use a disposable target fixture that can delay Statement visibility while recording its assigned stored
@@ -19,22 +30,35 @@ tests:
   action: Store Statements during the delay; observe X-Experience-API-Consistent-Through on success, error, GET,
     and HEAD; release visibility and query all Statements before the reported watermark.
   expected: Every Statement stored before the watermark is available for retrieval with reasonable certainty. Delay
-    the watermark when visibility is delayed; never advance it past known invisible records.
+    the watermark when visibility is delayed; never advance it past known invisible records. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: http-rfc-interoperability
+  check_levels:
+    state-head-metadata-recommendation: advisory
+    agent-profile-head-metadata-recommendation: advisory
+    activity-profile-head-metadata-recommendation: advisory
   level: required
   setup: Use HTTP 1.1 clients with UTF-8 strings, valid request framing, language negotiation, and all listed applicable
-    headers.
+    headers. Prove each nonmatching conditional ETag from the current captured entity-tag by appending ! inside
+    its opaque quoted value, stripping only optional W/. Hold the resource stable between capture and conditional
+    request; do not assume any fixed literal is unused.
   action: Exercise the resource methods with valid alternative header casing and syntax and the applicable RFC conditional
-    semantics. Check HEAD has GET-equivalent headers and no body.
+    semantics. Require no HEAD body and independently mandatory xAPI headers; observe GET-equivalent entity metadata
+    as SHOULD.
   expected: The target implements and validates the listed headers in their specified contexts. Content negotiation
-    recommendations and optional compression choices are reported separately.
+    recommendations, HEAD metadata equivalence and optional compression choices are reported separately. Metadata
+    omission or difference alone is not a mandatory FAIL. {{common:response-observations}} Negative resource assertions
+    require case-specific independent fixture evidence for the exact selectors and credentials, including maintained
+    absence. A generic isolated label or the response being judged is not proof. {{common:status-before-body}}
 - id: mime-rfc-framing
   level: required
   setup: Use the generated multipart fixtures with an RFC 2046 independent parser and transport variations.
   action: Check preambles, epilogues, quoted boundaries, case-insensitive media types and header names, legal folding,
     closing delimiters, and binary bytes including embedded boundary-like substrings.
   expected: Valid MIME framing is accepted and returned framing is valid; attachment identity is determined by SHA-2.
-    The parser must not split a delimiter-like substring inside binary content.
+    The parser must not split a boundary-like substring away from line start or without the chosen boundary prefix.
+    Part lines starting with --boundary plus extra text are invalid inputs, not acceptance positives. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: declared-limit-and-extension-contexts
   level: conditional-required
   setup: Declare target credential permissions, each configured document/Statement/attachment size limit, rate limits,
@@ -42,7 +66,8 @@ tests:
   action: Probe just over each declared limit and denied operation, and send a parameter explicitly absent from
     the declared extension vocabulary in each resource context.
   expected: Size, rate, and permission denials yield 413, 429, and 403 respectively. Truly unrecognized parameters
-    yield 400. Intentionally recognized extensions are allowed; no particular limits are mandated.
+    yield 400. Intentionally recognized extensions are allowed; no particular limits are mandated. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: duplicate-state-and-response-observation
   level: required
   setup: Store a Statement carrying Activity definitions and snapshot available Activity and Person resources plus
@@ -51,7 +76,12 @@ tests:
     and other affected objects after visibility settles.
   expected: No duplicate request changes any stored object. PUT may return 204 or 409; POST may also return 200
     with the corresponding UUID array. Recommendations about 409 are not mandatory. Logical-equivalence exclusions
-    remain separate from duplicate state preservation.
+    remain separate from duplicate state preservation. {{common:response-observations}} Compare all snapshot facts,
+    including stored/authority/version; no signature exclusion mask. Permit equal instants with different lexical
+    spellings, same Duration value with different spellings (no second truncation allowance), unordered Group membership
+    and generic permitted attachment order; preserve all properties, multiplicity and extension array order. Exact
+    lossless numbers require the abstract number provider if tokens are unavailable. Known differences dominate
+    unknown comparisons. {{common:status-before-body}}
 - id: exact-and-ids-recursive-response
   level: required
   setup: Store Agents, identified and anonymous Groups, Activities, Verbs, context relationships and SubStatements
@@ -60,16 +90,20 @@ tests:
     to its table.
   expected: Exact/default preserve received Agent, Group, Activity and Verb data subject to explicit LRS transformations.
     ids contains only the minimum identifying fields, including each anonymous Group member; canonical preserves
-    original Agent/Group data.
+    original Agent/Group data. {{common:response-observations}} {{common:status-before-body}}
 - id: reference-time-sequence-and-cycles
   level: required
   setup: Store recursive StatementRefs with distinct stored times, a context.statement reference, a missing target,
     and references to a voided target.
   action: Combine agent/verb/activity/registration filters with since, until, limit and ascending; retrieve single
-    ids separately.
+    ids separately. Follow the complete bounded more chain before judging membership or absence. Validate each page's
+    actual headers and checks; a server page size below the requested limit is allowed. Incomplete traversal is
+    not-run, never a missing-member failure; retain every observed violation before that boundary.
   expected: Non-time filters inherit recursively through Object StatementRefs; time and sequence restrictions apply
     to the targeting Statement. Context references do not inherit filters. No voided target is leaked; targeting
-    and voiding Statements remain eligible.
+    and voiding Statements remain eligible. {{common:response-observations}} Evaluate observed forbidden IDs on
+    each page immediately. Positive set completeness/absence requires a terminal continuation chain and the separately
+    established visibility premise; incomplete routing or transport cannot imply absence. {{common:status-before-body}}
 - id: canonical-language-negotiation
   level: required
   setup: Obtain the canonical maps the target elects to maintain; include Activity name, description and interaction
@@ -80,7 +114,7 @@ tests:
   expected: Select one language per Activity map independently using the applicable Accept-Language semantics. Apply
     the same rule to other maps only when the target returns their canonical form; untouched Verb and extension
     maps are permitted. A submitted definition that the LRS elects not to maintain is not a FAIL; if ja-JP is in
-    the maintained map and preferred, it must be selected.
+    the maintained map and preferred, it must be selected. {{common:response-observations}} {{common:status-before-body}}
 - id: document-updated-time-boundary
   level: required
   setup: Use an independent fixture clock that fixes modification times at known ISO timestamps for every document
@@ -89,14 +123,23 @@ tests:
     and after the known updated time. Delete all State for one scope while preserving another.
   expected: Last-Modified identifies the last modification, since is exclusive, updated documents move across the
     boundary, and scope isolation is preserved. HTTP-date second precision alone is not sufficient to infer a subsecond
-    updated time.
+    updated time. {{common:response-observations}} {{common:status-before-body}}
 - id: person-semantic-identifiers
   level: required
-  setup: Use previously unknown Agents with each of the four IFIs and known Agents with directory enrichment.
+  setup: Use each of the four IFIs with an independently controlled Agent inventory. For fallback Agent A, establish
+    that the LRS has no additional information about A; record A's submitted identity and any name. Establish unrelated
+    Agent B separately. For enriched Agent C, declare every associated IFI and name, including multiple values in
+    one array and across arrays. Obtain this inventory from the fixture authority, never from the Person response
+    under test. A fresh random IFI alone does not prove absence of enrichment.
   action: GET the Person resource and validate each returned array element against the corresponding Agent/account
-    definitions.
+    definitions and the independent association inventory. Repeat mbox, mbox_sha1sum, openid and account queries;
+    associate account by the complete homePage/name pair. Preserve query, raw response and inventory revision.
   expected: A Person is returned even without enrichment, complete account members have homePage and name, and identifying
-    properties retain valid formats. Multiple identifying arrays are permitted.
+    properties retain valid formats. For the no-additional-information fallback, every returned name and identifying
+    value must belong to requested Agent A; a well-formed B-only value fails. Multiple associated values and arrays
+    remain permitted; do not infer a singleton or one-array restriction. Known enrichment exercises the separate
+    Person information duties and must not be graded under the fallback precondition. {{common:response-observations}}
+    {{common:status-before-body}}
   rubric:
   - Preserve the request and raw response for each of the four IFIs. Confirm the queried IFI is present in its corresponding
     returned array; do not accept a Person shell alone.
@@ -104,14 +147,51 @@ tests:
     hex SHA-1, URI, account homePage IRL and string name. Full external grammar boundaries remain a separately recorded
     handover.
   - Record each property/array index and its pass/fail observation. A missing requested IFI, incomplete account,
-    wrong element type or invalid direct format fails; extra valid identifying arrays are allowed.
+    wrong element type or invalid direct format fails. Extra identifiers need association evidence as well as valid
+    syntax.
+  - In the independently established fallback branch compare every returned name and IFI with A's inventory. A value
+    known to belong only to B fails even when the queried A value is also present. Missing or incomplete inventory
+    is NOT-RUN for this association check; it neither establishes PASS nor cancels a known syntax/status failure.
+  - Apply the paper controls below to each of the four queried IFI forms. These are definition contrasts, not executed
+    observations. The portable contains/shape cases establish presence and syntax only.
+  association_controls:
+  - id: fallback-associated-only
+    precondition: Independently established no additional information about A.
+    response: Person with queried A IFI and only known associated A information.
+    association_outcome: passed
+    observed: null
+  - id: fallback-unrelated-same-array
+    precondition: No additional information about A; B-only value has valid syntax.
+    response: Person with both queried A IFI and B-only IFI in the same array.
+    association_outcome: failed
+    observed: null
+  - id: fallback-unrelated-other-property
+    precondition: No additional information about A; independent inventory marks the extra IFI or name as B-only.
+    response: Person with queried A IFI and an unrelated value in another identifying array or name array.
+    association_outcome: failed
+    observed: null
+  - id: enriched-multiple-associated
+    precondition: Independent inventory establishes multiple same-kind and cross-kind IFIs associated with C.
+    response: Person includes queried C IFI and valid associated enrichment.
+    association_outcome: not-applicable-to-fallback; allowed by Person multiplicity
+    observed: null
+  - id: requested-ifi-missing
+    precondition: Requested IFI and valid response syntax are independently known.
+    response: Person contains only a different IFI and omits the requested IFI.
+    association_outcome: failed-requested-identity-presence
+    observed: null
+  - id: unknown-association
+    precondition: Association inventory or no-additional-information evidence is unavailable.
+    response: Person contains the requested IFI and an additional syntactically valid value.
+    association_outcome: not-run; syntax/presence results remain separately recorded
+    observed: null
 - id: canonical-activity-available-information
   level: required
   setup: Declare the target's canonical metadata policy and known available definitions, including an Activity with
     no known definition.
   action: Query Activities after authorized definition writes and query an unknown Activity.
   expected: Return the requested Activity and all information available under the target's canonical policy, with
-    an Activity fallback when no canonical definition exists.
+    an Activity fallback when no canonical definition exists. {{common:response-observations}} {{common:status-before-body}}
   rubric:
   - Obtain an explicit inventory of information the target maintains for the Activity. Retain the policy and inventory
     with the observation; two submitted definitions alone do not establish this inventory.
@@ -122,20 +202,23 @@ tests:
 - id: older-version-routing
   level: conditional-required
   setup: Declare whether requests for a version before 2.0.0 route to a conformant prior implementation.
-  action: Run the older-version case and, if it is routed, run that version's conformance suite against the actual
-    routed implementation. Also run the 2.1.0-or-greater rejection and read every 400 response body.
+  action: On /statements (not the version-exempt /about resource), run the older-version case and, if it is routed,
+    run that version's conformance suite against the actual routed implementation. Also run the 2.1.0-or-greater
+    rejection and read every 400 response body.
   expected: The older version yields either 400 with a short problem explanation or a fully conformant implementation
     of exactly the declared earlier version. The 2.1.0-or-greater case yields 400 with a short problem explanation.
     Nonempty generic text is insufficient; the text must identify the unsupported version/request problem. Receiving
-    200 alone does not establish the routing exception.
+    200 alone does not establish the routing exception. {{common:response-observations}} {{common:status-before-body}}
 - id: authorization-policy-fixture
   level: required
   setup: Declare how validity and permission decisions are made/delegated and supply refused, permitted and operation-denied
-    credential fixtures.
+    credential fixtures. The denied-write probe has one well-formed Statement with the identical id in query and
+    body; do not conflate lack of permission with an ID mismatch.
   action: Run credential-sensitive cases and inspect the configured delegation/decision boundary for the observed
     outcomes.
   expected: Credentials or their absence determine operation permissions and Statement validity decisions as declared;
-    401 and 403 are distinguished correctly. No specific authentication mechanism is required.
+    401 and 403 are distinguished correctly. No specific authentication mechanism is required. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: interaction-validation-policy
   level: conditional-required
   setup: Declare whether the LRS validates interaction properties beyond interactionType.
@@ -143,56 +226,74 @@ tests:
     type/component/pattern tables; include characterstring parameters.
   expected: Invalid interactionType and common duplicate-key, null and key-case violations always reject. Both acceptance
     and 400 are allowed for optional remaining interaction-specific validation; characterstring parameters are not
-    validated. RelevantTypes empty-cardinality alternatives are a separate registered judgment.
+    validated. RelevantTypes empty-cardinality alternatives are a separate registered judgment. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: resolvable-metadata-advisory
+  check_levels:
+    declared-network-metadata-policy: advisory
   level: advisory
   setup: Use controlled metadata URLs and record whether the LRS implements resolvable metadata.
   action: Observe optional GET requests, Accept preferences, incorporation of valid definitions and preservation
     of fields absent from fetched definitions.
   expected: Report SHOULD/MAY behavior separately. Hosted metadata is optional and does not create a mandatory network-fetch
-    requirement.
+    requirement. {{common:response-observations}} {{common:status-before-body}}
 - id: rejection-policy-and-clock-margin
   level: advisory-and-conditional
   setup: Declare security/data retention policies, future clock margin and any intentional limits.
   action: Exercise reordered JSON, unknown void targets, future timestamps inside the declared margin, unusually
     large individual fields and unauthorized batches.
   expected: Required acceptance exceptions apply within the declared fixture. Recommendations about field sizes
-    and whole-batch authorization are advisory; no unspecified numerical clock margin is imposed.
+    and whole-batch authorization are advisory; no unspecified numerical clock margin is imposed. {{common:response-observations}}
+    {{common:status-before-body}}
 - id: authority-overwrite-policy
+  check_levels:
+    distinct-credential-identities: advisory
   level: conditional-required
   setup: Declare trusted-provider authority policy and overwrite behavior; use at least two credential identities.
+    Define the full deterministic credential-to-authority mapping and trusted-preservation branch independently
+    of the observed target. Agent and identified/anonymous Group are all admissible structures.
   action: Compare complete authorities for repeated writes under the same credentials and inspect the mapping when
     authority is overwritten.
   expected: Every stored Statement has authority; overwriting uses a deterministic credential mapping. Keeping a
-    trusted submitted authority is allowed and recommendations are reported separately.
+    trusted submitted authority is allowed and recommendations are reported separately. {{common:response-observations}}
+    Compare semantic authority values allowing unordered Group members and permitted identifier representations.
+    The bounded executor detects IFI differences and reordered complete values; changing display facts or unsupported
+    identifier equivalence require the complete mapping relation, not automatic PASS or FAIL. Do not apply the Statement
+    signature exclusion mask. Missing mapping/credentials cannot establish full determinism. {{common:status-before-body}}
+    An Anonymous Group requires a member array; neither the source table nor this procedure adds a minimum array
+    length. Missing/null/wrong-type member is distinct from an empty array.
 - id: canonical-metadata-and-cursor-policy
+  check_levels:
+    metadata-and-pagination-policy: advisory
   level: advisory
   setup: Record whether the target updates/corrects canonical metadata and whether pagination caches or reruns queries.
   action: Update definitions with and without authority; add or void Statements between successive page requests.
   expected: Record allowed cache/rerun and metadata choices without forcing a single implementation. Version retention/default
-    remains mandatory and is tested automatically.
+    remains mandatory and is tested automatically. {{common:response-observations}} {{common:status-before-body}}
 - id: iri-comparison-allowed-strategies
   level: required
   setup: Declare simple comparison, syntax normalization, or their allowed combination under RFC 3987 sections 5.3.1/5.3.2.
   action: Exercise Unicode IRIs, percent encoding, case-sensitive path differences, dot segments and default-port
     variants using the declared strategy.
   expected: Only the two allowed strategies govern identity; no scheme-based or protocol-based normalization is
-    substituted. Resolve the public source's broad case-equivalence language separately before donation.
+    substituted. Apply SP-01 field-aware IRI comparison, including signature payload equivalence; no global casefold.
+    {{common:response-observations}} {{common:status-before-body}}
 - id: language-tag-full-rfc-boundary
   level: required
   setup: Use independent RFC 5646 vectors including token lengths, grandfathered tags, private use, scripts and
     regions at every language-map location.
-  action: Exercise valid/invalid tags and distinguish minimum token-length validation from optional registry/value
-    validation.
-  expected: Reject invalid language-map tags at least at the mandated token-length level; do not invent locale-specific
-    language requirements or render strings as markup.
+  action: Exercise valid/invalid tags under DC-LANGUAGE and distinguish minimum token-length validation from required
+    RFC5646 validity and pinned registry validation.
+  expected: Reject invalid RFC5646 language-map tags, including registry and duplicate-component violations; retain
+    the minimum token-length check and valid grandfathered/private-use controls. Do not invent locale-specific language
+    requirements or render strings as markup. {{common:response-observations}} {{common:status-before-body}}
 - id: timestamp-precision-rounding
   level: required
   setup: Use offset timestamps with three and greater fractional-second precision at top level and in SubStatements.
   action: Store and retrieve timestamps; compare instants at three-decimal precision and allowed rounding/truncation
     boundaries.
   expected: Return UTC; accept non-UTC inputs; preserve at least three decimal digits, allowing the specified higher-precision
-    rounding/truncation.
+    rounding/truncation. {{common:response-observations}} {{common:status-before-body}}
 - id: table-driven-response-preservation
   level: required
   setup: Use the valid fixture and every accepted property/enum/omission vector from lrs-tables.yaml at every declared
@@ -206,13 +307,15 @@ tests:
     Required/generated id, stored, timestamp, authority and version exist with valid types. Group member ordering
     is unrestricted, contextActivities singles become length-one arrays, timestamps become UTC with permitted precision,
     stored/authority use declared overwrite conditions, and version is retained or defaulted. No other value/type
-    change is an automatic pass.
+    change is an automatic pass. {{common:response-observations}} {{common:status-before-body}}
   rubric:
   - Separate logical immutability from exact response preservation and duplicate state preservation; exemptions
     from logical equivalence are not blanket permission to omit returned data.
   - Agent and Group name/IFI/member, Verb display, Activity definition, Result score/success/completion/response/duration/extensions,
-    Context and attachments are all traversed. Compare objects by key and Group members without order; preserve
-    attachment array order. Compare all extension values recursively including nulls and mixed arrays.
+    Context and attachments are all traversed. Compare objects by key and Group members without order. For attachment
+    metadata preserve complete per-item associations and multiplicity in either permitted D-09 ordering; exact-order
+    grading requires an explicitly selected policy, which remains unselected. Extension-owned arrays stay ordered.
+    Compare all extension values recursively including nulls and mixed arrays.
   - Use the source's duration and numeric/timestamp precision allowances; inspect omitted SubStatement timestamp
     creation without inventing equality with top-level stored. Authority credential mapping conditions are judged
     by the separate policy procedure.
@@ -231,19 +334,30 @@ tests:
   expected: For each captured authority or member identifier, related_agents=true contains the stored id and default/false
     contains no such Statement within the unique-verb fixture. Ignoring authority is FAIL. If the authority has
     no identifiable Agent/Group/member, record that matching-identifier precondition is unavailable; do not call
-    it PASS. No blanket exclusion of the authority placement is allowed.
+    it PASS. No blanket exclusion of the authority placement is allowed. {{common:response-observations}} Evaluate
+    observed forbidden IDs on each page immediately. Positive set completeness/absence requires a terminal continuation
+    chain and the separately established visibility premise; incomplete routing or transport cannot imply absence.
+    {{common:status-before-body}}
   rubric:
   - Check that captured pointers correspond to all relevant returned authority identifiers and are disjoint from
     Actor/Object IFIs.
   - Require contains-id with true, and an empty statements array without true. Store exact request/response evidence;
     200 alone does not pass.
+  - Validate version and applicable Consistent-Through headers on every bootstrap PUT/GET, including intermediate
+    404 replies. Retain a known violation before retry; a later valid response cannot erase it. Use complete bounded
+    continuation chains for membership and absence. Unavailable visibility, non-disjoint authority and child not-run
+    are incomplete. Consume explicit passed/failed/incomplete results, not a nonzero exit code as a target violation.
 - id: voiding-a-voiding-statement
   level: required
   setup: 'Use voiding-statement-cannot-be-voided: A ordinary, B voids A, C attempts to void B. Retain the actual
-    status for C; 4.2.4.1 allows rejecting C. The allowance to reject C is the general acceptance/rejection permission
-    at public line 1182; line 1188 forbids rejecting a missing target and is not the reason.'
+    status for C. IEEE Std 9274.1.1-2023 4.2.4.1 opening paragraph (fixed ieee-layout.txt LF 3058-3060) preserves
+    rejection for security, authority and data-management reasons; it does not require C rejection. The missing-target
+    non-rejection requirement in LF 3066-3067 is distinct and is not the reason for allowing rejection of C. Clause
+    4.2.5 requires B to remain non-voidable in either admission branch.'
   action: After visibility settles, observe normal-id GET and query for B and A. If C was accepted, require normal-id
     GET/query to return C; if C was rejected, require no C state. Preserve statuses and complete returned ids.
   expected: A stays voided; B remains returnable and never becomes voided. C is returnable if accepted. C rejection
     is allowed and does not restore A or hide B. The automatic case checks A/B regardless of C status; this procedure
-    checks C retrieval conditional on actual acceptance.
+    checks C retrieval conditional on actual acceptance. {{common:response-observations}} Evaluate observed forbidden
+    IDs on each page immediately. Positive set completeness/absence requires a terminal continuation chain and the
+    separately established visibility premise; incomplete routing or transport cannot imply absence. {{common:status-before-body}}

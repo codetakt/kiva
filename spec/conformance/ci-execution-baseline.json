@@ -1,0 +1,1823 @@
+{
+  "schema_version": 1,
+  "claim": "known-gap-regression-only",
+  "authority": "User selected ledger PR first with an explicit, strict known-residual CI policy on 2026-10-23 JST.",
+  "source": {
+    "reviewed_commit": "fd8d942239df211605517bde57988f6aa161556a",
+    "review_packet_manifest_sha256": "f7d0ebb4dfbab100c33be274162a0de6ca649375c1dfa4427cd8f03ccf53493f",
+    "logs": {
+      "memory": {
+        "path": "target/lrs-conformance-pr3-recheck5/fable-20261021T215236Z/logs/nix2-memory-conformance.log",
+        "sha256": "e1b4234bb34fc4235e8e797f6b7eea4982ff5cb4bb106f0348b49f0992720159"
+      },
+      "postgres": {
+        "path": "target/lrs-conformance-pr3-recheck5/fable-20261021T215236Z/logs/nix2-postgres-conformance.log",
+        "sha256": "cf3a0e5ccde424920ef10b66f9f8f2e93456207f6a4330b26cb936b791e9505c"
+      }
+    },
+    "scope": "Fresh reviewer execution at clean fd8d942. Inherited applicability at 8d96de8; no new execution inferred from this transcription.",
+    "history": "Superseded branch history, preserved in pre-consolidation.bundle (SHA-256 1f9a09ef2e900e1c6aebfdb7465aee09baa356e0060aa6af0c7780150c59e6ff). Log paths are private provenance locators; reproducing the gate requires only committed definitions/profiles, explicit gap entries and current execution reports."
+  },
+  "update_policy": "No automatic refresh. Any changed definition/profile, newly passing known gap, changed reason, or new failure requires explicit disposition. Remove fixed gaps with product/provider follow-up evidence; never relabel raw FAIL/NOT-RUN as PASS.",
+  "case_count": 17933,
+  "case_files": {
+    "tests/conformance/http/about-version.yaml": "1b5550ebd7eb9bd56b8a27150f65d5d6191eb4deede0ae069c6867a716c403c9",
+    "tests/conformance/http/activity-profile-document-isolated.yaml": "67fb89ac150d21d888dd0e1292873fdf1687b226377ffe8759d5b8b9fdfb27bc",
+    "tests/conformance/http/agent-activity-fallback.yaml": "9534ee9f579dca1c4f3f6c62f24ebc7e8a6382e49b27c3f45b843bb822ba04fa",
+    "tests/conformance/http/agent-profile-document-isolated.yaml": "2e519f38f2ff0805e2c8ebffdccfb9587fe293b2e384381b74f2dec8eabd92a0",
+    "tests/conformance/http/authentication-errors.yaml": "495d43e1d8f3a36a3f4f8735c920ad84bc87994702116b56e60923c96cfb3b4c",
+    "tests/conformance/http/error-profile-sensitive-isolated.yaml": "a449273957647bc9069eb3edce89eeb9a4d04ba3cb5d2f966e2a43270e231a1b",
+    "tests/conformance/http/generated/behaviors.yaml": "01cada50781f3591ca73c4f638fa91999d7510a6927f00833d3aa62df9fbc445",
+    "tests/conformance/http/generated/issued-completion.yaml": "2cd4f356e2c21c8e8bf5c6f2781428781790f81dbcdf9bea773e41413ac263b0",
+    "tests/conformance/http/generated/issued-readback.yaml": "b70fe62d0fc0a23ad3a4d57eca69316cfa5d3a7b62c67a0047966443950f79b2",
+    "tests/conformance/http/generated/issued-rejection.yaml": "57c2fa8be04f38a44b7969835371204a1deae94bac52fc5084a48dc5aa88bbb0",
+    "tests/conformance/http/generated/tables.yaml": "43377d6b64f0940a89b574208c804afae21428b4b3703bf2973d9388a8661ddf",
+    "tests/conformance/http/state-document-isolated.yaml": "36bd8decd4a44799689e4539334387ce273c4db3b1595ed1a3bbf1530485a914",
+    "tests/conformance/http/statement-actor-validation-isolated.yaml": "0d862b82c52fe2a780a5d1cedb37e495bead1ca3b02fb4419fd37efac8000168",
+    "tests/conformance/http/statement-attachments-isolated.yaml": "a02a73f7f8663957c9adfc9154a30e08195e76e3b85c97fd402a137b702da97e",
+    "tests/conformance/http/statement-authz-authority-isolated.yaml": "a2263de601bb21dda83e2d3011da2d265bc656d300a41c43ae42382391332991",
+    "tests/conformance/http/statement-context-validation-isolated.yaml": "833d9b36949bfc1e1dca6ee8b3f3079b66263ed9d8ffc84531ce37c678f092c2",
+    "tests/conformance/http/statement-datatypes-isolated.yaml": "edfc5108628bcb9047f07e118da88d0b187edfa742783839a9d1e925afdb63ad",
+    "tests/conformance/http/statement-format-isolated.yaml": "21f899ba04e4b57776fde9349f8c65ec83df71f5165aa182b9838527d8468681",
+    "tests/conformance/http/statement-immutability-isolated.yaml": "c42c15eb423bd0bceaa9a1cad78a86239a626ba33ff2bccd9b777fe7e30da0a6",
+    "tests/conformance/http/statement-normalization-isolated.yaml": "bbfde5546aeae935274f0da22042e196026cd5ef90e2c3263ea42e9a1f579603",
+    "tests/conformance/http/statement-object-validation-isolated.yaml": "c9c7d56b88bd5401389320d388542445b4ab8ac75e1d3a2c1f4a14167100cb9f",
+    "tests/conformance/http/statement-query-filter-isolated.yaml": "546b10e0aecbec0098626609ded50d9128f6315971b9e1e198f0c5de8f089fdf",
+    "tests/conformance/http/statement-query-validation.yaml": "9e49dc520bb8c38a7cb35f8b74d0ed53f973dd5413511a58efafb741f2e7db6e",
+    "tests/conformance/http/statement-reference-isolated.yaml": "531f9b62f54a8b8e2551c5a8bf44c58d212eb2cad5355417eb3e07ab0977faea",
+    "tests/conformance/http/statement-result-validation-isolated.yaml": "0c64bb7575b0a09d6fc721ceb7478d6904f9bc05583e4d41f0fbaa4be01ec37d",
+    "tests/conformance/http/statement-signing-isolated.yaml": "828823e1f47d71490d0f156ae91f5278adfdfddea39537bfeb5af3bdfa7a1875",
+    "tests/conformance/http/statement-utf8-isolated.yaml": "e700bf0b2e25e4351028e7e0b1c0d63e3846180e1e97fe66abe19ad6c6413641",
+    "tests/conformance/http/statement-validation-isolated.yaml": "9ea7a3209fe3c7e4a9db6d44a65eeeccc25a77e225565ceb72fa8e556626818a",
+    "tests/conformance/http/statement-voiding-isolated.yaml": "520ebccd52b097fdbbebca66b80dd9023c9026951403a734934d58e8f04f3c0b",
+    "tests/conformance/http/statement-write-isolated.yaml": "518c9c36b3b99be0bf2bb044d347054c06bcd3916fea5f89b11c8a6847bff4a7",
+    "tests/conformance/http/support-resources.yaml": "adcf982e387fb3fd757c6037cd19651385d25ef2505ab551c45ec9d8c816fe32",
+    "tests/conformance/http/version-negotiation.yaml": "9cc80a18a0e8cd089bccf9f79530fb145223492ece894b7958b5eb3cba5004fa"
+  },
+  "profiles": {
+    "spec/conformance/endpoint-profile.example.yaml": "24cbf4b6414a2342a70283508d2315178b97cf6484c159e4299a514b9eebc116",
+    "spec/conformance/auth-profile.example.yaml": "ee71c67cc866b987bef6df0d374fc7436aa7db554545cdc8ab6d88d15ef78b07"
+  },
+  "gaps": [
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "about-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "20a906ee70a1be5125a99bf9f9c9008b449cbf9aca6b5cda5f1f06b93b446d18",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /about unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "about-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "7c7d449078538e7c80f7cbc6000c947da9a061c0a75cb7d4a9c738cb8724235a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /about unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activities-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "b629a8be3d4ddf0bacab90edbebaa945dee885dc46de2e2558c902058fa8658c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /activities unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activities-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "2b3421484c1aa2028c3650fe8c355cc57e1d5ca86de40415703a244efcbc3b35",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /activities unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activity-profile-unknown-parameter-with-valid-selectors-delete",
+      "case_sha256": "20b2ab272ed727fe7bdee80d0cd844743227a25ab1de2a73398354cb1ed8f42a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: DELETE /activities/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activity-profile-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "492e04b3b6feabedf5954f12dcb61f0779d458a01934087a6ab94998aa3a1e60",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /activities/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activity-profile-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "7af53f60da6451b612d857a0d70d075ffcec79c746df929d9fbf6f9a9950bb64",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /activities/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activity-profile-unknown-parameter-with-valid-selectors-post",
+      "case_sha256": "767210a78e019dc5ba79dd6981ae3147a146fe39f004c57209969337661d0f62",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: POST /activities/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "activity-profile-unknown-parameter-with-valid-selectors-put",
+      "case_sha256": "16913a6a1db0aacfe12a73642c521171f640136a0c61479d5f0e78dbd2d393b6",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: PUT /activities/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agent-profile-unknown-parameter-with-valid-selectors-delete",
+      "case_sha256": "bcbcdac101daf86287d671ce405670bb74c5694925371fab4da3412671707025",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: DELETE /agents/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agent-profile-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "be3f525e64d06457d7379434d4b654278930b7e66774d4181525d1381535162c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /agents/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agent-profile-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "e0fedf0bfe20906a588a623bd01974547fb0cb921ee6ba66d1e3fae8f224e860",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /agents/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agent-profile-unknown-parameter-with-valid-selectors-post",
+      "case_sha256": "9f1ae675896724111ea3b271697f98e866fc4fb3d2498921b1c29070758071b2",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: POST /agents/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agent-profile-unknown-parameter-with-valid-selectors-put",
+      "case_sha256": "ecb4ebdb7af24f2a05f7baf8ed6337480e5f57ee123374e0aeb549e505d47810",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: PUT /agents/profile unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agents-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "2eae1bdbae4a14381c54741c6fc0e982966636af3f3818ffb8fe2a1ccea2aa0d",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /agents unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "agents-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "3c887ae9dcb5545ad665ef348a9ac9559d4742f113d6a68238bc03194eaef80b",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /agents unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "extension-values-context-extensions-3",
+      "case_sha256": "c8a055de6065a5d6d933108a0aafeca4477fb25c093b4b9301876672d7448bc1",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: original decimal/exponent token required for exact JSON comparison/capture; JSON pointer /context/extensions equals"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "extension-values-object-definition-extensions-3",
+      "case_sha256": "ce4b4b37799e329c3ac4525ecf589878dfc6dff4f742f8ab50493d4213282efd",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: original decimal/exponent token required for exact JSON comparison/capture; JSON pointer /object/definition/extensions equals"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "extension-values-result-extensions-3",
+      "case_sha256": "1a014981d4dcf451cfc3313f72c1da191cafc1ff77bf4aefee1b5565e799287c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: original decimal/exponent token required for exact JSON comparison/capture; JSON pointer /result/extensions equals"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "person-response-all-identifiers-account",
+      "case_sha256": "b4e66cc91867d184e8f6718dbd194473a5f290d9f4f26cd1ad0d7529d1646092",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "ORACLE-UNAVAILABLE: /account/0/homePage requires DC-IRL locator/access-mechanism evidence; IRI syntax alone is insufficient"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS256-without-certificate",
+      "case_sha256": "97542eaaf8fe97322f8ee248470fdaf62c2cc09a155cfc5dd755d9c7388aae0a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS256-x5c",
+      "case_sha256": "b9a931658c1eb078b03aab91eb20ce4c2c493df2862b54ffe51163302d04502f",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS384-without-certificate",
+      "case_sha256": "cb1dc54cec57ade89d39652d5870807e2ddb3abbbf8ad863e45fec79e7e0883c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS384-x5c",
+      "case_sha256": "9526864635ed5d7392721f41ffd9b26c3888329423bccc7aab3c02d681f7cbc2",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS512-without-certificate",
+      "case_sha256": "148be70d75194b5a78e929a5cc7ac4cd4f71863c56ac1bfd99003ac99284d505",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-RS512-x5c",
+      "case_sha256": "faf3baf270c0b98a252b9eac16503c69908a67cd6143eebcc0f7a9358e9f3f2c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-compact-extra-segment",
+      "case_sha256": "bf928450d0968afbcba25e275a3633388d585847196ab65d7f66de7c41ac2bdf",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-compact-segments",
+      "case_sha256": "4042daf2212917b469df9b53bbf7b0c6424657b269928c5f8a6bf32a975f0310",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-disallowed-ES256",
+      "case_sha256": "0ca16c88559b6affeeba1b3df5466a1beececda5b050ac02ac5ecbbc9e566186",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-disallowed-HS256",
+      "case_sha256": "4fe15240c0a85f8b43bc3eb061b98e8d89998e065b929e8dfa9ec8c8e6f2c259",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-disallowed-none",
+      "case_sha256": "69ce505f1f1a8d4231ce783ae624b4e3affc79210ae0eaa504d1a56f07a4ff86",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-disallowed-rs256",
+      "case_sha256": "3f4e1191aa1d95518d97f1f87b928d31c711e131bf6d122c478aa6cbe54059b3",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-disallowed-unknown",
+      "case_sha256": "9102f53ad64862bf2976266a05527256a712b2eca3e1d027ac944c8dd0294725",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-empty-payload",
+      "case_sha256": "7f67fb38de6692eddbe09b9bbc8c128d95c77e6144e89bfb74334054a00627b1",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-activity-definition",
+      "case_sha256": "f21a032d34542186d9df930fcd8e53340bcc612f3b977dcccc4d54c8e590ac79",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-attachments",
+      "case_sha256": "260566348f33d76edb8e1040ac9b09c257cfcb6cb360bc0e9616241414c62487",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-authority",
+      "case_sha256": "85c938a16ead15b3649af1cc005d3c593f319874a44b72aab961ab6845f8f625",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-case",
+      "case_sha256": "0db756ef0c788217ac41c3576f107ce5d5eac4b5af5296489aa92092e9c5ce4d",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-duration",
+      "case_sha256": "1e4da07c1a4d6446324f9fb183312a96120dd77a7a24a7a738c2f8fee2195e4d",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-group-order",
+      "case_sha256": "87ffddbdfab263bdecac1e2c2afcc3f0f9ce8b23ef9592510f81bb4c47c7d281",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-id",
+      "case_sha256": "26b74afa2edf3827bf04a203aeebf6dcb343416babb206a3790b746aed404306",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-stored",
+      "case_sha256": "0a2651caf433f6f9a94fa056dd545680bff141e3cc1a9270e2665bd590e530c6",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-timestamp",
+      "case_sha256": "3533b947cdc36531d53a2e2554a68de782c8da11c430317e184deabf07607e4f",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-verb-display",
+      "case_sha256": "2fda725835c4f44e3cfbb47b15c809f31bc197866b858c021b2f551cd46d0e97",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-equivalence-excludes-version",
+      "case_sha256": "1858e9688a24121408cbd41290313c2ca9c7e92357dac4ee0e2da22fc15002ba",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-incomplete-payload-actor",
+      "case_sha256": "ff58ca8a4633481655bc8921c1e38b32506d68fe53f862aa62fca178ad49fff7",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-incomplete-payload-object",
+      "case_sha256": "7af83eb58ff9feecd72a0373feb3b13b86e38999102e057f74a432b7495f1279",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-incomplete-payload-verb",
+      "case_sha256": "a588c0feef579108246da49f50400ed7bc0c667637a6dd40c2acdd6696e5c104",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-base64",
+      "case_sha256": "8ebe9934f670c0282bf296fa6e36d5fea2c33c8d9c410f920c5fa7d228b890ed",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-certificate",
+      "case_sha256": "67043ccb9e3737ffc22226a8a9925ce2f72c38dfb36ddb953f9426c4a5bf179c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-0",
+      "case_sha256": "23bdf41b3cd1a72e63af9068c2d9903b3aec1ce0d06689063a73a859ed0dfc9e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-1",
+      "case_sha256": "2d1df09d199a20b5197d984447a17be0e966224458618ea6d3be0133afdbb802",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-2",
+      "case_sha256": "115ccd24a6518247419bfe7e0be86884538e1a95f25f74c066e5fcc0627d46a2",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-3",
+      "case_sha256": "7a9f5d8675b604916660535ceb6c6374349f93849d313b46d5e56c55db0ac2c3",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-4",
+      "case_sha256": "a8aab8db86746860120a5c40abd1059756a516ad679fd03cb33d852b9189a9a8",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-invalid-payload-5",
+      "case_sha256": "faac54951798e69b5ef1c3eb61f292fa51aa0381252f04997f2f9e464fa42efc",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-json-serialization",
+      "case_sha256": "0031bc095d6d11ff73ab426ba99b36d6434281f149a48c26e65d0b73eb529c6e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-tampered-x5c",
+      "case_sha256": "63fde7735dfeaea6efdd3e66769166819648ae40f480f55b07d6a1b3ac5a0d1c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-wrong-actor",
+      "case_sha256": "425d5dc799b0e9c6b7f67fe8d9304c79cc703874a270d1c79ba6f80302cd1679",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-wrong-media-type",
+      "case_sha256": "5b9f0303e4dc7243ec9e959529ec78c8ff6a14434bc10bde9689a7f6acefcfe5",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-wrong-object",
+      "case_sha256": "5cc89091e11af1192edc970dbbcfab858d8bbf3288125403e778d4fc50c87a37",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "signature-wrong-verb",
+      "case_sha256": "da6b1bdf8a91f77783db7b67ad3b3b9637d30dc826f26a0d4e64940d1ec703a8",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "state-unknown-parameter-with-valid-selectors-delete",
+      "case_sha256": "dfca2dbc93d7b7451ec04ff7704bcea6d37292697bb71cc47ad8b444064c4c6c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: DELETE /activities/state unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "state-unknown-parameter-with-valid-selectors-get",
+      "case_sha256": "36368b9b71bde3e4f8deca296ae1a8bfb7b1090debf819dd794d7866540eccd4",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /activities/state unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "state-unknown-parameter-with-valid-selectors-head",
+      "case_sha256": "bf264ef60def4892cb3d845cec98384d401c8b5d3230f1b7ed768aecda6e488b",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: HEAD /activities/state unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "state-unknown-parameter-with-valid-selectors-post",
+      "case_sha256": "64ba3e353c1517bfe8bb5c5f5169821dbc538d7b1e4395bfe0aa98337a986abd",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: POST /activities/state unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "state-unknown-parameter-with-valid-selectors-put",
+      "case_sha256": "13ebef335b388b48ce4f2cdc33cc5b5efed342bcb8da8265e9b96cba53a09ae1",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: PUT /activities/state unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "statement-unknown-parameter-with-valid-selectors-post",
+      "case_sha256": "5177b49409c5b52a0d75f00b3c55d5f72226d650c2ecf7c8194b02c67c33fc4f",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: POST /statements unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-behavior-projection",
+      "case": "statement-unknown-parameter-with-valid-selectors-put",
+      "case_sha256": "044175b1e002b5cbd25a24cdb5163bb92f59b5f69559f00af8bc1de7775b1af6",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: PUT /statements unknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-audit-sha384-fileurl",
+      "case_sha256": "2e75247b6fd08fdaabe0a576ff23edcf0709487f850074ba43338f61c6479db1",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 204, received 400",
+        "step store: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-audit-sha384-raw-match",
+      "case_sha256": "a0a0e5330f6b5de2464baa88b98cd606ec32cb86b7dc0757ed7e67b22c6fac66",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store-valid: expected status 204, received 400",
+        "step store-valid: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-audit-sha512-fileurl",
+      "case_sha256": "a7c1c661371574a3fefcef741e339e548bebc35a03cfaaa9eb2bc5e676686386",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 204, received 400",
+        "step store: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-audit-sha512-raw-match",
+      "case_sha256": "65d7ab39b1d34d4572f54f3656206f81bcd272aac389d84478a9529dfe9a52cb",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store-valid: expected status 204, received 400",
+        "step store-valid: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-root-duration-comma-batch",
+      "case_sha256": "7dd684d890fa4fac03970d40b9120c4dd138b399a2e130bd70825a4f0519874e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 400"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-root-duration-comma-post",
+      "case_sha256": "3c0002c8dc3d9352c0830c17bb9503165a941f3866fcf13c302f7115a7bda369",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 400"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-root-duration-comma-put",
+      "case_sha256": "fe69714df325fa5ba5b2f29edfeeb5c2b182de8c93e30b8d6b9e966bcfe0cbab",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 204, received 400",
+        "step store: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-sub-duration-comma-batch",
+      "case_sha256": "3d502a6cab3b0f022c97cec6da86c456097517df966824b23916b8206e171839",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 400"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-sub-duration-comma-post",
+      "case_sha256": "3ea6bf8dc686de5339e167ad27b9c6dcaeeb13f016244119908babd5842c7d0b",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 400"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-completion",
+      "case": "issued-completion-sub-duration-comma-put",
+      "case_sha256": "e1a704357826e8986ebfae6e829368b37e1507f6ff74e3eb2394aca54b1a220f",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 204, received 400",
+        "step store: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-en-GB-batch",
+      "case_sha256": "e93ceb816e6d25418f1639858506330a018001716a26763419f294cbbf37849e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-en-GB-post",
+      "case_sha256": "a758418d295c069cd6351e02a696b9ae488bda0f6388771216963e1ad45c58f2",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-en-GB-put",
+      "case_sha256": "3397931a8659802804ef665174cfa2501fe023cb773e6e8380849f2689c4c946",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-ja-batch",
+      "case_sha256": "b4129c433cc2d8382dfe2b72ef10740f93ec73ff6ac7fd4018e89445b8da9e1a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-ja-post",
+      "case_sha256": "ca96010fdc58680ad00cbc273694083a08772c0b7cf96f35c59d048f10f9aefe",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-ja-put",
+      "case_sha256": "5b7de62eb6e4e1ad44cbd8b68c8d78cd18cdebe7712efd4be34040f074f6a73c",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-omitted-batch",
+      "case_sha256": "5a54990d43fd9c883f5af80f4b218c871f6ca131841869390c0d52b7d591ca60",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-omitted-post",
+      "case_sha256": "5ae61cf66ce3d286e86303010fedd21007f548699bc7b420a2784fb9f7fe0438",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-root-omitted-put",
+      "case_sha256": "7cfb822e9f10c3f9fa040d82e1d94344532f34a72b34a70f769472fea4fd580e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-en-GB-batch",
+      "case_sha256": "bb3b3acc5e828058eb47459a60caced47ad3107a156dcbd12caec45d84dfcc33",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-en-GB-post",
+      "case_sha256": "4c922fe2b6b9ecfb6e2981763e610169857f62769f1ff66539e3438bb1ca10a3",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-en-GB-put",
+      "case_sha256": "a37451a8da830464e98a2581b93b92c36501e6b2af05995001ddad7cc3044b06",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-ja-batch",
+      "case_sha256": "05d6207e9baeff99d50961fb8133ee319deb5ced03071e635ed9a123a59e52b5",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-ja-post",
+      "case_sha256": "7d25f3ce9e6add2b23ea25aec6582bc2b8ae55c190917ad241e9ca3a83e8295e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-ja-put",
+      "case_sha256": "7804dc234d857432def8206fa3458f0061edfb54bba083da4d1a9588d4bf2eac",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-omitted-batch",
+      "case_sha256": "b1e0e55d7ac995e520966c61acaa3da588a0083ce47a52fbb8079d069524a0af",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-omitted-post",
+      "case_sha256": "6f987fbd1481bdfe86ba35edb589f95ba8ace81563349a034d0fa9ceb9c8d128",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-data-meaning-sub-omitted-put",
+      "case_sha256": "a43a41847dfd9a6be701f883e654ec6b550c612ac21e5c9805c3a7d082edb81e",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-raw-accepted-batch",
+      "case_sha256": "e45332a93faaa2d0c1794d63f59cddc7eef88b60bfce0f92873eb810a89fb7de",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-raw-accepted-post",
+      "case_sha256": "84b25efe8425ea41d518dfb1cc4aae642ea1691639ac480289da86400c8c620f",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-raw-accepted-put",
+      "case_sha256": "f2b4ae7c013dfade69fafa5c1429732d3c2774aa6b81cda6430d8d256a310cd3",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-scaled-accepted-batch",
+      "case_sha256": "8687107f7aa1b398febd833f0b7775f2f43306ee6598d97c6ed027269f9fc80b",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-scaled-accepted-post",
+      "case_sha256": "cd4330043b94a9e23d2f1724c49c9d4d28694a5c680fb4a5e4a969cb0ce0f554",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-object-result-score-scaled-accepted-put",
+      "case_sha256": "2e3bf0d6cdd857484615dc5b7d88909dfe99e59115594f0491b927f071effff3",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-raw-accepted-batch",
+      "case_sha256": "562eb10c6019faa4ab1cd7b1da0a80147d03ac67295048f6b020d155ec361fc8",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-raw-accepted-post",
+      "case_sha256": "29cb75dea403505b9caf2e805a35b31ea88ab7398dbe00fc5c6f71d82de41d23",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-raw-accepted-put",
+      "case_sha256": "128a327e5b6a6772285d198737b4a7b38e944795d3d549351ee75c470f5393ca",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-scaled-accepted-batch",
+      "case_sha256": "be5f6c309867e42cc37ba2239f6dce29c86677a937b5354dc19c53be147287d7",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-scaled-accepted-post",
+      "case_sha256": "a9ee32f29edd97a26159bf5246a780682ba0c77bb294981cca5f1ad86090063a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-readback-score-result-score-scaled-accepted-put",
+      "case_sha256": "c535230b2f9cf7fc5b23edc53013303163d0ede898053411a6ffdcb710b30207",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step read: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-utf8-valid-boundaries-batch",
+      "case_sha256": "ea0e1ececfdd04157aeef551e4d7ecf17ff11f3dc37f840a5e658d513f71a48d",
+      "backends": [
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 500"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-utf8-valid-boundaries-post",
+      "case_sha256": "5e3329e5276bd38bea226aa5ab26664969bb39feb684619788bc09c389917775",
+      "backends": [
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 200, received 500"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-issued-readback",
+      "case": "issued-utf8-valid-boundaries-put",
+      "case_sha256": "e35561bf645eb7ecb8b80ddbf0269dc64ab7c1ca530a58803a7d0b2908137494",
+      "backends": [
+        "postgres"
+      ],
+      "outcome": "failed",
+      "failures": [
+        "step store: expected status 204, received 500",
+        "step store: expected response body non_empty=false"
+      ],
+      "not_run_reasons": [],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-statement-datatypes-isolated",
+      "case": "statement-number-precision-is-preserved",
+      "case_sha256": "b13e95326be99abe94f95b10250eb13098e8f29344e81fe353a064969bbd87de",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "step get-statement: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading",
+        "step get-statement: ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-statement-query-validation",
+      "case": "statements-get-empty-result-returns-statement-result",
+      "case_sha256": "284d47e5212ebc0e630356eb7f8b311e7c39206390e87a0c77c279b8bb51c9e4",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: declared-resource-absence"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-statement-query-validation",
+      "case": "statements-get-rejects-unknown-query-parameter",
+      "case_sha256": "5872174af0a4531999c298a61deaf7f6f07ec0e1ff5442c7b9bcbf59fffab865",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: independent unrecognized parameter: GET /statements kivaUnknownParameter"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-statement-signing-isolated",
+      "case": "signed-statement-with-rs256-compact-jws-is-accepted",
+      "case_sha256": "ebe41402585b14be608c3f426e400e57d7ac7f0927abe6c8aa30969051f8213a",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: signature-validation-context"
+      ],
+      "finding": "R5-01"
+    },
+    {
+      "suite": "xapi-lrs-support-resources",
+      "case": "standard-resource-families-are-addressable",
+      "case_sha256": "6d19a68a356ad99d98de81e1666008ab2630f55ed08e320cb0019c7f789da6c8",
+      "backends": [
+        "memory",
+        "postgres"
+      ],
+      "outcome": "not-run",
+      "failures": [],
+      "not_run_reasons": [
+        "required target fixture profile(s) unavailable: declared-resource-absence"
+      ],
+      "finding": "R5-01"
+    }
+  ]
+}

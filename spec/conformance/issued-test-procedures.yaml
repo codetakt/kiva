@@ -1,0 +1,88 @@
+schema_version: 1
+scope: IEEE 9274.1.1-2023 issued detailed ledger; complementary to portable HTTP cases
+outcomes:
+  required: [passed, failed, not-run, not-applicable]
+  advisory: [observed, not-run, not-applicable]
+  unresolved: [unresolved]
+notes:
+  - A procedure definition is a test case, not evidence that it ran or passed.
+  - Not-run, unresolved and unjustified not-applicable never discharge a mandatory condition.
+  - Sender/renderer meaning and recommendations are not mandatory LRS rejection rules.
+tests:
+  - id: issued-scope-boundaries
+    rules: [IP-unknown-resource, IP-absence-only, IP-additional-resources, IP-extension-namespace, IP-attachment-hosting-scope, IP-authentication-method, IP-statement-deletion-recommendation, IP-data-management-scope]
+    level: scope-and-advisory
+    fixture: Declare extension paths, supported extra methods, authentication adapter, retention and attachment hosting/access policy; retain its configuration hash.
+    steps:
+      - Probe one documented extension, an undefined path and an undefined method using authorized credentials; retain status/body without inventing an xAPI status for those contexts.
+      - For each extension path, record whether its first additional segment is extensions; record reasons for a recommendation deviation.
+      - Retrieve a fileUrl before/after its declared expiration and with the declared allowed/denied credentials; assess only that policy, not perpetual public hosting.
+      - Compare a Statement before/after a configured retention event; distinguish normal retention/security processes from replay mutation and voiding.
+    assertions:
+      - No test requires support for an undefined resource, a particular authentication scheme, or unlimited retention/hosting.
+      - Recommendation deviations remain advisory and identify the actual rejection/deletion reason.
+      - Security and policy outcomes do not convert failures of separately applicable mandatory requirements to passes.
+  - id: issued-conformance-configuration
+    rules: [IP-security-scope, IP-configurable-conformance]
+    level: required
+    fixture: Disposable endpoint plus the exact deployable configuration, authorization policy, declared limits and enabled xAPI routes.
+    steps:
+      - Record the configuration and dependency hashes and configure the advertised conformance mode.
+      - Execute every applicable mandatory HTTP/procedure case; retain failed, skipped, missing-fixture and interpretation-dependent results independently.
+      - Verify that the configuration can be reproduced without disabling an IEEE requirement or loosening an expected result.
+    assertions:
+      - A missing runnable conformance configuration fails this configuration test.
+      - A failing target is allowed as a development result; it does not satisfy this conformance property.
+  - id: issued-producer-and-meaning
+    rules: [IP-mbox-uniqueness, IP-Account-homePage-value, IP-Account-name-value, IP-Verb-id-value, IP-Activity-id-value, IP-ActivityDefinition-moreInfo-meaning, IP-Statement-timestamp-meaning, IP-SubStatement-timestamp-meaning, IP-Score-scaled-meaning, IP-Score-raw-meaning, IP-Score-min-meaning, IP-Score-max-meaning, IP-Result-duration-meaning, IP-Context-language-meaning, IP-contextAgent-types-recommended, IP-contextGroup-types-recommended, IP-component-whitespace, IP-language-map-population, IP-language-map-specificity, IP-language-map-plain-text]
+    level: role-dependent
+    fixture: A controlled producer/renderer and ground-truth experience; an identifier assignment record; a local human-readable moreInfo document.
+    steps:
+      - Create an experience beginning 2020-01-01T00:00:00Z and ending 90.25 seconds later; record its event time at 00:00:30Z and Result.duration PT1M30.25S in both a Statement and a SubStatement. Duration describes the period over which the Statement occurred; it is not receipt time or a difference between LRS stored timestamps.
+      - Declare a raw score 17, possible minimum 0 and maximum 20, and an explicitly documented normalization to 0.7; label the experience language ja when known and omit it when unknown or inapplicable.
+      - Check that the producer uses the canonical account-system page and unique account name; retain the mailbox assignment evidence and verify that verb/activity identifiers identify the described entities rather than their display labels.
+      - Resolve the controlled moreInfo link and verify that it describes the Activity to a human; a launch link is optional. Separately submit an unreachable well-formed link to the LRS and do not require network-truth validation.
+      - Exercise generic and typed context relationships; check whitespace-free component identifiers as a producer recommendation, not an LRS rejection oracle.
+      - Render a language-map value containing literal HTML markup as text. Exercise an extension-owned map with an explicit rendering contract separately.
+    assertions:
+      - Fixture values correspond to the stated data meanings; raw/scaled and min/max are distinct concepts, and timestamps may lie inside the experience.
+      - Unknown/inapplicable Context.language may be omitted; no LRS grading, historical truth verification or URL-fetch requirement is introduced.
+      - LRS readback preserves supplied values under the explicit normalization rules; sender/renderer checks apply to those roles only.
+      - Producer recommendations produce advisory observations; missing producer/renderer fixtures are recorded as not-run for that role, not as an LRS failure.
+  - id: issued-stored-recording-time
+    rules: [IP-Statement-stored-meaning, IP-stored-overwrite, IP-stored-validate, IP-timestamp-default]
+    level: required-with-separate-advisory
+    fixture: An independent clock/recording barrier for the target, or documented shared clock with bounded uncertainty; no invented fixed skew tolerance.
+    steps:
+      - Hold recording at T0=2020-01-01T00:00:01.250Z; submit once with stored omitted and once with an obsolete stored value, using new ids.
+      - Read each recorded Statement in exact mode and compare stored with the independently observed recording instant/interval, retaining the timestamp normalization allowance.
+      - Repeat with timestamp absent and present. Absent timestamp must equal stored; a supplied experience timestamp is distinct from recording time.
+      - Replay an existing id after advancing the clock; verify that stored and other objects do not change.
+      - Submit an invalid stored field and record validation as a recommendation while retaining the mandatory overwrite behavior for accepted inputs.
+    assertions:
+      - stored identifies recording time and overwrites the submitted stored value for a newly stored Statement.
+      - Timestamp default, stored syntax, Last-Modified and replay immutability remain separate assertions.
+      - A missing independent clock is not-run, not a pass derived from the returned stored value itself.
+  - id: issued-characterstring-context
+    rules: [IP-characterstring-context, IP-characterstring-validation]
+    level: role-dependent
+    fixture: Producer/interpreter examples plus issued-characterstring HTTP cases, with no domain grading by the LRS.
+    steps:
+      - For fill-in/long-fill-in, compare omitted and explicit case_matters=false at the beginning of the complete list, and true/false alternatives.
+      - For fill-in/long-fill-in/performance, compare omitted and explicit order_matters=true at the beginning of the list, and false.
+      - Put lang at the beginning of each String item, using two differently tagged items; do not apply that parameter to numeric performance responses.
+      - Use invalid parameter values and unknown parameter names in otherwise valid strings; retain the exact input and output strings from the LRS.
+    assertions:
+      - An interpreter applies its declared policy to the default values, valid positions and applicable interaction types.
+      - The LRS does not validate characterstring parameters or invent a mandatory 400 for invalid parameter values.
+  - id: issued-iri-irl-boundary
+    rules: [IP-IRL-definition, IP-iri-not-resolvable]
+    level: required-boundary
+    fixture: Independent IRI-to-URI conversion adapter, Unicode HTTP paths, URNs, and unreachable example.invalid addresses.
+    steps:
+      - Convert a Unicode IRL to a URI and verify that the result is a URL; verify the same resource is addressed using escaped UTF-8 octets.
+      - Compare a valid nonresolvable identifier IRI with an IRL used as a continuation link; follow the latter using its resolved endpoint and original authorization rules.
+      - Exercise account.homePage, moreInfo, fileUrl and more separately; do not require every IRI identifier to be fetched over the network.
+    assertions:
+      - URL-convertible IRLs and general IRIs retain distinct contracts.
+      - Conversion/library evidence and xAPI boundary observations are retained separately; an unavailable network resource alone does not invalidate an identifier IRI.

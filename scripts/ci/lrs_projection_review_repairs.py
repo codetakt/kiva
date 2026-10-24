@@ -491,7 +491,7 @@ def review_repair_cases():
             write["headers"]["Content-Type"] = "multipart/mixed; boundary=" + boundary
         steps = [
             step("store", write, expect(204)),
-            read_statement(body["id"], {"/attachments": {"equals": metadata}}),
+            read_statement(body["id"], checks=[dict(kind="json-preservation", expected=body)]),
         ]
         if multipart:
             for suffix, query in [

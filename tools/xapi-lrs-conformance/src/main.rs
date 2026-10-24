@@ -637,6 +637,7 @@ mod tests {
                     outcome: CaseOutcome::Failed,
                     not_run_reasons: Vec::new(),
                     diagnostic_statuses: Vec::new(),
+                    retrieval_attempts: Vec::new(),
                     failures: vec!["expected <ok> & got \"bad\"".to_owned()],
                 }],
             }],
