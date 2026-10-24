@@ -47,7 +47,7 @@
     },
     {
       "path": "docs/architecture/conformance-claim.md",
-      "sha256": "5c55a0507c5c0786d11df6e37db573a1aa917ce5ba00793d3dce566335b72e8e"
+      "sha256": "54c1fe1b57e5e6ee47cdbe04c83d1e64d89674b2a0e6fb5dff1618fc515345bd"
     },
     {
       "path": "docs/architecture/conformance-endpoint-profiles.md",
@@ -135,7 +135,7 @@
     },
     {
       "path": "spec/conformance/lrs-assertion-manifest.yaml",
-      "sha256": "5194dd1cb83f9995b5aac44aa09dd7fb6c6ab18073831f1318d2615edbaf717b"
+      "sha256": "7da7ceb6a3e318a17f8a0bbbb48d1188aaf656c15eb62bc0abc5957d584b2e2f"
     },
     {
       "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",

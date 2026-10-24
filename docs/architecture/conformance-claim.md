@@ -73,7 +73,12 @@ correspondence and reproducibility; it is not an adoption or review-acceptance g
 
 The baseline comes from the sealed R5 reviewer logs at `fd8d942`; applicability
 to `8d96de8` was reviewed as a bounded delta. This provenance is not a fresh
-measurement of later code. New backend checks must validate the chosen policy
+measurement of later code. Both commit IDs belong to superseded history in
+`pre-consolidation.bundle`, SHA-256
+`1f9a09ef2e900e1c6aebfdb7465aee09baa356e0060aa6af0c7780150c59e6ff`;
+they need not be reachable from the current PR or main. Private historical log
+locators document provenance; the committed exact definitions, profiles and gap
+entries suffice to rerun the gate. New backend checks must validate the chosen policy
 on the actual candidate; their evidence is recorded separately.
 
 ## Interface Scope

@@ -15,7 +15,8 @@
         "sha256": "cf3a0e5ccde424920ef10b66f9f8f2e93456207f6a4330b26cb936b791e9505c"
       }
     },
-    "scope": "Fresh reviewer execution at clean fd8d942. Inherited applicability at 8d96de8; no new execution inferred from this transcription."
+    "scope": "Fresh reviewer execution at clean fd8d942. Inherited applicability at 8d96de8; no new execution inferred from this transcription.",
+    "history": "Superseded branch history, preserved in pre-consolidation.bundle (SHA-256 1f9a09ef2e900e1c6aebfdb7465aee09baa356e0060aa6af0c7780150c59e6ff). Log paths are private provenance locators; reproducing the gate requires only committed definitions/profiles, explicit gap entries and current execution reports."
   },
   "update_policy": "No automatic refresh. Any changed definition/profile, newly passing known gap, changed reason, or new failure requires explicit disposition. Remove fixed gaps with product/provider follow-up evidence; never relabel raw FAIL/NOT-RUN as PASS.",
   "case_count": 17933,

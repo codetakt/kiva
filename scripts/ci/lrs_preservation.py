@@ -232,6 +232,22 @@ def number_preserved(sent, got):
         return None
 
 
+def duration_lexically_valid(value):
+    """ISO 8601:2004 4.4.3.2 designators, without calendar conversion."""
+    if not isinstance(value, str):
+        return False
+    number = r'[0-9]+(?:[.,][0-9]+)?'
+    if re.fullmatch('P' + number + 'W', value):
+        return True
+    pattern = 'P' + ''.join('(' + number + unit + ')?' for unit in 'YMD')
+    pattern += '(?:T(?=[0-9])' + ''.join('(' + number + unit + ')?' for unit in 'HMS') + ')?'
+    match = re.fullmatch(pattern, value)
+    if not match:
+        return False
+    components = [part for part in match.groups() if part is not None]
+    return bool(components) and not any('.' in part or ',' in part for part in components[:-1])
+
+
 def duration_preserved(sent, got):
     """Recognize exact duration and permitted truncation of fractional seconds.
 
@@ -241,9 +257,7 @@ def duration_preserved(sent, got):
     """
     if not isinstance(sent, str) or not isinstance(got, str):
         return False
-    if any(not value.startswith('P') or any(c not in '0123456789PYMDWTHS.,' for c in value)
-           or re.search(r'[.,](?![0-9])',value)
-           for value in [sent,got]):
+    if not all(duration_lexically_valid(value) for value in (sent, got)):
         return False
     if sent == got:
         return True

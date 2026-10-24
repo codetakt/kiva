@@ -5,7 +5,9 @@
     "path": "tests/conformance/http/generated/behaviors.yaml",
     "file_sha256": "7a52b99bd803e65956deccfb3527d084db4ba85ca0439d04c62798b556e323b7",
     "selection": "case id starts with signature-; original order and exact objects retained",
-    "meaning": "Fixed public synthetic signature vectors transcribed without signing, cryptographic verification or target execution. Edit these input definitions explicitly; do not silently regenerate certificates or signatures."
+    "meaning": "Fixed public synthetic signature vectors transcribed without signing, cryptographic verification or target execution. Edit these input definitions explicitly; do not silently regenerate certificates or signatures.",
+    "selected_cases_sha256": "4324c75d4100643a9c5dfaa8096af0509f01289dadfc6c04a1f4f697fd7129ba",
+    "availability": "Historical commit is a provenance label, not a required reachable ref. This file contains the complete selected case objects; selected_cases_sha256 binds canonical UTF-8 JSON (sorted keys, compact separators, non-ASCII unescaped). Original file_sha256 binds the historical enclosing source."
   },
   "cases": [
     {

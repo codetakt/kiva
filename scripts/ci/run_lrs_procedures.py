@@ -183,6 +183,12 @@ class Reply(dict):
         return default
 
 
+def canonical_statement_id(value):
+    """Only standard UUID spelling is case-insensitive; keep other fixture IDs."""
+    return value.lower() if isinstance(value,str) and re.fullmatch(
+        r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',value) else value
+
+
 class Executor:
     def __init__(self, args):
         self.args, self.out = args, args.out
@@ -197,6 +203,9 @@ class Executor:
         self.docs = [('state','/activities/state',{'activityId':self.prefix,'agent':compact(self.actor)},'stateId'),('agent-profile','/agents/profile',{'agent':compact(self.actor)},'profileId'),('activity-profile','/activities/profile',{'activityId':self.prefix},'profileId')]
         self.ordinal=0
         self.visible_statements={}
+        self.known_statement_ids=set()
+        self.voiding_statement_ids=set()
+        self.voided_statement_ids=set()
 
     def check(self, name, ok=None, reason='', details=None):
         level = check_level(getattr(self, 'current_spec', {}), name)
@@ -275,6 +284,17 @@ class Executor:
     def store(self, body, headers=None):
         result=self.http('PUT','/statements',{'statementId':body['id']},body,headers, expected_statuses=(204,))
         self.check('setup-write-'+body['id'],result['status']==204,'valid fixture Statement must store')
+        identifier=canonical_statement_id(body['id'])
+        if result['status']==204 and identifier not in self.known_statement_ids:
+            if body.get('verb',{}).get('id')=='http://adlnet.gov/expapi/verbs/voided':
+                self.voiding_statement_ids.add(identifier)
+                target=body.get('object',{})
+                if target.get('objectType')=='StatementRef' and isinstance(target.get('id'),str):
+                    target_id=canonical_statement_id(target['id'])
+                    if target_id not in self.voiding_statement_ids:
+                        self.visible_statements.pop(target_id,None)
+                        self.voided_statement_ids.add(target_id)
+            self.known_statement_ids.add(identifier)
         return result
 
     def read(self, body, **query):
@@ -290,6 +310,13 @@ class Executor:
         return all_decisions([version,consistent])
 
     def read_visible(self, body, admission, **query):
+        reply=self._read_visible(body,admission,**query)
+        if reply is None:
+            self.check('visibility-'+body['id']+'-dependent-checks',None,
+                'Positive read precondition not established; dependent observations were not executed. Earlier FAILs remain.')
+        return reply
+
+    def _read_visible(self, body, admission, **query):
         """Observe an admitted positive Statement read; only an initial 404 may wait.
 
         The observation window is a harness limit, never a source deadline.
@@ -299,6 +326,10 @@ class Executor:
         Negative reads (voided or rejected) must use read(), without this helper.
         """
         label='visibility-'+body['id']+'-'+query.get('format','exact')
+        identifier=canonical_statement_id(body['id'])
+        if identifier in self.voided_statement_ids:
+            self.check(label,None,'Known voided target requires an explicit negative read(), not a positive visibility wait')
+            return None
         if admission['status'] not in [200,204]:
             self.check(label,None,'Positive observation lacks successful admission; setup failures are retained')
             return None
@@ -309,8 +340,8 @@ class Executor:
         while True:
             reply=self.read(body,**query)
             if self.statement_headers(reply,label) is False:return None
-            if reply['status']==404 and body['id'] in self.visible_statements:
-                stored=self.visible_statements[body['id']]
+            if reply['status']==404 and identifier in self.visible_statements:
+                stored=self.visible_statements[identifier]
                 headers={name.lower():value for name,value in reply['headers'].items()}
                 watermark=headers.get('x-experience-api-consistent-through')
                 try:
@@ -329,7 +360,7 @@ class Executor:
                     return None
                 time.sleep(min(0.05,max(0,deadline-time.monotonic())))
                 continue
-            valid=reply['status']==200 and isinstance(reply['json'],dict) and reply['json'].get('id')==body['id']
+            valid=reply['status']==200 and isinstance(reply['json'],dict) and canonical_statement_id(reply['json'].get('id'))==identifier
             self.check(label,valid,'Positive response must identify the admitted Statement')
             if not valid:return None
             stored=reply['json'].get('stored')
@@ -342,7 +373,11 @@ class Executor:
                 stored_valid=False
             self.check(label+'-stored',stored_valid,'Retain the returned stored timestamp as the consistency witness')
             if stored_valid is False:return None
-            self.visible_statements[body['id']]=stored
+            self.visible_statements[identifier]=stored
+            self.known_statement_ids.add(identifier)
+            verb=reply['json'].get('verb')
+            if isinstance(verb,dict) and verb.get('id')=='http://adlnet.gov/expapi/verbs/voided':
+                self.voiding_statement_ids.add(identifier)
             return reply
 
     def conflict(self):
@@ -555,10 +590,15 @@ class Executor:
                 self.check(('sub-' if nested else 'top-')+timestamp,ok,'At least millisecond instant precision and UTC, permitted higher precision rounding/truncation')
 
     def duplicate(self):
+        self.check('all-excluded-property-and-delayed-visibility-variants',None,'Finite immutable mutation only; every excluded-property duplicate and delayed fixture remains open')
         body=self.statement(object={'id':self.prefix+'/immutable','definition':{'name':{'en':'original'}}})
         admission=self.store(body)
         before=self.read_visible(body,admission)
-        if before is None:return
+        if before is None:
+            for method in ['PUT','POST']:
+                self.check(method+'-allowed-status',None,'Replay not executed: initial stored snapshot unavailable')
+                self.check(method+'-all-object-preservation',None,'Comparison not executed: initial stored snapshot unavailable')
+            return
         activity_before=self.http('GET','/activities',{'activityId':body['object']['id']}, expected_statuses=(200,))
         person_before=self.http('GET','/agents',{'agent':compact(body['actor'])}, expected_statuses=(200,))
         for method in ['PUT','POST']:
@@ -566,7 +606,9 @@ class Executor:
             response=self.http(method,'/statements',{'statementId':body['id']} if method=='PUT' else {},changed, expected_statuses=(204,409) if method=='PUT' else (200,204,409))
             self.check(method+'-allowed-status',response['status'] in ([204,409] if method=='PUT' else [200,204,409]))
             after=self.read_visible(body,admission)
-            if after is None:continue
+            if after is None:
+                self.check(method+'-all-object-preservation',None,'Comparison not executed: returned stored snapshot unavailable')
+                continue
             activity_after=self.http('GET','/activities',{'activityId':body['object']['id']}, expected_statuses=(200,))
             person_after=self.http('GET','/agents',{'agent':compact(body['actor'])}, expected_statuses=(200,))
             self.check(method+'-all-object-preservation',all_decisions([
@@ -574,7 +616,6 @@ class Executor:
                 snapshot_equal(activity_before['json'],activity_after['json']),
                 snapshot_equal(person_before['json'],person_after['json'])]),
                 'Same stored values, including managed fields; equivalent representation and designated member order do not prove mutation')
-        self.check('all-excluded-property-and-delayed-visibility-variants',None,'Finite immutable mutation executed; every excluded-property duplicate and delayed fixture remains open')
 
     def voiding(self):
         a=self.statement();admitted_a=self.store(a)

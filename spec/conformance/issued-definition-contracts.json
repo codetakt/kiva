@@ -55060,14 +55060,15 @@
       ],
       "rules": [
         "Distinguish validDuration2004_4432 from forbidden4433. PT1.239S may be preserved unchanged or as PT1.23S, but not PT1.2S. Compare at hundredth-second precision; do not convert calendar months/years to fixed seconds.",
-        "FFCR-05/09: Readback and replay predicates use retained-duration OR explicitly permitted fractional-second truncation, including comma/dot and insignificant-zero spelling changes. Compare strings only after parsing the bounded seconds components; unknown calendar equivalence is not false. The submitted original is the replay preservation baseline, not the conflicting payload. Logical signature centisecond equality remains a separate relation."
+        "FFCR-05/09: Readback and replay predicates use retained-duration OR explicitly permitted fractional-second truncation, including comma/dot and insignificant-zero spelling changes. Compare strings only after parsing the bounded seconds components; unknown calendar equivalence is not false. The submitted original is the replay preservation baseline, not the conflicting payload. Logical signature centisecond equality remains a separate relation.",
+        "Validate each operand before equality or equivalence deferral: ordered Y/M/D and T H/M/S components or standalone W; at least one component; T requires time components; decimal point/comma and digits only on the final component. No component magnitude or precision cap is imposed by this grammar check."
       ],
       "outputs": [
         "satisfied",
         "violated",
         "provider-unavailable (execution incomplete, not source indeterminate)"
       ],
-      "delegation": "authorized abstract runtime/standard-library primitive; provider selection later",
+      "delegation": "Local designator grammar and bounded preservation predicates; provider required only for equivalence relations beyond those predicates, including calendar-unit conversion.",
       "source_anchors": [
         {
           "file": "target/ieee-lrs-suite-audit/20261014T055444Z/source/ieee-layout.txt",

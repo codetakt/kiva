@@ -1234,6 +1234,13 @@ fn validate_header_expectation(
             value,
             available_captures,
         )?;
+        if header_name.eq_ignore_ascii_case("content-type") && !value.contains("{{") {
+            media_type::parse_http(value).map_err(|error| {
+                Error::Validation(format!(
+                    "{label}: invalid Content-Type expectation: {error}"
+                ))
+            })?;
+        }
     }
     if expectation.rfc3339 == Some(false) || expectation.iso8601 == Some(false) {
         return Err(Error::Validation(format!(
@@ -3311,6 +3318,12 @@ fn evaluate_header(
     if let Some(expected) = &expectation.contains {
         match render_template(expected, captures) {
             Ok(rendered) => {
+                if name.eq_ignore_ascii_case("content-type")
+                    && media_type::parse_http(&rendered).is_err()
+                {
+                    failures.push("ORACLE-UNAVAILABLE: invalid rendered Content-Type expectation; definition cannot judge this response".into());
+                    return;
+                }
                 match actual.map_or(Ok(false), |value| header_contains(name, value, &rendered)) {
                     Ok(true) => {}
                     Ok(false) => failures.push(format!(
@@ -3350,10 +3363,10 @@ fn header_contains(name: &str, actual: &str, expected: &str) -> Result<bool, Str
     if !name.eq_ignore_ascii_case("content-type") {
         return Ok(actual.contains(expected));
     }
-    let (Ok(actual), Ok(expected)) = (
-        media_type::parse_http(actual),
-        media_type::parse_http(expected),
-    ) else {
+    let expected = media_type::parse_http(expected).map_err(|error| {
+        format!("ORACLE-UNAVAILABLE: invalid Content-Type expectation: {error}")
+    })?;
+    let Ok(actual) = media_type::parse_http(actual) else {
         return Ok(false);
     };
     if actual.essence != expected.essence {
@@ -5109,7 +5122,8 @@ expect:
     #[tokio::test]
     async fn malformed_duration_remains_a_reported_failure() {
         for invalid in [
-            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1.S", "PT1,S",
+            "PTé1S", "PT🙂1S", "PT１S", "PT1éS", "PT1.éS", "PT1.S", "PT1,S", "PT1.5H1S", "PTS",
+            "P1S", "PT1S1M", "P1W1D",
         ] {
             for substatement in [false, true] {
                 let mut expected = serde_json::json!({"actor":{"mbox":"mailto:fixture@example.test"},
@@ -5139,6 +5153,50 @@ expect:
                 assert!(!report.failures.is_empty());
                 assert!(serde_json::to_string(&report).is_ok());
             }
+        }
+    }
+
+    #[test]
+    fn malformed_content_type_expectations_are_definition_errors() {
+        for name in ["Content-Type", "content-type", "CONTENT-TYPE"] {
+            for text in ["multipart / mixed", "text/plain; charset=", "", "text"] {
+                let case: super::TestCase = serde_json::from_value(serde_json::json!({
+                    "id":"definition", "requirements":[],
+                    "safety":{"destructive":false,"requires_isolated_lrs":true},
+                    "request":{"method":"GET","path":"/statements"},
+                    "expect":{"status":200,"headers":{name:{"contains":text}}}
+                }))
+                .expect("definition fixture");
+                let error =
+                    super::validate_case_steps("definition", &case).expect_err("bad media type");
+                assert!(matches!(error, super::Error::Validation(_)));
+                assert!(
+                    error
+                        .to_string()
+                        .contains("invalid Content-Type expectation")
+                );
+            }
+        }
+        let expected: super::HeaderExpectation =
+            serde_json::from_value(serde_json::json!({"contains":"{{media}}"})).expect("template");
+        super::validate_header_expectation(
+            "template",
+            "Content-Type",
+            &expected,
+            &std::collections::BTreeSet::from(["media".to_owned()]),
+        )
+        .expect("dynamic definition");
+        for actual in [None, Some("text/plain")] {
+            let mut failures = Vec::new();
+            super::evaluate_header(
+                "Content-Type",
+                &expected,
+                actual,
+                &BTreeMap::from([("media".to_owned(), "text / plain".to_owned())]),
+                &mut failures,
+            );
+            assert_eq!(failures.len(), 1);
+            assert!(failures[0].starts_with("ORACLE-UNAVAILABLE:"));
         }
     }
 

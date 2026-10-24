@@ -10,11 +10,46 @@ import unittest
 from unittest.mock import Mock, patch
 
 from run_lrs_procedures import Executor, IFI, Reply
-from lrs_preservation import preservation, snapshot_equal
+from lrs_preservation import preservation, snapshot_equal, load_json_members
+from report_issued_test_results import procedure_incomplete
 
 
 class ResponseTypeTests(unittest.TestCase):
     document_procedure = 'document-updated-time-boundary'
+
+    def test_blocked_duplicate_retains_failures_and_unexecuted_checks(self):
+        for failure_at in ['initial','PUT','POST','none']:
+            with self.subTest(failure_at=failure_at),TemporaryDirectory() as directory:
+                executor=self.person_executor(directory,{},False)
+                name='duplicate-state-and-response-observation'
+                executor.args.procedure=[name]
+                reads=0;writes=[];original={}
+                def http(method,path,query=None,body=None,*args,**kwargs):
+                    nonlocal reads
+                    headers={'x-experience-api-version':'2.0.0',
+                        'x-experience-api-consistent-through':'2026-01-02T00:00:00Z'}
+                    if method in ['PUT','POST']:
+                        writes.append(method)
+                        if not original:original.update(copy.deepcopy(body))
+                        return Reply(status=204 if method=='PUT' else 200,headers=headers,json=[])
+                    if path!='/statements':return Reply(status=200,headers=headers,json={})
+                    position=['initial','PUT','POST'][reads];reads+=1
+                    result=copy.deepcopy(original)
+                    if position!=failure_at:result['stored']='2026-01-01T00:00:00Z'
+                    return Reply(status=200,headers=headers,json=result)
+                executor.http=Mock(side_effect=http)
+                self.assertEqual(self.execute(executor),2 if failure_at=='none' else 1)
+                result=executor.results[name]
+                self.assertTrue(procedure_incomplete(result,executor.current_spec))
+                checks={c['id']:c for c in result['checks']}
+                self.assertNotIn('execution-unavailable',checks)
+                self.assertEqual(checks['all-excluded-property-and-delayed-visibility-variants']['outcome'],'not-run')
+                self.assertEqual(writes,['PUT'] if failure_at=='initial' else ['PUT','PUT','POST'])
+                for method in ['PUT','POST']:
+                    skipped=failure_at in ['initial',method]
+                    self.assertEqual(checks[method+'-all-object-preservation']['outcome'],'not-run' if skipped else 'passed')
+                if failure_at!='none':
+                    self.assertTrue(any(c['outcome']=='failed' for c in result['checks']))
 
     def test_mime_nested_attachment_is_a_failed_response_without_aborting_probes(self):
         for mode in ['valid','nested','corrupted','interrupted']:
@@ -174,6 +209,9 @@ class ResponseTypeTests(unittest.TestCase):
                 self.assertEqual(any(o['outcome']=='failed' for o in preservation(original,reply['json'])),not preserved)
                 # Raw evidence retains the full text even for ordinary map-view consumers.
                 self.assertEqual(reply['body_hex'],raw.hex())
+                evidence=json.loads((executor.out/'http.jsonl').read_text())
+                recovered=load_json_members(bytes.fromhex(evidence['response']['body_hex']))
+                self.assertIs(snapshot_equal(original,recovered),preserved)
 
     def test_iri_returned_object_types_fail_without_aborting_later_inputs(self):
         for bad in [None, [], {}, 42, 'activity', {'id':[]}, {'id':{}}, {'id':None}]:

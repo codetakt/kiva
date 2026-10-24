@@ -9,6 +9,31 @@ from unittest.mock import Mock, patch
 from run_lrs_procedures import Executor, iri_reference_valid
 
 class VisibilityTests(unittest.TestCase):
+    def test_only_accepted_new_voids_invalidate_positive_reads(self):
+        a='AAAAAAAA-0000-4000-8000-000000000001'
+        b='bbbbbbbb-0000-4000-8000-000000000002'
+        for status,replay,target_is_void in [(204,False,False),(409,False,False),(204,True,False),(204,False,True)]:
+            with self.subTest(status=status,replay=replay,target_is_void=target_is_void):
+                e=self.executor([404,200])
+                e.visible_statements={a.lower():'1969-12-31T23:59:59Z','other':'1969-12-31T23:59:59Z'}
+                e.known_statement_ids={a.lower(),b} if replay else {a.lower()}
+                if target_is_void:e.voiding_statement_ids.add(a.lower())
+                e.http=Mock(return_value={'status':status})
+                e.store({'id':b,'verb':{'id':'http://adlnet.gov/expapi/verbs/voided'},
+                         'object':{'objectType':'StatementRef','id':a}})
+                invalidated=status==204 and not replay and not target_is_void
+                self.assertEqual(a.lower() in e.voided_statement_ids,invalidated)
+                self.assertEqual(a.lower() in e.visible_statements,not invalidated)
+                self.assertIn('other',e.visible_statements)
+                if invalidated:
+                    self.assertIsNone(e.read_visible({'id':a},{'status':204}))
+                    self.assertFalse(e.calls)
+                    self.assertNotIn('failed',self.outcomes(e))
+                else:
+                    self.assertIsNone(e.read_visible({'id':a},{'status':204}))
+                    self.assertEqual(len(e.calls),1)
+                    self.assertIn('failed',self.outcomes(e))
+
     def test_continuation_iri_grammar_preserves_legal_reference_forms(self):
         valid=['','/','//','///next','?cursor=2','../next','./one:two',
                '/next%20page','/next%ff','/next%00','/次?値=二#節',
@@ -260,6 +285,7 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
         e.fixture={'statement_visibility_timeout_ms':0 if statuses==[404] else 1000}
         e.results={'probe':{'checks':[]}};e.current='probe'
         e.visible_statements={'s':stored} if seen else {}
+        e.known_statement_ids=set();e.voiding_statement_ids=set();e.voided_statement_ids=set()
         e.calls=[]
         def read(body,**query):
             e.calls.append(query)
@@ -333,7 +359,7 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
                     self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
                     self.assertEqual(len(e.calls),1)
                     self.assertIn('failed',self.outcomes(e))
-                    self.assertNotIn('not-run',self.outcomes(e))
+                    self.assertIn('not-run',self.outcomes(e))  # Dependent observations remain unexecuted.
 
     def test_combined_forms_keep_existing_parser_acceptance(self):
         # Compatibility vectors for the delegated parser, not ISO certification.
@@ -359,6 +385,6 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
                 self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
                 self.assertEqual(len(e.calls),1)
                 self.assertIn('failed',self.outcomes(e))
-                self.assertNotIn('not-run',self.outcomes(e))
+                self.assertIn('not-run',self.outcomes(e))  # Header FAIL plus blocked dependent checks.
 
 if __name__=='__main__':unittest.main()

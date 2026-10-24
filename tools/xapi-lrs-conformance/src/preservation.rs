@@ -584,7 +584,7 @@ fn compare_duration(expected: &Value, actual: &Value, path: &str) -> Result<(), 
         return Err(format!("duration type changed at {path}"));
     };
     if !duration_lexically_valid(left) || !duration_lexically_valid(right) {
-        return Err(format!("invalid duration characters at {path}"));
+        return Err(format!("invalid duration designator grammar at {path}"));
     }
     if left == right {
         return Ok(());
@@ -633,15 +633,65 @@ fn compare_duration(expected: &Value, actual: &Value, path: &str) -> Result<(), 
 }
 
 fn duration_lexically_valid(text: &str) -> bool {
-    text.starts_with('P')
-        && text.bytes().enumerate().all(|(index, byte)| {
-            b"0123456789PYMDWTHS.,".contains(&byte)
-                && (!matches!(byte, b'.' | b',')
-                    || text
-                        .as_bytes()
-                        .get(index + 1)
-                        .is_some_and(u8::is_ascii_digit))
-        })
+    // ISO 8601:2004 4.4.3.2: ordered components, standalone weeks, a
+    // fraction only on the last component and no empty time designator.
+    let Some(mut remaining) = text.as_bytes().strip_prefix(b"P") else {
+        return false;
+    };
+    let mut in_time = false;
+    let mut last_rank = 0;
+    let mut fractional = false;
+    while !remaining.is_empty() {
+        if fractional {
+            return false;
+        }
+        if let Some(after) = remaining.strip_prefix(b"T") {
+            if in_time {
+                return false;
+            }
+            in_time = true;
+            remaining = after;
+        }
+        let digits = remaining
+            .iter()
+            .take_while(|byte| byte.is_ascii_digit())
+            .count();
+        if digits == 0 {
+            return false;
+        }
+        remaining = &remaining[digits..];
+        if matches!(remaining.first(), Some(b'.' | b',')) {
+            fractional = true;
+            remaining = &remaining[1..];
+            let digits = remaining
+                .iter()
+                .take_while(|byte| byte.is_ascii_digit())
+                .count();
+            if digits == 0 {
+                return false;
+            }
+            remaining = &remaining[digits..];
+        }
+        let Some((&unit, after)) = remaining.split_first() else {
+            return false;
+        };
+        let rank = match (in_time, unit) {
+            (false, b'W') => return last_rank == 0 && after.is_empty(),
+            (false, b'Y') => 1,
+            (false, b'M') => 2,
+            (false, b'D') => 3,
+            (true, b'H') => 4,
+            (true, b'M') => 5,
+            (true, b'S') => 6,
+            _ => return false,
+        };
+        if rank <= last_rank {
+            return false;
+        }
+        last_rank = rank;
+        remaining = after;
+    }
+    last_rank != 0
 }
 
 fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
@@ -674,6 +724,38 @@ fn duration_seconds(text: &str) -> Option<(&str, &str, &str)> {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
+
+    #[test]
+    fn duration_designator_grammar_uses_shared_controls() {
+        let fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))
+        .expect("fixed JSON fixture");
+        for group in ["valid", "invalid"] {
+            let valid = group == "valid";
+            for value in fixture["duration_grammar"][group]
+                .as_array()
+                .expect("grammar vectors")
+            {
+                let text = value.as_str().expect("duration string");
+                assert_eq!(super::duration_lexically_valid(text), valid, "{text}");
+                assert_eq!(
+                    super::compare_duration(value, value, "duration").is_ok(),
+                    valid,
+                    "{text}"
+                );
+                if !valid {
+                    for other in [json!("PT1S"), json!("P1M")] {
+                        for (before, after) in [(value, &other), (&other, value)] {
+                            let error = super::compare_duration(before, after, "duration")
+                                .expect_err("invalid duration");
+                            assert!(!error.starts_with("ORACLE-UNAVAILABLE:"), "{text}: {error}");
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn duration_lexical_defects_do_not_reach_component_slices() {

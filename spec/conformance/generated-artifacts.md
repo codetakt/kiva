@@ -37,7 +37,7 @@ toolchain. Neither file records semantic acceptance.
 | Definition inputs | Merged catalog/ledger, table model, handwritten HTTP cases, Python scenario/selection definitions, interpretation/dependency contracts and fixed vectors | Tracked; change intentionally and assess affected meanings |
 | Review workflow | PR discussion and merge on GitHub; interim progress notes remain local | Not generation inputs or repository acceptance records |
 | CI integration baseline | `ci-execution-baseline.json`, exact known residuals and profile/case identities | Tracked; update only by explicit disposition, never by accepting a new failing run automatically |
-| Fixed signing inputs | `tests/conformance/fixtures/signing/cases.json` | Tracked; 42 exact public synthetic cases transcribed from commit `b505ffc9b69223ea48675f1e326a13f8757a19a8`; original source digest and selection recorded inside |
+| Fixed signing inputs | `tests/conformance/fixtures/signing/cases.json` | Tracked; 42 exact public synthetic cases with original source and canonical selected-case digests; historical commit is a provenance label, not a required ref |
 | Case expansion | Five YAML files under `tests/conformance/http/generated/` | Ignored; regenerated from models/scenarios and fixed inputs |
 | Procedure expansion | `issued-definition-tests.yaml`, `issued-supplemental-tests.yaml` | Ignored; regenerated from contracts and scenario definitions |
 | Derived relations | `lrs-table-bindings.yaml`, `issued-completion-bindings.json`, `issued-readback-origins.json`, `issued-rejection-origins.json` | Ignored; generated with the cases |
@@ -48,6 +48,14 @@ This inventory concerns the LRS test projection. It does not reclassify the
 already merged ledger's published tables or unrelated architecture generators.
 Historical links to the expanded paths resolve after regeneration or inside a
 bundle; the Git web view intentionally has no large generated blobs.
+
+Historical commit labels such as `b505ffc` and checkpoint `cd0773e` belong
+to superseded local histories and need not be reachable from main. They are
+provenance annotations, not reproduction dependencies. The signing fixture
+contains all selected case objects and their canonical content digest; the
+ledger authority is the merged revision and exact file digests in
+`issued-ledger-baseline.json`. The historical checkpoint is not an additional
+authority or required acceptance artifact.
 
 The signing file is now an explicit fixed fixture input, including request and
 expectation definitions. Normal expansion does not sign, generate keys or
@@ -109,6 +117,25 @@ baseline; its failure leaves the first package available for inspection. Substit
 `postgres` for the other backend. CI copies both evidence outputs before the gates
 and uploads them even after failure. The runner's strict FAIL/NOT-RUN policy is
 unchanged; no baseline entry is added automatically from a failing run.
+
+## Bounded runner controls
+
+After generating definitions, build the pinned runner and exercise the selected
+46 cases against eight local finite responders:
+
+```sh
+nix develop -c cargo build --locked -p xapi-lrs-conformance
+python -B scripts/ci/run_issued_revision_controls.py \
+  --runner target/debug/xapi-lrs-conformance \
+  --out target/lrs-revision-controls
+```
+
+The output directory must not already exist. `summary.json` records exact expected
+FAIL sets and the one reason-bound signature NOT-RUN per mode. A successful control
+run validates those finite witnesses; it does not supply a signature provider or
+execute an LRS product. These controls are manual; the Python unit controls run
+under `lrs-oracle-controls`. Neither static artifact generation nor that Nix check
+implicitly runs these responders.
 
 ## Intentional definition changes
 

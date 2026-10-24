@@ -91,7 +91,8 @@ def expectations(root, backend):
         require(key in cases and key not in seen, f"unknown/duplicate baseline case: {key}")
         seen.add(key)
         require(entry["case_sha256"] == digest(cases[key]), f"gap definition drift: {key}")
-        require(entry["finding"] == "R5-01", f"untracked gap: {key}")
+        require(isinstance(entry["finding"], str) and entry["finding"].strip(),
+                f"missing gap disposition identifier: {key}")
         backends = entry["backends"]
         require(isinstance(backends, list) and backends and
                 len(backends) == len(set(backends)) and set(backends) <= BACKENDS,

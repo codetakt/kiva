@@ -28,3 +28,8 @@ these results. Known FAIL/NOT-RUN outcomes remain visible. A successful run does
 not prove the failure-upload branch or complete product conformance. GitHub run
 logs and artifacts carry execution evidence; no repository review receipt or
 adoption record is required.
+
+Commits marked `[skip ci]` have no hosted execution evidence. While hosted
+execution is held, the first authorized workflow run (including a first run on
+main after merge) is the first verification of these collection/upload steps.
+Keep that distinction from the local Nix results and check the run as above.

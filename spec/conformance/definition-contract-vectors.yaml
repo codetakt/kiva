@@ -156,12 +156,12 @@ contracts:
     observed: null
   DC-DURATION:
   - id: grammar
-    input: Provider-certified ISO 8601:2004(E) 4.4.3.2 Y/M/D/W and T H/M/S forms, decimal point/comma on the lowest
+    input: Locally checked ISO 8601:2004(E) 4.4.3.2 Y/M/D or standalone W and T H/M/S forms, decimal point/comma on the lowest
       component, zero; forbidden 4.4.3.3 forms separately, root and SubStatement Result.
     allowed: Valid specified forms, including valid fine precision; other independent Statement conditions remain
       satisfied.
     forbidden: Rejecting solely because the duration is not PT...S; admitting the explicitly forbidden alternative
-      format.
+      format; repeated or out-of-order components, empty components or fractions on a non-final component.
   - id: precision-and-calendar
     input: PT1.239S, PT1,239S and calendar-unit values; compare preserved value and logical equivalence with independent
       duration provider.

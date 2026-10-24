@@ -232,6 +232,9 @@ class RegressionGateControls(unittest.TestCase):
             path = root / 'spec/conformance/ci-execution-baseline.json'
             path.write_text(json.dumps(baseline))
             self.assertEqual(len(expectations(root, 'memory')[3]), 2)
+            baseline['gaps'][0]['finding']='product-followup-duration'
+            path.write_text(json.dumps(baseline))
+            self.assertEqual(len(expectations(root, 'memory')[3]), 2)
             mutations = [lambda b: b.update(case_count=2),
                          lambda b: b['case_files'].clear(),
                          lambda b: b['profiles'].clear(),
@@ -242,7 +245,9 @@ class RegressionGateControls(unittest.TestCase):
                          lambda b: b['gaps'][0].update(backends=[]),
                          lambda b: b['gaps'][0].update(outcome='passed'),
                          lambda b: b['gaps'][0].update(failures=[]),
-                         lambda b: b['gaps'][0].update(reason='ignored typo')]
+                         lambda b: b['gaps'][0].update(reason='ignored typo'),
+                         *[lambda b, value=value: b['gaps'][0].update(finding=value)
+                           for value in ['', '  ', None, 42, [], {}]]]
             for mutate in mutations:
                 value = copy.deepcopy(baseline)
                 mutate(value)

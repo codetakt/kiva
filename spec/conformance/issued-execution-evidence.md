@@ -1,13 +1,14 @@
 # Issued-test execution evidence
 
 The test ledger defines what must be checked. Execution completeness is a
-separate assertion that needs an accepted definition and actual, current
+separate assertion that needs the exact definition and actual, current
 evidence. A target FAIL is an executed observation; it does not imply a missing
 test or a conforming product.
 
 `report_issued_test_results.py --require-complete` requires all of the following:
 
-- Accepted semantic coverage in the exact supplied projection.
+- Structural ledger/test completeness in the exact supplied projection; semantic
+  review remains a separate GitHub PR decision.
 - An HTTP execution report with final `passed` or `failed` status, all required
   cases present, and only executed `passed` or `failed` case outcomes.
 - Every declared procedure present with the current effective rubric hash.
@@ -33,6 +34,22 @@ even a `not-applicable` label with a free-text reason stays incomplete. A future
 applicability adapter must establish the definition's condition and bind the
 supporting evidence before such an exemption can complete this gate. This limit
 does not classify the target as failing its IEEE duty.
+
+## Interrupted procedures and raw response evidence
+
+A failed positive-read prerequisite retains its FAIL and adds a required NOT-RUN
+for dependent observations. Replay procedures also record skipped PUT/POST and
+comparison items. A failure therefore cannot make an unfinished procedure count
+as fully executed.
+
+In Python `http.jsonl`, request/response `body_hex` is the authoritative body
+evidence. Decode those bytes with the member-preserving JSON loader when checking
+extension member multiplicity. The convenience `json` field, and structured
+values inside `preservation.jsonl`, are last-value map views: repeated property
+names are not faithfully represented there. Observations identify the case and
+pointer; correlate them with the procedure/ordinal and raw HTTP records. Preserve
+the complete HTTP log alongside summaries. `incomplete_body` means the full body
+was not captured and cannot support a complete preservation verdict.
 
 ## Execution receipt
 

@@ -8,11 +8,26 @@ from decimal import Decimal, localcontext
 
 from lrs_preservation import (
     PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
-    statement_response_headers, snapshot_equal, duration_preserved, load_json_members,
+    statement_response_headers, snapshot_equal, duration_preserved, duration_lexically_valid, load_json_members,
 )
 
 
 class PreservationControls(unittest.TestCase):
+    def test_duration_designator_grammar_shared_controls(self):
+        fixture=json.loads((Path(__file__).resolve().parents[2]/'tests/conformance/fixtures/preservation-properties.json').read_text())['duration_grammar']
+        for group,values in fixture.items():
+            valid=group=='valid'
+            for value in values:
+                with self.subTest(value=value):
+                    self.assertIs(duration_lexically_valid(value),valid)
+                    self.assertIs(duration_preserved(value,value),valid)
+                    if not valid:
+                        for other in ['PT1S','P1M']:
+                            for before,after in [(value,other),(other,value)]:
+                                for pointer in ['/result/duration','/object/result/duration']:
+                                    self.assertEqual(preservation(before,after,pointer)[0]['outcome'],'failed')
+                                    self.assertIs(snapshot_equal(before,after,pointer),False)
+
     def test_extension_member_multiplicity_survives_decoding(self):
         fixture = json.loads((Path(__file__).resolve().parents[2] / 'tests/conformance/fixtures/preservation-properties.json').read_text())
         for row in fixture['duplicate_members']:
