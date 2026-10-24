@@ -34,6 +34,40 @@ from generate_lrs_projection_cases import (
 )
 
 
+def query_observations(steps, row):
+    """Preserve the unexecuted suffix of the runner's stop-on-first-error case.
+
+    Only an unambiguous step-prefixed report proves which preceding steps ran.
+    Unknown report shapes leave the queries unobserved rather than completing
+    them from the case's aggregate failed outcome.
+    """
+    checks = [{'id': entry['id'], 'outcome': 'not-run',
+               'reason': 'Required authority query was not observed'} for entry in steps[1:]]
+    if row.get('outcome') == 'passed':
+        for check in checks:
+            check.update(outcome='passed', reason='Required authority query completed')
+        return checks
+    outcome = row.get('outcome')
+    reasons = row.get('failures' if outcome == 'failed' else 'not_run_reasons')
+    if (outcome not in ('failed', 'not-run') or not isinstance(reasons, list)
+            or not reasons or not all(isinstance(reason, str) for reason in reasons)):
+        return checks
+    stopped = [i for i, entry in enumerate(steps)
+               if all(reason.startswith('step ' + entry['id'] + ': ') for reason in reasons)]
+    if len(stopped) != 1:
+        return checks
+    for i, check in enumerate(checks, 1):
+        if i < stopped[0]:
+            check.update(outcome='passed', reason='Query completed before the reported stopping step')
+        elif i == stopped[0]:
+            # A known failure can coexist with an unavailable subcondition.
+            # The aggregate failure remains, but it does not finish that query.
+            unavailable = row.get('not_run_reasons') or any('ORACLE-UNAVAILABLE:' in r for r in reasons)
+            check.update(outcome='failed' if outcome == 'failed' and not unavailable else 'not-run',
+                         reason='; '.join(reasons))
+    return checks
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--endpoint", required=True)
@@ -43,13 +77,18 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     observations = []
+    query_checks = [{'id': 'authority-queries-' + mode, 'outcome': 'not-run',
+                     'reason': 'Authority fixture was not established; required query was not run'}
+                    for mode in ('default', 'false', 'true')]
 
     def finish(status, reason):
-        if any(row['outcome'] == 'failed' for row in observations):
+        checks = observations + query_checks
+        if any(row['outcome'] == 'failed' for row in checks):
             status = 'failed'
-        elif status == 'passed' and any(row['outcome'] == 'not-run' for row in observations):
+        elif status == 'passed' and any(row['outcome'] == 'not-run' for row in checks):
             status = 'incomplete'
-        result = {'schema_version': 1, 'status': status, 'reason': reason, 'checks': observations}
+        result = {'schema_version': 1, 'status': status, 'reason': reason, 'checks': checks,
+                  'execution_complete': all(row['outcome'] in ('passed', 'failed') for row in checks)}
         (args.output / 'outcome.json').write_text(json.dumps(result, indent=2) + '\n')
         print(json.dumps(result))
         return {'passed': 0, 'failed': 1, 'incomplete': 2}[status]
@@ -175,6 +214,7 @@ def main():
                     expect(200, pointers_expect),
                 )
             )
+    query_checks = query_observations(steps, {})
     document = {
         "suite": {
             "id": "related-agents-authority",
@@ -233,11 +273,16 @@ def main():
         rows = [entry for suite in report['suites'] for entry in suite['cases']]
     except (ValueError, KeyError, TypeError):
         return finish('incomplete', 'child runner supplied no usable observation report')
-    if any(row.get('outcome') == 'failed' for row in rows):
+    if (len(rows) != 1 or not isinstance(rows[0], dict)
+            or rows[0].get('id') != 'related-agents-returned-authority'):
+        return finish('incomplete', 'child runner supplied an unexpected applicable case set')
+    row = rows[0]
+    if row.get('outcome') == 'passed' and (report.get('status') != 'passed' or result.returncode != 0):
+        return finish('incomplete', 'child runner completion evidence is inconsistent')
+    query_checks = query_observations(steps, row)
+    if row.get('outcome') == 'failed':
         return finish('failed', 'child runner observed an assertion failure')
-    if (len(rows) != 1 or rows[0].get('id') != 'related-agents-returned-authority'
-            or rows[0].get('outcome') != 'passed' or report.get('status') != 'passed'
-            or result.returncode != 0):
+    if row.get('outcome') != 'passed':
         return finish('incomplete', 'child runner did not complete the required applicable case')
     return finish('passed', 'bootstrap and applicable authority queries checked')
 

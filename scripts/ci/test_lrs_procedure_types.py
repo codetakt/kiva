@@ -3,15 +3,119 @@ import copy
 from contextlib import redirect_stdout
 import io
 import json
+import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
+import probe_lrs_authority_filter as authority_probe
 from run_lrs_procedures import Executor, IFI, Reply
 from lrs_preservation import preservation, snapshot_equal, load_json_members
-from report_issued_test_results import procedure_incomplete
+from report_issued_test_results import assess, procedure_incomplete
+
+
+class AuthorityCompletionTests(unittest.TestCase):
+    procedure = 'related-agents-returned-authority'
+    identifier = '00000000-0000-4000-8000-000000000001'
+
+    def probe(self, directory, stop=None, members=False):
+        output=Path(directory)/'child'
+        identity={'mbox':'mailto:authority@example.org'}
+        if members:
+            identity={'objectType':'Group','member':[identity,{'mbox':'mailto:member@example.org'}]}
+        stored={'id':self.identifier,'authority':identity}
+        def http(request, **kwargs):
+            headers={'X-Experience-API-Version':'2.0.0',
+                     'X-Experience-API-Consistent-Through':'2026-01-01T00:00:00Z'}
+            if stop==request.method:headers.pop('X-Experience-API-Version')
+            response=Mock(status=204 if request.method=='PUT' else 200,headers=headers)
+            response.read.return_value=json.dumps(stored).encode()
+            response.__enter__=Mock(return_value=response)
+            response.__exit__=Mock(return_value=False)
+            return response
+        def runner(command, **kwargs):
+            steps=authority_probe.yaml.safe_load((output/'cases.yaml').read_text())['cases'][0]['steps']
+            row={'id':self.procedure,'outcome':'passed','failures':[]}
+            if stop in ('capture','default','false','true','oracle','unknown'):
+                position=0 if stop=='capture' else 2 if stop=='oracle' else next(
+                    (i for i,s in enumerate(steps) if s['id']=='authority-0-'+stop),1)
+                row.update(outcome='not-run' if stop=='oracle' else 'failed')
+                reason='ORACLE-UNAVAILABLE: controlled unavailable comparison' if stop=='oracle' else 'controlled assertion failure'
+                row['not_run_reasons' if stop=='oracle' else 'failures']=[
+                    'step '+steps[position]['id']+': '+reason if stop!='unknown' else 'unrecognized failure scope']
+            status='incomplete' if row['outcome']=='not-run' else row['outcome']
+            return subprocess.CompletedProcess(command,0 if status=='passed' else 1,
+                json.dumps({'status':status,'suites':[{'cases':[row]}]}),'')
+        with patch('sys.argv',['probe','--endpoint','http://fixture.test','--runner','/unused',
+                               '--output',str(output)]),patch.object(authority_probe.uuid,'uuid4',return_value=self.identifier), \
+                patch.object(authority_probe,'urlopen',side_effect=http) as calls, \
+                patch.object(authority_probe.subprocess,'run',side_effect=runner) as child,redirect_stdout(io.StringIO()):
+            code=authority_probe.main()
+        return code,json.loads((output/'outcome.json').read_text()),calls.call_count,child.call_count
+
+    def parent(self, directory, code, outcome):
+        output=Path(directory)/'parent';output.mkdir()
+        executor=ResponseTypeTests.person_executor(output,{},False)
+        executor.args.procedure=[self.procedure]
+        destination=output/'authority-filter';destination.mkdir()
+        (destination/'outcome.json').write_text(json.dumps(outcome))
+        with patch('run_lrs_procedures.subprocess.run',return_value=subprocess.CompletedProcess([],code,'','')):
+            exit_code=ResponseTypeTests.execute(executor)
+        result=executor.results[self.procedure]
+        projection={'cases':{},'procedures':{self.procedure:{'file':'spec/conformance/lrs-review-tests.yaml'}},
+                    'summary':{'test_definition_projection_complete':True,'semantic_coverage_complete':False},
+                    'rules':[]}
+        report=assess(projection,{'suites':[]},{},[{'procedures':executor.results}])
+        return exit_code,result,report['incomplete_procedures']
+
+    def test_bootstrap_header_failure_retains_unexecuted_queries_through_collector(self):
+        for stop in ('PUT','GET'):
+            with self.subTest(stop=stop),TemporaryDirectory() as directory:
+                code,outcome,requests,children=self.probe(directory,stop)
+                self.assertEqual((code,requests,children),(1,1 if stop=='PUT' else 2,0))
+                self.assertFalse(outcome['execution_complete'])
+                self.assertEqual({c['id'] for c in outcome['checks'] if c['outcome']=='not-run'},
+                                 {'authority-queries-'+mode for mode in ('default','false','true')})
+                exit_code,result,incomplete=self.parent(directory,code,outcome)
+                self.assertEqual(exit_code,1)
+                self.assertEqual(result['outcome'],'failed')
+                self.assertEqual(incomplete,[self.procedure])
+                self.assertTrue(any(c['outcome']=='not-run' for c in result['checks']))
+                self.assertFalse(any(c['id']=='execution-unavailable' for c in result['checks']))
+
+    def test_child_stopping_step_distinguishes_completed_failure_from_skipped_queries(self):
+        for stop,expected in [(None,['passed']*3),('capture',['not-run']*3),
+                              ('default',['failed','not-run','not-run']),
+                              ('false',['passed','failed','not-run']),
+                              ('true',['passed','passed','failed']),
+                              ('oracle',['passed','not-run','not-run']),('unknown',['not-run']*3)]:
+            with self.subTest(stop=stop),TemporaryDirectory() as directory:
+                code,outcome,_,_=self.probe(directory,stop)
+                queries=[c for c in outcome['checks'] if c.get('id','').startswith('authority-')]
+                self.assertEqual([c['outcome'] for c in queries],expected)
+                complete='not-run' not in expected
+                self.assertEqual(outcome['execution_complete'],complete)
+                exit_code,result,incomplete=self.parent(directory,code,outcome)
+                self.assertEqual(incomplete,[] if complete else [self.procedure])
+                self.assertEqual(exit_code,0 if stop is None else 2 if stop=='oracle' else 1)
+
+    def test_failure_for_one_member_leaves_later_member_queries_unexecuted(self):
+        with TemporaryDirectory() as directory:
+            code,outcome,_,_=self.probe(directory,'true',members=True)
+            queries=[c for c in outcome['checks'] if c.get('id','').startswith('authority-')]
+            self.assertEqual([c['outcome'] for c in queries],['passed','passed','failed']+['not-run']*3)
+            self.assertEqual(self.parent(directory,code,outcome)[2],[self.procedure])
+
+    def test_parent_does_not_complete_legacy_or_inconsistent_child_reports(self):
+        for outcome in [None,{'status':'failed'},
+                        {'status':'failed','execution_complete':True,'checks':[]},
+                        {'status':'failed','execution_complete':True,'checks':[{'outcome':'not-run'}]}]:
+            with self.subTest(outcome=outcome),TemporaryDirectory() as directory:
+                _,result,incomplete=self.parent(directory,1,outcome)
+                self.assertEqual(incomplete,[self.procedure])
+                if outcome is not None:self.assertEqual(result['outcome'],'failed')
 
 
 class ResponseTypeTests(unittest.TestCase):

@@ -1,5 +1,5 @@
 {
-  "scope": "Author controls for exact/default serialization property presence and extension-member multiplicity; independent shape and managed-value validation still apply. Default object types do not grant permission to add a property to an exact serialization. Deep extension objects retain decoded member multisets; core and extension-map properties remain unique.",
+  "scope": "Author controls for exact/default serialization property presence and extension-member multiplicity; independent shape and managed-value validation still apply. Default object types do not grant permission to add a property to an exact serialization. Deep extension objects retain decoded member multisets; core and extension-map properties remain unique. Allowed timestamp/fileUrl additions retain their value contracts; absolute IRI syntax alone does not establish an IRL locator.",
   "rules": [
     "IP-format-exact",
     "IP-return-serialization",
@@ -11,7 +11,10 @@
     "IP-substatement-default-time",
     "IP-attachment-transmission-json",
     "IP-extension-values-domain",
-    "IP-extension-value-acceptance"
+    "IP-extension-value-acceptance",
+    "IP-SubStatement-timestamp-type",
+    "IP-Attachment-fileUrl-type",
+    "IP-IRL-definition"
   ],
   "cases": [
     {
@@ -663,7 +666,7 @@
           }
         ]
       },
-      "preserved": true
+      "preserved": null
     },
     {
       "id": "attachment-extra-description",
@@ -954,5 +957,169 @@
       "-P1D",
       "PT1\nS"
     ]
-  }
+  },
+  "added_values": [
+    {
+      "id": "timestamp-0",
+      "key": "timestamp",
+      "value": null,
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-1",
+      "key": "timestamp",
+      "value": [],
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-2",
+      "key": "timestamp",
+      "value": {},
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-3",
+      "key": "timestamp",
+      "value": 42,
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-4",
+      "key": "timestamp",
+      "value": true,
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-5",
+      "key": "timestamp",
+      "value": "",
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-6",
+      "key": "timestamp",
+      "value": "not-a-timestamp",
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-7",
+      "key": "timestamp",
+      "value": "2026-02-30T00:00:00Z",
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-8",
+      "key": "timestamp",
+      "value": "2026-01-01T24:00:00+0900",
+      "outcome": "failed"
+    },
+    {
+      "id": "timestamp-9",
+      "key": "timestamp",
+      "value": "2026-01-01T00:00:00Z",
+      "outcome": "passed"
+    },
+    {
+      "id": "timestamp-10",
+      "key": "timestamp",
+      "value": "2026-01-01T00:00:00.123456+00:00",
+      "outcome": "passed"
+    },
+    {
+      "id": "timestamp-11",
+      "key": "timestamp",
+      "value": "2016-12-31T23:59:60Z",
+      "outcome": "not-run"
+    },
+    {
+      "id": "fileUrl-0",
+      "key": "fileUrl",
+      "value": null,
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-1",
+      "key": "fileUrl",
+      "value": [],
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-2",
+      "key": "fileUrl",
+      "value": {},
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-3",
+      "key": "fileUrl",
+      "value": 42,
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-4",
+      "key": "fileUrl",
+      "value": true,
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-5",
+      "key": "fileUrl",
+      "value": "",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-6",
+      "key": "fileUrl",
+      "value": "/file",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-7",
+      "key": "fileUrl",
+      "value": "//example.org/file",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-8",
+      "key": "fileUrl",
+      "value": "https://example.org/file%xx",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-9",
+      "key": "fileUrl",
+      "value": "https://example.org/a b",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-10",
+      "key": "fileUrl",
+      "value": "http://[broken",
+      "outcome": "failed"
+    },
+    {
+      "id": "fileUrl-11",
+      "key": "fileUrl",
+      "value": "https://example.org/file",
+      "outcome": "not-run"
+    },
+    {
+      "id": "fileUrl-12",
+      "key": "fileUrl",
+      "value": "https://example.org/資料?x=1",
+      "outcome": "not-run"
+    },
+    {
+      "id": "fileUrl-13",
+      "key": "fileUrl",
+      "value": "http://[Vf.a:b]/file",
+      "outcome": "not-run"
+    },
+    {
+      "id": "fileUrl-14",
+      "key": "fileUrl",
+      "value": "urn:example:file",
+      "outcome": "not-run"
+    }
+  ]
 }

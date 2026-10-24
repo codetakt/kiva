@@ -10,6 +10,66 @@ import re
 import struct
 import math
 import json
+import ipaddress
+
+
+def iri_component(value, extra='', private=False):
+    """RFC3987 2.2 iunreserved / pct-encoded / sub-delims plus component delimiters."""
+    if re.search(r'%(?![0-9A-Fa-f]{2})',value):
+        return False
+    for char in re.sub(r'%[0-9A-Fa-f]{2}','',value):
+        code=ord(char)
+        if char in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;="+extra:
+            continue
+        if (0xA0<=code<=0xD7FF or 0xF900<=code<=0xFDCF or 0xFDF0<=code<=0xFFEF
+                or 0x10000<=code<=0xDFFFD and (code&0xFFFF)<=0xFFFD
+                or 0xE1000<=code<=0xEFFFD):
+            continue
+        if private and (0xE000<=code<=0xF8FF or 0xF0000<=code<=0xFFFFD or 0x100000<=code<=0x10FFFD):
+            continue
+        return False
+    return True
+
+
+def iri_reference_valid(value):
+    """Validate raw RFC3987 2.2 syntax before urllib strips or normalizes bytes.
+
+    Scheme-specific routing, origin authorization and transport support remain
+    separate capabilities; a valid reference need not be reachable by this host.
+    """
+    if not isinstance(value,str):
+        return False
+    hierarchy,_,fragment=value.partition('#')
+    hierarchy,_,query=hierarchy.partition('?')
+    if not iri_component(fragment,':@/?') or not iri_component(query,':@/?',private=True):
+        return False
+    if ':' in hierarchy.split('/',1)[0]:
+        scheme,_,hierarchy=hierarchy.partition(':')
+        if not re.fullmatch(r'[A-Za-z][A-Za-z0-9+.-]*',scheme):
+            return False
+    if hierarchy.startswith('//'):
+        authority,slash,path=hierarchy[2:].partition('/')
+        hierarchy=slash+path
+        user,separator,host=authority.rpartition('@')
+        if not separator:
+            host=authority
+        elif not iri_component(user,':'):
+            return False
+        if host.startswith('['):
+            literal=re.fullmatch(r'\[([^\]]+)\](?::[0-9]*)?',host)
+            if literal is None:
+                return False
+            address=literal[1]
+            if not re.fullmatch(r"[vV][0-9A-Fa-f]+\.[A-Za-z0-9._~!$&'()*+,;=:\-]+",address):
+                if '%' in address:
+                    return False
+                try:ipaddress.IPv6Address(address)
+                except ValueError:return False
+        else:
+            name,separator,port=host.partition(':')
+            if not iri_component(name) or separator and not re.fullmatch(r'[0-9]*',port):
+                return False
+    return iri_component(hierarchy,':@/')
 
 
 class MemberObject(dict):
@@ -413,6 +473,21 @@ def snapshot_equal(left, right, pointer='', opaque=False):
     return type(left) is type(right) and left == right
 
 
+def added_value_valid(value, key):
+    """Validate population without inventing a default instant or locator proof."""
+    if key == 'timestamp':
+        return timestamp_preserved(value, value)
+    if key == 'fileUrl':
+        if (not isinstance(value, str) or not re.match(r'[A-Za-z][A-Za-z0-9+.-]*:', value)
+                or not iri_reference_valid(value)):
+            return False
+        # Like the Rust shape adapter: absolute IRI syntax is necessary, but
+        # DC-IRL locator/access-mechanism evidence still requires its provider.
+        return None
+    # Root id/stored/authority/version retain their independent managed checks.
+    return True
+
+
 def preservation(sent, got, pointer=''):
     observations = []
 
@@ -451,15 +526,21 @@ def preservation(sent, got, pointer=''):
                 else:
                     observations.extend(preservation(value, got[key], sub))
             for key in got.keys() - sent.keys():
-                # Only schema-located population/transmission exceptions. Shapes
-                # and values are independently checked; implicit object types do
-                # not permit changing an exact serialization's property set.
+                # Population/transmission exceptions do not waive the added
+                # value's type or format. Implicit object types do not permit
+                # changing an exact serialization's property set.
                 allowed = (pointer == '' and key in {'id', 'stored', 'authority', 'timestamp', 'version'}
                            or pointer == '/object' and sent.get('objectType') == 'SubStatement' and key == 'timestamp'
                            or re.fullmatch(r'(?:/object)?/attachments/[0-9]+', pointer) and key == 'fileUrl')
                 if opaque or not allowed:
                     observations.append(dict(pointer=pointer + '/' + key.replace('~', '~0').replace('/', '~1'),
                                              outcome='failed', rule='unexpected returned property', returned=got[key]))
+                else:
+                    decision = added_value_valid(got[key], key)
+                    observations.append(dict(pointer=pointer + '/' + key.replace('~', '~0').replace('/', '~1'),
+                        outcome='not-run' if decision is None else 'passed' if decision else 'failed',
+                        rule='Added timestamp UTC/type/format or fileUrl IRL contract; locator/provider uncertainty remains NOT-RUN',
+                        returned=got[key]))
     elif isinstance(sent, list):
         if not isinstance(got, list) or len(sent) != len(got):
             record(False, 'array type and cardinality preserved')

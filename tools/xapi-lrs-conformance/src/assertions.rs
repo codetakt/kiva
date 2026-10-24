@@ -1841,15 +1841,101 @@ mod tests {
                 row["returned"].to_string().as_bytes(),
                 &BTreeMap::new(),
             );
-            let valid = row["preserved"].as_bool().expect("control result");
-            assert_eq!(errors.is_empty(), valid, "{}: {errors:?}", row["id"]);
-            if !valid {
+            let valid = row["preserved"].as_bool();
+            assert_eq!(
+                errors.is_empty(),
+                valid == Some(true),
+                "{}: {errors:?}",
+                row["id"]
+            );
+            if valid.is_none() {
+                assert!(
+                    errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")),
+                    "{errors:?}"
+                );
+            }
+            if valid == Some(false) {
                 assert!(
                     errors.iter().any(|e| !e.starts_with("ORACLE-UNAVAILABLE:")),
                     "{}: addition must be a definite failure: {errors:?}",
                     row["id"]
                 );
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn added_values_retain_type_and_format_contracts() -> Result<(), serde_json::Error> {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/preservation-properties.json"
+        ))?;
+        for row in fixture["added_values"]
+            .as_array()
+            .expect("addition vectors")
+        {
+            for nested in [false, true] {
+                let mut submitted = fixture["cases"][0]["submitted"].clone();
+                if nested {
+                    let mut sub = submitted.clone();
+                    sub["objectType"] = "SubStatement".into();
+                    submitted["object"] = sub;
+                }
+                let parent = if nested { "/object" } else { "" };
+                let key = row["key"].as_str().expect("key");
+                let path = if key == "fileUrl" {
+                    submitted.pointer_mut(parent).expect("parent")["attachments"] =
+                        serde_json::json!([{"sha2":"a".repeat(64)}]);
+                    format!("{parent}/attachments/0")
+                } else {
+                    parent.into()
+                };
+                let mut returned = submitted.clone();
+                returned.pointer_mut(&path).expect("population parent")[key] = row["value"].clone();
+                let check = Check::JsonPreservation {
+                    expected: submitted.into(),
+                };
+                let errors = check.evaluate(
+                    200,
+                    &HeaderMap::new(),
+                    returned.to_string().as_bytes(),
+                    &BTreeMap::new(),
+                );
+                let outcome = if errors.is_empty() {
+                    "passed"
+                } else if errors.iter().all(|e| e.starts_with("ORACLE-UNAVAILABLE:")) {
+                    "not-run"
+                } else {
+                    "failed"
+                };
+                assert_eq!(
+                    outcome,
+                    row["outcome"].as_str().expect("outcome"),
+                    "{path}/{}: {errors:?}",
+                    row["id"]
+                );
+            }
+        }
+        for (timestamp, url) in [
+            (serde_json::json!("2016-12-31T23:59:60Z"), Value::Null),
+            (Value::Null, serde_json::json!("https://example.org/file")),
+        ] {
+            let check = Check::JsonPreservation {
+                expected:
+                    serde_json::json!({"object":{"objectType":"SubStatement","attachments":[{}]}})
+                        .into(),
+            };
+            let returned = serde_json::json!({"object":{"objectType":"SubStatement","timestamp":timestamp,"attachments":[{"fileUrl":url}]}});
+            let errors = check.evaluate(
+                200,
+                &HeaderMap::new(),
+                returned.to_string().as_bytes(),
+                &BTreeMap::new(),
+            );
+            assert!(
+                errors.iter().any(|e| !e.starts_with("ORACLE-UNAVAILABLE:")),
+                "{errors:?}"
+            );
         }
         Ok(())
     }

@@ -303,10 +303,14 @@ fn compare(expected: &Json, actual: &Json, path: &str, opaque: bool) -> Result<(
                     &mut unavailable,
                 )?;
             }
-            for (key, _) in right.iter().filter(|(key, _)| expected.get(key).is_none()) {
+            for (key, value) in right.iter().filter(|(key, _)| expected.get(key).is_none()) {
                 if opaque || !permitted_addition(expected, path, key) {
                     return Err(format!("unexpected returned property {key} at {path}"));
                 }
+                defer_unknown(
+                    validate_added_value(value, &format!("{path}/{}", escape_key(key)), key),
+                    &mut unavailable,
+                )?;
             }
             unavailable.map_or(Ok(()), Err)
         }
@@ -385,8 +389,8 @@ fn compare_object_multiset(
 }
 
 fn permitted_addition(expected: &Json, path: &str, key: &str) -> bool {
-    // Presence allowance only: shapes, values and credential/time relationships
-    // are checked independently. An implicit object type is not an exact-output
+    // Presence allowance only: population does not waive the added value's type
+    // or format. An implicit object type is not an exact-output
     // property-addition permission. Never apply these exceptions in extensions.
     if path.is_empty() {
         return matches!(key, "id" | "stored" | "authority" | "timestamp" | "version");
@@ -404,6 +408,35 @@ fn permitted_addition(expected: &Json, path: &str, key: &str) -> bool {
                     !index.is_empty() && index.bytes().all(|byte| byte.is_ascii_digit())
                 })
             })
+}
+
+fn validate_added_value(value: &Json, path: &str, key: &str) -> Result<(), String> {
+    match key {
+        "timestamp" => {
+            let Json::Scalar(value) = value else {
+                return Err(format!("added timestamp must be a string at {path}"));
+            };
+            // No submitted instant exists for a default. Validate the returned
+            // instant and UTC independently of its unspecified default value.
+            compare_timestamp(value, value, path)
+        }
+        "fileUrl" => {
+            let text = value
+                .as_str()
+                .ok_or_else(|| format!("added fileUrl must be a string at {path}"))?;
+            if !crate::identifier_has_valid_syntax(text, false) {
+                return Err(format!(
+                    "added fileUrl is not valid absolute IRI syntax at {path}"
+                ));
+            }
+            Err(format!(
+                "ORACLE-UNAVAILABLE: {path} requires DC-IRL locator/access-mechanism evidence; IRI syntax alone is insufficient"
+            ))
+        }
+        // Root id/stored/authority/version have dedicated managed-field checks.
+        // SubStatement timestamps and Attachment fileUrls have no such fallback.
+        _ => Ok(()),
+    }
 }
 
 fn defer_unknown(result: Result<(), String>, pending: &mut Option<String>) -> Result<(), String> {

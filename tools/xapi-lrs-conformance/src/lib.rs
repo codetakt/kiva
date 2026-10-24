@@ -3983,6 +3983,44 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn generated_substatement_read_checks_added_timestamp_values() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/conformance/http/generated/issued-completion.yaml");
+        let suite: serde_json::Value = serde_yaml::from_str(
+            &std::fs::read_to_string(path).expect("expanded completion definitions"),
+        )
+        .expect("generated suite");
+        let case = suite["cases"]
+            .as_array()
+            .expect("cases")
+            .iter()
+            .find(|case| case["id"] == "issued-completion-sub-duration-week-put")
+            .expect("reviewed generated witness");
+        let read = &case["steps"][1];
+        for (timestamp, outcome) in [
+            (serde_json::Value::Null, Failed),
+            (serde_json::json!("2026-02-30T00:00:00Z"), Failed),
+            (serde_json::json!("2026-01-01T24:00:00+09:00"), Failed),
+            (serde_json::json!("2016-12-31T23:59:60Z"), NotRun),
+            (serde_json::json!("2026-01-01T00:00:00Z"), Passed),
+        ] {
+            let mut returned = case["steps"][0]["request"]["body"].clone();
+            returned["timestamp"] = "2026-01-01T00:00:00Z".into();
+            returned["stored"] = "2026-01-01T00:00:00Z".into();
+            returned["version"] = "2.0.0".into();
+            returned["authority"] = serde_json::json!({"mbox":"mailto:fixture@example.org"});
+            returned["object"]["timestamp"] = timestamp;
+            let report = response_control(read["request"].clone(), read["expect"].clone(), vec![
+                control_response(200,
+                    "Content-Type: application/json\r\nX-Experience-API-Version: 2.0.0\r\nX-Experience-API-Consistent-Through: 2026-01-02T00:00:00Z\r\nLast-Modified: Thu, 01 Jan 2026 00:00:00 GMT\r\n",
+                    &returned.to_string(), false),
+            ]).await;
+            assert_eq!(report.outcome, outcome, "{returned}: {report:?}");
+        }
+    }
+
     #[test]
     fn timestamp_preservation_keeps_known_defects_in_either_operand() {
         for unknown in ["2026-01-01T24:00:00Z", "2016-12-31T23:59:60Z"] {

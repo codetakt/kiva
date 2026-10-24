@@ -151,9 +151,34 @@ class PreservationControls(unittest.TestCase):
         for row in json.loads(path.read_text(), parse_float=Decimal)['cases']:
             with self.subTest(id=row['id']):
                 observations = preservation(row['submitted'], row['returned'])
-                self.assertEqual(all(o['outcome'] == 'passed' for o in observations), row['preserved'])
-                if not row['preserved']:
+                outcome = 'failed' if any(o['outcome']=='failed' for o in observations) else 'not-run' if any(o['outcome']=='not-run' for o in observations) else 'passed'
+                self.assertEqual(outcome, 'not-run' if row['preserved'] is None else 'passed' if row['preserved'] else 'failed')
+                if row['preserved'] is False:
                     self.assertTrue(any(o['outcome'] == 'failed' for o in observations))
+
+    def test_added_values_retain_type_and_format_contracts(self):
+        fixture = json.loads((Path(__file__).resolve().parents[2] / 'tests/conformance/fixtures/preservation-properties.json').read_text())
+        for row in fixture['added_values']:
+            for nested in [False, True]:
+                with self.subTest(id=row['id'], nested=nested):
+                    sent = copy.deepcopy(fixture['cases'][0]['submitted'])
+                    if nested:
+                        sent['object'] = dict(copy.deepcopy(sent), objectType='SubStatement')
+                    parent = sent['object'] if nested else sent
+                    if row['key'] == 'fileUrl':
+                        parent['attachments'] = [{'sha2':'a'*64}]
+                    got = copy.deepcopy(sent)
+                    parent = got['object'] if nested else got
+                    if row['key'] == 'fileUrl':parent = parent['attachments'][0]
+                    parent[row['key']] = row['value']
+                    checks = preservation(sent, got)
+                    outcome = 'failed' if any(c['outcome']=='failed' for c in checks) else 'not-run' if any(c['outcome']=='not-run' for c in checks) else 'passed'
+                    self.assertEqual(outcome, row['outcome'])
+        # Neither a delegated instant nor a locator may hide the other defect.
+        sent = {'object':{'objectType':'SubStatement','attachments':[{}]}}
+        for timestamp, url in [('2016-12-31T23:59:60Z',None), (None,'https://example.org/file')]:
+            got = {'object':{'objectType':'SubStatement','timestamp':timestamp,'attachments':[{'fileUrl':url}]}}
+            self.assertTrue(any(c['outcome']=='failed' for c in preservation(sent,got)))
 
     def test_integer_endpoint_serializations_and_definite_changes(self):
         for sent, got, valid in (

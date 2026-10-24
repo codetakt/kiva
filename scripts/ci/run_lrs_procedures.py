@@ -13,7 +13,6 @@ import datetime as dt
 import email.policy
 import hashlib
 import http.client
-import ipaddress
 import json
 import os
 import re
@@ -49,65 +48,6 @@ def mailbox_structure(value):
     return True
 
 
-def iri_component(value, extra='', private=False):
-    """RFC3987 2.2 iunreserved / pct-encoded / sub-delims plus component delimiters."""
-    if re.search(r'%(?![0-9A-Fa-f]{2})',value):
-        return False
-    for char in re.sub(r'%[0-9A-Fa-f]{2}','',value):
-        code=ord(char)
-        if char in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;="+extra:
-            continue
-        if (0xA0<=code<=0xD7FF or 0xF900<=code<=0xFDCF or 0xFDF0<=code<=0xFFEF
-                or 0x10000<=code<=0xDFFFD and (code&0xFFFF)<=0xFFFD
-                or 0xE1000<=code<=0xEFFFD):
-            continue
-        if private and (0xE000<=code<=0xF8FF or 0xF0000<=code<=0xFFFFD or 0x100000<=code<=0x10FFFD):
-            continue
-        return False
-    return True
-
-
-def iri_reference_valid(value):
-    """Validate raw RFC3987 2.2 syntax before urllib strips or normalizes bytes.
-
-    Scheme-specific routing, origin authorization and transport support remain
-    separate capabilities; a valid reference need not be reachable by this host.
-    """
-    if not isinstance(value,str):
-        return False
-    hierarchy,_,fragment=value.partition('#')
-    hierarchy,_,query=hierarchy.partition('?')
-    if not iri_component(fragment,':@/?') or not iri_component(query,':@/?',private=True):
-        return False
-    if ':' in hierarchy.split('/',1)[0]:
-        scheme,_,hierarchy=hierarchy.partition(':')
-        if not re.fullmatch(r'[A-Za-z][A-Za-z0-9+.-]*',scheme):
-            return False
-    if hierarchy.startswith('//'):
-        authority,slash,path=hierarchy[2:].partition('/')
-        hierarchy=slash+path
-        user,separator,host=authority.rpartition('@')
-        if not separator:
-            host=authority
-        elif not iri_component(user,':'):
-            return False
-        if host.startswith('['):
-            literal=re.fullmatch(r'\[([^\]]+)\](?::[0-9]*)?',host)
-            if literal is None:
-                return False
-            address=literal[1]
-            if not re.fullmatch(r"[vV][0-9A-Fa-f]+\.[A-Za-z0-9._~!$&'()*+,;=:\-]+",address):
-                if '%' in address:
-                    return False
-                try:ipaddress.IPv6Address(address)
-                except ValueError:return False
-        else:
-            name,separator,port=host.partition(':')
-            if not iri_component(name) or separator and not re.fullmatch(r'[0-9]*',port):
-                return False
-    return iri_component(hierarchy,':@/')
-
-
 def host_stamp(value):
     """Only this executor's own utc() clock samples, never target values."""
     return dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
@@ -134,7 +74,7 @@ def ptr(value, pointer):
 
 from lrs_preservation import (preservation, timestamp_preserved, timestamp_ns, timestamp_pair, PrimitiveUnavailable,
     statement_response_headers, agent_structure, agent_identity_equal, snapshot_equal, all_decisions,
-    load_json_members)
+    load_json_members, iri_reference_valid)
 
 
 def response_http_date(value):
@@ -798,9 +738,20 @@ class Executor:
         try:
             outcome=json.loads((self.out/'authority-filter'/'outcome.json').read_text())
         except (OSError, ValueError):outcome={}
+        if not isinstance(outcome,dict):outcome={}
         status=outcome.get('status')
         verdict=False if status=='failed' else True if status=='passed' and run.returncode==0 else None
         self.check('actual-returned-authority-true-default-false',verdict,'Explicit helper result; unavailable fixture/child incomplete is never a target failure or pass',{'exit_code':run.returncode,'helper_outcome':outcome})
+        checks=outcome.get('checks')
+        valid=isinstance(checks,list) and bool(checks) and all(isinstance(c,dict) for c in checks)
+        if valid:
+            for i,check in enumerate(checks):
+                observed={'passed':True,'failed':False}.get(check.get('outcome'))
+                self.check('authority-helper-'+str(i),observed,check.get('reason','Child response observation'),check)
+        complete=(valid and outcome.get('execution_complete') is True
+                  and all(c.get('outcome') in ('passed','failed') for c in checks))
+        self.check('authority-required-checks-completed',True if complete else None,
+                   'Every applicable query must be observed; a bootstrap or child FAIL cannot complete skipped queries')
 
     def languages(self):
         # Fixed RFC5646/IANA definitions; validity is not an optional parser
