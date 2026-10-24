@@ -40,7 +40,7 @@
     "tests/conformance/http/statement-format-isolated.yaml": "21f899ba04e4b57776fde9349f8c65ec83df71f5165aa182b9838527d8468681",
     "tests/conformance/http/statement-immutability-isolated.yaml": "c42c15eb423bd0bceaa9a1cad78a86239a626ba33ff2bccd9b777fe7e30da0a6",
     "tests/conformance/http/statement-normalization-isolated.yaml": "bbfde5546aeae935274f0da22042e196026cd5ef90e2c3263ea42e9a1f579603",
-    "tests/conformance/http/statement-object-validation-isolated.yaml": "9352dd4e062764ce6dcc814d14e9ebe759009616e6116d03e0126edd9807caf5",
+    "tests/conformance/http/statement-object-validation-isolated.yaml": "c9c7d56b88bd5401389320d388542445b4ab8ac75e1d3a2c1f4a14167100cb9f",
     "tests/conformance/http/statement-query-filter-isolated.yaml": "18a24f9832f49d0ad01367139dfe72f186bf5b4704b75b4251edc483f4d82ea0",
     "tests/conformance/http/statement-query-validation.yaml": "9e49dc520bb8c38a7cb35f8b74d0ed53f973dd5413511a58efafb741f2e7db6e",
     "tests/conformance/http/statement-reference-isolated.yaml": "531f9b62f54a8b8e2551c5a8bf44c58d212eb2cad5355417eb3e07ab0977faea",

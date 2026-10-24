@@ -2579,15 +2579,14 @@ fn evaluate_pending_retrieval(
     // An observation deadline is a harness limit, not an IEEE deadline.
     // Error headers still apply; success-only JSON and Last-Modified do not.
     let mut failures = Vec::new();
-    for name in [
-        "X-Experience-API-Version",
-        "X-Experience-API-Consistent-Through",
-    ] {
-        if let Some(expected) = expectation.headers.get(name) {
+    for (name, expected) in &expectation.headers {
+        if name.eq_ignore_ascii_case("X-Experience-API-Version")
+            || name.eq_ignore_ascii_case("X-Experience-API-Consistent-Through")
+        {
             evaluate_header(
                 name,
                 expected,
-                headers.get(name).and_then(|v| v.to_str().ok()),
+                headers.get(name.as_str()).and_then(|v| v.to_str().ok()),
                 &state.captures,
                 &mut failures,
             );
@@ -2984,13 +2983,15 @@ fn evaluate_header(
     }
     if let Some(expected) = &expectation.contains {
         match render_template(expected, captures) {
-            Ok(rendered)
-                if actual
-                    .is_some_and(|actual_value| header_contains(name, actual_value, &rendered)) => {
+            Ok(rendered) => {
+                match actual.map_or(Ok(false), |value| header_contains(name, value, &rendered)) {
+                    Ok(true) => {}
+                    Ok(false) => failures.push(format!(
+                        "expected header {name} to contain {rendered:?}, received {actual:?}"
+                    )),
+                    Err(error) => failures.push(error),
+                }
             }
-            Ok(rendered) => failures.push(format!(
-                "expected header {name} to contain {rendered:?}, received {actual:?}"
-            )),
             Err(error) => failures.push(format!("failed to render header {name}: {error}")),
         }
     }
@@ -3018,22 +3019,37 @@ fn evaluate_header(
 
 // Content-Type assertions name a media type, not a substring. Parameters in the
 // assertion constrain the response; additional response parameters are allowed.
-fn header_contains(name: &str, actual: &str, expected: &str) -> bool {
+fn header_contains(name: &str, actual: &str, expected: &str) -> Result<bool, String> {
     if !name.eq_ignore_ascii_case("content-type") {
-        return actual.contains(expected);
+        return Ok(actual.contains(expected));
     }
     let (Ok(actual), Ok(expected)) = (
         media_type::parse_http(actual),
         media_type::parse_http(expected),
     ) else {
-        return false;
+        return Ok(false);
     };
-    actual.essence == expected.essence
-        && expected.ambiguous.is_empty()
-        && expected
-            .parameters
-            .iter()
-            .all(|(name, value)| actual.parameters.get(name) == Some(value))
+    if actual.essence != expected.essence {
+        return Ok(false);
+    }
+    let mut unknown = false;
+    for (name, expected_value) in &expected.parameters {
+        let Some(actual_value) = actual.parameters.get(name) else {
+            return Ok(false);
+        };
+        if actual.ambiguous.contains(name) || expected.ambiguous.contains(name) {
+            unknown = true;
+        } else if actual_value != expected_value {
+            return Ok(false);
+        }
+    }
+    // Only parameters constrained by the assertion affect this comparison.
+    // Keep checking determinate constraints before deferring an ambiguous value.
+    if unknown {
+        Err("ORACLE-UNAVAILABLE: duplicate Content-Type parameter prevents a definite value comparison".into())
+    } else {
+        Ok(true)
+    }
 }
 
 fn evaluate_body(
@@ -3811,11 +3827,10 @@ expect:
             "APPLICATION/JSON",
             "application/json; charset=UTF-8",
         ] {
-            assert!(super::header_contains(
-                "Content-Type",
-                actual,
-                "application/json"
-            ));
+            assert_eq!(
+                super::header_contains("Content-Type", actual, "application/json"),
+                Ok(true)
+            );
         }
         for actual in [
             "application/jsonp",
@@ -3824,23 +3839,219 @@ expect:
             "application/json; broken",
             "not application/json",
         ] {
-            assert!(!super::header_contains(
-                "Content-Type",
-                actual,
-                "application/json"
-            ));
+            assert_eq!(
+                super::header_contains("Content-Type", actual, "application/json"),
+                Ok(false)
+            );
         }
-        assert!(super::header_contains(
-            "content-type",
-            "text/plain; charset=UTF-8",
-            "TEXT/PLAIN; charset=utf-8"
-        ));
-        assert!(!super::header_contains(
-            "content-type",
-            "text/plain; charset=iso-8859-1",
-            "text/plain; charset=utf-8"
-        ));
-        assert!(super::header_contains("x-custom", "prefix-value", "value"));
+        assert_eq!(
+            super::header_contains(
+                "content-type",
+                "text/plain; charset=UTF-8",
+                "TEXT/PLAIN; charset=utf-8"
+            ),
+            Ok(true)
+        );
+        assert_eq!(
+            super::header_contains(
+                "content-type",
+                "text/plain; charset=iso-8859-1",
+                "text/plain; charset=utf-8"
+            ),
+            Ok(false)
+        );
+        assert_eq!(
+            super::header_contains("x-custom", "prefix-value", "value"),
+            Ok(true)
+        );
+    }
+
+    #[tokio::test]
+    async fn pending_headers_are_case_insensitive_and_never_hidden_by_retry() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        use std::fmt::Write;
+        for (version_name, through_name) in [
+            (
+                "X-Experience-API-Version",
+                "X-Experience-API-Consistent-Through",
+            ),
+            (
+                "x-experience-api-version",
+                "x-experience-api-consistent-through",
+            ),
+            (
+                "X-eXpErIeNcE-aPi-VeRsIoN",
+                "x-EXPERIENCE-api-CONSISTENT-through",
+            ),
+        ] {
+            for (version, through, valid) in [
+                ("2.0.0", "2026-01-01T00:00:00Z", true),
+                ("", "2026-01-01T00:00:00Z", false),
+                ("1.1.0", "2026-01-01T00:00:00Z", false),
+                ("2.0.0", "", false),
+                ("2.0.0", "invalid", false),
+            ] {
+                for interrupted in [false, true] {
+                    let mut headers = String::new();
+                    if !version.is_empty() {
+                        write!(headers, "X-Experience-API-Version: {version}\r\n")
+                            .expect("fixture header");
+                    }
+                    if !through.is_empty() {
+                        write!(
+                            headers,
+                            "X-Experience-API-Consistent-Through: {through}\r\n"
+                        )
+                        .expect("fixture header");
+                    }
+                    let mut responses = vec![control_response(404, &headers, "{}", interrupted)];
+                    if valid && !interrupted {
+                        responses.push(control_response(200, &headers, "{}", false));
+                    }
+                    let report = response_control(
+                        serde_json::json!({"method":"GET","path":"/statements","query":{"statementId":"01000000-0000-4000-8000-000000000001"},"await_retrieval_ms":1000}),
+                        serde_json::json!({"status":200,"headers":{
+                            version_name:{"equals":"2.0.0"}, through_name:{"iso8601":true}
+                        }}),
+                        responses,
+                    ).await;
+                    let expected = if !valid {
+                        Failed
+                    } else if interrupted {
+                        NotRun
+                    } else {
+                        Passed
+                    };
+                    assert_eq!(
+                        report.outcome, expected,
+                        "{version_name}, {through_name}, {version:?}, {through:?}, interrupted={interrupted}: {report:?}"
+                    );
+                    assert_eq!(
+                        report.retrieval_attempts.len(),
+                        if valid && !interrupted { 2 } else { 1 }
+                    );
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn ambiguous_content_type_values_defer_without_hiding_known_mismatches() {
+        use super::CaseOutcome::{Failed, NotRun, Passed};
+        for (actual, expected, outcome) in [
+            (
+                "TEXT/PLAIN; charset=UTF-8; charset=ISO-8859-1",
+                "text/plain; charset=utf-8",
+                NotRun,
+            ),
+            (
+                "text/plain; charset=ISO-8859-1; CHARSET=UTF-8",
+                "text/plain; charset=utf-8",
+                NotRun,
+            ),
+            (
+                "text/plain; charset=utf-8; charset=utf-8",
+                "text/plain; charset=utf-8",
+                NotRun,
+            ),
+            (
+                "text/plain; charset=utf-8",
+                "text/plain; charset=utf-8; CHARSET=iso-8859-1",
+                NotRun,
+            ),
+            (
+                "text/plain; charset=utf-8; charset=iso-8859-1",
+                "text/plain",
+                Passed,
+            ),
+            (
+                "text/plain; charset=utf-8; note=a; note=b",
+                "text/plain; charset=utf-8",
+                Passed,
+            ),
+            (
+                "text/html; charset=utf-8; charset=iso-8859-1",
+                "text/plain; charset=utf-8",
+                Failed,
+            ),
+            (
+                "text/plain; charset=utf-8; charset=iso-8859-1; note=x",
+                "text/plain; charset=utf-8; note=y",
+                Failed,
+            ),
+            (
+                "text/plain; charset=utf-8; charset=iso-8859-1",
+                "text/plain; charset=utf-8; note=y",
+                Failed,
+            ),
+            (
+                "multipart/mixed; boundary=a; boundary=b",
+                "multipart/mixed; boundary=a",
+                NotRun,
+            ),
+        ] {
+            for status in [200, 500] {
+                let report = response_control(
+                    serde_json::json!({"method":"GET","path":"/statements"}),
+                    serde_json::json!({"status":200,"headers":{"Content-Type":{"contains":expected}}}),
+                    vec![control_response(status, &format!("Content-Type: {actual}\r\n"), "{}", false)],
+                ).await;
+                assert_eq!(
+                    report.outcome,
+                    if status == 200 { outcome } else { Failed },
+                    "{actual} / {expected}, status={status}: {report:?}"
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn accepted_statement_version_keeps_the_response_version_contract() {
+        use std::fmt::Write;
+        // Exercise the authored expectation so losing this assertion in the YAML
+        // also loses the control, even when the Statement's version is retained.
+        let suite: serde_json::Value = serde_yaml::from_str(include_str!(
+            "../../../tests/conformance/http/statement-object-validation-isolated.yaml"
+        ))
+        .expect("authored suite");
+        let case = suite["cases"]
+            .as_array()
+            .expect("cases")
+            .iter()
+            .find(|case| {
+                case["id"] == "statement-accepts-semantic-version-outside-legacy-adl-range"
+            })
+            .expect("version case");
+        for (step_index, status, body) in [
+            (0, 200, "[]"),
+            (0, 400, "{}"),
+            (1, 200, r#"{"version":"1.1.0"}"#),
+        ] {
+            let step = &case["steps"][step_index];
+            for version in [None, Some("1.1.0"), Some("2.0.0")] {
+                let mut headers =
+                    "X-Experience-API-Consistent-Through: 2026-01-01T00:00:00Z\r\n".to_owned();
+                if let Some(version) = version {
+                    write!(headers, "X-Experience-API-Version: {version}\r\n")
+                        .expect("fixture header");
+                }
+                let report = response_control(
+                    step["request"].clone(),
+                    step["expect"].clone(),
+                    vec![control_response(status, &headers, body, false)],
+                )
+                .await;
+                assert_eq!(
+                    report.outcome,
+                    if version == Some("2.0.0") {
+                        super::CaseOutcome::Passed
+                    } else {
+                        super::CaseOutcome::Failed
+                    },
+                    "step={step_index}, status={status}, version={version:?}: {report:?}"
+                );
+            }
+        }
     }
 
     #[test]
@@ -3864,8 +4075,9 @@ expect:
                 "application/octet-stream",
             ),
         ] {
-            assert!(
+            assert_eq!(
                 super::header_contains("Content-Type", actual, expected),
+                Ok(true),
                 "{actual}"
             );
         }
@@ -3889,8 +4101,9 @@ expect:
                 "multipart/mixed; boundary=\"abc\"",
             ),
         ] {
-            assert!(
-                !super::header_contains("Content-Type", actual, expected),
+            assert_eq!(
+                super::header_contains("Content-Type", actual, expected),
+                Ok(false),
                 "{actual}"
             );
         }

@@ -41480,11 +41480,11 @@ prose_duties:
     - pointer: /steps/0/expect/status_in
       sha256: e8b9f345f7a25b45d04c1991acd03a43c539d04a411228e95789681f135ac223
     - pointer: /steps/0/expect/headers
-      sha256: 8199571f883a26a5e2869e09e1227c4bb0784aabd3a5aabb90da9f93a74ca457
+      sha256: 7bd39ea72b2f4627bb8805a674ddfaa1f7d2699f8915246f2f1b77c0a580d36b
     - pointer: /steps/1/expect/status
       sha256: 27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf
     - pointer: /steps/1/expect/headers
-      sha256: 8199571f883a26a5e2869e09e1227c4bb0784aabd3a5aabb90da9f93a74ca457
+      sha256: 7bd39ea72b2f4627bb8805a674ddfaa1f7d2699f8915246f2f1b77c0a580d36b
     - pointer: /steps/1/expect/json
       sha256: 78f537e626963c44aeeee7ea7bb4552f57b2758a395c1859928d9bf400b6a226
   semantic_procedure: table-driven-response-preservation
