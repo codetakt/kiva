@@ -131,11 +131,11 @@
     },
     {
       "path": "spec/conformance/README.md",
-      "sha256": "4bc3bcfe9b460ff4624e027fb50899b3735a06ef183b1f67c83968cb3ac94bf1"
+      "sha256": "f3264439c59de58bf9d610fc697f59a558bbdcf21c538ef7a8d68531f7f6222e"
     },
     {
       "path": "spec/conformance/lrs-assertion-manifest.yaml",
-      "sha256": "d67ad6c975802a242ba31bc80242789fc72ef599acc36981ab1af83471e8642e"
+      "sha256": "ff696b353d27775b5c0d88548d744740839452f2c487cc96f92e54972795454c"
     },
     {
       "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",

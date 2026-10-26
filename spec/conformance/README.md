@@ -39,10 +39,21 @@ Bounded design controls can be executed locally with:
 ```sh
 python scripts/ci/run_lrs_evaluation_controls.py --runner target/debug/xapi-lrs-conformance --out target/lrs-evaluation-controls
 python scripts/ci/run_lrs_procedure_controls.py --runner target/debug/xapi-lrs-conformance --out target/lrs-procedure-controls
-python scripts/ci/run_lrs_person_identifier_controls.py --runner target/debug/xapi-lrs-conformance --server target/debug/kiva-server --out target/lrs-person-controls
+nix develop .#conformance-definitions -c python -B scripts/ci/run_lrs_person_identifier_controls.py --runner target/debug/xapi-lrs-conformance --server target/debug/kiva-server --out target/lrs-person-controls --focused
 ```
 
 Use a fresh output directory for each run.
+
+The Person control uses a narrow fixture declaring no target-specific policy or
+external provider, rather than the general Kiva procedure-policy fixture. It
+keeps the Account IRL locator-evidence gap as an exact
+NOT-RUN in the valid branch. All four malformed-OpenID cases must still FAIL
+with their specific syntax reasons; the procedure also retains its locator and
+manual-inventory gaps. This control does not supply an IRL provider. Omitting
+`--focused` runs the full memory suite and requires the committed known-gap
+baseline for every other case; unexpected failures, unavailability and stale
+baseline improvements are rejected. The harness validators run as unit controls
+in `lrs-oracle-controls`; the server/proxy contrast remains an explicit local run.
 
 - `xapi-lrs-discharge.yaml`: discharge plan for the IEEE Std 9274.1.1-2023
   xAPI LRS requirement catalog.

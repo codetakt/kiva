@@ -29,9 +29,10 @@ not prove the failure-upload branch or complete product conformance. GitHub run
 logs and artifacts carry execution evidence; no repository review receipt or
 adoption record is required.
 
-Commits marked `[skip ci]` have no hosted execution evidence. Hosted execution
-currently remains held. After that hold is explicitly released, run the workflow
-on the intended PR revision before moving it to Ready for Review or merging it.
+An automatically skipped workflow supplies no hosted execution evidence. Commit
+messages containing `[skip ci]` suppress automatic push/pull-request workflows;
+an explicit `workflow_dispatch` can still verify that revision. Run the workflow
+on the intended PR revision during formal review and before merging it.
 This is the first hosted verification of collection/upload, independent of local
 Nix results. Check the actual branch protection and required-check settings;
 do not infer their configuration from the existence of workflow checks.
