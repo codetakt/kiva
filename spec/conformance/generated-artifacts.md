@@ -89,6 +89,13 @@ hash seed and checks any outputs already materialized in the checkout. It writes
 neither the lock nor the checkout's generated files. `verify` checks existing
 inputs and outputs against the lock without regenerating them.
 
+An evidence entry point that has just generated the artifacts can call
+`validate_lrs_projection.py --verify-artifacts` to verify their complete input/output
+identities before running the same projection, schema and source-binding checks.
+Missing or changed artifacts are rejected; this mode does not repair them or skip
+validation. The default standalone validator still generates first. The separate
+reproduction check continues to expand both hash seeds from empty temporary trees.
+
 `--allow-review-pending` is retained as a compatibility option; it does not change
 the checks. No mode requires a review receipt. `--skip-source` explicitly leaves external source bytes unverified; the
 merged ledger remains pinned. No licensed IEEE PDF or private historical review

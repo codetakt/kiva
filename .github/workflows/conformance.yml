@@ -32,7 +32,7 @@ jobs:
       - name: Setup Nix CI
         uses: ./.github/actions/setup-nix-ci
         with:
-          enable-flakehub-cache: "true"
+          enable-nix-cache: "true"
 
       - name: Reproduce and package static definitions
         run: |
@@ -59,15 +59,20 @@ jobs:
       - name: Setup Nix CI
         uses: ./.github/actions/setup-nix-ci
         with:
-          enable-flakehub-cache: "true"
+          enable-nix-cache: "true"
 
       - name: Check Python oracle and evidence boundaries
         run: nix build .#checks.x86_64-linux.lrs-oracle-controls --print-build-logs
 
-  conformance:
-    name: xAPI Conformance Evidence
+  backends:
+    name: Conformance (${{ matrix.backend }})
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        backend: [memory, postgres]
     defaults:
       run:
         shell: bash
@@ -79,45 +84,61 @@ jobs:
         uses: ./.github/actions/setup-nix-ci
         with:
           free-disk: "true"
-          enable-flakehub-cache: "true"
+          enable-nix-cache: "true"
 
-      - name: Capture memory execution evidence
-        if: ${{ !cancelled() }}
+      - name: Capture execution evidence
+        id: capture
+        env:
+          BACKEND: ${{ matrix.backend }}
         run: |
-          mkdir -p artifacts/conformance-regression/memory
-          nix build .#memory-conformance-evidence --print-build-logs \
-            --out-link result-memory-evidence 2>&1 | tee artifacts/conformance-regression/memory/build.log
-          cp -R --dereference result-memory-evidence/. artifacts/conformance-regression/memory/
+          evidence_dir="artifacts/conformance-regression/$BACKEND"
+          mkdir -p "$evidence_dir"
+          nix build ".#$BACKEND-conformance-evidence" --print-build-logs \
+            --out-link result-backend-evidence 2>&1 | tee "$evidence_dir/build.log"
+          cp -R --dereference result-backend-evidence/. "$evidence_dir/"
 
-      - name: Capture postgres execution evidence
-        if: ${{ !cancelled() }}
+      - name: Enforce backend regression check
+        if: ${{ !cancelled() && steps.capture.outcome == 'success' }}
+        env:
+          BACKEND: ${{ matrix.backend }}
+        run: |
+          nix build ".#checks.x86_64-linux.$BACKEND-conformance" \
+            --print-build-logs 2>&1 | tee "artifacts/conformance-regression/$BACKEND/gate.log"
+
+      - name: Verify PostgreSQL storage
+        if: ${{ !cancelled() && matrix.backend == 'postgres' }}
         run: |
           mkdir -p artifacts/conformance-regression/postgres
-          nix build .#postgres-conformance-evidence --print-build-logs \
-            --out-link result-postgres-evidence 2>&1 | tee artifacts/conformance-regression/postgres/build.log
-          cp -R --dereference result-postgres-evidence/. artifacts/conformance-regression/postgres/
+          nix build .#checks.x86_64-linux.postgres-verification \
+            --print-build-logs 2>&1 | tee artifacts/conformance-regression/postgres/verification.log
 
-      - name: Enforce conformance checks
-        if: ${{ !cancelled() }}
-        run: |
-          nix build \
-            .#checks.x86_64-linux.conformance-plan \
-            .#checks.x86_64-linux.memory-conformance \
-            .#checks.x86_64-linux.postgres-conformance \
-            .#checks.x86_64-linux.postgres-verification \
-            --keep-going --print-build-logs 2>&1 | tee artifacts/conformance-regression/gates.log
-
-      - name: Upload live regression evidence (not full conformance)
+      - name: Upload backend evidence even after failure
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: conformance-regression
+          name: conformance-regression-${{ matrix.backend }}
           path: artifacts/conformance-regression/
           if-no-files-found: error
           retention-days: 14
 
+  static-evidence:
+    name: Static Conformance Evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Nix CI
+        uses: ./.github/actions/setup-nix-ci
+        with:
+          free-disk: "true"
+          enable-nix-cache: "true"
+
       - name: Build static conformance evidence bundle
         run: |
+          nix build .#checks.x86_64-linux.conformance-plan \
+            .#conformance-evidence-static --no-link --keep-going --print-build-logs
           nix build .#conformance-evidence-static \
             --print-build-logs \
             --out-link result-conformance-evidence-static
@@ -129,4 +150,47 @@ jobs:
         with:
           name: conformance-evidence-static
           path: artifacts/conformance-evidence-static/
+          if-no-files-found: error
           retention-days: 14
+
+  conformance:
+    name: xAPI Conformance Evidence
+    needs: [lrs-artifacts, lrs-oracles, backends, static-evidence]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Collect available backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: conformance-regression-*
+          merge-multiple: true
+          path: artifacts/conformance-regression/
+
+      - name: Upload combined regression evidence (not full conformance)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-regression
+          path: artifacts/conformance-regression/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Require every conformance job to succeed
+        if: ${{ always() }}
+        env:
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          results = json.loads(os.environ["JOB_RESULTS"])
+          incomplete = {name: job["result"] for name, job in results.items()
+                        if job["result"] != "success"}
+          if incomplete:
+              print(f"Conformance jobs did not all succeed: {incomplete}", file=sys.stderr)
+              sys.exit(1)
+          print("All conformance checks and evidence uploads succeeded.")
+          PY

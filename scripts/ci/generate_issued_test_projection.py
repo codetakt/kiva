@@ -42,6 +42,7 @@ def collect_execution_contract(root=ROOT):
             'scripts/ci/check_conformance_regressions.py',
             'scripts/ci/conformance_lib.sh',
             'scripts/ci/run_memory_conformance.sh','scripts/ci/run_postgres_conformance.sh',
+            'scripts/ci/run_parallel_conformance.py',
             'spec/conformance/ci-execution-baseline.json',
             'spec/conformance/endpoint-profile.example.yaml','spec/conformance/auth-profile.example.yaml',
             'docs/architecture/conformance-claim.md','.github/workflows/conformance.yml',

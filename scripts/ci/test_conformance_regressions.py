@@ -277,7 +277,7 @@ class RegressionGateControls(unittest.TestCase):
             names = ['spec/conformance/ci-execution-baseline.json',
                      'spec/conformance/schemas/conformance-run-report.schema.json',
                      'spec/conformance/lrs-generated-artifacts.lock.json',
-                     'scripts/ci/check_conformance_regressions.py',
+                     'scripts/ci/check_conformance_regressions.py', 'scripts/ci/run_parallel_conformance.py',
                      'scripts/ci/conformance_lib.sh', 'scripts/ci/run_memory_conformance.sh']
             for name in names:
                 path = root / name
@@ -318,7 +318,7 @@ class RegressionGateControls(unittest.TestCase):
             inputs = ['spec/conformance/ci-execution-baseline.json',
                       'spec/conformance/schemas/conformance-run-report.schema.json',
                       'spec/conformance/lrs-generated-artifacts.lock.json',
-                      'scripts/ci/check_conformance_regressions.py',
+                      'scripts/ci/check_conformance_regressions.py', 'scripts/ci/run_parallel_conformance.py',
                       'scripts/ci/conformance_lib.sh', 'scripts/ci/run_memory_conformance.sh']
             for name in inputs:
                 f = root / name

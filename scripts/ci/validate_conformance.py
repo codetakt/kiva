@@ -30,7 +30,7 @@ class ConformanceError(RuntimeError):
 def load_yaml(path: Path) -> dict[str, Any]:
     """Load a YAML mapping from disk."""
     with path.open("r", encoding="utf-8") as handle:
-        value = yaml.safe_load(handle)
+        value = yaml.load(handle, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
     if not isinstance(value, dict):
         raise ConformanceError(f"{path} root must be a mapping")
     return value

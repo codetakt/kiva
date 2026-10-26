@@ -10,8 +10,8 @@ inputs:
     description: Run the hosted-runner disk cleanup step.
     required: false
     default: "false"
-  enable-flakehub-cache:
-    description: Enable the FlakeHub binary cache.
+  enable-nix-cache:
+    description: Cache Nix build results in GitHub Actions without external credentials.
     required: false
     default: "false"
 
@@ -49,6 +49,8 @@ runs:
           rm -rf /homeless-shelter || true
         fi
 
-    - name: Enable FlakeHub cache
-      if: ${{ inputs.enable-flakehub-cache == 'true' }}
-      uses: DeterminateSystems/flakehub-cache-action@v1
+    - name: Enable Nix binary cache
+      if: ${{ inputs.enable-nix-cache == 'true' }}
+      uses: DeterminateSystems/flakehub-cache-action@3ac6f3c19fc52eeb1408fd434bd1b4ed4266bf25 # v3.24.1
+      with:
+        use-gha-cache: "true"

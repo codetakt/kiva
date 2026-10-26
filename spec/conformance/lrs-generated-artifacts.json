@@ -64,6 +64,7 @@
     "spec/conformance/auth-profile.example.yaml",
     "scripts/ci/run_memory_conformance.sh",
     "scripts/ci/run_postgres_conformance.sh",
+    "scripts/ci/run_parallel_conformance.py",
     "docs/architecture/conformance-claim.md",
     ".github/workflows/conformance.yml",
     "flake.nix",

@@ -28,7 +28,7 @@ let
         buildPhaseCargoCommand = "";
         checkPhaseCargoCommand = ''
           python -B scripts/ci/check_conformance_regressions.py capture \
-            --backend ${name} --output-dir "$PWD/reports"
+            --backend ${name} --workers 4 --output-dir "$PWD/reports"
         '';
         installPhaseCommand = ''
           mkdir -p "$out"

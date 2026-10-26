@@ -9,8 +9,8 @@
   },
   "inputs": {
     ".github/workflows/conformance.yml": {
-      "sha256": "dd493e3988a868a91e09a6dfc992f5559f683003308aa138296dfbcbed48e6c2",
-      "bytes": 4281
+      "sha256": "93487826664df7225f0ef1ab11a0a5d5f25d81f727cf2f3102790f356cb861ba",
+      "bytes": 6171
     },
     "Cargo.lock": {
       "sha256": "da734c3a43d08a5a645747bfa9e0a2c49c2d5966a3e5f13f6a224be971a660b2",
@@ -37,36 +37,36 @@
       "bytes": 45796
     },
     "nix/flake/conformance.nix": {
-      "sha256": "563354394ef9066982cbefe0bd81c7f9c64985733cd85d75c5520ad1691bcac4",
-      "bytes": 1624
+      "sha256": "6cd6c0a4ed306ad1e31413d99656412f3f261d11c00eadf05f2b91b1541e7a16",
+      "bytes": 1636
     },
     "nix/flake/dev-shells.nix": {
       "sha256": "4caf15fa6050684a0120f2cb3cba0afb1f6984fc3eb6ef2992caca34c66fcffd",
       "bytes": 1234
     },
     "nix/flake/packages.nix": {
-      "sha256": "e619403357709f8352e833884c0d5fadd414a8134d7c955d893b0452daa3189d",
-      "bytes": 4326
+      "sha256": "bfe72e4fe6007edb10a128529b9588fb16ddd799aaa9ea5ee85890b5c356e4a6",
+      "bytes": 4259
     },
     "scripts/ci/audit_lrs_source_projection.py": {
       "sha256": "e3b13c42b1a7e798a83631d7f0fce2894e181fa587fde97679416cc862d134f7",
       "bytes": 18187
     },
     "scripts/ci/check_conformance_regressions.py": {
-      "sha256": "72938e2ec88a85e838819ae009131e80572727c9d1af9df9f235eb5c93d2183b",
-      "bytes": 17555
+      "sha256": "658c13adfe46199d2a5541e9ef59607355a37846a28f2ed0108ce6c034c6ad9e",
+      "bytes": 20126
     },
     "scripts/ci/conformance_lib.sh": {
-      "sha256": "0a8f1339e3216b1f0334b7d80f7b6c7908761670285244f714554aa4e661bb5e",
-      "bytes": 3978
+      "sha256": "2b542f279db989a447e6fda1e4a63b4197bf555f0c673956fb4f22442daa7bbb",
+      "bytes": 4660
     },
     "scripts/ci/generate_conformance_evidence.sh": {
-      "sha256": "2e13b0e695d9cc25fbac4fb2d99de8ba0dec74dd1ac57091e9448a7053d78d90",
-      "bytes": 15591
+      "sha256": "47f2eae2c0dcebfca23524e1a9b8bccaf266bc85cab2d10d22a6141538ba8e38",
+      "bytes": 15620
     },
     "scripts/ci/generate_issued_test_projection.py": {
-      "sha256": "6747df8746a6835abe44669b88f2a23db797ee76f13ba7a47708d077205006f7",
-      "bytes": 17276
+      "sha256": "aec7390f39681bc0a0cd0557f62ae3a1bc674d77f3103027fe14971d8d527eec",
+      "bytes": 17330
     },
     "scripts/ci/generate_lrs_projection_cases.py": {
       "sha256": "ae821cb005de0020e825a4c612edfeb233a7a1f3b06964b0059371a9f4fa0e7d",
@@ -173,16 +173,24 @@
       "bytes": 68871
     },
     "scripts/ci/run_memory_conformance.sh": {
-      "sha256": "25aa87f0470ef8aa385d2ffd596b118e8928576a8afa4d5a8443aeb933d931de",
-      "bytes": 947
+      "sha256": "daea753327b045c0abf10ceffc769e35df5a46b0ba7b1127d5b93270dcb50b33",
+      "bytes": 957
+    },
+    "scripts/ci/run_parallel_conformance.py": {
+      "sha256": "96982887e0ca55ea743d5981d50da2dcb1fe94e6ecdc69b9e970270835263b8f",
+      "bytes": 13360
     },
     "scripts/ci/run_postgres_conformance.sh": {
-      "sha256": "3cd17c19ed67656e5585da5906faa2b3d4c76a27c32cd917edd72dd6f48c5694",
-      "bytes": 2260
+      "sha256": "0d813a5c9be2f4e876272026b585bfbe56733528c2a33fd0cbdea7e50abbf43a",
+      "bytes": 2270
     },
     "scripts/ci/test_conformance_regressions.py": {
-      "sha256": "e8c4b6364c870395c2b1222f81b1d2768069d4f4d8df88adfdb2fa0b6fae951c",
-      "bytes": 21496
+      "sha256": "7f1b0aaad662bcdd0128b4ec8f3690f9182cb08cd2ad94a99043febad37bdd07",
+      "bytes": 21580
+    },
+    "scripts/ci/test_conformance_yaml_loader.py": {
+      "sha256": "168b26523ca7632f2c1e73a09264f0acd2f884d4a93250f0a49100b0e3ecea96",
+      "bytes": 1823
     },
     "scripts/ci/test_issued_execution_boundaries.py": {
       "sha256": "e24499e1cc018520a9696656a0545e790083f201c9d24dc02199900abc8c1ce3",
@@ -228,17 +236,21 @@
       "sha256": "9fb9f3aadb09f905d556e9b4db4d3f8b4ca9e66ff292e7af2621965f49de771b",
       "bytes": 5627
     },
+    "scripts/ci/test_parallel_conformance.py": {
+      "sha256": "c6233c5f6750c42d631855c9d8fef70dfff8f4ff5828d501145d51e3d36e7cfd",
+      "bytes": 15417
+    },
     "scripts/ci/test_person_identifier_controls.py": {
       "sha256": "2806b719cfb3e0782e933cf9cf22d327e7d7e708d1355dff53e45ddde2421dd1",
       "bytes": 9445
     },
     "scripts/ci/validate_conformance.py": {
-      "sha256": "adc0aef42390cf96b6a3821e98a6b7b7d9d9368249eba822b5ee26930e552e2e",
-      "bytes": 6169
+      "sha256": "b47c89d6c8ac0bc7999e66ac65a646e7340f8a9b2f8f00f2ff564f631b116593",
+      "bytes": 6218
     },
     "scripts/ci/validate_lrs_projection.py": {
-      "sha256": "1cde9bf344ffec69eaaa40b30a34eb1da46db31ca53249339f33a306254a5b28",
-      "bytes": 2339
+      "sha256": "4b6ad15c4388b42a64cd47ebaa20cfae1bd70da5d30545a3d6f89a2f09a64882",
+      "bytes": 2563
     },
     "spec/conformance/auth-profile.example.yaml": {
       "sha256": "ee71c67cc866b987bef6df0d374fc7436aa7db554545cdc8ab6d88d15ef78b07",
@@ -257,8 +269,8 @@
       "bytes": 283
     },
     "spec/conformance/generated-artifacts.md": {
-      "sha256": "ec15084acb98f1739ae64120e979a5a8c3e812754ffe29803ae86e54fe19a2f4",
-      "bytes": 12355
+      "sha256": "3858c7ffafd9bd0876e646fc141afd3334ce1340890b108097baa0f29aa21961",
+      "bytes": 12840
     },
     "spec/conformance/issued-definition-contracts.json": {
       "sha256": "86f65f2d1cbae1283f5777dacb1f8fc99fb10b0644124be424c021d53477cd58",
@@ -293,8 +305,8 @@
       "bytes": 3609120
     },
     "spec/conformance/lrs-generated-artifacts.json": {
-      "sha256": "00b0f2b99f79e8fd7ec7ccadf7d64ba50709f48340a70e8030f19401f8bd6927",
-      "bytes": 5045
+      "sha256": "934d838fefa5cc40911920f2747d0511bfda91276b5c94fb7be0f284dc392007",
+      "bytes": 5091
     },
     "spec/conformance/lrs-interpretation-policy.yaml": {
       "sha256": "8df00b62d8de2eea37c5a93c0c7c5381491a4db2800bdfd75b6791b25feaf843",
@@ -571,11 +583,11 @@
       "bytes": 99485
     },
     "spec/conformance/issued-test-projection.json": {
-      "sha256": "ca1298e36b839d60471ce36255eef168aaea008f8d0e88e7c66f3970b6d117e3",
-      "bytes": 51807069
+      "sha256": "dc5532dba140b12a49f95bbd813b9657d935889f43f96add55883ce45ae2f011",
+      "bytes": 51807416
     },
     "spec/conformance/lrs-assertion-manifest.yaml": {
-      "sha256": "692ea062793ee31131e4c968ab93073e2f3a259dc21896fcd140a9f143d69146",
+      "sha256": "a4bc21b877d093b27c31f63222ac4c7b3e96c8c2489f27b79eb87c1403e1e174",
       "bytes": 17136026
     },
     "spec/conformance/lrs-table-bindings.yaml": {
