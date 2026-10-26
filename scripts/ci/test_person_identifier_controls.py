@@ -24,10 +24,12 @@ class PersonIdentifierControlTests(unittest.TestCase):
             row = dict(definitions['person', name], id=name, outcome='passed', failures=[], not_run_reasons=[])
             if ('person', name) in gaps:
                 row.update(copy.deepcopy(gaps['person', name]))
+            if name == ACCOUNT:
+                row['unresolved_checks'] = [IRL_UNAVAILABLE]
             if mode == 'invalid' and name in CASES:
                 index = 1 if name.endswith('-openid') else 0
                 row.update(outcome='failed', failures=[f'/openid/{index} is not valid uri direct syntax'],
-                           not_run_reasons=[])
+                           not_run_reasons=[], unresolved_checks=[])
             rows.append(row)
         report = {'schema_version': 2, 'standard': STANDARD, 'mode': 'execute-http',
                   'suites': [{'id': 'person', 'path': 'tests/person.yaml', 'cases': rows}],
@@ -95,6 +97,25 @@ class PersonIdentifierControlTests(unittest.TestCase):
                 if mutation == 'changed-reason': row['not_run_reasons'] = ['new failure reason']
                 else: row['outcome'] = mutation
                 with self.assertRaises(ValueError): self.validate(fixture, focused=False)
+
+    def test_expected_results_reject_unrelated_unresolved_observations(self):
+        for focused in [True, False]:
+            for mode in ['valid', 'invalid']:
+                for name in CASES:
+                    with self.subTest(focused=focused, mode=mode, name=name):
+                        fixture = self.fixture(mode, focused)
+                        row = next(c for c in fixture[0]['suites'][0]['cases'] if c['id'] == name)
+                        row.setdefault('unresolved_checks', []).append('ORACLE-UNAVAILABLE: interrupted response')
+                        with self.assertRaises(ValueError): self.validate(fixture, mode, focused)
+
+    def test_valid_account_requires_exactly_its_one_irl_observation(self):
+        for unresolved in [[], [IRL_UNAVAILABLE, IRL_UNAVAILABLE], ['another unavailable check']]:
+            for focused in [True, False]:
+                with self.subTest(unresolved=unresolved, focused=focused):
+                    fixture = self.fixture(focused=focused)
+                    row = next(c for c in fixture[0]['suites'][0]['cases'] if c['id'] == ACCOUNT)
+                    row['unresolved_checks'] = unresolved
+                    with self.assertRaises(ValueError): self.validate(fixture, focused=focused)
 
     def checks(self, mode):
         return ([{'id': name, 'outcome': 'failed' if mode == 'invalid' else 'passed'} for name in sorted(CHECKS)]

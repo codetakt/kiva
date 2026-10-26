@@ -141,6 +141,20 @@ These controls are manual; the Python unit controls run
 under `lrs-oracle-controls`. Neither static artifact generation nor that Nix check
 implicitly runs these responders.
 
+The two raw-wire numeric-string controls use the same pinned runner:
+
+```sh
+nix develop .#conformance-definitions -c python -B scripts/ci/run_issued_wire_controls.py \
+  --runner target/debug/xapi-lrs-conformance \
+  --out target/lrs-wire-controls
+```
+
+The strict peer must pass both cases; the coercing peer must fail at the declared
+admission check with only the expected unvisited readback. Unrelated failures or
+unavailable observations cannot establish a mutation witness. The Person controls
+likewise permit only the exact IRL observation for the valid Account response;
+their malformed-OpenID witnesses must contain no unresolved observations.
+
 ## Intentional definition changes
 
 1. Edit the authored inputs or generator. Preserve the previous lock and exact

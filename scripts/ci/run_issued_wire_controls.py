@@ -11,6 +11,32 @@ import threading
 import yaml
 
 ROOT=Path(__file__).resolve().parents[2]
+CASES=('issued-completion-root-coerced-scaled-3-put','issued-completion-sub-coerced-scaled-3-put')
+COERCION_FAILURE='step reject-invalid-child: expected status 400, received 204'
+UNVISITED_SUFFIX='step not-stored: not evaluated after step reject-invalid-child stopped execution'
+
+
+def validate_control_results(report, exit_code, mutation):
+    """An unrelated defect or unavailable observation cannot witness coercion."""
+    if mutation not in ('strict','coerce-string'):
+        raise ValueError('unknown wire control mode')
+    failed=mutation=='coerce-string'
+    cases=[c for suite in report['suites'] for c in suite['cases']]
+    outcomes={c['id']:c['outcome'] for c in cases}
+    expected='failed' if failed else 'passed'
+    if len(cases)!=len(outcomes) or outcomes!={name:expected for name in CASES}:
+        raise ValueError('missing, duplicate or unexpected wire control outcome')
+    for case in cases:
+        if case['failures']!=([COERCION_FAILURE] if failed else []):
+            raise ValueError(f'{case["id"]}: unexpected coercion diagnostic')
+        if case.get('unresolved_checks',[])!=([UNVISITED_SUFFIX] if failed else []):
+            raise ValueError(f'{case["id"]}: unexpected unresolved observation or unvisited suffix')
+        if case.get('not_run_reasons',[])!=[] or case.get('diagnostic_statuses',[])!=[]:
+            raise ValueError(f'{case["id"]}: unexpected unavailable or diagnostic observation')
+    totals={'total':2,'passed':0 if failed else 2,'failed':2 if failed else 0,'validated':0,'not_run':0}
+    if report['totals']!=totals or report['status']!=expected or exit_code!=int(failed):
+        raise ValueError('wire control totals/status/exit disagree with outcomes')
+    return outcomes
 
 
 def main():
@@ -22,7 +48,14 @@ def main():
     if (args.out/'summary.json').exists(): raise SystemExit('use a fresh output directory')
     source=ROOT/'tests/conformance/http/generated/issued-completion.yaml'
     doc=yaml.load(source.read_text(),Loader=yaml.CSafeLoader)
-    names=['issued-completion-root-coerced-scaled-3-put','issued-completion-sub-coerced-scaled-3-put']
+    names=CASES
+    definitions=[c for c in doc['cases'] if c['id'] in names]
+    if len(definitions)!=len(names) or {c['id'] for c in definitions}!=set(names):
+        raise ValueError('missing or duplicate wire control definition')
+    for case in definitions:
+        operations=[(s['id'],s['request']['method'],s['expect']['status']) for s in case['steps']]
+        if operations!=[('reject-invalid-child','PUT',400),('not-stored','GET',404)]:
+            raise ValueError('wire mutation witness definition changed')
     # Keep the generated wire serialization unchanged: extract case blocks as
     # text instead of passing requests through a different YAML emitter.
     text=source.read_text()
@@ -65,12 +98,11 @@ def main():
         (args.out/(mutation+'.stderr')).write_text(run.stderr)
         (args.out/(mutation+'.wire.json')).write_text(json.dumps(observed,indent=2)+'\n')
         report=json.loads(run.stdout)
-        outcomes={c['id']:c['outcome'] for s in report['suites'] for c in s['cases']}
-        expected='passed' if mutation=='strict' else 'failed'
-        assert outcomes=={n:expected for n in names},outcomes
+        outcomes=validate_control_results(report,run.returncode,mutation)
         assert len(observed)==len(names) and all(o['json_type']=='str' and o['value']=='1e0' for o in observed),observed
-        assert run.returncode==(0 if mutation=='strict' else 1)
-        results[mutation]=dict(outcomes=outcomes,wire_string_preserved=True,exit_code=run.returncode)
+        results[mutation]=dict(outcomes=outcomes,wire_string_preserved=True,exit_code=run.returncode,
+            expected_failures=[COERCION_FAILURE] if mutation=='coerce-string' else [],
+            expected_unresolved_checks=[UNVISITED_SUFFIX] if mutation=='coerce-string' else [])
     (args.out/'summary.json').write_text(json.dumps(dict(scope='Two raw-wire scalar-type controls; not an LRS reference implementation',results=results,input_sha256={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [source,args.runner,Path(__file__),suite]}),indent=2)+'\n')
     print(json.dumps(results,indent=2))
 

@@ -54,6 +54,14 @@ def validate_control_results(report, exit_code, cases, suites, gaps, mode, focus
             expected[key] = {'outcome': 'failed', 'not_run_reasons': [],
                              'failures': [f'/openid/{index} is not valid uri direct syntax']}
     compare(report, exit_code, selected, selected_suites, expected)
+    # The integration baseline deliberately does not bind unresolved checks for
+    # known gaps. These finite Person controls require a narrower observation set.
+    for suite in report['suites']:
+        for case in suite['cases']:
+            if (suite['id'], case['id']) in targets:
+                unresolved = [IRL_UNAVAILABLE] if mode == 'valid' and case['id'] == ACCOUNT else []
+                require(case.get('unresolved_checks', []) == unresolved,
+                        f'{case["id"]}: unexpected unresolved Person observation')
     return {case['id']: case for suite in report['suites'] for case in suite['cases']}
 
 

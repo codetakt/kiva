@@ -57,6 +57,7 @@ def collect_execution_contract(root=ROOT):
             'scripts/ci/lrs_issued_interpretations.py','scripts/ci/lrs_preservation.py',
             'scripts/ci/run_lrs_procedures.py','scripts/ci/probe_lrs_authority_filter.py',
             'scripts/ci/run_issued_revision_controls.py',
+            'scripts/ci/run_issued_wire_controls.py',
             'scripts/ci/run_lrs_person_identifier_controls.py',
             'tests/conformance/controls/person_identifier_fixture.json',
             'tests/conformance/controls/person_identifier_proxy.py',
