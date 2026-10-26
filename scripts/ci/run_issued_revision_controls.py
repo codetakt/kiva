@@ -30,8 +30,53 @@ DUPLICATE = 'issued-completion-identical-duplicate-batch-id'
 SIGNATURE_UNAVAILABLE = 'required target fixture profile(s) unavailable: signature-validation-context'
 
 
+def mutation_evidence(name, definition):
+    """Declare the intended violation and its unvisited suffix before execution.
+
+    These finite peers change admission status or one version value. An unrelated
+    failure is not a witness, even if it produces the expected case outcome.
+    """
+    if name == VERSION:
+        step_id = 'preserve-accepted-version'
+    elif name == DUPLICATE:
+        step_id = 'reject-identical-members'
+    elif name.startswith('issued-completion-') and '-sub-forbidden-' in name:
+        step_id = 'reject-invalid-child'
+    elif name.startswith('issued-completion-') and '-duration-' in name:
+        step_id = 'store'
+    else:
+        raise ValueError(f'{name}: no declared mutation witness')
+    steps = definition.get('steps', [])
+    ids = [step['id'] for step in steps]
+    if len(ids) != len(set(ids)) or step_id not in ids:
+        raise ValueError(f'{name}: mutation step missing or duplicated')
+    index = ids.index(step_id)
+    step = steps[index]
+    method = step['request']['method']
+    if name == VERSION:
+        if method != 'GET' or step['expect'].get('status') != 200 or step['expect'].get(
+                'json', {}).get('pointers', {}).get('/version') != {'equals': '1.1.0'}:
+            raise ValueError(f'{name}: version witness definition changed')
+        diagnostic = 'JSON pointer /version equals failed for "1.1.0"'
+    else:
+        if method not in ('PUT', 'POST'):
+            raise ValueError(f'{name}: unsupported admission method')
+        success = 204 if method == 'PUT' else 200
+        expected, received = (success, 400) if step_id == 'store' else (400, success)
+        if step['expect'].get('status') != expected:
+            raise ValueError(f'{name}: admission witness definition changed')
+        diagnostic = f'expected status {expected}, received {received}'
+    return {
+        'failures': [f'step {step_id}: {diagnostic}'],
+        'unresolved_checks': [
+            f'step {pending}: not evaluated after step {step_id} stopped execution'
+            for pending in ids[index + 1:]
+        ],
+    }
+
+
 def validate_control_results(report, selected, failures, exit_code):
-    """Check exact finite outcomes, including the sole unavailable prerequisite."""
+    """Require exact mutation witnesses, not merely matching failed outcomes."""
     if selected[SIGNATURE].get('requires_endpoint_profiles') != ['signature-validation-context']:
         raise ValueError('signature control prerequisite changed')
     cases=[case for suite in report['suites'] for case in suite['cases']]
@@ -40,12 +85,16 @@ def validate_control_results(report, selected, failures, exit_code):
         raise ValueError('missing, duplicate or unexpected control case')
     if SIGNATURE in failures or not failures<=set(selected):
         raise ValueError('invalid expected failure set')
+    witnesses={name:mutation_evidence(name,selected[name]) for name in failures}
     for name,case in outcomes.items():
         expected='not-run' if name==SIGNATURE else 'failed' if name in failures else 'passed'
         if case['outcome']!=expected:
             raise ValueError(f'{name}: expected {expected}, got {case["outcome"]}')
-        if bool(case['failures'])!=(expected=='failed'):
-            raise ValueError(f'{name}: inconsistent failure evidence')
+        witness=witnesses.get(name, {'failures':[], 'unresolved_checks':[]})
+        if case['failures']!=witness['failures']:
+            raise ValueError(f'{name}: unexpected mutation diagnostic')
+        if case.get('unresolved_checks',[])!=witness['unresolved_checks']:
+            raise ValueError(f'{name}: unexpected unresolved observation or unvisited suffix')
         reasons=[SIGNATURE_UNAVAILABLE] if name==SIGNATURE else []
         if case.get('not_run_reasons',[])!=reasons:
             raise ValueError(f'{name}: unexpected unavailable reason')
@@ -94,6 +143,7 @@ def main():
     }
     results = {}
     for mode, failures in expected.items():
+        witnesses={name:mutation_evidence(name,selected[name]) for name in sorted(failures)}
         statements, wire = {}, []
 
         class Peer(BaseHTTPRequestHandler):
@@ -196,6 +246,7 @@ def main():
         if mode == 'reject-version':
             assert not any(w['method'] == 'GET' and 'retained_version' in w['path'] for w in wire)
         results[mode] = dict(cases=len(outcomes), expected_failed=sorted(failures), actual_failed=sorted(actual),
+            expected_mutation_evidence=witnesses,
             messages={n:outcomes[n] for n in actual}, exit_code=run.returncode,
             expected_not_run={SIGNATURE:SIGNATURE_UNAVAILABLE},
             not_run={SIGNATURE:outcomes[SIGNATURE]})

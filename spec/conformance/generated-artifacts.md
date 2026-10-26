@@ -131,9 +131,13 @@ nix develop .#conformance-definitions -c python -B scripts/ci/run_issued_revisio
 ```
 
 The output directory must not already exist. `summary.json` records exact expected
-FAIL sets and the one reason-bound signature NOT-RUN per mode. A successful control
-run validates those finite witnesses; it does not supply a signature provider or
-execute an LRS product. These controls are manual; the Python unit controls run
+FAIL sets, mutation-specific admission/readback diagnostics and the one reason-bound
+signature NOT-RUN per mode. Unrelated failures and unavailable observations are
+rejected, including on otherwise passing cases. After an intended violation stops
+a case, only the exact unvisited suffix of that definition is permitted; this does
+not count the skipped checks as executed. A successful control run validates those
+finite witnesses; it does not supply a signature provider or execute an LRS product.
+These controls are manual; the Python unit controls run
 under `lrs-oracle-controls`. Neither static artifact generation nor that Nix check
 implicitly runs these responders.
 
