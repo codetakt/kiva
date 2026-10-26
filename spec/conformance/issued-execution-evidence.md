@@ -46,7 +46,7 @@ globally and through the affected rule references, and rejects incomplete cases
 under `--require-complete`. It also recognizes final `ORACLE-UNAVAILABLE` messages
 in legacy mixed failure lists; omitting the new field cannot conceal them.
 Intermediate polling attempts that have resolved do not themselves make a final
-observation incomplete. Raw FAIL counts remain
+observation incomplete. Raw FAIL counts and known-gap regression decisions remain
 separate from this execution-completeness gate.
 
 An attempt stopped before final response evaluation records
@@ -93,6 +93,33 @@ the complete HTTP log alongside summaries. `incomplete_body` means the full body
 was not captured and cannot support a complete preservation verdict.
 
 ## Execution receipt
+
+### Known-gap diagnostic migration
+
+The POST readback correction in `b09d351` binds a successful response to the
+submitted Statement ID and uses that known ID for retrieval. It no longer
+captures `/0` from a rejected write. Six existing baseline entries therefore
+lost the secondary diagnostic `step store: expected JSON pointer /0 for capture issued_id`:
+
+| Cases in `ci-execution-baseline.json` | Retained primary failure | Backends |
+| --- | --- | --- |
+| `issued-completion-root-duration-comma-batch`, `issued-completion-root-duration-comma-post` | `step store: expected status 200, received 400` | memory, postgres |
+| `issued-completion-sub-duration-comma-batch`, `issued-completion-sub-duration-comma-post` | `step store: expected status 200, received 400` | memory, postgres |
+| `issued-utf8-valid-boundaries-batch`, `issued-utf8-valid-boundaries-post` | `step store: expected status 200, received 500` | postgres |
+
+All six remain FAIL. No gap was removed or relabeled, and the other baseline
+outcomes and reason strings were preserved. Their case hashes and enclosing
+file hashes were rebound to the corrected definitions. This is a change in
+diagnostic collection, not a resolution of the comma-Duration or U+0000 product
+defects. The gate still requires the exact recorded failure sets and rejects
+any subsequent drift, including an unexpected PASS.
+
+The later authority-identifier correction strengthens the generated readback
+shapes and the dedicated authority case. Its baseline update changes only five
+enclosing case-file hashes and 46 existing gap case hashes. All 117 gap entries
+retain their identities, backend scopes, outcomes and exact diagnostic strings.
+The added authority checks must pass the same regression gate; this rebinding
+does not exempt any new failure or unavailable result.
 
 ### Receipt fields
 

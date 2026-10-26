@@ -10,6 +10,14 @@
 }:
 
 let
+  conformance = import ./conformance.nix {
+    inherit
+      pkgs
+      craneLib
+      src
+      cargoArtifacts
+      ;
+  };
   rustUseScan = craneLib.buildPackage {
     pname = "kiva-rust-use-scan";
     version = "0.0.0";
@@ -206,72 +214,8 @@ in
       '';
     };
 
-  memory-conformance =
-    let
-      python = pkgs.python3.withPackages (pythonPackages: [
-        pythonPackages.jsonschema
-        pythonPackages.pyyaml
-      ]);
-    in
-    craneLib.mkCargoDerivation {
-      pname = "kiva-memory-conformance";
-      version = "0.0.0";
-      inherit src cargoArtifacts;
-      doCheck = true;
-      doInstallCargoArtifacts = false;
-      nativeBuildInputs = [
-        pkgs.curl
-        python
-      ];
-      buildPhaseCargoCommand = "";
-      checkPhaseCargoCommand = ''
-        mkdir -p reports junit
-        KIVA_CONFORMANCE_JSON_REPORT="$PWD/reports/xapi-memory-http.json" \
-          KIVA_CONFORMANCE_JUNIT_REPORT="$PWD/junit/xapi-memory-http.xml" \
-          bash scripts/ci/run_memory_conformance.sh
-        python scripts/ci/validate_conformance_reports.py \
-          --run-report "$PWD/reports/xapi-memory-http.json"
-      '';
-      installPhaseCommand = ''
-        mkdir -p "$out"
-        cp -r reports junit "$out"/
-        touch "$out/success"
-      '';
-    };
-
-  postgres-conformance =
-    let
-      python = pkgs.python3.withPackages (pythonPackages: [
-        pythonPackages.jsonschema
-        pythonPackages.pyyaml
-      ]);
-    in
-    craneLib.mkCargoDerivation {
-      pname = "kiva-postgres-conformance";
-      version = "0.0.0";
-      inherit src cargoArtifacts;
-      doCheck = true;
-      doInstallCargoArtifacts = false;
-      nativeBuildInputs = [
-        pkgs.curl
-        pkgs.postgresql
-        python
-      ];
-      buildPhaseCargoCommand = "";
-      checkPhaseCargoCommand = ''
-        mkdir -p reports junit
-        KIVA_CONFORMANCE_JSON_REPORT="$PWD/reports/xapi-postgres-http.json" \
-          KIVA_CONFORMANCE_JUNIT_REPORT="$PWD/junit/xapi-postgres-http.xml" \
-          bash scripts/ci/run_postgres_conformance.sh
-        python scripts/ci/validate_conformance_reports.py \
-          --run-report "$PWD/reports/xapi-postgres-http.json"
-      '';
-      installPhaseCommand = ''
-        mkdir -p "$out"
-        cp -r reports junit "$out"/
-        touch "$out/success"
-      '';
-    };
+  memory-conformance = conformance.memory.gate;
+  postgres-conformance = conformance.postgres.gate;
 
   database-migrations =
     pkgs.runCommand "kiva-database-migrations"
