@@ -30,7 +30,11 @@ kiva_export_conformance_fixture_env() {
 }
 
 kiva_build_conformance_binaries() {
-  python3 -B scripts/ci/lrs_generated_artifacts.py generate
+  if [[ "${KIVA_CONFORMANCE_ARTIFACTS_READY:-0}" == 1 ]]; then
+    python3 -B scripts/ci/lrs_generated_artifacts.py verify
+  else
+    python3 -B scripts/ci/lrs_generated_artifacts.py generate
+  fi
   cargo build --release -q -p kiva-server -p xapi-lrs-conformance
 }
 
@@ -80,6 +84,23 @@ kiva_run_xapi_conformance() {
     --auth-profile-file
     spec/conformance/auth-profile.example.yaml
   )
+
+  if [[ -n "${KIVA_CONFORMANCE_CASE_IDS_FILE:-}" ]]; then
+    local case_id
+    local selected_cases=0
+    while IFS= read -r case_id; do
+      if [[ -z "$case_id" ]]; then
+        echo "empty conformance case selection" >&2
+        return 2
+      fi
+      args+=(--case-id "$case_id")
+      selected_cases=$((selected_cases + 1))
+    done < "$KIVA_CONFORMANCE_CASE_IDS_FILE"
+    if [[ "$selected_cases" == 0 ]]; then
+      echo "empty conformance case selection" >&2
+      return 2
+    fi
+  fi
 
   if [[ -n "${KIVA_CONFORMANCE_JUNIT_REPORT:-}" ]]; then
     mkdir -p "$(dirname "$KIVA_CONFORMANCE_JUNIT_REPORT")"

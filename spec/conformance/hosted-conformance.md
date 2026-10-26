@@ -11,8 +11,10 @@ revision, then inspect all job/step conclusions, including artifact uploads.
 Do not transfer a result to another revision without an input-identity comparison.
 
 Memory and PostgreSQL run in separate matrix jobs on isolated runners, with
-`fail-fast: false`. Each still executes the complete suite against its own target;
-cases are not run concurrently against a shared LRS. The static plan/bundle,
+`fail-fast: false`. Each executes the complete suite in four deterministic groups.
+Every group has its own disposable server; PostgreSQL groups also have separate
+database clusters. Cases within a group and steps within a case retain their
+original order. Cases are never run concurrently against a shared LRS. The static plan/bundle,
 definition reproduction and oracle controls run independently of both backends.
 PostgreSQL storage verification remains in the PostgreSQL job.
 
@@ -23,6 +25,15 @@ gate failure. Preserve the backend's `build.log`, `gate.log` and each emitted
 `-execution.json`; PostgreSQL also supplies `verification.log`. Missing reports
 and infrastructure errors remain failures; successful artifact capture alone
 does not accept execution.
+
+The `reports/shards/` directory retains the partition plan, selected case IDs,
+original JSON/JUnit, log and exit of every group, including failed groups. The
+version 2 capture receipt hashes these files as well as the aggregate reports.
+The gate reconstructs the aggregate from the raw groups, requires each current
+case exactly once in its assigned group, and then applies the unchanged baseline
+to the full suite. Aggregation copies case observations and JUnit diagnostics;
+it does not turn FAIL or NOT-RUN into PASS. Infrastructure failures cannot produce
+a complete aggregate, but the capture package still preserves available evidence.
 
 The final `xAPI Conformance Evidence` job preserves the existing check name. It
 collects the available backend artifacts into `conformance-regression`, retaining
@@ -56,10 +67,28 @@ do not infer their configuration from the existence of workflow checks.
 
 The backend wrappers and static runner use the workspace release profile, matching
 the Nix dependency artifacts. The static package retains the inherited Cargo target
-directory. The static bundle verifies its already generated artifacts when invoking
+directory. Generation runs before parallel workers; each worker verifies all locked
+inputs/outputs before reusing them and asks Cargo to check its release binaries.
+The static bundle similarly verifies its already generated artifacts when invoking
 the projection validator. The independent reproduction check still expands twice
 with different hash seeds. No outcome, prerequisite, polling window or assertion
 is removed to reduce runtime.
+
+For a fresh local comparison, use separate output directories and the pinned shell:
+
+```sh
+nix develop -c python -B scripts/ci/check_conformance_regressions.py run \
+  --backend memory --workers 1 --output-dir target/conformance-serial
+nix develop -c python -B scripts/ci/check_conformance_regressions.py run \
+  --backend memory --workers 4 --output-dir target/conformance-parallel
+```
+
+Use `postgres` for the other authorized backend. Fixed port, endpoint, tenant or
+PGDATA overrides are rejected during parallel capture to preserve isolation.
+Measure generation/build and execution separately, and compare every case and
+diagnostic rather than only totals. Cold builds and reuse of compiled dependencies
+must be distinguished. Parallel fixture isolation also limits the unrelated data
+accumulated by each server; its speedup need not be linear in worker count.
 
 Before parallelization, [run 40287271568](https://github.com/codetakt/kiva/actions/runs/40287271568)
 took about 131 minutes in the evidence job: memory capture 37m28s, PostgreSQL

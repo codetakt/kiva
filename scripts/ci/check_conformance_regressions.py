@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 import jsonschema
@@ -196,11 +197,17 @@ def compare(report, runner_exit, cases, suites, expected):
             "known_gaps": [list(key) for key in sorted(expected)]}
 
 
-def check(root, backend, report_path, runner_exit):
-    _, cases, suites, expected = expectations(root, backend)
+def check(root, backend, report_path, runner_exit, parallel=None):
+    baseline, cases, suites, expected = expectations(root, backend)
     report = load_json(report_path)
     schema = load_json(root / SCHEMA)
-    jsonschema.Draft202012Validator(schema).validate(report)
+    validator = jsonschema.Draft202012Validator(schema)
+    validator.validate(report)
+    if parallel is not None:
+        from run_parallel_conformance import verify_aggregate
+        captured, workers = parallel
+        verify_aggregate(captured / 'shards', workers, report, captured / f'xapi-{backend}-http.xml',
+                         cases, suites, baseline['case_files'], validator)
     result = compare(report, runner_exit, cases, suites, expected)
     result.update(backend=backend, baseline_sha256=sha(root / BASELINE),
                   report_sha256=sha(report_path), artifact_lock_sha256=sha(
@@ -211,13 +218,24 @@ def check(root, backend, report_path, runner_exit):
 def capture_inputs(root, backend):
     paths = [BASELINE, SCHEMA, 'spec/conformance/lrs-generated-artifacts.lock.json',
              'scripts/ci/check_conformance_regressions.py', 'scripts/ci/conformance_lib.sh',
-             f'scripts/ci/run_{backend}_conformance.sh']
+             f'scripts/ci/run_{backend}_conformance.sh', 'scripts/ci/run_parallel_conformance.py']
     return {p: sha(root / p) for p in paths}
 
 
-def capture(root, backend, output):
+def capture_artifacts(backend, workers=1):
+    names = {f'xapi-{backend}-{suffix}' for suffix in ['http.json', 'http.xml', 'execution.log']}
+    if workers != 1:
+        require(type(workers) is int and 2 <= workers <= 8, 'invalid capture worker count')
+        names.add('shards/plan.json')
+        names.update(f'shards/{index:02}/{name}' for index in range(workers)
+                     for name in ['case-ids.txt', 'http.json', 'http.xml', 'execution.log', 'result.json'])
+    return names
+
+
+def capture(root, backend, output, workers=1):
     """Persist an execution regardless of its verdict; this is not a gate."""
     require(backend in BACKENDS, "unknown backend")
+    require(type(workers) is int and 1 <= workers <= 8, "invalid capture worker count")
     output.mkdir(parents=True, exist_ok=True)
     require(not any((output / f"xapi-{backend}-{name}").exists()
                     for name in ("http.json", "http.xml", "regression.json", "execution.json", "execution.log")),
@@ -226,6 +244,16 @@ def capture(root, backend, output):
     env = dict(os.environ)
     require(not env.get("KIVA_CONFORMANCE_PROCEDURE_REPORT_ROOT"),
             "procedure execution is outside the HTTP integration baseline")
+    require(not env.get('KIVA_CONFORMANCE_CASE_IDS_FILE')
+            and not env.get('KIVA_CONFORMANCE_ARTIFACTS_READY'),
+            'capture owns case selection and artifact preparation')
+    if workers > 1:
+        # Each child must allocate its own server and database. Fixed endpoints
+        # or PGDATA would silently defeat isolation or create port collisions.
+        fixed = [name for name in env if name.startswith('KIVA_MEMORY_CONFORMANCE_')
+                 or name.startswith('KIVA_POSTGRES_CONFORMANCE_')]
+        require(not fixed, f'parallel capture requires automatic fixture isolation: {fixed}')
+        require(not (output / 'shards').exists(), 'fresh run requires unused shard paths')
     errors = []
     status = None
     with tempfile.TemporaryDirectory(prefix="conformance-run-", dir=output) as temporary:
@@ -234,7 +262,10 @@ def capture(root, backend, output):
         env.update(KIVA_CONFORMANCE_JSON_REPORT=str(raw), KIVA_CONFORMANCE_JUNIT_REPORT=str(junit))
         with (output / f'xapi-{backend}-execution.log').open('w') as log:
             try:
-                status = subprocess.run(['bash', f'scripts/ci/run_{backend}_conformance.sh'],
+                command = (['bash', f'scripts/ci/run_{backend}_conformance.sh'] if workers == 1 else
+                           [sys.executable, '-B', 'scripts/ci/run_parallel_conformance.py',
+                            '--backend', backend, '--workers', str(workers), '--out', str(output / 'shards')])
+                status = subprocess.run(command,
                                         cwd=root, env=env, check=False, stdout=log,
                                         stderr=subprocess.STDOUT).returncode
             except OSError as error:
@@ -246,35 +277,40 @@ def capture(root, backend, output):
                 errors.append(f'runner did not emit complete report artifacts: {suffix}')
     if before != capture_inputs(root, backend):
         errors.append('execution input drift')
-    artifacts = {f'xapi-{backend}-{suffix}': sha(output / f'xapi-{backend}-{suffix}')
-                 for suffix in ['http.json', 'http.xml', 'execution.log']
-                 if (output / f'xapi-{backend}-{suffix}').is_file()}
-    receipt = dict(schema_version=1, claim='execution-capture-only', backend=backend,
+    artifacts = {name: sha(output / name) for name in sorted(capture_artifacts(backend, workers))
+                 if (output / name).is_file()}
+    receipt = dict(schema_version=1 if workers == 1 else 2, claim='execution-capture-only', backend=backend,
                    runner_exit=status, inputs=before, artifacts=artifacts, errors=errors)
+    if workers > 1:
+        receipt['workers'] = workers
     (output / f'xapi-{backend}-execution.json').write_text(json.dumps(receipt, indent=2) + '\n')
     return receipt
 
 
 def gate(root, backend, captured):
     receipt = load_json(captured / f'xapi-{backend}-execution.json')
-    require(receipt['schema_version'] == 1 and receipt['claim'] == 'execution-capture-only'
+    require(receipt['schema_version'] in (1, 2) and receipt['claim'] == 'execution-capture-only'
             and receipt['backend'] == backend, 'invalid capture receipt')
+    workers = 1 if receipt['schema_version'] == 1 else receipt['workers']
+    require(type(workers) is int and (workers == 1 if receipt['schema_version'] == 1 else 2 <= workers <= 8),
+            'invalid capture worker count')
     require(not receipt['errors'], f"incomplete execution capture: {receipt['errors']}")
     require(receipt['inputs'] == capture_inputs(root, backend), 'capture input drift')
-    artifacts = {f'xapi-{backend}-{suffix}' for suffix in ['http.json', 'http.xml', 'execution.log']}
+    artifacts = capture_artifacts(backend, workers)
     require(set(receipt['artifacts']) == artifacts, 'incomplete capture artifact inventory')
     require(receipt['artifacts'] == {name: sha(captured / name) for name in artifacts},
             'captured report drift')
-    result = check(root, backend, captured / f'xapi-{backend}-http.json', receipt['runner_exit'])
+    args = (root, backend, captured / f'xapi-{backend}-http.json', receipt['runner_exit'])
+    result = check(*args) if workers == 1 else check(*args, parallel=(captured, workers))
     result.update(evidence_kind='captured-wrapper-execution', inputs=receipt['inputs'],
                   capture_receipt_sha256=sha(captured / f'xapi-{backend}-execution.json'),
                   junit_sha256=receipt['artifacts'][f'xapi-{backend}-http.xml'])
     return result
 
 
-def run(root, backend, output):
+def run(root, backend, output, workers=1):
     """Strict convenience entry point; capture remains available on rejection."""
-    capture(root, backend, output)
+    capture(root, backend, output, workers)
     return gate(root, backend, output)
 
 
@@ -286,7 +322,11 @@ def main():
     parser.add_argument("--runner-exit", type=int)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--capture-dir", type=Path)
+    parser.add_argument("--workers", type=int, choices=range(1, 9), default=1,
+                        help="isolated backend processes for a fresh capture (default: 1)")
     args = parser.parse_args()
+    require(args.workers == 1 or args.action in {'capture', 'run'},
+            'workers applies only to fresh execution')
     if args.action == "verify":
         _, cases, _, expected = expectations(ROOT, args.backend)
         print(json.dumps({"cases": len(cases), "known_gaps": len(expected),
@@ -301,7 +341,7 @@ def main():
         require(args.report is None and args.runner_exit is None and args.capture_dir is None,
                 "fresh run cannot accept a supplied report or exit status")
     if args.action == 'capture':
-        result = capture(ROOT, args.backend, output)
+        result = capture(ROOT, args.backend, output, args.workers)
         print(json.dumps({'claim': result['claim'], 'runner_exit': result['runner_exit'],
                           'errors': result['errors']}))
         print('Execution artifacts saved; no regression or conformance acceptance.')
@@ -321,7 +361,7 @@ def main():
 
 def evaluate(args, output):
     if args.action == "run":
-        result = run(ROOT, args.backend, output)
+        result = run(ROOT, args.backend, output, args.workers)
     elif args.action == 'gate':
         require(args.capture_dir is not None and args.report is None and args.runner_exit is None,
                 'gate requires a capture directory; no supplied report or exit status')
