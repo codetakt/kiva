@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "id": "merged-main-20261021",
+  "standard": "IEEE Std 9274.1.1-2023",
+  "source_commit": "842d6e9a511bc1b598f280a83c3b52836450b2a5",
+  "ledger_pr": 1,
+  "authority": "User designates the merged main ledger as the complete LRS responsibility set; source-to-ledger projection is a premise of this task.",
+  "scope": "Ledger-to-test-definition projection, including conditions, exceptions, actor/strength and reasoned Kiva design choices. This record does not reapprove source fidelity or certify implementation.",
+  "files": [
+    {
+      "path": "spec/requirements/ieee-39274-1-1-2025.yaml",
+      "sha256": "ceb16376c0cfdf9f6c1ccde4ffadfae0dd598a92d73ee42b275d3070080f74c9"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/ISSUES.md",
+      "sha256": "230a7bfc2a8031ca1451157073ba7625c25d333f03c8a1e5c1a745178c88a267"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/README.md",
+      "sha256": "19cc170c36742d892333f2de7133972b24394c869d837f70f647f56056e4a8bf"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/dependencies.json",
+      "sha256": "2a5f8a44d528a1d1cc6e8aff74582d76d557a012afd8de88faa92dfbc587152b"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/discharge-groups.json",
+      "sha256": "a9d527cdfb11059573d9ac5d0a59374e70c3210774dacc692c6e63612895f0f1"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/families.json",
+      "sha256": "7dbcd31a29f18f77b50248f0b3d24d995a2c7759639944ca9f09f047b2dfd716"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/issues.json",
+      "sha256": "a8c0b3e9fb77f013d7b7f1a5ba1d8bdeef8b8474ef631a0ba3d104650ce8c656"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/ledger.json",
+      "sha256": "e3a685865a9c710dac0e639b1aeb92ce5520ef83d954ead53c5516327fde6d58"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/project-interpretations.json",
+      "sha256": "3cf785f450535e1f634bdc05be8ca982bfc33afe2ad048491a5651700ecd3425"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/requirements.csv",
+      "sha256": "68cef19e0d31299ff7536de7dec02219dc290f57bbe77fa0328d599cbef98268"
+    },
+    {
+      "path": "spec/requirements/lrs-requirements-ledger/source-units.csv",
+      "sha256": "6d990d5c113aadf7eaae609a0f7f3f82e7d647e73e8cee5c99d9e3b0c96ad9dc"
+    }
+  ],
+  "historical_publication": {
+    "commit": "842d6e9a511bc1b598f280a83c3b52836450b2a5",
+    "path": "spec/requirements/lrs-requirements-ledger-publication.json",
+    "sha256": "d10c49682c7c29eea746a9cf2cb9b1a784e312b5ea513ce1a97b915566a6d53c"
+  },
+  "historical_source_adoption": "Preserved in checkpoint cd0773e and original sealed evidence; removed live source-adoption path is not required for main authority.",
+  "test_review": "Separate exact-input review; publication hashes and this authority record cannot accept test meanings."
+}

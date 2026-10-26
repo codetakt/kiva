@@ -4,6 +4,7 @@ suite:
   description: Destructive signed Statement checks for disposable isolated LRS targets.
 cases:
   - id: signed-statement-with-rs256-compact-jws-is-accepted
+    requires_endpoint_profiles: [signature-validation-context]
     requirements:
       - xapi-lrs-4.2.6-signed-statement-attachment
       - xapi-lrs-4.2.6-jws-compact

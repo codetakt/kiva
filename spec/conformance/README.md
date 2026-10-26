@@ -7,6 +7,17 @@ identifiers; equivalence with the 2025 edition has not been established.
 Requirement traceability alone does not establish implementation conformance;
 see the [xAPI claim boundary](../../docs/architecture/conformance-claim.md).
 
+The [detailed test projection](issued-test-projection.md) describes the ledger-to-test
+correspondence and claim boundaries. Use
+`python -B scripts/ci/validate_lrs_projection.py --definitions-only --skip-source`
+for structural validation without target execution. Official review is the GitHub
+PR merge; interim review administration remains outside the repository.
+
+Expanded cases and indexes are no longer tracked in Git. Follow
+[the generation inventory and reproduction guide](generated-artifacts.md) before
+using standalone runners/reports. The static validator regenerates locked outputs
+automatically; test-definition inputs remain tracked.
+
 The source-pinned LRS projection, portable vectors, assertion contract and
 review procedures are described in [lrs-projection.md](lrs-projection.md).
 Source provenance and project interpretations are described in
@@ -28,10 +39,21 @@ Bounded design controls can be executed locally with:
 ```sh
 python scripts/ci/run_lrs_evaluation_controls.py --runner target/debug/xapi-lrs-conformance --out target/lrs-evaluation-controls
 python scripts/ci/run_lrs_procedure_controls.py --runner target/debug/xapi-lrs-conformance --out target/lrs-procedure-controls
-python scripts/ci/run_lrs_person_identifier_controls.py --runner target/debug/xapi-lrs-conformance --server target/debug/kiva-server --out target/lrs-person-controls
+nix develop .#conformance-definitions -c python -B scripts/ci/run_lrs_person_identifier_controls.py --runner target/debug/xapi-lrs-conformance --server target/debug/kiva-server --out target/lrs-person-controls --focused
 ```
 
 Use a fresh output directory for each run.
+
+The Person control uses a narrow fixture declaring no target-specific policy or
+external provider, rather than the general Kiva procedure-policy fixture. It
+keeps the Account IRL locator-evidence gap as an exact
+NOT-RUN in the valid branch. All four malformed-OpenID cases must still FAIL
+with their specific syntax reasons; the procedure also retains its locator and
+manual-inventory gaps. This control does not supply an IRL provider. Omitting
+`--focused` runs the full memory suite and requires the committed known-gap
+baseline for every other case; unexpected failures, unavailability and stale
+baseline improvements are rejected. The harness validators run as unit controls
+in `lrs-oracle-controls`; the server/proxy contrast remains an explicit local run.
 
 - `xapi-lrs-discharge.yaml`: discharge plan for the IEEE Std 9274.1.1-2023
   xAPI LRS requirement catalog.
@@ -214,9 +236,10 @@ use `bearer_token_env` to inject `Authorization: Bearer ...`, and may also use
 the full header value.
 
 Endpoint-profile-sensitive cases declare `requires_endpoint_profiles`. The
-runner validates those cases without a profile, but HTTP execution fails the
-case unless `--endpoint-profile PATH` supplies the required deterministic
-fixture. The current endpoint profile contract supports:
+runner validates those cases without a profile. If a required capability is
+unavailable, the case is NOT-RUN before any HTTP request. Recognition of a
+prerequisite name does not supply that capability. The endpoint profile file
+can declare these four fixture types:
 
 - `deterministic-too-large-threshold`: declares `max_request_body_bytes` and a
   larger `probe_body_bytes`; the runner generates a valid xAPI Statement body
@@ -224,6 +247,19 @@ fixture. The current endpoint profile contract supports:
 - `deterministic-rate-limit-trigger`: declares `request_count`,
   `window_seconds`, and `path`; the runner sends that many immediate requests
   to the declared path and evaluates the final response as `429`.
+- `declared-parameter-vocabulary`: supplies independent `evidence` and
+  `unrecognized` parameter names for each method/path in `contexts`.
+- `declared-resource-absence`: supplies independent `case_evidence`, keyed by
+  exact case ID, that every negative selector is absent for the case's
+  credentials before and throughout the case. The response under test is not
+  that evidence; fixture validity/integration remains later work.
+
+`signature-validation-context` is a recognized requirement name in cases and
+reports, but cannot be declared in the current endpoint profile schema. Its
+provider is unavailable, so requiring cases remain NOT-RUN. The Python oracle
+controls compare all five recognized names across the Rust case validator,
+Python reporter and report schema, and keep this distinction from the four
+declarable fixture types. See the [profile contract](../../docs/architecture/conformance-endpoint-profiles.md).
 
 Use `--json` for the full machine-readable conformance report. Use
 `--junit PATH` when CI needs a JUnit XML pass/fail artifact in addition to the

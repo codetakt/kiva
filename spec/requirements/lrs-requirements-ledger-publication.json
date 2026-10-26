@@ -47,11 +47,11 @@
     },
     {
       "path": "docs/architecture/conformance-claim.md",
-      "sha256": "d7f027f818989a58db9e542d3d230453314205d0ac339ab8600df7b5c54b2401"
+      "sha256": "004370b0b430e1efe6f58808467c6e11e34586103dd67a57750062565a4f9a3c"
     },
     {
       "path": "docs/architecture/conformance-endpoint-profiles.md",
-      "sha256": "607af758b48e71400533630957e5b98a741435850353f8a2bb330bc7993fe3e2"
+      "sha256": "54fe3bad96c712c2341cdcf2cb03e1820849aa1ee32fff4a922b41745f12387f"
     },
     {
       "path": "docs/architecture/conformance-suite-contribution.md",
@@ -123,7 +123,7 @@
     },
     {
       "path": "scripts/ci/lrs_projection_followup.py",
-      "sha256": "3477ccb34a4b579508aa3a09185f484a1b61d5fe3cbc4315ac90d0d503ea575d"
+      "sha256": "ca7d0f1577a776b60dc827f431ec87bb39b581a81221853d6dcc86b1b1672930"
     },
     {
       "path": "spec/architecture/boundaries/hygiene-rules.yaml",
@@ -131,11 +131,11 @@
     },
     {
       "path": "spec/conformance/README.md",
-      "sha256": "a00789884f0414a25c7d93d34a8d6bab7271f37f7e5c757b3c8a32eda2e5b45a"
+      "sha256": "f3264439c59de58bf9d610fc697f59a558bbdcf21c538ef7a8d68531f7f6222e"
     },
     {
       "path": "spec/conformance/lrs-assertion-manifest.yaml",
-      "sha256": "e28e9c4a489136153d7e5f6363b8da802f10f329d49797b84b81b6680ae3ee42"
+      "sha256": "692ea062793ee31131e4c968ab93073e2f3a259dc21896fcd140a9f143d69146"
     },
     {
       "path": "spec/conformance/schemas/requirement-catalog-audit-report.schema.json",
@@ -163,7 +163,7 @@
     },
     {
       "path": "spec/requirements/lrs-requirements-ledger-publication.md",
-      "sha256": "a77c789aa73fbec7be2092b0b3d5b1e376e3a1d4b7ed4c31396eea5532a06a45"
+      "sha256": "d8cf22ac181ec4fd82bccab8e1f45886192f1272af3bf988430df3b94a429c61"
     },
     {
       "path": "spec/requirements/lrs-requirements-ledger-review.md",
@@ -215,8 +215,8 @@
     },
     {
       "path": "tests/conformance/http/generated/behaviors.yaml",
-      "sha256": "aeafa3927301bf8e4e3b1e0eed146e71ffe05b7088dd89fa482d856c969ec41d"
+      "sha256": "01cada50781f3591ca73c4f638fa91999d7510a6927f00833d3aa62df9fbc445"
     }
   ],
-  "inventory_boundary": "All changed or added PR files except this inventory. The signed Git commit binds the inventory."
+  "inventory_boundary": "The ledger publication's historical 53 paths, with explicit successor documentation/test-support identities. This is not the full test-projection PR inventory. Materialize generated members using the artifact lock; Git binds this inventory."
 }

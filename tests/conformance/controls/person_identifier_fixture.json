@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "axis": "target implementation",
+  "basis": "Disposable local Person syntax contrast only. No target-specific policy or external provider capability is declared. The proxy's valid/invalid OpenID mutation is recorded independently in its response trace.",
+  "scope": "person-semantic-identifiers; locator evidence, complete grammar and Person association inventory remain unavailable"
+}

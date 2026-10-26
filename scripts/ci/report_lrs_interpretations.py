@@ -17,6 +17,8 @@ from pathlib import Path
 
 import yaml
 
+from lrs_generated_artifacts import require_generated_cases
+
 ROOT = Path(__file__).resolve().parents[2]
 POLICY = "spec/conformance/lrs-interpretation-policy.yaml"
 
@@ -40,6 +42,7 @@ def value_digest(value):
 
 
 def case_documents(root):
+    require_generated_cases(root)
     cases = {}
     for path in sorted((root / "tests/conformance/http").rglob("*.yaml")):
         for case in load_yaml(path)["cases"]:
@@ -86,7 +89,7 @@ def interpretation_bindings(root):
         )
     for decision in decisions:
         if (
-            decision["status"] != "project-adopted"
+            decision["status"] not in ["project-adopted", "definition-candidate"]
             or decision["official_adjudication"] != "not-established"
         ):
             raise ValueError(

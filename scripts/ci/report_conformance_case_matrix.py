@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from lrs_generated_artifacts import require_generated_cases
+
 from validate_conformance import (
     DEFAULT_REQUIREMENT_CATALOG,
     ConformanceError,
@@ -22,9 +24,14 @@ DEFAULT_GAP_MAP = Path("spec/conformance/executable-gap-map.yaml")
 REPORT_SCHEMA_VERSION = 1
 STANDARD = "IEEE/ISO/IEC 39274-1-1-2025"
 VALID_GAP_CLASSIFICATIONS = {"endpoint-profile-sensitive"}
+# Recognized case prerequisites, including capabilities whose provider is not
+# available yet. Listing a requirement does not declare that capability available.
 VALID_ENDPOINT_PROFILES = {
     "deterministic-too-large-threshold",
     "deterministic-rate-limit-trigger",
+    "declared-parameter-vocabulary",
+    "signature-validation-context",
+    "declared-resource-absence",
 }
 
 
@@ -141,6 +148,12 @@ def collect_case_paths(roots: list[Path]) -> list[Path]:
     """Collect YAML case paths from files or directories."""
     paths: list[Path] = []
     for root in roots:
+        repository = Path(__file__).resolve().parents[2]
+        if root.resolve() == repository / DEFAULT_CASE_ROOT:
+            try:
+                require_generated_cases(repository)
+            except (ValueError, FileNotFoundError) as error:
+                raise ConformanceError(str(error)) from error
         collect_case_path(root, paths)
     paths.sort()
     if not paths:

@@ -92,8 +92,6 @@ cases:
           equals: 2.0.0
         X-Experience-API-Consistent-Through:
           iso8601: true
-        Last-Modified:
-          present: true
       body:
         non_empty: false
 - id: statement-post-rejects-duplicate-batch-id

@@ -10,8 +10,22 @@
   ...
 }:
 
+let
+  conformance = import ./conformance.nix {
+    inherit
+      pkgs
+      craneLib
+      src
+      cargoArtifacts
+      ;
+  };
+in
+
 {
   kani = kani';
+  # Evidence packages always retain completed/partial runs. They are not checks.
+  memory-conformance-evidence = conformance.memory.evidence;
+  postgres-conformance-evidence = conformance.postgres.evidence;
 
   default = craneLib.buildPackage {
     pname = "kiva-workspace";
