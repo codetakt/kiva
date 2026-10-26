@@ -58,7 +58,7 @@ def resource_cases():
                     {"nested": {"new": True}} if method != "DELETE" else None,
                 )
                 write["headers"].update(
-                    {"If-Match": '"obsolete-etag"'}
+                    {"If-Match": "{{nonmatching_etag}}"}
                     if precondition == "stale-match"
                     else {"If-None-Match": "*"}
                 )
@@ -87,6 +87,7 @@ def resource_cases():
                                     200,
                                     {"": {"equals": original}},
                                     capture={
+                                        **({"nonmatching_etag": {"header": "ETag", "nonmatching_etag": True}} if precondition == "stale-match" else {}),
                                         "original_etag": {"header": "ETag"},
                                         "original_modified": {
                                             "header": "Last-Modified"
@@ -924,7 +925,9 @@ def statement_cases():
                             ),
                         ),
                         read_statement(
-                            original["id"], {"/" + field: {"equals": original[field]}}
+                            original["id"],
+                            None if field == "result" else {"/" + field: {"equals": original[field]}},
+                            checks=[dict(kind="json-preservation", expected=original)] if field == "result" else None,
                         ),
                     ],
                 )
@@ -1392,14 +1395,14 @@ def filter_cases():
         steps.append(
             step(
                 "inherits-" + str(index),
-                request("GET", "/statements", {"activity": activity}),
+                request("GET", "/statements", {"activity": activity}, collect_statement_pages=100),
                 expect(200, {"/statements": {"contains": {"id": body["id"]}}}),
             )
         )
     steps.append(
         step(
             "context-does-not-inherit",
-            request("GET", "/statements", {"activity": activity}),
+            request("GET", "/statements", {"activity": activity}, collect_statement_pages=100),
             expect(200, {"/statements": {"not_contains": {"id": context["id"]}}}),
         )
     )
@@ -1543,6 +1546,7 @@ def response_cases():
                             kind="json-capture-equal",
                             pointer="/authority",
                             capture="authority",
+                            agent_identity=True,
                         )
                     ],
                 ),

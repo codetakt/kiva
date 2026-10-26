@@ -112,7 +112,7 @@ def followup_cases():
     person = {"type": "object", "required": ["objectType"], "properties": {
         "objectType": {"enum": ["Person"]}, "name": {"type": "array", "items": {"type": "string"}},
         **{field: {"type": "array", "items": {"type": "string", "format": fmt}} for field, fmt in [("mbox", "mailto-iri"), ("mbox_sha1sum", "sha1"), ("openid", "uri")]},
-        "account": {"type": "array", "items": {"type": "object", "required": ["homePage", "name"], "properties": {"homePage": {"type": "string", "format": "iri"}, "name": {"type": "string"}}, "additional_properties": False}},
+        "account": {"type": "array", "items": {"type": "object", "required": ["homePage", "name"], "properties": {"homePage": {"type": "string", "format": "irl"}, "name": {"type": "string"}}, "additional_properties": False}},
     }, "additional_properties": False}
     for field, value in [("mbox", "mailto:person-followup@example.org"), ("mbox_sha1sum", "0123456789abcdef0123456789abcdef01234567"), ("openid", "https://example.org/person-followup"), ("account", {"homePage": "https://example.org/account-followup", "name": "learner"})]:
         cases.append(case("person-response-all-identifiers-" + field, ["xapi-lrs-4.1.6.3-person-arrays"], req=request("GET", "/agents", {"agent": dumps({field: value})}), exp=expect(200, {"/" + field: {"contains": value}}, checks=[{"kind": "json-shape", "shape": person}])))

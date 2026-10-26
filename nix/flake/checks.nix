@@ -41,6 +41,12 @@ in
     version = "0.0.0";
     inherit src cargoArtifacts;
     cargoExtraArgs = "--workspace --all-features --locked";
+    nativeBuildInputs = [
+      (pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
+    ];
+    preCheck = ''
+      python -B scripts/ci/lrs_generated_artifacts.py generate
+    '';
   };
 
   postgres-verification = craneLib.mkCargoDerivation {
@@ -204,6 +210,7 @@ in
     let
       python = pkgs.python3.withPackages (pythonPackages: [
         pythonPackages.jsonschema
+        pythonPackages.pyyaml
       ]);
     in
     craneLib.mkCargoDerivation {
@@ -236,6 +243,7 @@ in
     let
       python = pkgs.python3.withPackages (pythonPackages: [
         pythonPackages.jsonschema
+        pythonPackages.pyyaml
       ]);
     in
     craneLib.mkCargoDerivation {
@@ -279,6 +287,39 @@ in
         touch "$out/success"
       '';
 
+  lrs-generated-artifacts =
+    let
+      python = pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]);
+    in
+    pkgs.runCommand "kiva-lrs-generated-artifacts" { nativeBuildInputs = [ python ]; } ''
+      cp -r ${src} source
+      chmod -R u+w source
+      cd source
+      python -B scripts/ci/lrs_generated_artifacts.py generate
+      python -B scripts/ci/lrs_generated_artifacts.py check
+      mkdir -p "$out"
+      python -B scripts/ci/lrs_generated_artifacts.py bundle \
+        --output "$out/lrs-static.tar.gz" > "$out/bundle.json"
+      cp spec/conformance/lrs-generated-artifacts.lock.json "$out/"
+    '';
+
+  lrs-oracle-controls =
+    let
+      python = pkgs.python3.withPackages (pythonPackages: [
+        pythonPackages.jsonschema
+        pythonPackages.pyyaml
+      ]);
+    in
+    pkgs.runCommand "kiva-lrs-oracle-controls" { nativeBuildInputs = [ python ]; } ''
+      cp -r ${src} source
+      chmod -R u+w source
+      cd source
+      python -B scripts/ci/lrs_generated_artifacts.py generate
+      python -B -m unittest discover -s scripts/ci -p 'test_*.py'
+      mkdir -p "$out"
+      touch "$out/success"
+    '';
+
   conformance-plan =
     let
       python = pkgs.python3.withPackages (pythonPackages: [
@@ -297,9 +338,9 @@ in
         cp -r ${src} source
         chmod -R u+w source
         cd source
+        python scripts/ci/validate_lrs_projection.py --definitions-only --skip-source
         python scripts/ci/validate_conformance.py spec/conformance/xapi-lrs-discharge.yaml
         python scripts/ci/validate_conformance_fixtures.py --check-schemas
-        python scripts/ci/validate_lrs_projection.py --skip-source
         python scripts/ci/report_lrs_interpretations.py --skip-source --json > lrs-interpretations.json
         python scripts/ci/audit_requirement_catalog.py --no-reference-root > requirement-audit.md
         python scripts/ci/audit_requirement_catalog.py --no-reference-root --json > requirement-audit.json

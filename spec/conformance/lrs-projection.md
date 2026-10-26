@@ -57,21 +57,23 @@ The portable assets are:
 - `schemas/conformance-case.schema.json`: the portable request, response,
   capture and relationship assertion contract.
 
-Generate and check the assets from the repository root with Python, PyYAML,
-JSON Schema and OpenSSL available:
+Generate and check the assets from the repository root in the pinned Python,
+PyYAML/LibYAML and JSON Schema environment. See the complete
+[input/output inventory and reproduction procedure](generated-artifacts.md).
+OpenSSL is not used by static expansion; signature cases are fixed inputs.
 
 ```sh
-python scripts/ci/generate_lrs_projection_cases.py
-python scripts/ci/audit_lrs_source_projection.py --update-bindings
-python scripts/ci/validate_lrs_projection.py
-cargo run -p xapi-lrs-conformance -- --validate-only
+python -B scripts/ci/lrs_generated_artifacts.py generate
+python -B scripts/ci/lrs_generated_artifacts.py check
+python -B scripts/ci/validate_lrs_projection.py --definitions-only --skip-source
 ```
 
-The assertion manifest is regenerated only after inspecting an intentional
-change. CI uses `--check`; source bytes cannot be silently rebased by the
-generator. Use `--source PATH` for another checkout containing the same pinned
-file. `--skip-source` supports builds without an external checkout and
-explicitly reports that source bytes have not been verified.
+The assertion manifest is a derived index; its expected digest is tracked in the
+artifact lock. CI regenerates and compares exact outputs, and then checks review
+bindings. Intentional changes require an explicit lock refresh and review impact
+assessment; neither operation silently rebases source identities or grants
+acceptance. Use `--source PATH` to check the same pinned public source bytes.
+`--skip-source` explicitly reports that source bytes have not been verified.
 The audit also binds the bytes of the published-source record. Its
 `source_bytes_verified` field concerns the public Markdown; raw PDF verification
 is recorded separately in the private reconciliation evidence. A distributable

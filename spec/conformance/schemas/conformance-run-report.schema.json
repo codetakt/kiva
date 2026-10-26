@@ -151,12 +151,57 @@
             "type": "string"
           }
         },
+        "unresolved_checks": {
+          "description": "Unevaluated checks retained independently of a failed case outcome.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "diagnostic_statuses": {
           "type": "array",
           "items": {
             "type": "integer",
             "minimum": 100,
             "maximum": 599
+          }
+        },
+        "retrieval_attempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "step",
+              "status",
+              "pending_visibility",
+              "failures"
+            ],
+            "properties": {
+              "step": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 100,
+                "maximum": 599
+              },
+              "pending_visibility": {
+                "type": "boolean"
+              },
+              "failures": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

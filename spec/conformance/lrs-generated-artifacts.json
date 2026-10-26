@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "scope": "IEEE 9274.1.1-2023 ledger-to-test static artifacts; no semantic acceptance or execution receipt",
+  "inputs": [
+    "Cargo.lock",
+    "Cargo.toml",
+    "flake.lock",
+    "nix/flake/checks.nix",
+    "nix/flake/dev-shells.nix",
+    "scripts/ci/audit_lrs_source_projection.py",
+    "scripts/ci/conformance_lib.sh",
+    "scripts/ci/generate_conformance_evidence.sh",
+    "scripts/ci/generate_issued_test_projection.py",
+    "scripts/ci/generate_lrs_projection_cases.py",
+    "scripts/ci/issued_definition_contracts.py",
+    "scripts/ci/issued_test_design.py",
+    "scripts/ci/lrs_generated_artifacts.py",
+    "scripts/ci/lrs_procedure_definitions.py",
+    "scripts/ci/lrs_issued_bindings.py",
+    "scripts/ci/lrs_issued_interpretations.py",
+    "scripts/ci/lrs_issued_scenarios.py",
+    "scripts/ci/lrs_preservation.py",
+    "scripts/ci/probe_lrs_authority_filter.py",
+    "scripts/ci/report_conformance_case_matrix.py",
+    "scripts/ci/report_issued_test_results.py",
+    "scripts/ci/report_lrs_interpretations.py",
+    "scripts/ci/run_lrs_procedures.py",
+    "scripts/ci/run_issued_revision_controls.py",
+    "scripts/ci/validate_conformance.py",
+    "scripts/ci/validate_lrs_projection.py",
+    "spec/conformance/definition-contract-vectors.yaml",
+    "spec/conformance/generated-artifacts.md",
+    "spec/conformance/issued-definition-contracts.json",
+    "spec/conformance/issued-definition-source-anchors.json",
+    "spec/conformance/issued-execution-evidence.md",
+    "spec/conformance/issued-ledger-baseline.json",
+    "spec/conformance/issued-test-definition-completion-amendment.md",
+    "spec/conformance/issued-test-definition-source-residuals.json",
+    "spec/conformance/issued-test-procedures.yaml",
+    "spec/conformance/lrs-duty-review.yaml",
+    "spec/conformance/lrs-generated-artifacts.json",
+    "spec/conformance/lrs-interpretation-policy.yaml",
+    "spec/conformance/lrs-published-source.yaml",
+    "spec/conformance/lrs-review-tests.yaml",
+    "spec/conformance/lrs-source-projection.yaml",
+    "spec/conformance/reference/language-subtag-registry-20260917.txt",
+    "spec/conformance/schemas/conformance-case.schema.json",
+    "spec/conformance/schemas/conformance-run-report.schema.json",
+    "spec/conformance/schemas/endpoint-profile.schema.json",
+    "spec/requirements/ieee-39274-1-1-2025.yaml",
+    "tests/conformance/fixtures/identifier-grammar.json",
+    "tests/conformance/fixtures/identifier-grammar.sources.json",
+    "tests/conformance/fixtures/signing/cases.json",
+    "tests/conformance/models/lrs-tables.yaml",
+    "tools/xapi-lrs-conformance/Cargo.toml",
+    "spec/conformance/schemas/conformance-case-matrix-report.schema.json",
+    "spec/conformance/endpoint-profile.example.yaml",
+    "spec/conformance/auth-profile.example.yaml",
+    "scripts/ci/run_memory_conformance.sh",
+    "scripts/ci/run_postgres_conformance.sh",
+    "docs/architecture/conformance-claim.md",
+    ".github/workflows/conformance.yml",
+    "flake.nix",
+    "nix/flake/packages.nix",
+    "tests/conformance/fixtures/preservation-properties.json"
+  ],
+  "input_globs": [
+    "scripts/ci/lrs_projection_*.py",
+    "scripts/ci/test_*.py",
+    "tools/xapi-lrs-conformance/src/*.rs",
+    "tests/conformance/http/**/*.yaml",
+    "spec/requirements/lrs-requirements-ledger/*"
+  ],
+  "stages": [
+    {
+      "id": "cases-and-procedures",
+      "script": "scripts/ci/generate_lrs_projection_cases.py",
+      "args": [],
+      "outputs": [
+        "spec/conformance/issued-completion-bindings.json",
+        "spec/conformance/issued-definition-tests.yaml",
+        "spec/conformance/issued-readback-origins.json",
+        "spec/conformance/issued-rejection-origins.json",
+        "spec/conformance/issued-supplemental-tests.yaml",
+        "spec/conformance/lrs-table-bindings.yaml",
+        "tests/conformance/http/generated/behaviors.yaml",
+        "tests/conformance/http/generated/issued-completion.yaml",
+        "tests/conformance/http/generated/issued-readback.yaml",
+        "tests/conformance/http/generated/issued-rejection.yaml",
+        "tests/conformance/http/generated/tables.yaml"
+      ]
+    },
+    {
+      "id": "issued-correspondence",
+      "script": "scripts/ci/generate_issued_test_projection.py",
+      "args": [],
+      "outputs": [
+        "spec/conformance/issued-test-projection.json",
+        "spec/conformance/issued-test-matrix.md"
+      ]
+    },
+    {
+      "id": "assertion-index",
+      "script": "scripts/ci/audit_lrs_source_projection.py",
+      "args": [
+        "--skip-source",
+        "--render-manifest"
+      ],
+      "outputs": [
+        "spec/conformance/lrs-assertion-manifest.yaml"
+      ]
+    }
+  ]
+}

@@ -17,6 +17,7 @@ cases:
       path: /about
       headers:
         Accept: application/json
+        X-Experience-API-Version: "2.0.0"
     expect:
       status: 200
       headers:

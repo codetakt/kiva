@@ -386,7 +386,7 @@ def mime_cases():
         "binary-delimiter-like",
     ]:
         name = "attachment-rfc-framing-" + variation
-        boundary = "independent-mime-vector"
+        boundary = "independent-mime-vector-outer"
         data = (
             b"\xff\x00\x80\r\n--independent-mime-vector-not-a-delimiter\r\nend"
             if variation == "binary-delimiter-like"

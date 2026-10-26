@@ -35,6 +35,10 @@ let
   '';
 in
 {
+  conformance-definitions = pkgs.mkShell {
+    packages = [ python ];
+  };
+
   default = pkgs.mkShell {
     inputsFrom = [ cargoArtifacts ];
     packages = lib.unique (commonPackages ++ pre-commit-check.enabledPackages);

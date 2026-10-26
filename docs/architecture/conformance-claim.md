@@ -2,6 +2,17 @@
 
 This document defines the claim boundary for Kiva's xAPI LRS interface.
 
+The design target is **IEEE Std 9274.1.1-2023**. The merged main ledger supplies the
+responsibility set; [the detailed test projection](../../spec/conformance/issued-test-projection.md)
+connects each responsibility, condition and exception to concrete test definitions
+and exact definition identities. Its static gate detects drift in those bindings.
+Source conflicts retained under the project amendment have separate Kiva policy
+outcomes; policy PASS is not an IEEE ruling. Definition completion supports a
+claim about the design and its test specification. A claim that a particular
+product revision conforms additionally requires the execution evidence below.
+Official review is the GitHub PR merge. The structural gate does not measure
+review acceptance, and no repository adoption record is required.
+
 ## Interface Scope
 
 The conformance aid targets the xAPI LRS HTTP interface. PDS, BI, OAuth/OIDC
@@ -66,8 +77,9 @@ uses `--skip-live` and therefore does not contain memory HTTP, PostgreSQL HTTP,
 or PostgreSQL execution-verification reports.
 
 For ordinary CI-style verification, `nix flake check` runs static contract
-validation plus live HTTP conformance checks against both the in-memory and
-PostgreSQL backends. The release-candidate evidence bundle remains the archival
+validation plus live HTTP regression checks against the explicitly enumerated
+integration baseline for both backends. It does not discharge the remaining
+product/provider gaps. The release-candidate evidence bundle remains the archival
 artifact because it records reports, logs, checksums, and git metadata for a
 specific revision.
 

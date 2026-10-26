@@ -30,6 +30,7 @@ kiva_export_conformance_fixture_env() {
 }
 
 kiva_build_conformance_binaries() {
+  python3 -B scripts/ci/lrs_generated_artifacts.py generate
   cargo build -q -p kiva-server -p xapi-lrs-conformance
 }
 

@@ -1,0 +1,390 @@
+"""Regression boundaries for positive, admitted Statement visibility observations."""
+import copy
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
+import unittest
+from unittest.mock import Mock, patch
+from run_lrs_procedures import Executor, iri_reference_valid
+
+class VisibilityTests(unittest.TestCase):
+    def test_only_accepted_new_voids_invalidate_positive_reads(self):
+        a='AAAAAAAA-0000-4000-8000-000000000001'
+        b='bbbbbbbb-0000-4000-8000-000000000002'
+        for status,replay,target_is_void in [(204,False,False),(409,False,False),(204,True,False),(204,False,True)]:
+            with self.subTest(status=status,replay=replay,target_is_void=target_is_void):
+                e=self.executor([404,200])
+                e.visible_statements={a.lower():'1969-12-31T23:59:59Z','other':'1969-12-31T23:59:59Z'}
+                e.known_statement_ids={a.lower(),b} if replay else {a.lower()}
+                if target_is_void:e.voiding_statement_ids.add(a.lower())
+                e.http=Mock(return_value={'status':status})
+                e.store({'id':b,'verb':{'id':'http://adlnet.gov/expapi/verbs/voided'},
+                         'object':{'objectType':'StatementRef','id':a}})
+                invalidated=status==204 and not replay and not target_is_void
+                self.assertEqual(a.lower() in e.voided_statement_ids,invalidated)
+                self.assertEqual(a.lower() in e.visible_statements,not invalidated)
+                self.assertIn('other',e.visible_statements)
+                if invalidated:
+                    self.assertIsNone(e.read_visible({'id':a},{'status':204}))
+                    self.assertFalse(e.calls)
+                    self.assertNotIn('failed',self.outcomes(e))
+                else:
+                    self.assertIsNone(e.read_visible({'id':a},{'status':204}))
+                    self.assertEqual(len(e.calls),1)
+                    self.assertIn('failed',self.outcomes(e))
+
+    def test_continuation_iri_grammar_preserves_legal_reference_forms(self):
+        valid=['','/','//','///next','?cursor=2','../next','./one:two',
+               '/next%20page','/next%ff','/next%00','/次?値=二#節',
+               '/next?x=/?:@&y=1#fragment/?', 'urn:example:next',
+               '//user:password@host:80/next','http://example.test:99999/next',
+               '//[::1]/next','//[::ffff:192.0.2.1]:/next','//[Vf.a:b]/next',
+               '//example.test\uff1a80/next', '/\u00a0/\ud7ff/\uf900/\ufdf0/\uffef',
+               '/\U00010000/\U0001fffd/\U000dfffd/\U000e1000/\U000efffd',
+               '?q=\ue000\uf8ff\U000f0000\U000ffffd\U00100000\U0010fffd']
+        invalid=['/next%xx','/next%','/next%0','/next page','/next\\page',
+                 '\n/next','/next\r','/next\t','/next\x00','/next\x7f','/next\x9f',
+                 'http://[broken','//[127.0.0.1]/','//[::gg]/','//[v1.]/',
+                 '//[::1]tail/','//[::1]:bad/','//[::1%25zone]/','//host:bad/',
+                 '//user@@host/','//host%xy/','1http:next',':next','/next#one#two',
+                 '/next[page]','?q=[x]','/\ud800','/\ue000','#\uf8ff',
+                 '/\ufdd0','/\ufffe','/\U0001fffe','/\U000e0000','/\U000f0000',
+                 '?q=\U0010fffe']
+        for values,expected in [(valid,True),(invalid,False)]:
+            for value in values:
+                with self.subTest(value=value):
+                    self.assertEqual(iri_reference_valid(value),expected)
+
+    def test_valid_but_unsupported_resolution_remains_unavailable(self):
+        executor=Executor.__new__(Executor)
+        executor.results={'probe':{'checks':[]}};executor.current='probe'
+        executor.http=Mock(return_value={'status':200,'url':'http://example.test/xapi/statements',
+            'headers':{'x-experience-api-version':'2.0.0',
+                'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'},
+            'json':{'statements':[],'more':'//example.test\uff1a80/next'}})
+        self.assertIsNone(executor.collect_statements({},'probe'))
+        executor.http.assert_called_once()
+        self.assertFalse(any(c['outcome']=='failed' for c in executor.results['probe']['checks']))
+        self.assertEqual(executor.results['probe']['checks'][-1]['outcome'],'not-run')
+
+    def test_malformed_continuations_fail_before_resolution_or_transport(self):
+        for more in ['/next%xx','/next page','/next%','/next%2','/next\\page',
+                     '\n/next','/next\tpage','/next\rpage','/next\x00page',
+                     'http://[broken','//host:bad/next','//user@@host/next',
+                     '1http:next','/next#one#two','/next[page]']:
+            for last_page in [False,True]:
+                with self.subTest(more=more,last_page=last_page):
+                    executor=Executor.__new__(Executor)
+                    executor.results={'probe':{'checks':[]}};executor.current='probe'
+                    def reply(ordinal, reference):
+                        return {'status':200,'url':'http://example.test/xapi/statements?cursor='+str(ordinal),
+                            'headers':{'x-experience-api-version':'2.0.0',
+                                'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'},
+                            'json':{'statements':[],'more':reference}}
+                    prefix=[reply(i,'?cursor='+str(i+1)) for i in range(99)] if last_page else []
+                    # A successful next response must never erase malformed syntax.
+                    executor.http=Mock(side_effect=prefix+[reply(99,more),reply(100,'')])
+                    self.assertIsNone(executor.collect_statements({},'probe'))
+                    self.assertEqual(executor.http.call_count,len(prefix)+1)
+                    self.assertTrue(any(c['id']=='probe-more-syntax' and c['outcome']=='failed'
+                                        for c in executor.results['probe']['checks']))
+
+    def test_relative_continuation_requires_a_base_and_keeps_origin_boundary(self):
+        executor=Executor.__new__(Executor)
+        executor.args=SimpleNamespace(endpoint='http://example.test/xapi')
+        executor.headers={'Authorization':'fixture-credential'}
+        for base,more in [
+            (None,'?cursor=2'),
+            ('http://example.test/xapi/statements','/next%xx'),
+            ('http://example.test/xapi/statements','/next page'),
+            ('http://example.test/xapi/statements','//other.test/next'),
+            ('http://example.test/xapi/statements','https://example.test/next'),
+        ]:
+            with self.subTest(base=base,more=more), patch('run_lrs_procedures.http.client.HTTPConnection') as connection:
+                with self.assertRaises(ValueError):
+                    executor.http('GET','/statements',continuation=more,continuation_base=base)
+                connection.assert_not_called()
+
+    def test_relative_continuations_follow_each_page_url(self):
+        for continuations,expected in [
+            (['?cursor=2','pages/third?cursor=3','?cursor=4',''],
+             ['/xapi/statements?limit=1','/xapi/statements?cursor=2',
+              '/xapi/pages/third?cursor=3','/xapi/pages/third?cursor=4']),
+            (['pages/','next/','next/',''],
+             ['/xapi/statements?limit=1','/xapi/pages/',
+              '/xapi/pages/next/','/xapi/pages/next/next/']),
+        ]:
+            with self.subTest(continuations=continuations), TemporaryDirectory() as directory:
+                executor=Executor.__new__(Executor)
+                executor.args=SimpleNamespace(endpoint='http://example.test/xapi')
+                executor.out=Path(directory);executor.headers={};executor.docs=[]
+                executor.results={'probe':{'checks':[]}};executor.current='probe';executor.ordinal=0
+                connections=[]
+                for more in continuations:
+                    connection=Mock();response=connection.getresponse.return_value
+                    response.status=200
+                    response.getheaders.return_value=[('X-Experience-API-Version','2.0.0'),
+                        ('X-Experience-API-Consistent-Through','2026-01-01T00:00:00Z')]
+                    response.read.return_value=json.dumps({'statements':[],'more':more}).encode()
+                    connections.append(connection)
+                with patch('run_lrs_procedures.http.client.HTTPConnection',side_effect=connections) as factory:
+                    self.assertEqual(executor.collect_statements({'limit':'1'},'probe'),[])
+                self.assertEqual(factory.call_count,4)
+                self.assertEqual([c.request.call_args.args[1] for c in connections],expected)
+                records=[json.loads(line) for line in (executor.out/'http.jsonl').read_text().splitlines()]
+                self.assertEqual([r['response']['url'] for r in records],['http://example.test'+p for p in expected])
+
+    invalid_response_dates = [
+        'Thu, 01 Jan 2026 00:00 GMT',
+        '01 Jan 2026 00:00:00 GMT',
+        'Thu, 1 Jan 2026 00:00:00 GMT',
+        'Thu, 01 Jan 26 00:00:00 GMT',
+        'Thu, 01 Jan 2026 00:00:00 +0000',
+        'Thu, 01 Jan 2026 00:00:00 UTC',
+        'Thu, 01 Jan 2026 00:00:00',
+        'thu, 01 Jan 2026 00:00:00 GMT',
+        'Thu, 01 jan 2026 00:00:00 GMT',
+        'Thu, 01 Jan 2026 00:00:00 gmt',
+        'Thu, 01 Jan 2026 00:00:00 GMT (comment)',
+        'Thu,  01 Jan 2026 00:00:00 GMT',
+        'Thu,\t01 Jan 2026 00:00:00 GMT',
+        'Thu, 01 Jan 2026 00:00:00 GMT\n',
+        'Thu, 01 Jan 2026 0:00:00 GMT',
+        'Thu, 01 Jan 2026 00:00:00.0 GMT',
+        'Thu, 01 Jan 2026 00:00:60 GMT',
+        'Thu, 01 Jan 2026 24:00:00 GMT',
+        'Thu, 30 Feb 2026 00:00:00 GMT',
+        'Fri, 01 Jan 2026 00:00:00 GMT',
+        'Thu, ０１ Jan 2026 00:00:00 GMT',
+        # Legal obsolete receiver forms do not satisfy the HTTP sender duty.
+        'Thursday, 01-Jan-26 00:00:00 GMT',
+        'Thu Jan  1 00:00:00 2026',
+    ]
+
+    def test_response_http_date_syntax_precedes_page_comparison(self):
+        for header in self.invalid_response_dates:
+            for continuation in [False,True]:
+                for items,incomplete in [([],False),([{'stored':'2026-01-01T00:00:00Z'}],False),([],True)]:
+                    with self.subTest(header=header,continuation=continuation,items=items,incomplete=incomplete):
+                        e,_=self.collect(items,header,continuation=continuation,incomplete=incomplete)
+                        checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                        self.assertEqual(checks[-1]['outcome'],'failed')
+
+    def test_complete_response_dates_keep_page_semantics(self):
+        for header,stored in [
+            ('Thu, 01 Jan 2026 00:00:00 GMT','2026-01-01T00:00:00Z'),
+            ('Thu, 29 Feb 2024 23:59:59 GMT','2024-02-29T23:59:59.999Z'),
+            ('Mon, 01 Jan 0001 00:00:00 GMT','0001-01-01T00:00:00Z'),
+            (' \tThu, 01 Jan 2026 00:00:00 GMT\t ','2026-01-01T00:00:00Z'),
+            ('\r\n Thu, 01 Jan 2026 00:00:00 GMT\r\n\t','2026-01-01T00:00:00Z'),
+        ]:
+            for items,incomplete in [([],False),([{'stored':stored}],False),([],True)]:
+                with self.subTest(header=header,items=items,incomplete=incomplete):
+                    e,_=self.collect(items,header,incomplete=incomplete)
+                    checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                    self.assertEqual(checks[-1]['outcome'],'not-run' if incomplete else 'passed')
+        for header,outcome in [('Sat, 01 Jan 0000 00:00:00 GMT','not-run'),
+                               ('Sun, 01 Jan 0000 00:00:00 GMT','failed'),
+                               ('Wed, 30 Feb 0000 00:00:00 GMT','failed')]:
+            with self.subTest(header=header):
+                e,_=self.collect([],header)
+                checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                self.assertEqual(checks[-1]['outcome'],outcome)
+
+    def test_document_last_modified_uses_same_sender_syntax(self):
+        for header in [*self.invalid_response_dates,'Thu, 01 Jan 2026 00:00:00 GMT']:
+            with self.subTest(header=header):
+                e=Executor.__new__(Executor)
+                e.results={'probe':{'checks':[]}};e.current='probe';e.fixture={};e.prefix='urn:fixture'
+                e.docs=[('state','/activities/state',{},'stateId')]
+                def http(method,path,query=None,*a,**kw):
+                    status=404 if method=='GET' and query.get('stateId')=='clock' and getattr(e,'deleted',False) else 200 if method=='GET' else 204
+                    if method=='DELETE':e.deleted=True
+                    return {'status':status,'headers':{'last-modified':header},'json':{'v':'sibling'},
+                            'before':'2026-01-01T00:00:00Z','after':'2026-01-01T00:00:00Z'}
+                e.http=http;e.documents()
+                checks=[c for c in e.results['probe']['checks'] if c['id']=='state-last-modified']
+                self.assertEqual(checks[-1]['outcome'],'failed' if header in self.invalid_response_dates else 'not-run')
+
+    def test_long_http_date_padding_is_bounded(self):
+        import subprocess
+        import sys
+        from pathlib import Path
+        # Keep a parser hang bounded in the test process as well. Both sides
+        # exercise failure after long padding, not just a greedy valid match.
+        script="""
+from run_lrs_procedures import response_http_date
+for value in [' '*4096+'Thu, 01 Jan 2026 00:00 GMT',
+              'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096+'junk']:
+    try: response_http_date(value)
+    except ValueError: pass
+    else: raise AssertionError('malformed date accepted')
+response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
+"""
+        result=subprocess.run([sys.executable,'-B','-c',script],
+                              cwd=Path(__file__).resolve().parent,capture_output=True,text=True,timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def collect(self, items, header, *, incomplete=False, continuation=False):
+        from run_lrs_procedures import Reply
+        e=Executor.__new__(Executor)
+        e.results={'probe':{'checks':[]}};e.current='probe'
+        headers={'x-experience-api-version':'2.0.0',
+                 'x-experience-api-consistent-through':'2026-01-01T00:00:00Z'}
+        if header is not None:headers['last-modified']=header
+        # These controls vary timestamps, while retaining a well-typed identity.
+        items=[{'id':f'fixture-{index}',**item} for index,item in enumerate(items)]
+        reply=Reply(status=200,headers=headers,json={'statements':items,'more':''},incomplete_body=incomplete)
+        pages=[reply]
+        if continuation:
+            pages.insert(0,Reply(status=200,headers={k:v for k,v in headers.items() if k!='last-modified'},
+                                 json={'statements':[],'more':'/next'}))
+        e.http=lambda *a,**kw:pages.pop(0)
+        result=e.collect_statements({},'probe')
+        return e,result
+
+    def test_page_header_syntax_survives_empty_or_interrupted_body(self):
+        for continuation in [False,True]:
+            for incomplete in [False,True]:
+                for header in [None,'invalid','Thu, 01 Jan 2026 00:00:00 GMT']:
+                    with self.subTest(continuation=continuation,incomplete=incomplete,header=header):
+                        e,result=self.collect([],header,incomplete=incomplete,continuation=continuation)
+                        self.assertEqual('failed' in self.outcomes(e),header=='invalid')
+                        self.assertEqual(result,None if incomplete else [])
+                        checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                        self.assertTrue(checks)
+                        self.assertEqual(checks[-1]['outcome'],
+                                         'failed' if header=='invalid' else 'not-run' if incomplete else 'passed')
+
+    def test_unavailable_page_time_does_not_hide_definite_stored_or_max_defect(self):
+        unknown={'stored':'2016-12-31T23:59:60Z'}
+        for item in [{'stored':42},{},{'stored':'2026-02-30T00:00:00Z'},
+                     {'stored':'2026-01-01T00:00:01Z'}]:
+            for items in [[unknown,item],[item,unknown]]:
+                with self.subTest(items=items):
+                    e,_=self.collect(items,'Thu, 01 Jan 2026 00:00:00 GMT')
+                    self.assertIn('failed',self.outcomes(e))
+        for items,header,outcome in [
+            ([unknown],None,'failed'),
+            ([unknown],'invalid','failed'),
+            ([unknown],'Thu, 01 Jan 2026 00:00:00 GMT','not-run'),
+            ([unknown,{'stored':'2025-12-31T23:59:59Z'}],'Thu, 01 Jan 2026 00:00:00 GMT','not-run'),
+            ([{'stored':'2026-01-01T00:00:00.999Z'}],'Thu, 01 Jan 2026 00:00:00 GMT','passed'),
+            ([{'stored':'2025-12-31T23:59:59Z'}],'Thu, 01 Jan 2026 00:00:00 GMT','failed')]:
+            with self.subTest(items=items,header=header):
+                e,_=self.collect(items,header)
+                checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                self.assertEqual(checks[-1]['outcome'],outcome)
+
+    def executor(self, statuses, *, missing_header=False, wrong_id=False, seen=False,
+                 first_consistent_through='1970-01-01T00:00:00Z',
+                 stored='1969-12-31T23:59:59Z', later_consistent_through='1970-01-01T00:00:00Z',
+                 incomplete=False):
+        e=Executor.__new__(Executor)
+        e.fixture={'statement_visibility_timeout_ms':0 if statuses==[404] else 1000}
+        e.results={'probe':{'checks':[]}};e.current='probe'
+        e.visible_statements={'s':stored} if seen else {}
+        e.known_statement_ids=set();e.voiding_statement_ids=set();e.voided_statement_ids=set()
+        e.calls=[]
+        def read(body,**query):
+            e.calls.append(query)
+            status=statuses[min(len(e.calls)-1,len(statuses)-1)]
+            headers={'x-experience-api-version':'2.0.0','x-experience-api-consistent-through':later_consistent_through}
+            if len(e.calls)==1:headers['x-experience-api-consistent-through']=first_consistent_through
+            if missing_header and len(e.calls)==1:headers.pop('x-experience-api-version')
+            from run_lrs_procedures import Reply
+            return Reply(status=status,headers=headers,json={'id':'wrong' if wrong_id else 's','stored':stored} if status==200 else {},
+                         incomplete_body=incomplete and status==404)
+        e.read=read
+        return e
+    def outcomes(self,e):return [x['outcome'] for x in e.results['probe']['checks']]
+    def test_initial_404_then_visible(self):
+        e=self.executor([404,200])
+        with patch('run_lrs_procedures.time.sleep'):
+            self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertEqual(len(e.calls),2);self.assertNotIn('failed',self.outcomes(e))
+    def test_deadline_is_not_run(self):
+        e=self.executor([404]);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertIn('not-run',self.outcomes(e));self.assertNotIn('failed',self.outcomes(e))
+    def test_error_header_failure_is_not_retried(self):
+        e=self.executor([404,200],missing_header=True);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertEqual(len(e.calls),1);self.assertIn('failed',self.outcomes(e))
+    def test_first_200_wrong_identity_is_not_retried(self):
+        e=self.executor([200,200],wrong_id=True);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertEqual(len(e.calls),1);self.assertIn('failed',self.outcomes(e))
+    def test_previously_visible_disappearance_is_failure(self):
+        e=self.executor([404,200],seen=True);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertEqual(len(e.calls),1);self.assertIn('failed',self.outcomes(e))
+    def test_retrieval_guarantee_requires_a_strictly_later_watermark(self):
+        for stored, watermark, outcome in [
+            ('1970-01-01T00:00:00Z', '1970-01-01T00:00:00Z', 'not-run'),
+            ('1970-01-01T09:00:00+09:00', '1970-01-01T00:00:00Z', 'not-run'),
+            ('1970-01-01T00:00:00Z', '1969-12-31T23:59:59Z', 'not-run'),
+            ('1970-01-01T00:00:00Z', '1970-01-01T00:00:00.0000000001Z', 'failed'),
+            ('2016-12-31T23:59:60Z', '2017-01-01T00:00:01Z', 'not-run'),
+            ('2017-01-01T00:00:00Z', '2016-12-31T23:59:60Z', 'not-run'),
+            ('2016-12-31T23:59:60Z', '2026-02-30T00:00:00Z', 'failed'),
+        ]:
+            for incomplete in [False, True]:
+                with self.subTest(stored=stored,watermark=watermark,incomplete=incomplete):
+                    e=self.executor([200,404,200],stored=stored,
+                                    later_consistent_through=watermark,incomplete=incomplete)
+                    self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
+                    self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+                    self.assertEqual(len(e.calls),2)  # Never retry a prior positive observation.
+                    self.assertIn(outcome,self.outcomes(e))
+                    if outcome=='not-run':self.assertNotIn('failed',self.outcomes(e))
+
+    def test_invalid_stored_is_not_a_visibility_witness(self):
+        for value in [None, 42, 'invalid', '2026-02-30T00:00:00Z']:
+            with self.subTest(stored=value):
+                e=self.executor([200],stored=value)
+                self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+                self.assertIn('failed',self.outcomes(e))
+
+    def test_rejected_admission_does_not_poll(self):
+        e=self.executor([404]);self.assertIsNone(e.read_visible({'id':'s'},{'status':400}))
+        self.assertFalse(e.calls);self.assertIn('not-run',self.outcomes(e))
+    def test_unexpected_status_is_failure(self):
+        e=self.executor([500,200]);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+        self.assertEqual(len(e.calls),1);self.assertIn('failed',self.outcomes(e))
+
+    def test_date_only_error_and_success_headers_fail_before_retry(self):
+        for value in ['2026-10-01','20261001','2026-W40-4','2026W404',
+                      '2026-10-01Z','2026-10-01+09:00']:
+            for status in [404,200]:
+                with self.subTest(value=value,status=status):
+                    e=self.executor([status,200],first_consistent_through=value)
+                    self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+                    self.assertEqual(len(e.calls),1)
+                    self.assertIn('failed',self.outcomes(e))
+                    self.assertIn('not-run',self.outcomes(e))  # Dependent observations remain unexecuted.
+
+    def test_combined_forms_keep_existing_parser_acceptance(self):
+        # Compatibility vectors for the delegated parser, not ISO certification.
+        for value in ['2026-10-01T00:00:00Z','2026-10-01T09:00:00+09:00',
+                      '2026-10-01T00:00:00.123456Z','20261001T000000Z',
+                      '2026-10-01t00:00:00+00:00','2026-10-01 00:00:00+00:00',
+                      '2026-W40-4T00:00:00Z','2026-10-01T00:00:00,123Z',
+                      '2026-10-01T00:00:00']:
+            with self.subTest(value=value):
+                e=self.executor([404,200],first_consistent_through=value)
+                with patch('run_lrs_procedures.time.sleep'):
+                    self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
+                self.assertEqual(len(e.calls),2)
+                self.assertNotIn('failed',self.outcomes(e))
+
+    def test_malformed_combined_header_never_retries(self):
+        for value in [None,123,'','2026-10-01T','2026-10-01T25:00:00Z',
+                      '2026-02-30T00:00:00Z','2026-10-01X00:00:00Z',
+                      '2026-10-01T25Z','2026-10-01T25:00Z','2026-10-01T00:61Z',
+                      '2026-10-01T25.5Z','2026-10-01T24.1Z','2026-10-01T09.5+24:00']:
+            with self.subTest(value=value):
+                e=self.executor([404,200],first_consistent_through=value)
+                self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
+                self.assertEqual(len(e.calls),1)
+                self.assertIn('failed',self.outcomes(e))
+                self.assertIn('not-run',self.outcomes(e))  # Header FAIL plus blocked dependent checks.
+
+if __name__=='__main__':unittest.main()
