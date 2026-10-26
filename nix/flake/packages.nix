@@ -62,7 +62,6 @@ in
       buildPhaseCargoCommand = "";
       checkPhaseCargoCommand = ''
         export HOME="$PWD/.home"
-        export CARGO_TARGET_DIR="$PWD/target-conformance-evidence"
         export KIVA_CONFORMANCE_GIT_COMMIT=${lib.escapeShellArg sourceRevision}
         export KIVA_CONFORMANCE_GIT_DIRTY=${if sourceDirty then "1" else "0"}
         mkdir -p "$HOME"

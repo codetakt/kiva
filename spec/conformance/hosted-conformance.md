@@ -54,6 +54,13 @@ do not infer their configuration from the existence of workflow checks.
 
 ## Runtime and cache behavior
 
+The backend wrappers and static runner use the workspace release profile, matching
+the Nix dependency artifacts. The static package retains the inherited Cargo target
+directory. The static bundle verifies its already generated artifacts when invoking
+the projection validator. The independent reproduction check still expands twice
+with different hash seeds. No outcome, prerequisite, polling window or assertion
+is removed to reduce runtime.
+
 Before parallelization, [run 40287271568](https://github.com/codetakt/kiva/actions/runs/40287271568)
 took about 131 minutes in the evidence job: memory capture 37m28s, PostgreSQL
 capture 53m09s, checks 16m53s and static evidence 21m16s. Its setup logs reported

@@ -31,7 +31,7 @@ kiva_export_conformance_fixture_env() {
 
 kiva_build_conformance_binaries() {
   python3 -B scripts/ci/lrs_generated_artifacts.py generate
-  cargo build -q -p kiva-server -p xapi-lrs-conformance
+  cargo build --release -q -p kiva-server -p xapi-lrs-conformance
 }
 
 kiva_apply_postgres_migrations() {
@@ -67,6 +67,7 @@ kiva_run_xapi_conformance() {
   local suite_status=0
   local args=(
     run
+    --release
     -q
     -p
     xapi-lrs-conformance
@@ -122,7 +123,7 @@ PY
   if [[ -n "${KIVA_CONFORMANCE_PROCEDURE_REPORT_ROOT:-}" ]]; then
     local procedure_status=0
     python3 scripts/ci/run_lrs_procedures.py --endpoint "http://${addr}" \
-      --runner target/debug/xapi-lrs-conformance \
+      --runner "${CARGO_TARGET_DIR:-target}/release/xapi-lrs-conformance" \
       --fixture "${KIVA_CONFORMANCE_PROCEDURE_FIXTURE:?procedure fixture must be declared}" \
       --out "$KIVA_CONFORMANCE_PROCEDURE_REPORT_ROOT" || procedure_status=$?
     if [[ "$suite_status" == 0 ]]; then

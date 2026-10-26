@@ -206,7 +206,7 @@ if [[ "$REQUIRE_IEEE_REFERENCE" != 1 && ! -f "$IEEE_REFERENCE_ROOT/9274.1.1 xAPI
   projection_args=(--skip-source)
 fi
 run_logged lrs-source-projection-validation \
-  python3 scripts/ci/validate_lrs_projection.py "${projection_args[@]}"
+  python3 scripts/ci/validate_lrs_projection.py --verify-artifacts "${projection_args[@]}"
 run_to_file lrs-source-projection-json \
   "$REPORT_DIR/lrs-source-projection.json" \
   python3 scripts/ci/audit_lrs_source_projection.py "${projection_args[@]}" --json
@@ -223,7 +223,7 @@ run_to_file requirement-catalog-audit-md \
 
 run_to_file xapi-validate-only-json \
   "$REPORT_DIR/xapi-validate-only.json" \
-  cargo run -q -p xapi-lrs-conformance -- --validate-only --json \
+  cargo run --release -q -p xapi-lrs-conformance -- --validate-only --json \
     --junit "$JUNIT_DIR/xapi-validate-only.xml"
 
 run_to_file conformance-case-matrix-json \

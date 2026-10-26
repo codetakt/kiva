@@ -30,7 +30,7 @@ export KIVA_LISTEN_ADDR="$KIVA_ADDR"
 kiva_export_conformance_fixture_env
 kiva_build_conformance_binaries
 
-cargo run -q -p kiva-server &
+cargo run --release -q -p kiva-server &
 SERVER_PID="$!"
 
 kiva_wait_for_server "$KIVA_ADDR"
