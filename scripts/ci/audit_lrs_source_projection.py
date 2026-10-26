@@ -219,6 +219,44 @@ def audit_policy_table_anchors(lines):
     return checked
 
 
+def execution_contract_files(root=ROOT):
+    """Bind the oracle implementation used to qualify existing run evidence."""
+    return {
+        path: hashlib.sha256((root / path).read_bytes()).hexdigest()
+        for path in [
+            "Cargo.toml",
+            "Cargo.lock",
+            "spec/conformance/schemas/conformance-case.schema.json",
+            "tests/conformance/fixtures/identifier-grammar.json",
+            "tests/conformance/fixtures/identifier-grammar.sources.json",
+            "tools/xapi-lrs-conformance/Cargo.toml",
+            "tools/xapi-lrs-conformance/src/lib.rs",
+            "tools/xapi-lrs-conformance/src/assertions.rs",
+            "tools/xapi-lrs-conformance/src/preservation.rs",
+            "tools/xapi-lrs-conformance/src/lossless_json.rs",
+            "tools/xapi-lrs-conformance/src/media_type.rs",
+            "tools/xapi-lrs-conformance/src/main.rs",
+            "scripts/ci/run_lrs_procedures.py",
+            "scripts/ci/lrs_procedure_definitions.py",
+            "scripts/ci/lrs_preservation.py",
+            "scripts/ci/issued_definition_contracts.py",
+            "spec/conformance/issued-definition-contracts.json",
+            "spec/conformance/issued-definition-source-anchors.json",
+            "spec/conformance/definition-contract-vectors.yaml",
+            "spec/conformance/issued-definition-tests.yaml",
+            "spec/conformance/reference/language-subtag-registry-20260917.txt",
+            "spec/conformance/issued-test-procedures.yaml",
+            "spec/conformance/issued-supplemental-tests.yaml",
+            "scripts/ci/issued_test_design.py",
+            "scripts/ci/lrs_issued_scenarios.py",
+            "scripts/ci/lrs_issued_interpretations.py",
+            "scripts/ci/lrs_projection_completion.py",
+            "scripts/ci/lrs_issued_bindings.py",
+            "scripts/ci/generate_issued_test_projection.py",
+        ]
+    }
+
+
 def audit(source, update_bindings, render_manifest=False):
     ledger = load_yaml(LEDGER.read_text())
     data = source.read_bytes() if source else None
@@ -280,39 +318,7 @@ def audit(source, update_bindings, render_manifest=False):
     manifest = dict(
         schema_version=1,
         source_sha256=actual,
-        execution_contract_files={
-            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
-            for path in [
-                "Cargo.toml",
-                "Cargo.lock",
-                "spec/conformance/schemas/conformance-case.schema.json",
-                "tests/conformance/fixtures/identifier-grammar.json",
-                "tests/conformance/fixtures/identifier-grammar.sources.json",
-                "tools/xapi-lrs-conformance/Cargo.toml",
-                "tools/xapi-lrs-conformance/src/lib.rs",
-                "tools/xapi-lrs-conformance/src/assertions.rs",
-                "tools/xapi-lrs-conformance/src/preservation.rs",
-                "tools/xapi-lrs-conformance/src/media_type.rs",
-                "tools/xapi-lrs-conformance/src/main.rs",
-                "scripts/ci/run_lrs_procedures.py",
-                "scripts/ci/lrs_procedure_definitions.py",
-                "scripts/ci/lrs_preservation.py",
-                "scripts/ci/issued_definition_contracts.py",
-                "spec/conformance/issued-definition-contracts.json",
-                "spec/conformance/issued-definition-source-anchors.json",
-                "spec/conformance/definition-contract-vectors.yaml",
-                "spec/conformance/issued-definition-tests.yaml",
-                "spec/conformance/reference/language-subtag-registry-20260917.txt",
-                "spec/conformance/issued-test-procedures.yaml",
-                "spec/conformance/issued-supplemental-tests.yaml",
-                "scripts/ci/issued_test_design.py",
-                "scripts/ci/lrs_issued_scenarios.py",
-                "scripts/ci/lrs_issued_interpretations.py",
-                "scripts/ci/lrs_projection_completion.py",
-                "scripts/ci/lrs_issued_bindings.py",
-                "scripts/ci/generate_issued_test_projection.py",
-            ]
-        },
+        execution_contract_files=execution_contract_files(),
         table_model_sha256=hashlib.sha256(
             (ROOT / "tests/conformance/models/lrs-tables.yaml").read_bytes()
         ).hexdigest(),
