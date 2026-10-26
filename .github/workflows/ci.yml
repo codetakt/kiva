@@ -33,7 +33,7 @@ jobs:
         uses: ./.github/actions/setup-nix-ci
         with:
           free-disk: "true"
-          enable-flakehub-cache: "true"
+          enable-nix-cache: "true"
 
       - name: Pre-commit baseline
         run: nix build .#checks.x86_64-linux.pre-commit-check --print-build-logs
