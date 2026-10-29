@@ -1,3 +1,4 @@
+use super::number::ExactNumber;
 use serde_json::{Map, Value};
 use thiserror::Error;
 use uuid::Uuid;
@@ -117,7 +118,7 @@ fn validate_score(score: Option<&Value>, path: &str) -> Result<(), ContextResult
     validate_allowed_properties(score, &SCORE_PROPERTIES, path)?;
     let scaled = optional_number(score.get("scaled"), &format!("{path} scaled"))?;
     if let Some(scaled) = scaled
-        && !(-1.0..=1.0).contains(&scaled)
+        && (scaled < ExactNumber::one(true) || scaled > ExactNumber::one(false))
     {
         return Err(ContextResultValidationError::InvalidScaledScore {
             path: path.to_owned(),
@@ -126,21 +127,21 @@ fn validate_score(score: Option<&Value>, path: &str) -> Result<(), ContextResult
     let raw = optional_number(score.get("raw"), &format!("{path} raw"))?;
     let min = optional_number(score.get("min"), &format!("{path} min"))?;
     let max = optional_number(score.get("max"), &format!("{path} max"))?;
-    if let (Some(min), Some(max)) = (min, max)
+    if let (Some(min), Some(max)) = (&min, &max)
         && min >= max
     {
         return Err(ContextResultValidationError::InvalidScoreBounds {
             path: path.to_owned(),
         });
     }
-    if let (Some(raw), Some(min)) = (raw, min)
+    if let (Some(raw), Some(min)) = (&raw, &min)
         && raw < min
     {
         return Err(ContextResultValidationError::InvalidRawScore {
             path: path.to_owned(),
         });
     }
-    if let (Some(raw), Some(max)) = (raw, max)
+    if let (Some(raw), Some(max)) = (&raw, &max)
         && raw > max
     {
         return Err(ContextResultValidationError::InvalidRawScore {
@@ -427,10 +428,11 @@ fn validate_duration(
 fn optional_number(
     value: Option<&Value>,
     path: &str,
-) -> Result<Option<f64>, ContextResultValidationError> {
+) -> Result<Option<ExactNumber>, ContextResultValidationError> {
     value.map_or(Ok(None), |value| {
         value
-            .as_f64()
+            .as_number()
+            .and_then(ExactNumber::from_number)
             .map(Some)
             .ok_or_else(|| ContextResultValidationError::ExpectedNumber {
                 path: path.to_owned(),

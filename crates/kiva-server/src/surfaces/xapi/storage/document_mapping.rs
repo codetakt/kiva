@@ -56,13 +56,13 @@ pub(super) fn document_bytes_content(content: &DocumentContent) -> Option<Vec<u8
 
 pub(super) fn put_document_decision(
     existing: Option<&DocumentRecord>,
-    content: &DocumentContent,
+    _content: &DocumentContent,
     preconditions: &Preconditions,
 ) -> DocumentWriteDecision {
     document_put_decision(
         preconditions_pass(existing, preconditions),
         preconditions.has_any(),
-        existing.map(|record| record.content == *content),
+        existing.is_some(),
     )
 }
 

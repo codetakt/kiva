@@ -57,7 +57,7 @@ pub(crate) fn canonical_statement(mut statement: Value, headers: &HeaderMap) -> 
     statement
 }
 
-pub(crate) fn accepted_languages(headers: &HeaderMap) -> Vec<String> {
+pub(crate) fn accepted_languages(headers: &HeaderMap) -> Vec<kiva_xapi::LanguagePreference> {
     accepted_language_ranges(
         headers
             .get(ACCEPT_LANGUAGE)

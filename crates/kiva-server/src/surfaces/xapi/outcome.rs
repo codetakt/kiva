@@ -6,7 +6,7 @@ use uuid::Uuid;
 impl From<DocumentWriteDecision> for DocumentWriteOutcome {
     fn from(value: DocumentWriteDecision) -> Self {
         match value {
-            DocumentWriteDecision::Write | DocumentWriteDecision::Noop => Self::Stored,
+            DocumentWriteDecision::Write => Self::Stored,
             DocumentWriteDecision::Conflict => Self::Conflict,
             DocumentWriteDecision::PreconditionFailed => Self::PreconditionFailed,
         }

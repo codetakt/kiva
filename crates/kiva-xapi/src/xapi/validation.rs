@@ -302,30 +302,27 @@ fn validate_language_map(
 }
 
 pub(crate) fn is_language_tag(value: &str) -> bool {
-    let mut subtags = value.split('-');
-    let Some(primary) = subtags.next() else {
-        return false;
-    };
-    if primary.len() < 2
-        || primary.len() > 8
-        || !primary
-            .chars()
-            .all(|character| character.is_ascii_alphabetic())
-    {
-        return false;
-    }
-    subtags.all(|subtag| {
-        (1..=8).contains(&subtag.len())
-            && subtag
-                .chars()
-                .all(|character| character.is_ascii_alphanumeric())
-    })
+    super::language_tag::valid_language_tag(value)
 }
 
 /// Checks the complete syntax of an IRI with a scheme, without normalizing it.
 #[must_use]
 pub fn is_absolute_iri(value: &str) -> bool {
     iri_string::types::IriStr::new(value).is_ok()
+}
+
+/// Checks locator syntax, including the required host of HTTP(S) locators.
+/// This does not resolve the locator or restrict ordinary identifier fields.
+#[must_use]
+pub fn is_absolute_irl(value: &str) -> bool {
+    iri_string::types::IriStr::new(value).is_ok_and(|iri| {
+        !matches!(
+            iri.scheme_str().to_ascii_lowercase().as_str(),
+            "http" | "https"
+        ) || iri
+            .authority_components()
+            .is_some_and(|authority| !authority.host().is_empty())
+    })
 }
 
 pub(crate) fn is_duration(value: &str) -> bool {
@@ -343,6 +340,10 @@ pub(crate) fn is_duration(value: &str) -> bool {
     let date = parts.next().unwrap_or_default();
     let time = parts.next();
     if parts.next().is_some() {
+        return false;
+    }
+    if time.is_some() && date.contains(['.', ',']) {
+        // ISO 8601 allows a fraction only on the lowest-order component.
         return false;
     }
 
@@ -373,13 +374,16 @@ fn parse_duration_components(value: &str, designators: &[char]) -> Option<(bool,
             return None;
         }
         rest = &rest[index + designator.len_utf8()..];
+        if number.contains(['.', ',']) && !rest.is_empty() {
+            return None;
+        }
         count += 1;
     }
     Some((rest.is_empty(), count))
 }
 
 fn is_duration_number(value: &str) -> bool {
-    let Some((whole, fraction)) = value.split_once('.') else {
+    let Some((whole, fraction)) = value.split_once(['.', ',']) else {
         return !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit());
     };
     !whole.is_empty()

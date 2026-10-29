@@ -7,10 +7,33 @@ pub enum BearerHeaderError {
     EmptyToken,
 }
 
-/// Returns whether an `X-Experience-API-Version` value is supported.
+/// Returns whether a version request is compatible with Kiva's 2.0 API.
+///
+/// D-08=A accepts every well-formed normal 2.0 patch without integer narrowing.
+/// Response metadata still advertises the implemented version, never the input.
 #[must_use]
 pub const fn xapi_version_is_supported(value: &str) -> bool {
-    matches!(value.as_bytes(), b"2.0" | b"2.0.0")
+    let bytes = value.as_bytes();
+    if matches!(bytes, b"2.0") {
+        return true;
+    }
+    if bytes.len() < 5
+        || bytes[0] != b'2'
+        || bytes[1] != b'.'
+        || bytes[2] != b'0'
+        || bytes[3] != b'.'
+        || (bytes[4] == b'0' && bytes.len() != 5)
+    {
+        return false;
+    }
+    let mut index = 4;
+    while index < bytes.len() {
+        if !bytes[index].is_ascii_digit() {
+            return false;
+        }
+        index += 1;
+    }
+    true
 }
 
 /// Extracts the Bearer token from an optional Authorization header value.
