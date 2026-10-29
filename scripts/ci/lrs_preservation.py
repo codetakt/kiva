@@ -11,6 +11,7 @@ import struct
 import math
 import json
 import ipaddress
+from urllib.parse import quote
 
 
 def standard_uuid(value):
@@ -94,7 +95,78 @@ class MemberObject(dict):
 
 
 def load_json_members(encoded):
-    return json.loads(encoded, object_pairs_hook=MemberObject)
+    return json.loads(encoded, object_pairs_hook=MemberObject, parse_float=Decimal)
+
+
+def load_yaml_numbers(encoded):
+    """Retain authored YAML numeric values for request/preservation witnesses.
+
+    CSafeLoader normally rounds decimal tokens to binary64 before the HTTP
+    request is built. That loses the independent value being tested. Keep the
+    YAML resolver's type decisions, but construct finite decimal values exactly.
+    """
+    import yaml
+
+    class DecimalLoader(yaml.CSafeLoader):
+        pass
+
+    def number(loader, node):
+        token = loader.construct_scalar(node).replace('_', '')
+        if ':' in token or token.lower() in ('.inf', '+.inf', '-.inf', '.nan'):
+            raise ValueError('non-JSON YAML numeric value: ' + token)
+        return Decimal(token)
+
+    DecimalLoader.add_constructor('tag:yaml.org,2002:float', number)
+    return yaml.load(encoded, Loader=DecimalLoader)
+
+
+def dump_json_members(value):
+    """Serialize retained decimal tokens and member multiplicity without a float hop."""
+    if isinstance(value, dict):
+        return '{' + ','.join(json.dumps(key, ensure_ascii=False) + ':' + dump_json_members(item)
+                              for key, item in members(value)) + '}'
+    if isinstance(value, (list, tuple)):
+        return '[' + ','.join(dump_json_members(item) for item in value) + ']'
+    if isinstance(value, Decimal):
+        if not value.is_finite():
+            raise ValueError('non-finite JSON number')
+        return str(value)
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+
+
+def locator_validity(value, semantic_evidence=None):
+    """DC-IRL: RFC3987 mapping and RFC9110 4.2 HTTP(S) access mechanisms.
+
+    Unknown schemes need separate, exact-resource evidence. No network
+    reachability inference; an absent declaration remains unknown.
+    """
+    if (not isinstance(value, str) or not re.match(r'[A-Za-z][A-Za-z0-9+.-]*:', value)
+            or not iri_reference_valid(value)):
+        return False
+    mapped = quote(value, safe="%:/?[]@!$&'()*+,;=-._~#")
+    scheme, _, rest = mapped.partition(':')
+    if scheme.lower() in ('http', 'https'):
+        if not rest.startswith('//'):
+            return False
+        authority = re.split(r'[/#?]', rest[2:], maxsplit=1)[0]
+        hostport = authority.rsplit('@', 1)[-1]
+        host = hostport.split(']', 1)[0] if hostport.startswith('[') else hostport.split(':', 1)[0]
+        return bool(host)
+    if not isinstance(semantic_evidence, dict):
+        return None
+    evidence = semantic_evidence.get(value)
+    if (not isinstance(evidence, dict) or evidence.get('iri') != value
+            or evidence.get('mapped_uri') != mapped
+            or not all(isinstance(evidence.get(k),str) and evidence[k].strip()
+                       for k in ('authority','revision','source','resource_semantics'))):
+        return None
+    if evidence.get('classification') == 'pure-name' and evidence.get('access_mechanism') is None:
+        return False
+    if (evidence.get('classification') == 'locator'
+            and isinstance(evidence.get('access_mechanism'),str)
+            and evidence['access_mechanism'].strip()):
+        return True
+    return None
 
 
 def members(value):
@@ -366,20 +438,9 @@ def multiset_equal(left, right, compare):
 
 
 def mailbox_structure(value):
-    """Bounded DC-MAILTO adapter: True/False/None (needs full contract)."""
-    scheme, separator, rest = value.partition(':')
-    if not separator or scheme.lower() != 'mailto' or '#' in rest:
-        return False
-    if '%' in rest or '?' in rest or not rest.isascii():
-        return None
-    atom = re.compile(r"[A-Za-z0-9!$'*+_~\-]+")
-    for address in rest.split(','):
-        local, separator, domain = address.rpartition('@')
-        if not separator or not local or not domain:
-            return False
-        if not all(atom.fullmatch(part) for part in local.split('.') + domain.split('.')):
-            return False
-    return True
+    """Complete RFC6068 syntax after RFC3987 mapping; no delivery assumption."""
+    from lrs_mailbox import mailbox
+    return iri_reference_valid(value) and mailbox(value)
 
 
 def agent_structure(value, member=False):
@@ -521,6 +582,8 @@ def snapshot_equal(left, right, pointer='', opaque=False):
         # conceal a definite change to another JSON type (including boolean).
         numeric = (int, float, Decimal)
         return None if type(left) in numeric and type(right) in numeric else False
+    if type(left) in (int, Decimal) and type(right) in (int, Decimal):
+        return left == right
     return type(left) is type(right) and left == right
 
 
@@ -529,12 +592,7 @@ def added_value_valid(value, key):
     if key == 'timestamp':
         return timestamp_preserved(value, value)
     if key == 'fileUrl':
-        if (not isinstance(value, str) or not re.match(r'[A-Za-z][A-Za-z0-9+.-]*:', value)
-                or not iri_reference_valid(value)):
-            return False
-        # Like the Rust shape adapter: absolute IRI syntax is necessary, but
-        # DC-IRL locator/access-mechanism evidence still requires its provider.
-        return None
+        return locator_validity(value)
     # Root id/stored/authority/version retain their independent managed checks.
     return True
 

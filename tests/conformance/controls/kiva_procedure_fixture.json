@@ -4,26 +4,123 @@
   "basis": "Author-declared disposable local Kiva fixture, policy information confirmed in the bound implementation; expected obligations remain source-derived. This is not an external operator statement.",
   "clock_control": false,
   "host_clock_shared": true,
-  "canonical_submitted_fixture": "Direct Activity definitions retained by statement storage; canonical Statement projection selects language maps. /activities merges available direct Object definitions. Fixture uses one uncontested definition per id; policy input digests bound.",
-  "authorization_policy": "Local optional authorization; refused token and statement-read-only token fixtures are configured by conformance_lib.sh. No external IdP delegation exercised.",
-  "authority_policy": "Local credential subject maps deterministically to Agent; anonymous default and writer-a supply two identities; submitted authority overwritten.",
-  "interaction_policy": "Configured built-in common validity; optional pattern/component acceptance remains distinct from invalid interactionType. Full optional policy audit is open.",
-  "resolvable_metadata_policy": "No hosted metadata fixture declared; optional fetch observation remains open.",
-  "cursor_policy": "No fixed cache/rerun declaration; observe as advisory only.",
+  "canonical_submitted_fixture": "Canonical Statement maps come from each retained Statement, including root/SubStatement and every Context Activity role; Agent/Group data remain exact. The Activities resource merges first-known properties in stored-time/id order, fills missing language/property entries, and keeps extension-owner values atomic. Native inventory fixtures separately verify authorized and rejected corrections. Accept-Language fields are combined in received order; each tag uses its most-specific matching range including q=0, then quality and header order select an available tag. The adopted deterministic fallback remains when none is acceptable.",
+  "authorization_policy": "The ordinary portable target uses optional authorization with refused/read-only tokens configured by conformance_lib.sh. Separate native fixtures use an actual external BearerTokenVerifier decision log, require authentication, exercise operation scopes, and configure disjoint subject-based Statement ID sets through KIVA_XAPI_STATEMENT_VISIBILITY_JSON. Every continuation reapplies its verified caller permission; no external production IdP service is claimed.",
+  "authority_policy": "Kiva always overwrites accepted submitted authority with an Agent Account: homePage https://example.org/kiva/conformance/auth and name equal to verified principal subject, or kiva-lrs for permitted anonymous access. Trusted input-authority retention is not enabled. Native external-verifier fixtures independently test two subjects and two credentials for the same subject; injectivity is not required.",
+  "interaction_policy": "Kiva validates interactionType presence/vocabulary, common JSON validity, component/list/String types and Language Maps. Pattern grammar, grading and characterstring parameters are not interpreted. Whitespace-free component ids are producer advice; fill-in250 characters is explanatory, not a receiver cutoff. Native fixtures cover every type and parameter scope independently from the controlled consumer interpreter.",
+  "resolvable_metadata_policy": "Kiva has no external metadata consumer, metadata-host route or deferred fetch worker. Native reachable JSON/HTML host controls qualify conditional applicability separately from mandatory Activity fallback and submitted-information preservation.",
+  "cursor_policy": "Kiva continuation links requery current stored data with a stored/id anchor and have no expiry. Native fixtures verify insertion/voiding between pages, tied timestamps, terminal empty more and replay after a controlled 40-day advance.",
   "size_limit": 4096,
   "rate_path": "/__kiva/conformance/rate-limit",
   "policy_inputs": {
-    "crates/kiva-server/src/surfaces/xapi/wire.rs": "0cebf7276edeffabc73a588b9ed72a982b5274371b4852adaf090cf124291adc",
-    "crates/kiva-server/src/surfaces/xapi/request/projection.rs": "01b39840a9de8eecb83e50f85633795d648461f0ab69cc4e473cf31626a103fd",
-    "crates/kiva-xapi/src/xapi/language.rs": "5cdd6086c716c3bd64a30014c536433de29f06ee811adb311b65586cf98d08ab",
-    "crates/kiva-server/src/core/auth.rs": "7e32b03bdd94d303da84c9c91d49b5be5654e014b129cc5af4ab6ae67cfccd62",
-    "crates/kiva-server/src/surfaces/xapi/handlers/documents.rs": "abf3e5644d661a1ba3061291725e31f6fa4f496bfe6f5964e8bc1d67efc8f0fe",
-    "scripts/ci/conformance_lib.sh": "b636a82b262f31c8fa909e9291791348253d3fd7cc112678618cd70cb8f8866c",
-    "crates/kiva-server/src/core/runtime.rs": "3544c7c8ca2a968d172ffbc665eed49b770399fe27b6ebfe05d2a6546edd50b6",
-    "crates/kiva-server/src/surfaces/xapi/model.rs": "63813e8626e79d10e990d4bb3546c00ade6183fb836a118072ba6a4b82e69e26",
-    "crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs": "b12497c50a84313c1c3839ad7d1dda06aa0c6460b5166318ed99e9aedca7a93a",
-    "crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs": "517829212c577e24c576724df3e08cfa78b18182e6e27af7dbe28b631248ff1d"
+    "crates/kiva-server/src/surfaces/xapi/wire.rs": "8f4b4062d81936f44f14028112ef20a6c7a5ca303bf949377b941d60368e68ec",
+    "crates/kiva-server/src/surfaces/xapi/request/projection.rs": "c499a78df083a0000ec22a12efe488ab039282a26237dfe22b4052e28a4c9bdf",
+    "crates/kiva-xapi/src/xapi/language.rs": "0b1346f0d9de7417c3edcf9c39977075cd980e5ec52c193755269953c084da88",
+    "crates/kiva-server/src/core/auth.rs": "7c6343f6a113d6baabcf9db817125e05281099778d1a7f4c18b240ee5f0d369f",
+    "crates/kiva-server/src/surfaces/xapi/handlers/documents.rs": "b5e700af21d133dc290147e1b54b4f205f73c965630e7c54de76f7cda13aba2b",
+    "scripts/ci/conformance_lib.sh": "6d9c59bd3e1d2bd6dd29144da665ebfb2e02de450c4ffde73c67a35a46c59e3a",
+    "crates/kiva-server/src/core/runtime.rs": "a923bf2b45f7667c437320d0300cd3374d23ac288cdaab65a658028e19b5ad47",
+    "crates/kiva-server/src/surfaces/xapi/model.rs": "1d8270e897e52a8c7f83e4623cee04939c038d5f3d17e2b06bc2ba70b256e477",
+    "crates/kiva-server/src/surfaces/xapi/storage/document_memory.rs": "3f7b536af8c2cefc5d605925d08f5277082769c569989b909e42954423615a84",
+    "crates/kiva-server/src/surfaces/xapi/storage/document_postgres.rs": "4dc54eb68ed9efb34391dd591f470a4e30ecb89bb29efadc270f92bfb98ec28a",
+    "crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs": "daa1361ce00ecc44ca4796af1ad684e8b27ba137e4c13dc07c6da96760653abc",
+    "crates/kiva-server/src/core/signature_policy.rs": "6e7a77933fa02a6c9f18c33279debc005b6119d53f0f5d0e9be596ab135a72de",
+    "crates/kiva-server/src/surfaces/xapi/request/multipart.rs": "fd1d622af10d29b74480c807c2c76b17d864fa46aac8b8c98404de9b0926d79d",
+    "vendor/pkix-path/src/lib.rs": "fa7beb6b87617eb5cd3995b5f151b89ac35ee4ccde612f945cbea0d2b0a194a5",
+    "crates/kiva-server/src/core/signature_policy/provider.rs": "2c39362dfdf2fab39353e1a856ad68c62099120935abb3813312e622f83c7978",
+    "tests/conformance/controls/kiva_certificate_policy.json": "484ae5eaad5fbea0266e01987bf7fdd38e72c3b9fea7bec6ce4338deeb3f20f5",
+    "crates/kiva-server/src/core/recording_clock.rs": "5633f02de310d91ac3db37891f9e13c83bdaf6f3b481713940a801cb64aa5e86",
+    "vendor/pkix-path/src/rfc4518.rs": "28fd91fd1bf8989690776d7d5bdc38b7ddbe5a6eb1f8962e1974a6bbe7852248",
+    "vendor/pkix-path/src/certificate_idna.rs": "413bf688a8df5a026f78901758c316a905c690559baa979b5f98cad5fe611743",
+    "crates/kiva-server/src/core/statement_visibility.rs": "0e70b8976bbf184fdfe233452c8a5fbf7dcddf5201dc0a6ee3c2f36ef03abd60",
+    "crates/kiva-server/src/surfaces/xapi/handlers/about.rs": "7bdbb3944eebeef4b680776f87a4c04a229d571215fea85c8852cc986e76a593",
+    "crates/kiva-server/src/surfaces/xapi/request/media.rs": "268d1907665d153fac3766ad7dd299e1936c8518f0855c3ec2d749b1f71aa721",
+    "crates/kiva-server/src/surfaces/xapi/request/query.rs": "61b12ef4bf2da1b03b0af325dd7ff91557d8ecf0783f14b2e172713df022b533",
+    "vendor/pkix-path/src/certificate_uri.rs": "4313260af76c6baa87ff51a8c2ce60891f3b50c6b741c2216a6590ed9782f644",
+    "crates/kiva-server/src/core/signature_policy/der.rs": "2eaf6822f3771a67045dd28990dd274dc69cc41ba149f3285cf1f1d645ba8230",
+    "crates/kiva-server/src/surfaces/xapi/request/attachments.rs": "aba4727f487a323417bacb66f40792072015d1f58e29ab07562e1042c3b7555e",
+    "crates/kiva-server/src/surfaces/xapi/request/multipart/digest.rs": "55ffee08daeaa845bfd34b18efe069afa7812d201c66298879db6ee35ff6550f",
+    "crates/kiva-xapi/src/xapi/media.rs": "30f32401283fbafba528b2288bbc51643d9900fe0b48ae13c727e71d1bb578a8",
+    "crates/kiva-xapi/src/xapi/filtering.rs": "51fce09abc891356c0bdc3a6b8398f6e72bc2eeb75dd05ad01d487ef089407ae",
+    "crates/kiva-server/src/surfaces/xapi/handlers/statements.rs": "58e3dd770ac7793c0bc2632adb31dc49b0812926292de1d2c4c09587b6fcfc49",
+    "crates/kiva-server/src/surfaces/xapi/response/attachments.rs": "7b3e50113be95871a9d399d9fa0103bd0e25dd5ade0745e3af95e44deaa3fc91",
+    "crates/kiva-server/src/surfaces/xapi/response.rs": "4dec1ca396cec5e9899332bfcc0b71efa9e0d84a4b918711e2805f2743e1da57",
+    "crates/kiva-server/src/surfaces/xapi/request/preconditions.rs": "62ced9b7efbe1352bf303962206a43217645f3b1454061f59cef86088dc03b06",
+    "crates/kiva-server/src/surfaces/xapi/model/document_list.rs": "210cf36a179dde1582a6d7666768c620a8b2ac650946d02b80621cfdaf144bc7",
+    "crates/kiva-server/src/surfaces/xapi/storage/document_mapping.rs": "c8fc41e1f82f8fae78f29d8f9c7109dac4b539d13e7207f34566b3552a21f3a0"
   },
   "rate_window_seconds": 1,
-  "rate_trigger_request_count": 3
+  "rate_trigger_request_count": 3,
+  "about_context": {
+    "supported": "2.0.0",
+    "unsupported": "9.9.9",
+    "latest_versions": [
+      "2.0.0"
+    ],
+    "unrecognized": "auditUnknown",
+    "missing_header": "route-default",
+    "cause_basis": "About handler rejects every query parameter; auth fixture independently refuses invalid-credential. No precedence of multiple unrelated invalid causes is inferred."
+  },
+  "iri_strategy": "simple",
+  "parameter_vocabulary": [
+    {
+      "method": "GET",
+      "path": "/statements",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/about",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/agents",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/activities",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/activities/state",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/agents/profile",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    },
+    {
+      "method": "GET",
+      "path": "/activities/profile",
+      "unrecognized": [
+        "unknownProcedureParameter"
+      ],
+      "evidence": "Source-bound explicit query allowlists in crates/kiva-server/src/surfaces/xapi/request/query.rs and the bound About/Agents/Activities/Document handlers. Vocabulary established before executing the rejection probe, separately from its response."
+    }
+  ],
+  "signature_policy": "Local trusted certificate policy from KIVA_XAPI_CERTIFICATE_POLICY; independently configured anchor and certificate/issuer/time-bound authenticated out-of-band status. CRL/OCSP/discovery not selected. Original-byte RSA SHA256/384/512 and exact >=2048-bit JWS modulus; D10=A unknown not-evaluated/known failure rejected, D11 decoded duplicate rejection. Named native controls exercise selected certificate-name/DER/path/status boundaries and combinations. Their passing outcomes do not prove all requirement semantics; confirmed counterexamples remain product gaps. Public synthetic keys are test-only.",
+  "related_activity_policy": "Related Activity filtering reads direct Activity ids from the four declared Context Activity roles, accepting singleton and array forms at root and SubStatement scopes. Opaque definition/extension contents do not introduce related Activities. Object StatementRef expansion and paging retain these same boundaries.",
+  "attachment_output_policy": "Collection raw parts are deduplicated by hexadecimal digest value. A nonempty optional Content-Type is emitted only when equivalence with all metadata references in that returned page is established, including SubStatement and fileUrl-only references. Otherwise it is omitted; stored metadata and raw bytes remain unchanged and required hash/binary-encoding headers remain present."
 }

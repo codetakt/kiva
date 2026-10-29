@@ -9,7 +9,7 @@ use super::lossless_json::Json;
 use serde_json::Value;
 
 pub(super) fn compare_statement_bytes(expected: &Json, bytes: &[u8]) -> Result<(), String> {
-    let actual: Json = serde_json::from_slice(bytes)
+    let actual: Json = super::lossless_json::from_slice(bytes)
         .map_err(|error| format!("preservation requires JSON: {error}"))?;
     unique_core_members(expected, "", false)?;
     unique_core_members(&actual, "", false)?;
@@ -469,9 +469,7 @@ fn validate_added_value(value: &Json, path: &str, key: &str) -> Result<(), Strin
                     "added fileUrl is not valid absolute IRI syntax at {path}"
                 ));
             }
-            Err(format!(
-                "ORACLE-UNAVAILABLE: {path} requires DC-IRL locator/access-mechanism evidence; IRI syntax alone is insufficient"
-            ))
+            super::locator::check(text, path)
         }
         // Root id/stored/authority/version have dedicated managed-field checks.
         // SubStatement timestamps and Attachment fileUrls have no such fallback.
@@ -565,71 +563,9 @@ fn context_activity_value(path: &str) -> bool {
         .is_some_and(|key| matches!(key, "parent" | "grouping" | "category" | "other"))
 }
 
-/// Only integer JSON representations retain exact input values in this parser.
-/// Decimal/exponent representations require a lossless provider, even when their
-/// already-rounded binary64 values compare equal. Never infer a decimal PASS.
-#[expect(
-    clippy::cast_possible_truncation,
-    clippy::cast_precision_loss,
-    reason = "Binary32 bounds are integral for integral inputs; i128 contains all u64/i64 values and their adjacent binary32 bounds"
-)]
+/// Inputs carry their original decimal/exponent tokens through the lossless loaders.
 pub(super) fn numeric_precision(expected: &Value, actual: &Value) -> Result<bool, String> {
-    if !expected.is_number() || !actual.is_number() {
-        return Ok(false);
-    }
-    let integer = |value: &Value| {
-        value
-            .as_i64()
-            .map(i128::from)
-            .or_else(|| value.as_u64().map(i128::from))
-    };
-    let (Some(expected), Some(actual)) = (integer(expected), integer(actual)) else {
-        return Err("ORACLE-UNAVAILABLE: decimal/exponent JSON input needs lossless DC-NUMBER provider before numeric equality or precision grading".into());
-    };
-    if expected == actual {
-        return Ok(true);
-    }
-    let rounded = expected as f32;
-    let center = rounded as i128;
-    if center == expected {
-        return Ok(binary32_integer_spelling(rounded, actual));
-    }
-    let adjacent = if center < expected {
-        rounded.next_up()
-    } else {
-        rounded.next_down()
-    };
-    let other = adjacent as i128;
-    Ok((actual >= center.min(other) && actual <= center.max(other))
-        || binary32_integer_spelling(rounded, actual)
-        || binary32_integer_spelling(adjacent, actual))
-}
-
-/// Recognize directed decimal rounding of an integral binary32 endpoint at
-/// each significant precision. Floor/ceiling bracket nearest/tie choices;
-/// sharing a binary32 rounding bin alone is not a serialization witness.
-#[expect(
-    clippy::cast_possible_truncation,
-    clippy::cast_precision_loss,
-    reason = "Caller supplies integral f32 bounds of i64/u64 input; i128 arithmetic stays within 10^20 and the f32 cast only checks endpoint restoration"
-)]
-const fn binary32_integer_spelling(endpoint: f32, actual: i128) -> bool {
-    if (actual as f32).to_bits() != endpoint.to_bits() {
-        return false;
-    }
-    let exact = endpoint as i128;
-    // Units and finer precision yield the exact integer, already handled by
-    // the singleton/enclosing interval. Coarser decimal places are powers of 10.
-    let mut quantum = 10;
-    while quantum <= exact.abs() {
-        let lower = exact.div_euclid(quantum) * quantum;
-        // Exact multiples need no rounding: their floor and ceiling coincide.
-        if actual == lower || (exact != lower && actual == lower + quantum) {
-            return true;
-        }
-        quantum *= 10;
-    }
-    false
+    super::numeric::preserved(expected, actual)
 }
 
 fn compare_timestamp(expected: &Value, actual: &Value, path: &str) -> Result<(), String> {
@@ -880,6 +816,32 @@ mod tests {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn issued_duration_preservation_relations() {
+        for pointer in ["/result/duration", "/object/result/duration"] {
+            for (before, after, expected) in [
+                ("PT1S", "PT1.00S", "passed"),
+                ("PT1.23S", "PT1,23S", "passed"),
+                ("PT1S", "PT9S", "failed"),
+                ("PT1.234S", "PT1,234S", "passed"),
+                ("PT1.230S", "PT1,23S", "passed"),
+                ("PT1.234S", "PT1.23S", "passed"),
+                ("PT1.234S", "PT1.2S", "failed"),
+                ("PT1.23S", "PT2.23S", "failed"),
+                ("P1M", "P30D", "not-run"),
+                ("P1Y", "P365D", "not-run"),
+            ] {
+                let outcome = match super::compare_duration(&json!(before), &json!(after), pointer)
+                {
+                    Ok(()) => "passed",
+                    Err(error) if error.starts_with("ORACLE-UNAVAILABLE:") => "not-run",
+                    Err(_) => "failed",
+                };
+                assert_eq!(outcome, expected, "{pointer}: {before} -> {after}");
             }
         }
     }

@@ -9,11 +9,53 @@ from decimal import Decimal, localcontext
 from lrs_preservation import (
     PrimitiveUnavailable, preservation, timestamp_ns, timestamp_preserved, number_preserved,
     statement_response_headers, snapshot_equal, duration_preserved, duration_lexically_valid, load_json_members,
-    agent_validity, agent_identity_equal,
+    agent_validity, agent_identity_equal, dump_json_members, locator_validity, load_yaml_numbers,
 )
 
 
 class PreservationControls(unittest.TestCase):
+    def test_actor_output_member_order_never_erases_identity_or_multiplicity(self):
+        a={'mbox':'mailto:a@example.org','name':'A'}
+        b={'mbox':'mailto:b@example.org','name':'B'}
+        for path in ('actor','object','object/actor','object/object'):
+            def statement(members):
+                group={'objectType':'Group','member':members}
+                if path.startswith('object/'):
+                    return {'object':{'objectType':'SubStatement',path.split('/')[1]:group}}
+                return {path:group}
+            original=statement([a,b])
+            self.assertTrue(all(o['outcome']=='passed' for o in preservation(original,statement([b,a]))))
+            for members in ([a],[b],[a,b,a],[a,dict(b,mbox='mailto:c@example.org')]):
+                self.assertTrue(any(o['outcome']=='failed' for o in preservation(original,statement(members))),
+                                (path,members))
+
+    def test_authored_yaml_numbers_survive_request_serialization(self):
+        value = load_yaml_numbers('values: [0.1, 9007199254740993.0, 1.0e-400, "0.1", true]\n')
+        self.assertEqual(value['values'][:3], [Decimal('0.1'), Decimal('9007199254740993'), Decimal('1e-400')])
+        self.assertEqual(value['values'][3:], ['0.1', True])
+        roundtrip = load_json_members(dump_json_members(value))
+        self.assertIs(snapshot_equal(value, roundtrip), True)
+        self.assertIs(number_preserved(value['values'][0], roundtrip['values'][0]), True)
+        with self.assertRaises(ValueError): load_yaml_numbers('number: .inf')
+
+    def test_raw_decimals_and_duplicate_members_survive_procedure_serialization(self):
+        raw = '{"extensions":{"urn:x":{"n":0.10000000000000000001,"n":9007199254740993.0}}}'
+        value = load_json_members(raw)
+        self.assertEqual(dump_json_members(value), raw)
+        self.assertTrue(snapshot_equal(value, load_json_members(dump_json_members(value))))
+        self.assertFalse(snapshot_equal(value, load_json_members(raw.replace('00000000000000001', '0'))))
+        self.assertIs(snapshot_equal(1, Decimal('1.0')), True)
+        self.assertIs(snapshot_equal(Decimal('9007199254740993.0'), 9007199254740992), False)
+        with self.assertRaises(ValueError): dump_json_members(Decimal('NaN'))
+
+    def test_locator_mechanisms_have_bounded_positive_and_negative_evidence(self):
+        for value in ['https://example.invalid/路径', 'HTTP://[2001:db8::1]/a', 'https://[v1.host]/a']:
+            self.assertIs(locator_validity(value), True)
+        for value in ['https:///no-host', 'https://[', 'http:path', 'not a locator']:
+            self.assertIs(locator_validity(value), False)
+        for value in ['urn:example:item', 'custom:resource']:
+            self.assertIsNone(locator_validity(value))
+
     def test_generated_and_dedicated_authority_formats_agree(self):
         import yaml
         from generate_lrs_projection_cases import actor_output_shape, read_statement
@@ -41,6 +83,24 @@ class PreservationControls(unittest.TestCase):
         invalid={'mbox_sha1sum':'xyz'}
         self.assertIs(agent_identity_equal(unknown,invalid),False)
         self.assertIs(agent_identity_equal(invalid,unknown),False)
+
+    def test_authority_group_order_and_mapping_unknowns_remain_separate(self):
+        a={'mbox':'mailto:a@example.org','name':'A'}
+        b={'mbox':'mailto:b@example.org','name':'B'}
+        group={'objectType':'Group','member':[a,b]}
+        self.assertIs(agent_identity_equal(group,{**group,'member':[b,a]}),True)
+        self.assertIs(agent_identity_equal(group,{**group,'member':[a]}),False)
+        self.assertIs(agent_identity_equal(group,{**group,'member':[a,b,a]}),False)
+        identified={**group,'mbox':'mailto:group@example.org'}
+        self.assertIsNone(agent_identity_equal(identified,{**identified,'member':[a]}))
+        self.assertIsNone(agent_identity_equal(a,{**a,'name':'changed display fact'}))
+        self.assertIs(agent_identity_equal(a,{**a,'mbox':'mailto:different@example.org'}),False)
+        empty={'objectType':'Group','member':[]}
+        self.assertIs(agent_validity(empty),True)
+        self.assertIs(agent_identity_equal(empty,empty),True)
+        for value in ({'objectType':'Group'},{'objectType':'Group','member':None},
+                      {'objectType':'Group','member':'not-an-array'}):
+            self.assertIs(agent_validity(value),False)
 
     def test_duration_designator_grammar_shared_controls(self):
         fixture=json.loads((Path(__file__).resolve().parents[2]/'tests/conformance/fixtures/preservation-properties.json').read_text())['duration_grammar']
@@ -347,6 +407,25 @@ class PreservationControls(unittest.TestCase):
             with self.subTest(value=value):
                 self.assertIs(statement_response_headers({
                     'X-Experience-API-Consistent-Through': value})[1], False)
+
+    def test_known_defects_dominate_unknown_numeric_and_multiset_comparisons(self):
+        from lrs_preservation import multiset_equal, all_decisions
+        original={'verb':{'id':'urn:a'},'result':{'score':{'scaled':Decimal('0.1')}}}
+        unknown={'verb':{'id':'urn:a'},'result':{'score':{'scaled':0.1}}}
+        def result(value):
+            outcomes=[{'passed':True,'failed':False,'not-run':None}[o['outcome']] for o in preservation(original,value)]
+            return all_decisions(outcomes)
+        self.assertIs(result(original),True)
+        self.assertIsNone(result(unknown))
+        unknown['verb']['id']='urn:b'
+        self.assertIs(result(unknown),False)
+        self.assertIs(snapshot_equal([Decimal('0.1'),'same'],[0.1,'changed'],opaque=True),False)
+        # Explicit comparison truth tables exercise possible versus proven
+        # perfect matching, without inventing invalid numeric Agent fields.
+        for edges,expected in [([[None,False],[None,False]],False),
+                               ([[None,False],[False,True]],None),
+                               ([[True,None],[None,True]],True)]:
+            self.assertIs(multiset_equal([0,1],[0,1],lambda a,b:edges[a][b]),expected)
 
     def test_binary64_collapse_is_not_lossless_evidence(self):
         self.assertFalse(number_preserved(9007199254740992, 9007199254740993))

@@ -55181,7 +55181,7 @@
         "IP-multipart-match-length",
         "IP-number-precision"
       ],
-      "adapter_boundary": "Current Rust precision/preservation adapter handles retained i64/u64 JSON integers through i128 comparisons of integer binary32 bounds; decimal/exponent Number representations are unavailable before equality. Python floats are unavailable before equality; explicit int/Decimal inputs use the exact-input adapter. Full lossless decimal provider integration is deferred. Ordinary Rust JSON comparison/capture/enum/MIME length now rejects binary64 evidence as ORACLE-UNAVAILABLE; exact signed/unsigned integer Values remain comparable. Structural equality is not substituted for the xAPI preservation allowance relation."
+      "adapter_boundary": "Rust exact_yaml retains suite decimal/exponent tokens and the isolated serde_json dependency retains response tokens. numeric.rs compares normalized decimal values without binary64 and implements enclosing binary32 bounds plus directed decimal endpoint spellings that round-trip. Exact equality includes underflow/overflow-sized decimals; differing values requiring binary32 overflow or exponents outside i64 remain unavailable. Subnormals and signed zero are covered. Python load_json_members retains Decimal inputs; preexisting binary64 float objects remain unavailable rather than being promoted to exact evidence. Ordinary equality, capture and numeric enums use exact values; preservation retains the distinct minimum-precision relation."
     },
     {
       "id": "DC-LANGUAGE",
@@ -55295,7 +55295,7 @@
         "Require original IRI, mapped URI, and independently documented scheme/resource access-mechanism classification. A known pure name with no access mechanism fails the locator predicate; a known locator satisfies it even if the resource is unreachable or absent. Insufficient classification evidence yields oracle-unavailable, not invalid or valid.",
         "No invented global scheme allowlist/denylist. In particular do not classify every urn: as invalid; name/locator roles can overlap. The negative pure-name fixture carries independent namespace semantics and absence of an access mechanism, not merely a lexical urn prefix.",
         "Apply to Account.homePage including Person account elements, ActivityDefinition.moreInfo and Attachment.fileUrl, subject to each field/role and IEEE input validation waiver. Query more handling retains its own relative-URL rules. Do not dereference a URL to prove syntax or preservation.",
-        "Current Rust format:irl and Python Person account checks perform necessary type/IRI syntax checks but lack locator classification evidence. They emit ORACLE-UNAVAILABLE/None after syntax success. xAPI preservation comparisons do not substitute for classification."
+        "Rust locator.rs and Python locator_validity retain necessary IRI syntax checks and RFC3987 section 3.1 URI mapping. For HTTP and HTTPS, RFC9110 sections 4.2.1–4.2.2 independently supply the resource identity and primary access mechanism; require an authority with a nonempty host. No request is issued to test reachability. Other schemes/resources remain oracle-unavailable until independently classified; this bounded provider does not treat them as invalid."
       ],
       "outputs": [
         "valid",
@@ -55318,7 +55318,7 @@
         "IP-Person-account-type",
         "IP-person-array-members"
       ],
-      "later": "Provider integration/behavioral execution after static definition completion"
+      "later": "Other scheme/resource classifiers and independent provider qualification remain separate from the bounded local HTTP(S) execution."
     }
   ],
   "equality_matrix": [

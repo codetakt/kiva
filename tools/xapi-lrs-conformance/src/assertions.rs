@@ -136,9 +136,9 @@ pub(super) struct Shape {
     #[serde(default)]
     max_properties: Option<usize>,
     #[serde(default)]
-    minimum: Option<f64>,
+    minimum: Option<serde_json::Number>,
     #[serde(default)]
-    maximum: Option<f64>,
+    maximum: Option<serde_json::Number>,
     #[serde(default)]
     any_of: Vec<Self>,
 }
@@ -230,7 +230,14 @@ impl Check {
                     validate_pointer(pointer)?;
                 }
                 if let Some(expected) = expected {
-                    parse_time(expected)?;
+                    // A bounded provider's inability is an execution gap, not
+                    // an invalid definition. Keep the check executable so UTC,
+                    // field types and later comparisons can still fail.
+                    if let Err(error) = parse_time(expected)
+                        && !error.starts_with("ORACLE-UNAVAILABLE:")
+                    {
+                        return Err(error);
+                    }
                 } else if *allow_truncation_or_rounding {
                     return Err("timestamp rounding requires an expected timestamp".into());
                 }
@@ -482,7 +489,7 @@ impl Check {
         {
             return header_time(headers, header).map(|_| ());
         }
-        let json: Value = serde_json::from_slice(bytes)
+        let json: Value = super::lossless_json::value_from_slice(bytes)
             .map_err(|error| format!("response relationship requires JSON: {error}"))?;
         match self {
             Self::StatementResultIds { required, allowed } => {
@@ -671,6 +678,7 @@ impl Check {
                         // No max(empty) exists. A supplied header still has HTTP-date syntax.
                         if headers.contains_key(header.as_str()) {
                             header_time(headers, header)?;
+                            return Err("ORACLE-UNAVAILABLE: empty collection Last-Modified needs independent representation-change and origination-time evidence; valid syntax alone does not prove its meaning".into());
                         }
                         return Ok(());
                     }
@@ -717,7 +725,8 @@ impl Check {
                     .get(capture)
                     .ok_or_else(|| format!("missing capture {capture}"))?;
                 let expected: Value =
-                    serde_json::from_str(serialized_value).map_err(|error| error.to_string())?;
+                    super::lossless_json::value_from_slice(serialized_value.as_bytes())
+                        .map_err(|error| error.to_string())?;
                 let actual = json
                     .pointer(pointer)
                     .ok_or_else(|| format!("missing {pointer}"))?;
@@ -853,8 +862,15 @@ impl Shape {
             .is_some_and(|(min, max)| min > max)
             || self
                 .minimum
-                .zip(self.maximum)
-                .is_some_and(|(min, max)| min > max)
+                .as_ref()
+                .zip(self.maximum.as_ref())
+                .is_some_and(|(min, max)| {
+                    super::numeric::compare(
+                        &Value::Number(min.clone()),
+                        &Value::Number(max.clone()),
+                    )
+                    .is_ok_and(std::cmp::Ordering::is_gt)
+                })
         {
             return Err("JSON shape has inconsistent property or numeric bounds".into());
         }
@@ -923,14 +939,13 @@ impl Shape {
             return Err(format!("{pointer} has an invalid type"));
         }
         if self.value_type.as_deref() == Some("integer") {
-            if value
-                .as_f64()
-                .is_some_and(|number| number.fract().abs() > 0.0)
-            {
-                return Err(format!("{pointer} is not an integer"));
-            }
-            // Decimal spelling may be integral; it needs the original token.
-            retain(require_exact_numbers(value))?;
+            retain(super::numeric::integral(value).and_then(|integral| {
+                if integral {
+                    Ok(())
+                } else {
+                    Err(format!("{pointer} is not an integer"))
+                }
+            }))?;
         }
         if let Some(allowed) = &self.enum_values {
             retain(
@@ -980,11 +995,24 @@ impl Shape {
             match require_exact_numbers(value) {
                 Err(error) => retain(Err(error))?,
                 Ok(()) => {
-                    if let Some(number) = value.as_f64()
-                        && (self.minimum.is_some_and(|min| number < min)
-                            || self.maximum.is_some_and(|max| number > max))
-                    {
-                        return Err(format!("{pointer} violates numeric bounds"));
+                    if value.is_number() {
+                        for (bound, forbidden) in [
+                            (&self.minimum, std::cmp::Ordering::Less),
+                            (&self.maximum, std::cmp::Ordering::Greater),
+                        ] {
+                            if let Some(bound) = bound {
+                                retain(
+                                    super::numeric::compare(value, &Value::Number(bound.clone()))
+                                        .and_then(|order| {
+                                            if order == forbidden {
+                                                Err(format!("{pointer} violates numeric bounds"))
+                                            } else {
+                                                Ok(())
+                                            }
+                                        }),
+                                )?;
+                            }
+                        }
                     }
                 }
             }
@@ -999,23 +1027,8 @@ pub(super) fn check_string_format(format: &str, text: &str, pointer: &str) -> Re
         "timestamp" => return parse_time(text).map(|_| ()),
         "iri" => crate::identifier_has_valid_syntax(text, false),
         "uri" => crate::identifier_has_valid_syntax(text, true),
-        "irl" => {
-            if !crate::identifier_has_valid_syntax(text, false) {
-                return Err(format!("{pointer} is not valid IRI syntax"));
-            }
-            return Err(format!(
-                "ORACLE-UNAVAILABLE: {pointer} requires DC-IRL locator/access-mechanism evidence; IRI syntax alone is insufficient"
-            ));
-        }
-        "mailto-iri" => {
-            if !crate::identifier_has_valid_syntax(text, false) {
-                false
-            } else if let Some((scheme, rest)) = text.split_once(':') {
-                scheme.eq_ignore_ascii_case("mailto") && mailbox_list(rest)?
-            } else {
-                false
-            }
-        }
+        "irl" => return super::locator::check(text, pointer),
+        "mailto-iri" => super::mailbox::valid(text),
         "sha1" => text.len() == 40 && text.bytes().all(|byte| byte.is_ascii_hexdigit()),
         _ => return Err(format!("unknown string format {format}")),
     };
@@ -1024,37 +1037,6 @@ pub(super) fn check_string_format(format: &str, text: &str, pointer: &str) -> Re
     } else {
         Err(format!("{pointer} is not valid {format} direct syntax"))
     }
-}
-
-// Bounded RFC 6068 adapter. Encoded/quoted/internationalized addresses and
-// hfields need the complete DC-MAILTO contract, never a generic-IRI PASS.
-fn mailbox_list(rest: &str) -> Result<bool, String> {
-    if rest.contains('#') {
-        return Ok(false);
-    }
-    if rest.contains('%') || rest.contains('?') || !rest.is_ascii() {
-        return Err(
-            "ORACLE-UNAVAILABLE: DC-MAILTO percent/quoted/domain/hfield adapter required".into(),
-        );
-    }
-    let atom = |part: &str| {
-        !part.is_empty()
-            && part
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b"!$'*+-_~".contains(&b))
-    };
-    Ok(!rest.is_empty()
-        && rest.split(',').all(|address| {
-            let Some((local, domain)) = address.rsplit_once('@') else {
-                return false;
-            };
-            // Raw comments, whitespace, extra @, and non-atext fail this supported
-            // ASCII dot-atom partition. No DNS lookup or delivery test is required.
-            !local.is_empty()
-                && !domain.is_empty()
-                && local.split('.').all(&atom)
-                && domain.split('.').all(&atom)
-        }))
 }
 
 // Classify definite violations in ordinary calendar/clock spellings before an
@@ -1576,7 +1558,7 @@ pub(super) fn multipart_document(
                 }
                 Err(error) => return Err(error),
             }
-            let json: Value = serde_json::from_slice(data)
+            let json: Value = super::lossless_json::value_from_slice(data)
                 .map_err(|error| format!("invalid first MIME JSON part: {error}"))?;
             let statements: Vec<&Value> = json
                 .as_array()
@@ -1775,14 +1757,11 @@ pub(super) fn decode_hex(hex: &str) -> Result<Vec<u8>, String> {
         .collect()
 }
 
-/// A binary64 Value is not evidence of the original JSON number token.
-/// Until a lossless decimal adapter is supplied, never turn it into PASS/FAIL
-/// by serializing the rounded Value back to text. Integer Values remain exact.
+/// The suite and response loaders retain decimal/exponent tokens. Validate the
+/// exact decimal adapter's bounds before comparison or capture.
 pub(super) fn require_exact_numbers(value: &Value) -> Result<(), String> {
     match value {
-        Value::Number(number) if number.is_f64() => Err(
-            "ORACLE-UNAVAILABLE: original decimal/exponent token required for exact JSON comparison/capture".into(),
-        ),
+        Value::Number(_) => super::numeric::compare(value, value).map(|_| ()),
         Value::Array(values) => values.iter().try_for_each(require_exact_numbers),
         Value::Object(values) => values.values().try_for_each(require_exact_numbers),
         _ => Ok(()),
@@ -1821,16 +1800,8 @@ pub(super) fn any_comparison(
 
 pub(super) fn json_equal(left: &Value, right: &Value) -> Result<bool, String> {
     match (left, right) {
-        (Value::Number(a), Value::Number(b)) => {
-            require_exact_numbers(left)?;
-            require_exact_numbers(right)?;
-            let integer = |value: &serde_json::Number| {
-                value
-                    .as_i64()
-                    .map(i128::from)
-                    .or_else(|| value.as_u64().map(i128::from))
-            };
-            Ok(integer(a) == integer(b))
+        (Value::Number(_), Value::Number(_)) => {
+            super::numeric::compare(left, right).map(std::cmp::Ordering::is_eq)
         }
         (Value::Array(a), Value::Array(b)) => {
             if a.len() != b.len() {
@@ -2095,6 +2066,43 @@ mod tests {
     }
 
     #[test]
+    fn person_mailbox_contract_checks_each_additional_position() {
+        let check: super::Check=serde_yaml::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}").expect("Person mailbox shape");
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../tests/conformance/fixtures/mailto-contract.json"
+        ))
+        .expect("RFC component partitions");
+        for row in fixture["vectors"].as_array().expect("vectors") {
+            for position in 0..4 {
+                let queried = "mailto:queried@example.org";
+                let mut person = serde_json::json!({"objectType":"Person","mbox":[queried,queried,queried,queried]});
+                person["mbox"][position] = row["iri"].clone();
+                assert!(
+                    person["mbox"]
+                        .as_array()
+                        .expect("array")
+                        .contains(&serde_json::json!(queried))
+                );
+                let errors = check.evaluate(
+                    200,
+                    &HeaderMap::new(),
+                    person.to_string().as_bytes(),
+                    &BTreeMap::new(),
+                );
+                if row["valid"] == true {
+                    assert!(errors.is_empty(), "{} at {position}: {errors:?}", row["id"]);
+                } else {
+                    assert_eq!(errors.len(), 1, "{} at {position}: {errors:?}", row["id"]);
+                    assert!(
+                        errors[0].starts_with(&format!("/mbox/{position} is not valid mailto-iri")),
+                        "{errors:?}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn person_identifiers_check_every_enrichment_entry() {
         let check: super::Check = serde_yaml::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}\n    openid: {type: array, items: {type: string, format: uri}}\n    mbox_sha1sum: {type: array, items: {type: string, format: sha1}}")
             .expect("Person identifier shape");
@@ -2134,8 +2142,7 @@ mod tests {
                 "mailto:%22not%20me%22@example.org",
                 "/mbox/0"
             )
-            .unwrap_err()
-            .starts_with("ORACLE-UNAVAILABLE:")
+            .is_ok()
         );
         let invalid = serde_json::json!({"openid": ["https://[::1]/person", "https://["]});
         let errors = check.evaluate(
@@ -2376,7 +2383,7 @@ mod tests {
                 );
             }
         }
-        // Lost decimal/exponent tokens still require a lossless provider.
+        // Both spellings retain their input tokens in the exact-number loader.
         for body in [
             br#"{"result":{"score":{"raw":100000010.0}}}"#.as_slice(),
             br#"{"result":{"score":{"raw":1.0000001e8}}}"#,
@@ -2391,8 +2398,7 @@ mod tests {
                 },
             ] {
                 let failures = check.evaluate(200, &HeaderMap::new(), body, &BTreeMap::new());
-                assert_eq!(failures.len(), 1);
-                assert!(failures[0].starts_with("ORACLE-UNAVAILABLE:"));
+                assert!(failures.is_empty(), "{failures:?}");
             }
         }
         Ok(())
@@ -2403,7 +2409,7 @@ mod tests {
     -> Result<(), serde_json::Error> {
         let integer: Value = serde_json::from_str("{\"number\":1}")?;
         let decimal: Value = serde_json::from_str("{\"number\":1.0}")?;
-        assert!(json_equal(&integer, &decimal).is_err());
+        assert_eq!(json_equal(&integer, &decimal), Ok(true));
         let lower: Value = serde_json::from_str("9007199254740992")?;
         let upper: Value = serde_json::from_str("9007199254740993")?;
         assert_eq!(json_equal(&lower, &upper), Ok(false));
@@ -2476,9 +2482,7 @@ mod tests {
             );
         }
         assert!(shape.check(&serde_json::json!(1), "").is_ok());
-        assert!(
-            matches!(shape.check(&serde_json::json!(1.0), ""), Err(error) if error.starts_with("ORACLE-UNAVAILABLE:"))
-        );
+        assert!(shape.check(&serde_json::json!(1.0), "").is_ok());
         Ok(())
     }
 
@@ -2508,3 +2512,7 @@ mod tests {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "assertions/time_controls.rs"]
+mod time_controls;

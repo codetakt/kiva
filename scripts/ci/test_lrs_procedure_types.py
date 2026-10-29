@@ -16,6 +16,38 @@ from lrs_preservation import preservation, snapshot_equal, load_json_members
 from report_issued_test_results import assess, procedure_incomplete
 
 
+class VersionExplanationTests(unittest.TestCase):
+    message = 'X-Experience-API-Version must be 2.0 or a normal 2.0.x version; the requested version is unsupported or malformed'
+
+    def observe(self, message, status=400):
+        executor=Executor.__new__(Executor)
+        executor.current='older-version-routing'
+        executor.results={executor.current:{'checks':[]}}
+        body={'error':message}
+        executor.http=Mock(return_value={'status':status,'json':body,
+            'body_hex':json.dumps(body).encode().hex()})
+        executor.versions()
+        self.assertEqual(executor.http.call_count,3)
+        return executor.results[executor.current]['checks']
+
+    def test_reviewed_response_identifies_version_cause_and_supported_family(self):
+        checks=self.observe(self.message)
+        self.assertEqual([c['id'] for c in checks],
+            [version+'-rejection-explanation' for version in ('1.0.3','1.1.0','2.1.0')])
+        self.assertTrue(all(c['outcome']=='passed' for c in checks))
+        self.assertTrue(all(c['details']['message']==self.message for c in checks))
+
+    def test_unknown_or_misleading_explanations_remain_unavailable(self):
+        for message in ('','Bad request','unsupported',None,7,[],{},
+                        'Not true: '+self.message,self.message+'; this request was accepted'):
+            with self.subTest(message=message):
+                self.assertTrue(all(c['outcome']=='not-run' for c in self.observe(message)))
+
+    def test_version_admission_does_not_establish_prior_conformance(self):
+        checks=self.observe(self.message,status=200)
+        self.assertEqual([c['outcome'] for c in checks],['not-run','not-run','failed'])
+
+
 class AuthorityCompletionTests(unittest.TestCase):
     procedure = 'related-agents-returned-authority'
     identifier = '00000000-0000-4000-8000-000000000001'
@@ -477,7 +509,7 @@ class ResponseTypeTests(unittest.TestCase):
                     self.assertIsNone(executor.collect_statements({}, 'probe', {'forbidden'}))
                     self.assertEqual(executor.http.call_count, 2)
                     checks=executor.results['probe']['checks']
-                    self.assertTrue(any(c['id']=='probe-page-shape' and c['outcome']=='failed' for c in checks))
+                    self.assertTrue(any(c['id']=='probe-page-0-shape' and c['outcome']=='failed' for c in checks))
                     for page in [0, 1]:
                         self.assertTrue(any(c['id']==f'probe-observed-exclusions-{page}'
                                             and c['outcome']=='failed' for c in checks))

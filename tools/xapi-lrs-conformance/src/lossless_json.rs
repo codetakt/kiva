@@ -17,6 +17,18 @@ pub(super) enum Json {
 }
 
 impl Json {
+    fn into_value(self) -> Value {
+        match self {
+            Self::Scalar(value) => value,
+            Self::Array(items) => Value::Array(items.into_iter().map(Self::into_value).collect()),
+            Self::Object(pairs) => Value::Object(
+                pairs
+                    .into_iter()
+                    .map(|(key, value)| (key, value.into_value()))
+                    .collect(),
+            ),
+        }
+    }
     pub(super) const fn is_object(&self) -> bool {
         matches!(self, Self::Object(_))
     }
@@ -80,6 +92,14 @@ impl<'de> Deserialize<'de> for Json {
                 while let Some(pair) = map.next_entry()? {
                     pairs.push(pair);
                 }
+                if let [(key, Json::Scalar(Value::String(token)))] = pairs.as_slice()
+                    && key == "$serde_json::private::Number"
+                {
+                    return token
+                        .parse::<serde_json::Number>()
+                        .map(|n| Json::Scalar(Value::Number(n)))
+                        .map_err(serde::de::Error::custom);
+                }
                 Ok(Json::Object(pairs))
             }
 
@@ -118,5 +138,84 @@ impl<'de> Deserialize<'de> for Json {
             }
         }
         deserializer.deserialize_any(JsonVisitor)
+    }
+}
+
+/// Decode raw responses without confusing an actual object key with Serde's
+/// private arbitrary-precision number transport. Retain duplicate members.
+pub(super) fn from_slice(bytes: &[u8]) -> Result<Json, serde_json::Error> {
+    let raw: Box<serde_json::value::RawValue> = serde_json::from_slice(bytes)?;
+    from_raw(&raw)
+}
+
+pub(super) fn value_from_slice(bytes: &[u8]) -> Result<Value, serde_json::Error> {
+    from_slice(bytes).map(Json::into_value)
+}
+
+fn from_raw(raw: &serde_json::value::RawValue) -> Result<Json, serde_json::Error> {
+    match raw.get().as_bytes().first() {
+        Some(b'{') => {
+            struct Members(Vec<(String, Box<serde_json::value::RawValue>)>);
+            impl<'de> Deserialize<'de> for Members {
+                fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+                    struct MemberVisitor;
+                    impl<'de> Visitor<'de> for MemberVisitor {
+                        type Value = Members;
+                        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                            f.write_str("JSON object")
+                        }
+                        fn visit_map<M: MapAccess<'de>>(
+                            self,
+                            mut m: M,
+                        ) -> Result<Members, M::Error> {
+                            let mut pairs = Vec::new();
+                            while let Some(pair) = m.next_entry()? {
+                                pairs.push(pair);
+                            }
+                            Ok(Members(pairs))
+                        }
+                    }
+                    d.deserialize_map(MemberVisitor)
+                }
+            }
+            let Members(members) = serde_json::from_str(raw.get())?;
+            Ok(Json::Object(
+                members
+                    .into_iter()
+                    .map(|(key, value)| Ok((key, from_raw(&value)?)))
+                    .collect::<Result<_, serde_json::Error>>()?,
+            ))
+        }
+        Some(b'[') => {
+            let elements: Vec<Box<serde_json::value::RawValue>> = serde_json::from_str(raw.get())?;
+            Ok(Json::Array(
+                elements
+                    .iter()
+                    .map(|value| from_raw(value))
+                    .collect::<Result<_, _>>()?,
+            ))
+        }
+        _ => serde_json::from_str(raw.get()).map(Json::Scalar),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn raw_objects_cannot_impersonate_numbers() -> Result<(), serde_json::Error> {
+        let bytes = br#"{"$serde_json::private::Number":"1.2","x":0.10000000000000000001,"x":2}"#;
+        let decoded = super::from_slice(bytes)?;
+        assert!(decoded.is_object());
+        assert!(decoded.has_repeated_members());
+        assert_eq!(
+            decoded
+                .get("$serde_json::private::Number")
+                .and_then(super::Json::as_str),
+            Some("1.2")
+        );
+        let value = super::value_from_slice(bytes)?;
+        assert!(value.is_object());
+        assert_eq!(value["x"], 2);
+        Ok(())
     }
 }

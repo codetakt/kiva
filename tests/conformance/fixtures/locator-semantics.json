@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "authority": "controlled DC-IRL namespace assignment, independent of any target response",
+  "resources": {
+    "urn:example:account": {
+      "iri": "urn:example:account",
+      "mapped_uri": "urn:example:account",
+      "authority": "controlled namespace fixture owner",
+      "revision": "dc-irl-pure-name-v1",
+      "source": "issued-contract-DC-IRL rrf06-locator-evidence",
+      "resource_semantics": "This exact assigned fixture object is solely a name, with no declared access mechanism.",
+      "classification": "pure-name",
+      "access_mechanism": null
+    },
+    "custom:fixture-resource": {
+      "iri": "custom:fixture-resource",
+      "mapped_uri": "custom:fixture-resource",
+      "authority": "controlled namespace fixture owner",
+      "revision": "dc-irl-custom-access-v1",
+      "source": "controlled resolver fixture in test_lrs_locator.py",
+      "resource_semantics": "An exact key for a local fixture resolver, whose retrieval returns fixed resource bytes.",
+      "classification": "locator",
+      "access_mechanism": "fixture-resolver-v1: exact lookup in the independently populated controlled resolver"
+    }
+  }
+}
