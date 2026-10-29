@@ -254,15 +254,22 @@ in
         pythonPackages.pyyaml
       ]);
     in
-    pkgs.runCommand "kiva-lrs-oracle-controls" { nativeBuildInputs = [ python ]; } ''
-      cp -r ${src} source
-      chmod -R u+w source
-      cd source
-      python -B scripts/ci/lrs_generated_artifacts.py generate
-      python -B -m unittest discover -s scripts/ci -p 'test_*.py'
-      mkdir -p "$out"
-      touch "$out/success"
-    '';
+    pkgs.runCommand "kiva-lrs-oracle-controls"
+      {
+        nativeBuildInputs = [
+          python
+          pkgs.git
+        ];
+      }
+      ''
+        cp -r ${src} source
+        chmod -R u+w source
+        cd source
+        python -B scripts/ci/lrs_generated_artifacts.py generate
+        python -B -m unittest discover -s scripts/ci -p 'test_*.py'
+        mkdir -p "$out"
+        touch "$out/success"
+      '';
 
   conformance-plan =
     let
@@ -733,6 +740,7 @@ in
     let
       python = pkgs.python3.withPackages (pythonPackages: [
         pythonPackages.jsonschema
+        pythonPackages.pyyaml
       ]);
     in
     pkgs.runCommand "kiva-release-evidence-contract"
@@ -1213,9 +1221,16 @@ in
         create_conformance_fixture()
         create_formal_fixture()
         PY
+        if python scripts/ci/validate_release_evidence_set.py \
+          --conformance release-evidence-fixture/conformance \
+          --formal release-evidence-fixture/formal >missing-issued.log 2>&1; then
+          echo "HTTP-only fixture must not satisfy full issued-test release scope" >&2
+          exit 1
+        fi
+        grep -q 'lacks full issued-test execution' missing-issued.log
         python scripts/ci/validate_release_evidence_set.py \
           --conformance release-evidence-fixture/conformance \
-          --formal release-evidence-fixture/formal
+          --formal release-evidence-fixture/formal --allow-static-conformance
         mkdir -p "$out"
         touch "$out/success"
       '';

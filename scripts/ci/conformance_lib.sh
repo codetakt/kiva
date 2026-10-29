@@ -20,6 +20,7 @@ PY
 }
 
 kiva_export_conformance_fixture_env() {
+  export KIVA_XAPI_CERTIFICATE_POLICY="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/tests/conformance/controls/kiva_certificate_policy.json"
   export KIVA_MAX_STATEMENT_BODY_BYTES=4096
   export KIVA_RATE_LIMIT_PATH=/__kiva/conformance/rate-limit
   export KIVA_RATE_LIMIT_REQUEST_COUNT=3
@@ -69,13 +70,11 @@ kiva_wait_for_server() {
 kiva_run_xapi_conformance() {
   local addr="$1"
   local suite_status=0
+  # Build server and runner together once. A later `cargo run -p ...` can
+  # resolve a different feature graph and rebuild while readiness is polled;
+  # it also no longer identifies the already captured binary as the executable.
+  local runner="${CARGO_TARGET_DIR:-target}/release/xapi-lrs-conformance"
   local args=(
-    run
-    --release
-    -q
-    -p
-    xapi-lrs-conformance
-    --
     --endpoint
     "http://${addr}"
     --allow-destructive
@@ -109,7 +108,7 @@ kiva_run_xapi_conformance() {
 
   if [[ -n "${KIVA_CONFORMANCE_JSON_REPORT:-}" ]]; then
     mkdir -p "$(dirname "$KIVA_CONFORMANCE_JSON_REPORT")"
-    if cargo "${args[@]}" --json >"$KIVA_CONFORMANCE_JSON_REPORT"; then
+    if "$runner" "${args[@]}" --json >"$KIVA_CONFORMANCE_JSON_REPORT"; then
       suite_status=0
     else
       suite_status=$?
@@ -135,13 +134,20 @@ for suite in report["suites"]:
 PY
     fi
   else
-    if cargo "${args[@]}"; then
+    if "$runner" "${args[@]}"; then
       suite_status=0
     else
       suite_status=$?
     fi
   fi
   if [[ -n "${KIVA_CONFORMANCE_PROCEDURE_REPORT_ROOT:-}" ]]; then
+    if [[ -n "${KIVA_CONFORMANCE_NATIVE_REPORT_ROOT:-}" ]]; then
+      local native_status=0
+      python3 -B scripts/ci/run_lrs_native_controls.py \
+        --backend "${KIVA_NATIVE_BACKEND:?native backend must be declared}" \
+        --out "$KIVA_CONFORMANCE_NATIVE_REPORT_ROOT" || native_status=$?
+      if [[ "$suite_status" == 0 ]]; then suite_status="$native_status"; fi
+    fi
     local procedure_status=0
     python3 scripts/ci/run_lrs_procedures.py --endpoint "http://${addr}" \
       --runner "${CARGO_TARGET_DIR:-target}/release/xapi-lrs-conformance" \
