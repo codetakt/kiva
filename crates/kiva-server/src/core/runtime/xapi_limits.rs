@@ -155,4 +155,9 @@ impl XapiLimits {
         }
         Ok(())
     }
+
+    #[cfg(test)]
+    pub(crate) const fn clock(&self) -> &RecordingClock {
+        &self.clock
+    }
 }

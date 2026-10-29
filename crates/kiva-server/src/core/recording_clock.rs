@@ -57,6 +57,22 @@ impl RecordingClock {
     pub(crate) fn set(&self, instant: OffsetDateTime) {
         *self.fixed.write().expect("recording clock lock") = Some(instant);
     }
+
+    #[cfg(test)]
+    pub(crate) fn pause_next(
+        &self,
+    ) -> (
+        tokio::sync::oneshot::Receiver<OffsetDateTime>,
+        tokio::sync::oneshot::Sender<()>,
+    ) {
+        let (assigned, received) = tokio::sync::oneshot::channel();
+        let (release, resume) = tokio::sync::oneshot::channel();
+        *self.barrier.lock().expect("recording barrier lock") = Some(RecordingBarrier {
+            assigned,
+            release: resume,
+        });
+        (received, release)
+    }
 }
 
 #[cfg(test)]

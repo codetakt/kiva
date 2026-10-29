@@ -8,14 +8,26 @@ mod admission;
 mod array_boundaries;
 #[path = "xapi_regressions/attachment_boundaries.rs"]
 mod attachment_boundaries;
+#[path = "xapi_regressions/authority.rs"]
+mod authority;
+#[path = "xapi_regressions/document_selectors.rs"]
+mod document_selectors;
+#[path = "xapi_regressions/documents.rs"]
+mod documents;
 #[path = "xapi_regressions/duration_boundaries.rs"]
 mod duration_boundaries;
+#[path = "xapi_regressions/errors.rs"]
+mod errors;
 #[path = "xapi_regressions/evidence.rs"]
 mod evidence;
+#[path = "xapi_regressions/http_transport.rs"]
+mod http_transport;
 #[path = "xapi_regressions/interactions.rs"]
 mod interactions;
 #[path = "xapi_regressions/locators.rs"]
 mod locators;
+#[path = "xapi_regressions/metadata.rs"]
+mod metadata;
 #[path = "xapi_regressions/mime_boundaries.rs"]
 mod mime_boundaries;
 #[path = "xapi_regressions/numeric_boundaries.rs"]
@@ -26,16 +38,34 @@ mod opaque_values;
 mod pagination;
 #[path = "xapi_regressions/person.rs"]
 mod person;
+#[path = "xapi_regressions/preconditions.rs"]
+mod preconditions;
+#[path = "xapi_regressions/producer.rs"]
+mod producer;
+#[path = "xapi_regressions/recording.rs"]
+mod recording;
+#[path = "xapi_regressions/references.rs"]
+mod references;
+#[path = "xapi_regressions/replay.rs"]
+mod replay;
 #[path = "xapi_regressions/representation.rs"]
 mod representation;
+#[path = "xapi_regressions/review_gaps.rs"]
+mod review_gaps;
 #[path = "xapi_regressions/rsa_provider.rs"]
 mod rsa_provider;
+#[path = "xapi_regressions/scope.rs"]
+mod scope;
+#[path = "xapi_regressions/settlement.rs"]
+mod settlement;
 #[path = "xapi_regressions/signatures.rs"]
 mod signatures;
 #[path = "xapi_regressions/substatement_time.rs"]
 mod substatement_time;
 #[path = "xapi_regressions/versions.rs"]
 mod versions;
+#[path = "xapi_regressions/visibility.rs"]
+mod visibility;
 
 #[tokio::test]
 async fn memory_xapi_preserves_nul_strings_and_literal_escapes() -> Result<(), String> {

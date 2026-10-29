@@ -169,6 +169,14 @@ impl StatementRepository {
 }
 
 impl DocumentRepository {
+    #[cfg(test)]
+    pub(crate) const fn clock(&self) -> &crate::core::recording_clock::RecordingClock {
+        match self {
+            Self::Memory(repository) => &repository.clock,
+            Self::Postgres(repository) => &repository.clock,
+        }
+    }
+
     pub(crate) fn postgres(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {
         Ok(Self::Postgres(PostgresDocumentRepository::new(
             pool, tenant_id,

@@ -129,3 +129,37 @@ pub(super) async fn received(mut reply: reqwest::Response) -> Result<reqwest::Re
     *builder.headers_mut().ok_or("response builder headers")? = received_headers;
     Ok(builder.body(body).map_err(|e| e.to_string())?.into())
 }
+
+/// Retain an independently parsed raw socket response before any HTTP client
+/// discards a HEAD payload or decodes a content coding.
+pub(super) fn received_raw(
+    url: &str,
+    status: u16,
+    values: &axum::http::HeaderMap,
+    body: &[u8],
+    wire: &[u8],
+) -> Result<(), String> {
+    let Some(directory) = std::env::var_os("KIVA_NATIVE_HTTP_TRACE") else {
+        return Ok(());
+    };
+    let id = uuid::Uuid::parse_str(
+        values
+            .get(TRACE_ID)
+            .ok_or("raw trace ID")?
+            .to_str()
+            .map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| e.to_string())?;
+    let path = std::path::PathBuf::from(directory).join(format!("{id}.json"));
+    let mut record: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(&path).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
+    let mut received_headers = values.clone();
+    received_headers.remove(TRACE_ID);
+    record["received_response"] = json!({"boundary":"raw TCP HTTP/1.1 bytes, before content decoding; HEAD body is the actual trailing wire bytes", "url":url,"status":status,"headers":headers(&received_headers),"body_hex":hex_lower(body),"wire_hex":hex_lower(wire)});
+    std::fs::write(
+        path,
+        serde_json::to_vec(&record).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| e.to_string())
+}

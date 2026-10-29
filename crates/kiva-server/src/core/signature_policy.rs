@@ -22,6 +22,8 @@ mod der;
 mod provider;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+pub(crate) use tests::name_constraints::integration_cases as name_constraint_cases;
 
 const POLICY_ENV: &str = "KIVA_XAPI_CERTIFICATE_POLICY";
 

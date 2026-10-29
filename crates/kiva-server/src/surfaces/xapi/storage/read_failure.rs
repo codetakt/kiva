@@ -10,6 +10,18 @@ use crate::surfaces::xapi::outcome::StatementStoreError;
 pub(crate) struct ReadFailure(Arc<Mutex<(Option<Uuid>, Vec<Uuid>)>>);
 
 impl ReadFailure {
+    pub(crate) fn arm(&self) -> Uuid {
+        let mut state = self.0.lock().expect("read failure fixture");
+        assert!(state.0.is_none(), "an unconsumed failure is already armed");
+        let id = Uuid::new_v4();
+        state.0 = Some(id);
+        id
+    }
+
+    pub(crate) fn consumed(&self) -> Vec<Uuid> {
+        self.0.lock().expect("read failure fixture").1.clone()
+    }
+
     pub(crate) fn check(&self) -> Result<(), StatementStoreError> {
         let mut state = self.0.lock().expect("read failure fixture");
         if let Some(id) = state.0.take() {
