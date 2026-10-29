@@ -1,0 +1,20 @@
+{
+  "trust_anchors_der": [
+    "MIIC0TCCAbmgAwIBAgIBATANBgkqhkiG9w0BAQsFADAsMSowKAYDVQQDDCFMUlMgQ29uZm9ybWFuY2UgU3ludGhldGljIEZpeHR1cmUwHhcNMjUwMTAxMDAwMDAwWhcNMzUwMTAxMDAwMDAwWjAsMSowKAYDVQQDDCFMUlMgQ29uZm9ybWFuY2UgU3ludGhldGljIEZpeHR1cmUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC+d3gvibKqckMk5S+LmW3AmnNx6V9b55wbmJjXWwYQ/6s+gKLF1P3sK4pUZT1p+inEySAmDU7/qIfKULD15ATw/G+qyd9lmb8jc5+/tYSaOftjT+CU5TcxDC8zjjfaC9R0WxFecanVBumA0Fg9/abKlLMz64+F+DqYy/t12F1uYIcSl8revrlxqu6Ty7pSdYp7gJHjaDNuBIqsV6A/i/i//jRYsfHnVVf1tn6rhQGPQcVOaFVniw1DFva35ExODypcbIMCeywkJ5CknCysNKNhy9dls5BqnJ+0FJ6IeCSKQRgmODd/F4f7mabCoP1EOYLVdyfMrbUYpskL1qgkYldJAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAA634e5xqtwgtUzbGGwP++dOIjoNXnqCJ5RbpEKET/Ee869KORJmdYWIoIXSIQEKTr4un/HdQAWRe/rbzMaZYUuPfxxmM7luUJiRW+3WxUv8EKLwzyyFZHBzM2XiWNdsZ6TVSpq/4VNGu5NpjE6QukUWVmwOzCFmwzMD2DsGwAoQUWNtj8h69xJ9nvhc3bGZ6EgK0Tl6hyYFlIgWt6TOuk/u+9bcxpCTcIMkN/63p1gWMGC5Iix3jcn1/40cfMqWThuHcfYB72s9yqQ9+BS4WK/mqUuU8qAUFli10TvEe0KOcjZAAWQccKMXBJr3nXT8y/zjkpZgHt986NDIgWbo6Ko="
+  ],
+  "intended_service": "integrity-or-non-repudiation",
+  "allowed_extended_key_usages": [],
+  "initial_policy_set": [
+    "2.5.29.32.0"
+  ],
+  "out_of_band_status": [
+    {
+      "certificate_sha256": "9e237a16a8c44242880b95352df81eb75b60e3312ec5ac912c1e5451c04879cf",
+      "issuer_spki_sha256": "eadc018456b60baca0bd8b1199099ec2f6fc1a9b5512e35e96e84a1340033461",
+      "authenticated_source": "Local synthetic test authority; fixed fixture key is public and MUST NOT be trusted in production",
+      "valid_from": "2025-01-01T00:00:00Z",
+      "valid_until": "2035-01-01T00:00:00Z",
+      "status": "good"
+    }
+  ]
+}
