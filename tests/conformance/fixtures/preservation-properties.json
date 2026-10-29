@@ -666,7 +666,7 @@
           }
         ]
       },
-      "preserved": null
+      "preserved": true
     },
     {
       "id": "attachment-extra-description",
@@ -860,7 +860,7 @@
       "id": "duplicate-number-unknown",
       "submitted": "{\"a\":0.1,\"a\":2}",
       "returned": "{\"a\":2,\"a\":0.1}",
-      "outcome": "not-run"
+      "outcome": "passed"
     },
     {
       "id": "duplicate-unknown-does-not-hide-loss",
@@ -1101,19 +1101,19 @@
       "id": "fileUrl-11",
       "key": "fileUrl",
       "value": "https://example.org/file",
-      "outcome": "not-run"
+      "outcome": "passed"
     },
     {
       "id": "fileUrl-12",
       "key": "fileUrl",
       "value": "https://example.org/資料?x=1",
-      "outcome": "not-run"
+      "outcome": "passed"
     },
     {
       "id": "fileUrl-13",
       "key": "fileUrl",
       "value": "http://[Vf.a:b]/file",
-      "outcome": "not-run"
+      "outcome": "passed"
     },
     {
       "id": "fileUrl-14",
@@ -1170,7 +1170,7 @@
       "authority": {
         "mbox": "mailto:%22not%20me%22@example.org"
       },
-      "outcome": "not-run"
+      "outcome": "passed"
     },
     {
       "id": "mbox_sha1sum-0",

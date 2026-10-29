@@ -22,8 +22,14 @@ use time::{Duration, OffsetDateTime, format_description::well_known::Rfc3339};
 use url::Url;
 
 mod assertions;
+mod exact_yaml;
+mod locator;
 mod lossless_json;
+mod mailbox;
 mod media_type;
+#[cfg(test)]
+mod mime_controls;
+mod numeric;
 mod preservation;
 use assertions::Check;
 
@@ -152,6 +158,16 @@ enum EndpointProfileCapability {
     RateLimit(RateLimitEndpointProfile),
     ParameterVocabulary(Vec<ParameterContext>),
     ResourceAbsence(BTreeMap<String, String>),
+    SignatureValidation,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SignatureValidationContext {
+    evidence: String,
+    algorithms: Vec<String>,
+    certificate_signature: String,
+    without_certificate: String,
 }
 
 #[derive(Debug, Clone)]
@@ -187,6 +203,8 @@ struct ParameterContext {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct EndpointProfileConfig {
+    #[serde(default)]
+    signature: Option<SignatureValidationContext>,
     /// Independent evidence for exact case selectors, valid immediately before
     /// that case and maintained throughout it; never inferred from its 404.
     #[serde(default)]
@@ -780,12 +798,8 @@ fn load_suites(paths: &[PathBuf]) -> Result<Vec<LoadedSuite>, Error> {
                 path: path.clone(),
                 source,
             })?;
-            let document = serde_yaml::from_slice::<SuiteDocument>(&bytes).map_err(|source| {
-                Error::ParseYaml {
-                    path: path.clone(),
-                    source,
-                }
-            })?;
+            let document = exact_yaml::from_slice::<SuiteDocument>(&bytes)
+                .map_err(|error| Error::Validation(format!("{}: {error}", path.display())))?;
             Ok(LoadedSuite {
                 path: path.clone(),
                 document,
@@ -1519,12 +1533,18 @@ fn endpoint_profile_capability(
     name: &str,
     config: &EndpointProfileConfig,
 ) -> Result<EndpointProfileCapability, Error> {
+    if name != "signature-validation-context" && config.signature.is_some() {
+        return Err(Error::Validation(
+            "signature context belongs only to signature-validation-context".into(),
+        ));
+    }
     if name != "declared-resource-absence" && !config.case_evidence.is_empty() {
         return Err(Error::Validation(
             "case_evidence is only valid for declared-resource-absence".into(),
         ));
     }
     match name {
+        "signature-validation-context" => endpoint_profile_signature(path, config),
         "declared-resource-absence" => {
             if config.case_evidence.is_empty()
                 || config
@@ -1593,6 +1613,42 @@ fn endpoint_profile_capability(
             path.display()
         ))),
     }
+}
+
+fn endpoint_profile_signature(
+    path: &Path,
+    config: &EndpointProfileConfig,
+) -> Result<EndpointProfileCapability, Error> {
+    let name = "signature-validation-context";
+    let signature = config.signature.as_ref().ok_or_else(|| {
+        Error::Validation(
+            "signature context requires independent evidence and explicit verification policy"
+                .into(),
+        )
+    })?;
+    if signature.evidence.trim().is_empty()
+        || signature.algorithms != ["RS256", "RS384", "RS512"]
+        || signature.certificate_signature != "verify-supplied-x5c"
+        || signature.without_certificate != "accept-without-cryptographic-verification"
+    {
+        return Err(Error::Validation("signature context must cover RS256/384/512, supplied-x5c verification and the no-certificate branch".into()));
+    }
+    reject_endpoint_profile_fields(
+        path,
+        name,
+        &[
+            ("contexts", !config.contexts.is_empty()),
+            (
+                "max_request_body_bytes",
+                config.max_request_body_bytes.is_some(),
+            ),
+            ("probe_body_bytes", config.probe_body_bytes.is_some()),
+            ("request_count", config.request_count.is_some()),
+            ("window_seconds", config.window_seconds.is_some()),
+            ("path", config.path.is_some()),
+        ],
+    )?;
+    Ok(EndpointProfileCapability::SignatureValidation)
 }
 
 fn endpoint_profile_too_large(
@@ -2327,7 +2383,13 @@ async fn execute_http_request_once(
             .request(method.clone(), request_url.clone())
             .headers(headers.clone());
         if let Some(body) = &request.body {
-            request_builder = request_builder.json(body);
+            // Serialize with the same lossless JSON implementation that loaded
+            // the definition. Reqwest's separate JSON dependency is binary64.
+            if !headers.contains_key(reqwest::header::CONTENT_TYPE) {
+                request_builder =
+                    request_builder.header(reqwest::header::CONTENT_TYPE, "application/json");
+            }
+            request_builder = request_builder.body(body.to_string());
         } else if let Some(raw_body) = &request.raw_body {
             request_builder = request_builder.body(raw_body.clone());
         } else if let Some(hex) = &request.raw_body_hex {
@@ -2513,7 +2575,7 @@ async fn evaluate_statement_pages(
             failures.push("StatementResult page did not return 200".into());
             return (failures, false);
         }
-        let document: Value = match serde_json::from_slice(&bytes) {
+        let document: Value = match lossless_json::value_from_slice(&bytes) {
             Ok(value) => value,
             Err(error) => {
                 failures.push(format!("invalid StatementResult page JSON: {error}"));
@@ -2747,7 +2809,7 @@ fn submitted_statements(request: &RequestSpec, headers: &HeaderMap) -> Option<Va
     let kind = headers.get("Content-Type")?.to_str().ok()?;
     match media_type::parse_http(kind).ok()?.essence.as_str() {
         "multipart/mixed" => assertions::multipart_document(headers, &bytes, &[]).ok(),
-        "application/json" => serde_json::from_slice(&bytes).ok(),
+        "application/json" => lossless_json::value_from_slice(&bytes).ok(),
         _ => None,
     }
 }
@@ -2769,7 +2831,7 @@ fn retrieved_document(headers: &HeaderMap, bytes: &[u8]) -> Option<Value> {
     {
         assertions::multipart_document(headers, bytes, &[]).ok()
     } else {
-        serde_json::from_slice(bytes).ok()
+        lossless_json::value_from_slice(bytes).ok()
     }
 }
 
@@ -2819,7 +2881,7 @@ fn remember_submitted_ids(
         }
     }
     if request.method == "POST"
-        && let Ok(Value::Array(ids)) = serde_json::from_slice(response)
+        && let Ok(Value::Array(ids)) = lossless_json::value_from_slice(response)
     {
         for id in ids.iter().filter_map(Value::as_str) {
             state.known_statement_ids.insert(canonical_statement_id(id));
@@ -3253,7 +3315,8 @@ fn add_endpoint_profile_captures(
             .ok_or_else(|| format!("endpoint profile {profile} was not supplied"))?;
         match capability {
             EndpointProfileCapability::ParameterVocabulary(_)
-            | EndpointProfileCapability::ResourceAbsence(_) => {}
+            | EndpointProfileCapability::ResourceAbsence(_)
+            | EndpointProfileCapability::SignatureValidation => {}
             EndpointProfileCapability::TooLarge(profile) => {
                 captures.insert(
                     ENDPOINT_CAPTURE_TOO_LARGE_BODY.to_owned(),
@@ -3502,7 +3565,7 @@ fn evaluate_body(
     if expectation.json.is_none() && !captures_json_body(expectation) {
         return failures;
     }
-    let body = match serde_json::from_slice::<Value>(body_bytes) {
+    let body = match lossless_json::value_from_slice(body_bytes) {
         Ok(body) => body,
         Err(error) => {
             failures.push(format!("expected JSON response body: {error}"));
@@ -3749,6 +3812,332 @@ fn calculate_totals(suites: &[SuiteReport]) -> Totals {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::Value;
+    #[test]
+    fn signature_context_requires_its_complete_declared_policy() {
+        let text = include_str!("../../../spec/conformance/endpoint-profile.example.yaml");
+        for invalid in [
+            "valid",
+            "missing",
+            "evidence",
+            "algorithms",
+            "certificate",
+            "without",
+            "other-profile",
+        ] {
+            let mut document: super::EndpointProfileDocument =
+                serde_yaml::from_str(text).expect("example profile");
+            let config = document
+                .profiles
+                .get_mut("signature-validation-context")
+                .expect("signature context");
+            if invalid == "missing" {
+                config.signature = None;
+            } else {
+                let signature = config.signature.as_mut().expect("signature policy");
+                match invalid {
+                    "evidence" => signature.evidence.clear(),
+                    "algorithms" => {
+                        signature.algorithms.pop();
+                    }
+                    "certificate" => signature.certificate_signature = "skip".into(),
+                    "without" => signature.without_certificate = "verified".into(),
+                    _ => {}
+                }
+            }
+            if invalid == "other-profile" {
+                let moved = config.signature.take();
+                document
+                    .profiles
+                    .get_mut(super::ENDPOINT_PROFILE_TOO_LARGE)
+                    .expect("threshold")
+                    .signature = moved;
+            }
+            assert_eq!(
+                super::EndpointProfile::from_document(std::path::Path::new("fixture"), document)
+                    .is_ok(),
+                invalid == "valid",
+                "{invalid}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn yaml_decimal_tokens_reach_wire_and_exact_response_comparisons() {
+        use std::io::{Read, Write};
+        for mutation in [false, true] {
+            let case: super::TestCase = super::exact_yaml::from_slice(
+                br"
+id: exact-wire
+requirements: [number]
+safety: {destructive: false, requires_isolated_lrs: false}
+request:
+  method: POST
+  path: /fixture
+  body: {number: 0.10000000000000000001}
+expect:
+  status: 200
+  json:
+    pointers:
+      /number: {equals: 0.10000000000000000001}
+",
+            )
+            .expect("exact definition");
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("listener");
+            let address = listener.local_addr().expect("address");
+            let responder = std::thread::spawn(move || {
+                let (mut stream, _) = listener.accept().expect("request");
+                stream
+                    .set_read_timeout(Some(std::time::Duration::from_secs(5)))
+                    .expect("timeout");
+                let mut bytes = Vec::new();
+                let (head, length) = loop {
+                    let mut buf = [0; 4096];
+                    let count = stream.read(&mut buf).expect("wire bytes");
+                    assert!(count > 0);
+                    bytes.extend_from_slice(&buf[..count]);
+                    if let Some(offset) = bytes.windows(4).position(|window| window == b"\r\n\r\n")
+                    {
+                        let headers = String::from_utf8_lossy(&bytes[..offset]);
+                        let length: usize = headers
+                            .lines()
+                            .find_map(|line| {
+                                line.to_ascii_lowercase()
+                                    .strip_prefix("content-length: ")
+                                    .map(str::to_owned)
+                            })
+                            .expect("length")
+                            .parse()
+                            .expect("integer length");
+                        break (offset + 4, length);
+                    }
+                };
+                while bytes.len() < head + length {
+                    let mut buf = [0; 4096];
+                    let count = stream.read(&mut buf).expect("body bytes");
+                    assert!(count > 0);
+                    bytes.extend_from_slice(&buf[..count]);
+                }
+                let body = std::str::from_utf8(&bytes[head..head + length]).expect("JSON text");
+                assert_eq!(body, r#"{"number":0.10000000000000000001}"#);
+                let response = if mutation { r#"{"number":0.1}"# } else { body };
+                stream
+                    .write_all(
+                        control_response(
+                            200,
+                            "Content-Type: application/json\r\n",
+                            response,
+                            false,
+                        )
+                        .as_bytes(),
+                    )
+                    .expect("response");
+            });
+            let report = super::execute_case(
+                &reqwest::Client::new(),
+                &url::Url::parse(&format!("http://{address}")).expect("endpoint"),
+                &BTreeMap::new(),
+                &BTreeMap::new(),
+                None,
+                false,
+                case,
+            )
+            .await;
+            responder.join().expect("responder");
+            assert_eq!(
+                report.outcome,
+                if mutation {
+                    super::CaseOutcome::Failed
+                } else {
+                    super::CaseOutcome::Passed
+                }
+            );
+            assert!(report.unresolved_checks.is_empty());
+        }
+    }
+
+    #[tokio::test]
+    async fn exact_numbers_reach_every_json_predicate() {
+        for (before, after, equal) in [
+            ("1", "1.0", true),
+            ("1", "1.0000000000000001", false),
+            ("9007199254740992", "9007199254740993", false),
+            ("-9007199254740992", "-9007199254740993", false),
+            ("9223372036854775807", "9223372036854775808", false),
+            ("18446744073709551615", "18446744073709551616", false),
+            ("1e400", "10e399", true),
+            ("1e-400", "1.0000000000000001e-400", false),
+        ] {
+            let original: Value = serde_json::from_str(before).expect("original decimal");
+            let returned: Value = serde_json::from_str(after).expect("returned decimal");
+            for operation in ["equals", "not_equals", "contains", "not_contains"] {
+                for object_subset in [false, true] {
+                    let (expected, actual) = if object_subset {
+                        (
+                            serde_json::json!({"group":{"member":[{"n":original}]}}),
+                            serde_json::json!({"group":{"member":[{"n":returned}]},"other":true}),
+                        )
+                    } else if operation.ends_with("contains") {
+                        (
+                            original.clone(),
+                            serde_json::json!([returned, "two", false]),
+                        )
+                    } else {
+                        (
+                            serde_json::json!([original, "two", false]),
+                            serde_json::json!([returned, "two", false]),
+                        )
+                    };
+                    let matches = equal && (!object_subset || operation.ends_with("contains"));
+                    let expected_pass = matches != operation.starts_with("not_");
+                    let report=response_control(serde_json::json!({"method":"GET","path":"/numeric"}),
+                        serde_json::json!({"status":200,"json":{"pointers":{"/value":{operation:expected}}}}),
+                        vec![control_response(200,"Content-Type: application/json\r\n",&serde_json::json!({"value":actual}).to_string(),false)]).await;
+                    assert_eq!(
+                        report.outcome,
+                        if expected_pass {
+                            super::CaseOutcome::Passed
+                        } else {
+                            super::CaseOutcome::Failed
+                        },
+                        "{before}/{after}/{operation}/subset={object_subset}"
+                    );
+                    assert!(report.unresolved_checks.is_empty());
+                }
+            }
+            let report=response_control(serde_json::json!({"method":"GET","path":"/numeric"}),
+                serde_json::json!({"status":200,"checks":[{"kind":"json-shape","pointer":"/value","shape":{"type":"number","enum":[original]}}]}),
+                vec![control_response(200,"Content-Type: application/json\r\n",&serde_json::json!({"value":returned}).to_string(),false)]).await;
+            assert_eq!(
+                report.outcome,
+                if equal {
+                    super::CaseOutcome::Passed
+                } else {
+                    super::CaseOutcome::Failed
+                }
+            );
+            assert!(report.unresolved_checks.is_empty());
+        }
+    }
+
+    #[tokio::test]
+    async fn numeric_unknown_membership_keeps_independent_witnesses() {
+        for (body, operation, expected, outcome) in [
+            (
+                r#"{"value":[1e9223372036854775808,1]}"#,
+                "contains",
+                serde_json::json!(1),
+                super::CaseOutcome::Passed,
+            ),
+            (
+                r#"{"value":[1e9223372036854775808,1]}"#,
+                "contains",
+                serde_json::json!(2),
+                super::CaseOutcome::NotRun,
+            ),
+            (
+                r#"{"value":[1e9223372036854775808,1]}"#,
+                "not_contains",
+                serde_json::json!(1),
+                super::CaseOutcome::Failed,
+            ),
+            (
+                r#"{"value":{"a":1e9223372036854775808,"z":"changed"}}"#,
+                "equals",
+                serde_json::json!({"a":1,"z":"original"}),
+                super::CaseOutcome::Failed,
+            ),
+        ] {
+            let report=response_control(serde_json::json!({"method":"GET","path":"/numeric"}),serde_json::json!({"status":200,"json":{"pointers":{"/value":{operation:expected}}}}),vec![control_response(200,"Content-Type: application/json\r\n",body,false)]).await;
+            assert_eq!(report.outcome, outcome);
+        }
+    }
+
+    #[tokio::test]
+    async fn exact_numeric_json_capture_survives_followup_and_refuses_unavailable_tokens() {
+        for changed in [false, true] {
+            let source = r#"{"value":[1.0000000000000001,"two",false]}"#;
+            let returned = if changed {
+                r#"{"value":[1.0,"two",false]}"#
+            } else {
+                source
+            };
+            let case = serde_json::json!({"id":"exact-capture","requirements":["fixture"],"safety":{"destructive":false,"requires_isolated_lrs":false},"steps":[
+                {"id":"capture","request":{"method":"GET","path":"/capture"},"expect":{"status":200,"capture":{"exact":{"pointer":"/value","as_json":true}}}},
+                {"id":"followup","request":{"method":"GET","path":"/followup","query":{"original":"{{exact}}"}},"expect":{"status":200,"checks":[{"kind":"json-capture-equal","pointer":"/value","capture":"exact"}]}}
+            ]});
+            let (report, paths) = routed_case_control(
+                "",
+                case,
+                vec![
+                    control_response(200, "Content-Type: application/json\r\n", source, false),
+                    control_response(200, "Content-Type: application/json\r\n", returned, false),
+                ],
+            )
+            .await;
+            assert_eq!(
+                report.outcome,
+                if changed {
+                    super::CaseOutcome::Failed
+                } else {
+                    super::CaseOutcome::Passed
+                }
+            );
+            assert!(report.unresolved_checks.is_empty());
+            let query = url::Url::parse(&format!("http://fixture{}", paths[1]))
+                .expect("URL")
+                .query_pairs()
+                .into_owned()
+                .collect::<BTreeMap<_, _>>();
+            assert_eq!(query["original"], r#"[1.0000000000000001,"two",false]"#);
+        }
+        let expect:super::ResponseExpectation=serde_json::from_value(serde_json::json!({"status":200,"capture":{"exact":{"pointer":"/value","as_json":true}}})).expect("expectation");
+        let body: Value = serde_json::from_str(r#"{"value":1e9223372036854775808}"#)
+            .expect("valid JSON outside adapter range");
+        let mut captures = BTreeMap::new();
+        let errors = super::capture_json_values(&expect, &body, &mut captures);
+        assert!(errors.iter().any(|e| e.starts_with("ORACLE-UNAVAILABLE:")));
+        assert!(captures.is_empty());
+    }
+
+    #[tokio::test]
+    async fn mime_length_exact_decimal_and_independent_type_checks() {
+        for (length, data, valid) in [
+            ("3", "abc", true),
+            ("3.0", "abc", true),
+            ("3.0000000000000001", "abc", false),
+            ("21.0", "123456789012345678901", true),
+        ] {
+            for media in ["text/plain", "application/octet-stream"] {
+                use sha2::Digest as _;
+                let digest = format!("{:x}", sha2::Sha256::digest(data.as_bytes()));
+                let body = format!(
+                    "--numeric\r\nContent-Type: application/json\r\n\r\n{{\"attachments\":[{{\"sha2\":\"{digest}\",\"length\":{length},\"contentType\":\"text/plain\"}}]}}\r\n--numeric\r\nContent-Type: {media}\r\nContent-Transfer-Encoding: binary\r\nX-Experience-API-Hash: {digest}\r\n\r\n{data}\r\n--numeric--\r\n"
+                );
+                let report = response_control(
+                    serde_json::json!({"method":"GET","path":"/mime"}),
+                    serde_json::json!({"status":200,"checks":[{"kind":"multipart"}]}),
+                    vec![control_response(
+                        200,
+                        "Content-Type: multipart/mixed; boundary=numeric\r\n",
+                        &body,
+                        false,
+                    )],
+                )
+                .await;
+                assert_eq!(
+                    report.outcome,
+                    if valid && media == "text/plain" {
+                        super::CaseOutcome::Passed
+                    } else {
+                        super::CaseOutcome::Failed
+                    }
+                );
+                assert!(report.unresolved_checks.is_empty());
+            }
+        }
+    }
+
     async fn response_control(
         request: serde_json::Value,
         expect: serde_json::Value,
@@ -7142,6 +7531,37 @@ headers:
         );
         assert!(super::template_variables("{{learner").is_err());
         assert!(super::render_template("{{missing}}", &captures).is_err());
+    }
+    #[tokio::test]
+    async fn delegated_time_definitions_keep_actual_http_defects_and_empty_date_gaps() {
+        use super::CaseOutcome::{Failed, NotRun};
+        for (body, check, expected) in [
+            (
+                serde_json::json!({"timestamp":"2025-01-01T09:00:00+09:00"}),
+                serde_json::json!({"kind":"json-time","pointer":"/timestamp","expected":"2016-12-31T23:59:60Z","utc":true}),
+                Failed,
+            ),
+            (
+                serde_json::json!({"timestamp":"2025-01-01T00:00:00Z","stored":"2025-01-02T00:00:00Z"}),
+                serde_json::json!({"kind":"json-time","pointer":"/timestamp","expected":"2016-12-31T23:59:60Z","equals_pointer":"/stored"}),
+                Failed,
+            ),
+            (
+                serde_json::json!({"timestamp":"2025-01-01T00:00:00Z"}),
+                serde_json::json!({"kind":"json-time","pointer":"/timestamp","expected":"2016-12-31T23:59:60Z","utc":true}),
+                NotRun,
+            ),
+            (
+                serde_json::json!({"statements":[]}),
+                serde_json::json!({"kind":"header-time","header":"Last-Modified","max_pointer":"/statements","optional_if_empty":true}),
+                NotRun,
+            ),
+        ] {
+            let report=response_control(serde_json::json!({"method":"GET","path":"/probe"}),
+                serde_json::json!({"status":200,"checks":[check]}),
+                vec![control_response(200,"Content-Type: application/json\r\nLast-Modified: Wed, 01 Jan 2025 00:00:00 GMT\r\n",&body.to_string(),false)]).await;
+            assert_eq!(report.outcome, expected, "{report:?}");
+        }
     }
 }
 

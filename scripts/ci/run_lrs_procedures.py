@@ -21,7 +21,7 @@ import time
 import uuid
 from email.parser import BytesParser
 from pathlib import Path
-from urllib.parse import urlencode, urlsplit, urljoin
+from urllib.parse import urlencode, urlsplit, urljoin, quote
 
 import yaml
 
@@ -41,7 +41,7 @@ def utc():
 
 
 def compact(value):
-    return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+    return dump_json_members(value)
 
 
 def sha(path):
@@ -57,7 +57,8 @@ def ptr(value, pointer):
 
 from lrs_preservation import (preservation, timestamp_preserved, timestamp_ns, timestamp_pair, PrimitiveUnavailable,
     statement_response_headers, agent_identity_equal, snapshot_equal, all_decisions,
-    load_json_members, iri_reference_valid, mailbox_structure, agent_validity, canonical_statement_id, standard_uuid)
+    load_json_members, iri_reference_valid, mailbox_structure, agent_validity, canonical_statement_id, standard_uuid,
+    locator_validity, dump_json_members, load_yaml_numbers)
 
 
 def response_http_date(value):
@@ -132,6 +133,7 @@ class Executor:
     def http(self, method, path, query=None, body=None, headers=None, raw=None, continuation=None, retain_partial=False, expected_statuses=None, continuation_base=None):
         request_headers = dict(self.headers)
         request_headers.update(headers or {})
+        request_headers={key:value for key,value in request_headers.items() if value is not None}
         data = raw if raw is not None else compact(body).encode() if body is not None else None
         endpoint=urlsplit(self.args.endpoint)
         dest=endpoint._replace(path=endpoint.path.rstrip('/')+path,
@@ -145,8 +147,14 @@ class Executor:
             origin=lambda u:(u.scheme,u.hostname,u.port or (443 if u.scheme=='https' else 80))
             if origin(dest)!=origin(endpoint):
                 raise ValueError('continuation needs separate destination/credential capability')
-        target=(dest.path or '/')+('?' + dest.query if dest.query else '')
-        response_url=dest._replace(fragment='').geturl()
+        resolved_iri=dest._replace(fragment='').geturl()
+        # RFC3987 UTF-8 mapping is separate from reference resolution and
+        # identifier equality. Preserve existing percent octets and reserved
+        # delimiters; the HTTP request target cannot contain raw Unicode.
+        mapped_path=quote(dest.path or '/',safe="%/:@!$&'()*+,;=-._~")
+        mapped_query=quote(dest.query,safe="%/?@:!$&'()*+,;=-._~")
+        target=mapped_path+('?' + mapped_query if mapped_query else '')
+        response_url=dest._replace(path=mapped_path,query=mapped_query,fragment='').geturl()
         connection=(http.client.HTTPSConnection if endpoint.scheme=='https' else http.client.HTTPConnection)(endpoint.hostname,endpoint.port,timeout=30)
         before=utc()
         connection.request(method,target,body=data,headers=request_headers)
@@ -185,7 +193,7 @@ class Executor:
                 self.check('response-'+str(self.ordinal+1)+'-json-object',isinstance(reply['json'],dict),
                     'Successful JSON resource response must be an object; malformed complete bodies are target violations')
         self.ordinal+=1
-        evidence={'ordinal':self.ordinal,'procedure':self.current,'request':{'method':method,'path':path,'query':query or {},'continuation':continuation,'headers':{k:('[private]' if k.lower()=='authorization' else v) for k,v in request_headers.items()},'body_hex':(data or b'').hex()},'response':reply}
+        evidence={'ordinal':self.ordinal,'procedure':self.current,'request':{'method':method,'path':path,'query':query or {},'continuation':continuation,'resolved_iri':resolved_iri,'wire_target':target,'headers':{k:('[private]' if k.lower()=='authorization' else v) for k,v in request_headers.items()},'body_hex':(data or b'').hex()},'response':reply}
         with (self.out/'http.jsonl').open('a') as f:f.write(compact(evidence)+'\n')
         connection.close()
         return Reply(reply)
@@ -215,7 +223,7 @@ class Executor:
         return result
 
     def read(self, body, **query):
-        return self.http('GET','/statements',{'statementId':body['id'],**query}, expected_statuses=(200,404))
+        return self.http('GET','/statements',{'statementId':body['id'],**{k:v for k,v in query.items() if v is not None}}, expected_statuses=(200,404))
 
     def statement_headers(self, reply, label):
         """Keep mandatory header failures on every observation, including pending 404."""
@@ -229,7 +237,8 @@ class Executor:
     def read_visible(self, body, admission, **query):
         reply=self._read_visible(body,admission,**query)
         if reply is None:
-            self.check('visibility-'+body['id']+'-dependent-checks',None,
+            self.check('visibility-'+body['id']+'-'+(query.get('format') or 'default')
+                +'-'+str(self.visibility_ordinal)+'-dependent-checks',None,
                 'Positive read precondition not established; dependent observations were not executed. Earlier FAILs remain.')
         return reply
 
@@ -242,7 +251,8 @@ class Executor:
         assertion failure or mandatory error-header failure is retried.
         Negative reads (voided or rejected) must use read(), without this helper.
         """
-        label='visibility-'+body['id']+'-'+query.get('format','exact')
+        self.visibility_ordinal=getattr(self,'visibility_ordinal',0)+1
+        label='visibility-'+body['id']+'-'+(query.get('format') or 'default')+'-'+str(self.visibility_ordinal)
         identifier=canonical_statement_id(body['id'])
         if identifier in self.voided_statement_ids:
             self.check(label,None,'Known voided target requires an explicit negative read(), not a positive visibility wait')
@@ -254,9 +264,11 @@ class Executor:
         if type(window) is not int or not 0 <= window <= 60000:
             raise ValueError('statement_visibility_timeout_ms must be an integer from 0 to 60000 (harness bound only)')
         deadline=time.monotonic()+window/1000
+        attempt=0
         while True:
+            attempt+=1
             reply=self.read(body,**query)
-            if self.statement_headers(reply,label) is False:return None
+            if self.statement_headers(reply,label+'-attempt-'+str(attempt)) is False:return None
             if reply['status']==404 and identifier in self.visible_statements:
                 stored=self.visible_statements[identifier]
                 headers={name.lower():value for name,value in reply['headers'].items()}
@@ -417,8 +429,15 @@ class Executor:
 
     def person(self):
         examples={'mbox':'mailto:unknown-'+str(uuid.uuid4())+'@example.org','mbox_sha1sum':'0123456789abcdef0123456789abcdef01234567','openid':self.prefix+'/openid','account':{'homePage':self.prefix+'/account','name':'learner'}}
+        inventories=self.fixture.get('person_inventories',{})
         for field,value in examples.items():
-            reply=self.http('GET','/agents',{'agent':compact({field:value})}, expected_statuses=(200,))
+            inventory=inventories.get(field) if isinstance(inventories,dict) else None
+            requested=inventory.get('queried') if isinstance(inventory,dict) else {field:value}
+            if not isinstance(requested,dict) or field not in requested:
+                self.check(field+'-inventory-query',None,'Fixture lacks the declared queried IFI')
+                continue
+            value=requested[field]
+            reply=self.http('GET','/agents',{'agent':compact(requested)}, expected_statuses=(200,))
             got=reply['json']
             self.check(field+'-person',isinstance(got,dict) and got.get('objectType')=='Person',
                 'The returned Person must have objectType Person')
@@ -447,11 +466,18 @@ class Executor:
                 elif key=='mbox_sha1sum':valid=re.fullmatch(r'[0-9a-fA-F]{40}',item) is not None
                 elif key=='openid':valid=syntax.get((item,True))
                 else:
-                    # DC-IRL needs locator evidence even when generic IRI syntax passes.
-                    valid=False if syntax.get((item['homePage'],False)) is False else None
+                    valid=all_decisions([syntax.get((item['homePage'],False)),
+                        locator_validity(item['homePage'],self.fixture.get('locator_evidence'))])
                 self.check(field+'-'+key+'-'+str(index),valid,'All entries: field types plus DC-MAILTO/DC-IRL; None is an unavailable semantic adapter, never valid')
-        self.check('full-external-grammar',None,'Bounded ASCII mailto and generic URI/IRI grammar only; encoded mailto and locator evidence remain concrete DC-MAILTO/DC-IRL obligations')
-        self.check('person-association-inventory',None,'Partial executor checks presence and syntax only. Independently controlled no-additional-information and Agent association inventories require the manual person-semantic-identifiers procedure; random identifiers do not establish fallback applicability.')
+            if inventory is not None:
+                from lrs_person import person_associations
+                for check in person_associations(requested,got,inventory):
+                    self.check(field+'-'+check['id'],check['valid'],check['reason'],check['details'])
+        # RFC6068 component syntax is now evaluated for every mbox above.
+        # Unknown locator mechanisms retain their own NOT-RUN observation;
+        # the previous unconditional grammar gap no longer describes this code.
+        if not isinstance(inventories,dict) or set(examples)-set(inventories):
+            self.check('person-association-inventory',None,'Partial executor checks presence and syntax only. Independently controlled no-additional-information and Agent association inventories require the manual person-semantic-identifiers procedure; random identifiers do not establish fallback applicability.')
 
     def metadata(self, language=False):
         if not self.fixture.get('canonical_submitted_fixture'):
@@ -489,25 +515,40 @@ class Executor:
             if reply['status']==400:
                 # Assessment of actual exact responses is retained for semantic review.
                 known=reply['json'].get('message',reply['json'].get('error','')) if isinstance(reply['json'],dict) else text
-                valid=known in ['unsupported xAPI version','xAPI version is unsupported','unsupported X-Experience-API-Version','X-Experience-API-Version must be 2.0 or 2.0.0'] or known=='Unsupported request version '+version
+                # This exact response identifies the version header, the accepted
+                # 2.0 family and the unsupported/malformed cause. Unknown prose
+                # still needs semantic review; a substring is not evidence.
+                valid=known in ['unsupported xAPI version','xAPI version is unsupported','unsupported X-Experience-API-Version','X-Experience-API-Version must be 2.0 or 2.0.0',
+                    'X-Experience-API-Version must be 2.0 or a normal 2.0.x version; the requested version is unsupported or malformed'] or known=='Unsupported request version '+version
                 self.check(version+'-rejection-explanation',True if valid else None,'Known exact message describes unsupported version; other response needs semantic review',{'message':known})
             elif version.startswith('2.'):
                 self.check(version+'-rejection',False,'2.1.0 or later must reject')
             else:self.check(version+'-prior-conformance',None,'Accepted older-version request requires that routed version\'s complete Suite; status alone is insufficient',{'status':reply['status']})
 
     def precision(self):
+        timestamps=['2025-01-01T09:00:00+09:00','2025-01-01T09:00:00.123+09:00',
+                    '2025-01-01T09:00:00.123456+09:00','2025-01-01T09:00:00.123500+09:00',
+                    '2025-01-01T09:00:00.123456789012+09:00',
+                    '1969-12-31T23:59:59.999999999999Z',
+                    '2024-12-31T23:59:59.999999999999Z']
         for nested in [False,True]:
-            for timestamp in ['2025-01-01T09:00:00.123+09:00','2025-01-01T09:00:00.123456+09:00']:
-                body=self.statement(timestamp=timestamp)
-                if nested:
-                    sub=copy.deepcopy(body);sub.pop('id');body=self.statement(object={'objectType':'SubStatement',**sub})
-                admission=self.store(body);reply=self.read_visible(body,admission)
-                if reply is None:continue
-                try:
-                    got=ptr(reply['json'],'/object/timestamp' if nested else '/timestamp')
-                    ok=timestamp_preserved(timestamp, got)
-                except (KeyError,TypeError,ValueError):ok=False
-                self.check(('sub-' if nested else 'top-')+timestamp,ok,'At least millisecond instant precision and UTC, permitted higher precision rounding/truncation')
+            for method in ('PUT','POST'):
+                for timestamp in timestamps:
+                    body=self.statement(timestamp=timestamp)
+                    if nested:
+                        sub=copy.deepcopy(body);sub.pop('id');body=self.statement(object={'objectType':'SubStatement',**sub})
+                    admission=self.http(method,'/statements',{'statementId':body['id']} if method=='PUT' else {},
+                        body if method=='PUT' else [body],expected_statuses=(204,) if method=='PUT' else (200,))
+                    reply=self.read_visible(body,admission)
+                    if reply is None:continue
+                    got=None
+                    try:
+                        got=ptr(reply['json'],'/object/timestamp' if nested else '/timestamp')
+                        ok=timestamp_preserved(timestamp,got)
+                    except (KeyError,TypeError,ValueError):ok=False
+                    self.check(('sub-' if nested else 'top-')+method+'-'+timestamp,ok,
+                        'Independent decimal instant/precision relation, UTC, permitted truncation or rounding; zero/3/6/12 digits, tie and second/day/epoch carries',
+                        {'submitted':timestamp,'returned':got})
 
     def duplicate(self):
         self.check('all-excluded-property-and-delayed-visibility-variants',None,'Finite immutable mutation only; every excluded-property duplicate and delayed fixture remains open')
@@ -581,38 +622,65 @@ class Executor:
         self.check('all-ids-nested-identifying-values',None,'This direct procedure checks legal keys; automatic json-shape controls supply inner member assertions; full combined rubric is not closed')
 
     def tables(self):
-        files=[ROOT/'tests/conformance/http/generated/tables.yaml',ROOT/'tests/conformance/http/generated/values.yaml']
-        tested=0
-        for file in files:
-            if not file.exists():continue
-            for case in yaml.load(file.read_text(),Loader=yaml.CSafeLoader)['cases']:
-                first=case.get('steps',[case])[0]
-                req=first['request'];exp=first['expect']
-                if req['path']!='/statements' or not isinstance(req.get('body'),dict) or exp.get('status') not in [200,204]:continue
-                body=copy.deepcopy(req['body']);identifier=str(uuid.uuid4());body['id']=identifier
-                query={'statementId':identifier} if req['method']=='PUT' else {}
-                reply=self.http(req['method'],req['path'],query,body, expected_statuses=(exp['status'],))
-                self.check(case['id']+'-acceptance',reply['status'] in [200,204],'Required acceptance vector')
-                if reply['status'] not in [200,204]:continue
-                visible=self.read_visible(body,reply)
-                if visible is None:continue
-                returned=visible['json'];obs=preservation(body,returned)
-                if isinstance(returned,dict):
-                    for key in ['id','stored','timestamp','authority','version']:
-                        valid=key in returned and (isinstance(returned[key],dict) if key=='authority' else isinstance(returned[key],str))
-                        if key in ['stored','timestamp'] and valid:
-                            try:timestamp_ns(returned[key])
-                            except PrimitiveUnavailable:valid=None
-                            except (ValueError,TypeError):valid=False
-                        if key=='id' and valid:
-                            try:uuid.UUID(returned[key])
-                            except ValueError:valid=False
-                        obs.append({'pointer':'/'+key,'outcome':'not-run' if valid is None else 'passed' if valid else 'failed','rule':'required returned field type; combined date/time and delegated capability boundary'})
-                with (self.out/'preservation.jsonl').open('a') as f:f.write(compact({'case':case['id'],'observations':obs})+'\n')
-                self.check(case['id']+'-preservation',False if any(o['outcome']=='failed' for o in obs) else None if any(o['outcome']=='not-run' for o in obs) else True,'Every submitted pointer walked; see preservation.jsonl')
-                tested+=1
-        self.check('coverage',True,details={'accepted_vectors_read':tested})
-        self.check('omission-post-batches-two-attachment-raw-parts',None,'Omissions, all repeated POST batches, and both distinct attachment multipart fixtures remain an explicit separate rubric gap')
+        from lrs_table_vectors import accepted_vectors, statement_template, write_payload
+        selected=[]
+        for case,request,source in accepted_vectors(ROOT):
+            original,envelope=statement_template(request)
+            selected.append(case)
+            for method in ('PUT','POST'):
+                bodies=[copy.deepcopy(original) for _ in range(2 if method=='POST' else 1)]
+                identifiers=[str(uuid.uuid4()) for _ in bodies]
+                for body,identifier in zip(bodies,identifiers):
+                    if 'id' in original:body['id']=identifier
+                sent=bodies if method=='POST' else bodies[0]
+                label=case+'-'+method
+                reply=self.http(method,'/statements',{'statementId':identifiers[0]} if method=='PUT' else {},
+                    expected_statuses=(200,) if method=='POST' else (204,),**write_payload(sent,envelope))
+                accepted=reply['status']==(200 if method=='POST' else 204)
+                self.check(label+'-acceptance',accepted,'Required accepted table vector; original omissions retained',source)
+                if not accepted:continue
+                if method=='POST':
+                    ids=reply['json']
+                    valid=(isinstance(ids,list) and len(ids)==len(bodies) and all(standard_uuid(i) for i in ids)
+                           and len({canonical_statement_id(i) for i in ids})==len(ids))
+                    if 'id' in original:valid=valid and ids==identifiers
+                    self.check(label+'-returned-ids',valid,'POST ids correspond to the admitted batch; missing ids are generated',
+                        {'assignment':'supplied' if 'id' in original else 'LRS-generated',
+                         'variant2_advisory':[uuid.UUID(i).variant==uuid.RFC_4122 if standard_uuid(i) else None
+                                              for i in ids] if isinstance(ids,list) else None,
+                         'strength':'UUID variant is SHOULD; standard string form is required'})
+                    if not valid:continue
+                    identifiers=ids
+                for index,(body,identifier) in enumerate(zip(bodies,identifiers)):
+                    # Retrieval identity is separate from the transmitted JSON.
+                    lookup={**body,'id':identifier}
+                    for format_name in ('default','exact'):
+                        options={'format':None} if format_name=='default' else {'format':'exact'}
+                        visible=self.read_visible(lookup,reply,**options)
+                        if visible is None:continue
+                        returned=visible['json'];obs=preservation(body,returned)
+                        if isinstance(returned,dict):
+                            for key in ['id','stored','timestamp','authority','version']:
+                                valid=(key in returned and (agent_validity(returned[key]) if key=='authority'
+                                       else standard_uuid(returned[key]) if key=='id'
+                                       else bool(re.fullmatch(r'[0-9]+[.][0-9]+[.][0-9]+',returned[key])) if key=='version' and isinstance(returned[key],str)
+                                       else isinstance(returned[key],str)))
+                                if key in ['stored','timestamp'] and valid:
+                                    try:valid=timestamp_ns(returned[key]) is not None and returned[key].endswith('Z')
+                                    except PrimitiveUnavailable:valid=None
+                                    except (ValueError,TypeError):valid=False
+                                obs.append({'pointer':'/'+key,'outcome':'not-run' if valid is None else 'passed' if valid else 'failed','rule':'independent required returned field type/format'})
+                            if 'timestamp' not in body:
+                                try:
+                                    left,right=timestamp_pair(returned.get('timestamp'),returned.get('stored'))
+                                    valid=None if left is None or right is None else left==right
+                                except (ValueError,TypeError):valid=False
+                                obs.append({'pointer':'/timestamp','outcome':'not-run' if valid is None else 'passed' if valid else 'failed','rule':'omitted root timestamp equals assigned stored instant'})
+                        record={'case':case,'method':method,'batch_index':index,'format':format_name,'source':source,'observations':obs}
+                        with (self.out/'preservation.jsonl').open('a') as output:output.write(compact(record)+'\n')
+                        self.check(label+'-'+str(index)+'-'+format_name+'-preservation',False if any(o['outcome']=='failed' for o in obs) else None if any(o['outcome']=='not-run' for o in obs) else True,'Every submitted pointer walked against its source table; see preservation.jsonl')
+        self.check('accepted-table-inventory',bool(selected) and len(selected)==len(set(selected)),
+            'Every positive table fixture/property/enum/omission and both authored two-attachment fixtures enumerated',selected)
 
     def http_rfc(self):
         for family,path,scope,key in self.docs:
@@ -739,16 +807,56 @@ class Executor:
                    'Every applicable query must be observed; a bootstrap or child FAIL cannot complete skipped queries')
 
     def languages(self):
-        # Fixed RFC5646/IANA definitions; validity is not an optional parser
-        # preference. All other Statement fields and admission conditions hold.
-        for tag,valid in [('en',True),('zh-Hant-CN',True),('i-klingon',True),('x-private',True),('abcdefgh',False),('abcdefghi',False),('en-abcdefghi',False),('sl-rozaj-rozaj',False),('en-a-foo-a-bar',False)]:
-            for nested in [False,True]:
-                body=self.statement(object={'id':self.prefix+'/lang/'+str(uuid.uuid4()),'definition':{'name':{tag:'plain text <b>'}}})
-                if nested:
-                    sub=copy.deepcopy(body);sub.pop('id');body=self.statement(object={'objectType':'SubStatement',**sub})
-                response=self.http('PUT','/statements',{'statementId':body['id']},body, expected_statuses=(204,) if valid else (400,))
-                self.check(tag+('-sub' if nested else '-top'),response['status']==(204 if valid else 400),'DC-LANGUAGE: fixed vectors characterized against RFC5646 and the pinned IANA registry; the registry is reference evidence, not loaded by this executor; full registry-based validation remains unexecuted')
-        self.check('full-rfc-every-language-map-location',None,'Defined by issued-definition-contracts.json DC-LANGUAGE; this partial executor covers Activity.definition.name at root and SubStatement only')
+        from lrs_language_vectors import TAGS, placements, registry_evidence
+        registry=ROOT/'spec/conformance/reference/language-subtag-registry-20260917.txt'
+        self.check('pinned-language-registry',sha(registry)=='755fad43283be7b41ebe3c89ad054b6eaf928f404f9c0edb74799e0eab74beb1',
+            'DC-LANGUAGE dated IANA inventory; witness validity is independent of the target response',registry_evidence(registry.read_text()))
+        covered=set()
+        for tag,valid in TAGS:
+            for pointer,body,owner,field in placements(self.statement(),self.prefix):
+                body['id']=str(uuid.uuid4())
+                owner[field]={tag:'plain text <b>日本語</b>'}
+                label=pointer+':'+(tag or '<empty>')
+                reply=self.http('PUT','/statements',{'statementId':body['id']},body,
+                    expected_statuses=(204,) if valid else (400,))
+                self.check(label+'-admission',reply['status']==(204 if valid else 400),
+                    'RFC5646 syntax, registry membership, duplicate components and registered/private-use controls')
+                if valid and reply['status']==204:
+                    returned=self.read_visible(body,reply)
+                    if returned is not None:
+                        try:preserved=ptr(returned['json'],pointer)==owner[field]
+                        except (KeyError,TypeError,IndexError):preserved=False
+                        self.check(label+'-preserved',preserved,'Exact format preserves map keys and plain text without imposing a locale')
+                elif not valid and reply['status']==400:
+                    absent=self.http('GET','/statements',{'statementId':body['id']},expected_statuses=(404,))
+                    self.check(label+'-not-stored',absent['status']==404,'Unique rejected Statement has no readable stored record; Kiva completion/settlement is separately qualified')
+                covered.add(pointer)
+        # Empty maps are permitted; malformed map values are independently
+        # rejected. Extension-owned maps are opaque and have no RFC5646 rule.
+        for value,valid in [({},True),({'en':1},False),({'en':None},False),({'en':[]},False)]:
+            for pointer,body,owner,field in placements(self.statement(),self.prefix):
+                body['id']=str(uuid.uuid4());owner[field]=value
+                reply=self.http('PUT','/statements',{'statementId':body['id']},body,
+                    expected_statuses=(204,) if valid else (400,))
+                self.check(pointer+':'+compact(value),reply['status']==(204 if valid else 400))
+                if valid and reply['status']==204:
+                    returned=self.read_visible(body,reply)
+                    try:preserved=None if returned is None else ptr(returned['json'],pointer)==value
+                    except (KeyError,TypeError,IndexError):preserved=False
+                    self.check(pointer+':empty-map-preserved',preserved)
+                elif not valid and reply['status']==400:
+                    absent=self.http('GET','/statements',{'statementId':body['id']},expected_statuses=(404,))
+                    self.check(pointer+':'+compact(value)+'-not-stored',absent['status']==404)
+        for nested in (False,True):
+            body=self.statement(); target=body
+            if nested:
+                sub=copy.deepcopy(body);sub.pop('id');sub['objectType']='SubStatement';body['object']=sub;target=sub
+            target['result']={'extensions':{self.prefix+'/opaque':{'abcdefgh':'<script>text</script>'}}}
+            admitted=self.store(body);returned=self.read_visible(body,admitted)
+            self.check('opaque-extension-'+str(nested),None if returned is None else
+                ptr(returned['json'],'/object/result/extensions' if nested else '/result/extensions')==target['result']['extensions'])
+        self.check('every-language-map-role',len(covered)==76,
+            'Root/SubStatement Verb, every Object/Context Activity map and five component maps, attachment display/description',sorted(covered))
 
     def references(self):
         a=self.statement();admitted_a=self.store(a)
@@ -765,7 +873,7 @@ class Executor:
         self.check('context-does-not-inherit',None if rows is None else canonical_statement_id(context['id']) not in {canonical_statement_id(v['id']) for v in rows})
         self.check('controlled-time-registration-limit-cycles-voided-targets',None,'Remaining reference combinations and cycle fixtures not yet controlled')
 
-    def page_last_modified(self, headers, items):
+    def page_last_modified(self, headers, items, *, representation_modified=None, originated=None):
         """Page-local maximum; None items means the body is unavailable.
 
         A known stored time above the header proves a maximum violation even
@@ -786,7 +894,22 @@ class Executor:
         if items is None:
             return None
         if not items:
-            return True if 'last-modified' not in headers or header_time is not None else None
+            if 'last-modified' not in headers:
+                return True
+            unknown=header_time is None
+            # Presence on an empty result is allowed, but grammar alone does
+            # not establish representation modification or message origination.
+            for supplied, compare in ((originated, lambda actual,bound:actual<=bound),
+                                      (representation_modified, lambda actual,bound:actual==bound.to_integral_value(rounding='ROUND_FLOOR'))):
+                if supplied is None:
+                    unknown=True
+                    continue
+                try: bound=timestamp_ns(supplied)
+                except PrimitiveUnavailable: unknown=True; continue
+                except (ValueError,TypeError,ArithmeticError): return None
+                if header_time is not None and not compare(header_time,bound):
+                    return False
+            return None if unknown else True
         unavailable=header_time is None
         known=[]
         for item in items:
@@ -807,41 +930,42 @@ class Executor:
         rows=[];more=None;seen=set();base=None;complete=True
         forbidden_ids={canonical_statement_id(value) for value in forbidden_ids}
         for page in range(100):
+            page_label=label+'-page-'+str(page)
             try:
                 reply=self.http('GET','/statements',query if more is None else None,continuation=more,
                                 continuation_base=base,retain_partial=True, expected_statuses=(200,))
             except (OSError,ValueError,http.client.HTTPException):
                 self.check(label+'-pages',None,'Continuation transport/routing unavailable; no incomplete-set membership verdict')
                 return None
-            self.statement_headers(reply,label+'-page-'+str(page))
+            self.statement_headers(reply,page_label)
             if reply['status']!=200:
-                self.check(label+'-page-status',False,'StatementResult page must return 200')
+                self.check(page_label+'-status',False,'StatementResult page must return 200')
                 return None
             if reply.get('incomplete_body'):
-                self.check(label+'-page-last-modified',self.page_last_modified(reply['headers'],None),
+                self.check(page_label+'-last-modified',self.page_last_modified(reply['headers'],None),
                     'Received header syntax is independent of unavailable page maximum')
-                self.check(label+'-page-body',None,'Body transport incomplete; observed header failures retained')
+                self.check(page_label+'-body',None,'Body transport incomplete; observed header failures retained')
                 return None
             value=reply['json']
             if not isinstance(value,dict) or not isinstance(value.get('statements'),list):
-                self.check(label+'-page-shape',False,'StatementResult must contain a statements array')
+                self.check(page_label+'-shape',False,'StatementResult must contain a statements array')
                 return None
             items=value['statements']
             valid_items=[item for item in items if isinstance(item,dict) and isinstance(item.get('id'),str)]
             valid=len(valid_items)==len(items)
-            self.check(label+'-page-shape',valid,'Every returned Statement must be an object with a string id')
+            self.check(page_label+'-shape',valid,'Every returned Statement must be an object with a string id')
             complete=complete and valid
             rows.extend(valid_items)
             self.check(label+'-observed-exclusions-'+str(page),not any(canonical_statement_id(item['id']) in forbidden_ids for item in valid_items),
                 'A forbidden object already observed cannot be removed by later pages or transport failure')
-            self.check(label+'-page-last-modified',self.page_last_modified(reply['headers'],items),
+            self.check(page_label+'-last-modified',self.page_last_modified(reply['headers'],items),
                 'Page header compared with this page; known defects retained before provider delegation')
             more=value.get('more','')
             if not isinstance(more,str):
-                self.check(label+'-more-type',False);return None
+                self.check(page_label+'-more-type',False);return None
             if more=='':return rows if complete else None
             if not iri_reference_valid(more):
-                self.check(label+'-more-syntax',False,'Malformed continuation IRI reference');return None
+                self.check(page_label+'-more-syntax',False,'Malformed continuation IRI reference');return None
             base=reply.get('url')
             try:destination=urljoin(base or '',more)
             except ValueError:
@@ -898,10 +1022,50 @@ class Executor:
                 'Returned Activity must be an object with the submitted string identifier')
         self.check('normalization-comparison-and-default-port',None,'Accepted IRI preservation does not establish equality strategy; external grammar/equality classes still open')
 
+    def about(self):
+        from lrs_about import about_content
+        context=self.fixture.get('about_context',{})
+        required=('supported','unsupported','latest_versions','unrecognized','missing_header')
+        if not all(key in context for key in required):
+            self.check('about-fixture',None,'Independent About cause and version declaration unavailable')
+            return
+        self.check('about-fixture',True,'Declared before requests; not inferred from target responses',context)
+        token=os.environ.get('KIVA_CONFORMANCE_INVALID_TOKEN')
+        for method in ('GET','HEAD'):
+            for version in (context['supported'],context['unsupported'],None):
+                for cause in ('valid','unknown','refused'):
+                    label='about-'+method+'-'+str(version)+'-'+cause
+                    if cause=='refused' and not token:
+                        self.check(label,None,'Independently refused credential unavailable')
+                        continue
+                    headers={'X-Experience-API-Version':version}
+                    if cause=='refused':headers['Authorization']='Bearer '+token
+                    query={context['unrecognized']:'1'} if cause=='unknown' else None
+                    # Source indeterminacy about header absence is not a free
+                    # target-specific inference. Kiva declares default routing.
+                    expected=401 if cause=='refused' else 400 if cause=='unknown' else 200
+                    if version is None and context['missing_header']!='route-default':
+                        self.check(label+'-missing-policy',None,'No selected missing-header cause disposition')
+                        continue
+                    response=self.http(method,'/about',query,headers=headers,expected_statuses=(expected,))
+                    if method=='HEAD':
+                        self.check(label+'-empty-body',response['body_hex']=='')
+                    elif response['status']==200:
+                        observed=about_content(bytes.fromhex(response['body_hex']),context['latest_versions'])
+                        self.check(label+'-content',observed['required'],observed['reason'],observed)
+                        # Duplicate-name advice remains in the raw observation
+                        # details. Do not invent a new advisory check ID outside
+                        # the adopted procedure's check_levels inventory.
+
+
     def execute(self):
         catalog=load_procedures(ROOT/'spec/conformance/lrs-review-tests.yaml')
         functions=[self.conflict,self.consistency,self.http_rfc,self.mime,self.limits,self.duplicate,self.recursive_formats,self.references,lambda:self.metadata(True),self.documents,self.person,self.metadata,self.versions,self.authorization,self.interaction,self.advisory_metadata,self.rejection,self.authority,self.cursor,self.iri,self.languages,self.precision,self.tables,self.related_authority,self.voiding]
-        for spec,function in zip(catalog,functions,strict=True):
+        selected=[(spec,function) for spec,function in zip(catalog,functions,strict=True)]
+        about_ids={'issued-about-error-cross-product','issued-definition-POL-ABOUT-01','issued-definition-POL-ABOUT-02'}
+        for filename in ('issued-supplemental-tests.yaml','issued-definition-tests.yaml'):
+            selected.extend((spec,self.about) for spec in load_procedures(ROOT/'spec/conformance'/filename) if spec['id'] in about_ids)
+        for spec,function in selected:
             name=spec['id']
             if self.args.procedure and name not in self.args.procedure:continue
             self.current=name
@@ -913,8 +1077,8 @@ class Executor:
             outcomes={c['outcome'] for c in self.results[name]['checks']}
             self.results[name]['outcome']='failed' if 'failed' in outcomes else 'incomplete' if 'not-run' in outcomes else 'observed' if spec['level']=='advisory' else 'passed'
             print(name,self.results[name]['outcome'],flush=True)
-        summary={'schema_version':1,'axis':self.fixture['axis'],'scope':'Executed finite rubric subconditions; unexecuted subconditions retained. No whole-standard closure.','target':self.args.endpoint,'fixture':self.fixture,'input_sha256':{str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p):sha(p) for p in [Path(__file__),ROOT/'scripts/ci/lrs_preservation.py',self.args.fixture,ROOT/'spec/conformance/lrs-review-tests.yaml',self.args.runner]},'procedures':self.results}
-        (self.out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
+        summary={'schema_version':1,'axis':self.fixture['axis'],'scope':'Executed finite rubric subconditions; unexecuted subconditions retained. No whole-standard closure.','target':self.args.endpoint,'fixture':self.fixture,'input_sha256':{str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p):sha(p) for p in [Path(__file__),ROOT/'scripts/ci/lrs_preservation.py',ROOT/'scripts/ci/lrs_about.py',ROOT/'scripts/ci/lrs_person.py',ROOT/'scripts/ci/lrs_table_vectors.py',ROOT/'tests/conformance/models/lrs-tables.yaml',ROOT/'tests/conformance/http/generated/tables.yaml',ROOT/'tests/conformance/http/generated/behaviors.yaml',self.args.fixture,ROOT/'spec/conformance/lrs-review-tests.yaml',ROOT/'spec/conformance/issued-supplemental-tests.yaml',ROOT/'spec/conformance/issued-definition-tests.yaml',self.args.runner]},'procedures':self.results}
+        (self.out/'summary.json').write_text(compact(summary)+'\n')
         return 1 if any(v['outcome']=='failed' for v in self.results.values()) else 2 if any(v['outcome']=='incomplete' for v in self.results.values()) else 0
 
 

@@ -1,5 +1,9 @@
 //! xAPI statement and document server model types.
 
+mod document_list;
+
+pub(crate) use document_list::DocumentList;
+
 use std::collections::BTreeMap;
 
 use axum::http::{
@@ -7,18 +11,18 @@ use axum::http::{
     header::{IF_MATCH, IF_NONE_MATCH},
 };
 use kiva_http_core::DocumentContentShape;
-use serde_json::{Map, Value};
+use serde_json::Value;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use uuid::Uuid;
 
 use crate::core::{
     config::DOCUMENT_JSON_CONTENT_TYPE,
-    request_util::{header_string, key_component},
-    response::{HttpError, new_etag},
+    request_util::{header_text, key_component},
+    response::{HttpError, new_etag, rfc3339},
 };
 use crate::surfaces::xapi::request::{
-    content_type_matches, document_request_content_type, optional_registration, required_agent,
-    required_iri, validate_query_parameters,
+    content_type_matches, document_request_content_type, optional_registration,
+    required_document_actor, required_iri, validate_query_parameters,
 };
 use kiva_xapi::canonical_actor_ifi;
 
@@ -40,7 +44,9 @@ impl DocumentKind {
             Self::AgentProfile => vec!["agent", "profileId"],
             Self::ActivityProfile => vec!["activityId", "profileId"],
         };
-        if allow_since {
+        // `since` filters the multiple-document operation. A present ID
+        // selects the single-document table, where that parameter is absent.
+        if allow_since && !query.contains_key(self.id_param()) {
             allowed.push("since");
         }
         validate_query_parameters(query, &allowed)
@@ -94,12 +100,8 @@ impl DocumentAddress {
                 DocumentIdRequirement::Optional => Ok(DocumentSelection::Scope(scope)),
             };
         };
-        if document_id.is_empty() {
-            return Err(HttpError::new(
-                StatusCode::BAD_REQUEST,
-                format!("{} must not be empty", kind.id_param()),
-            ));
-        }
+        // Presence selects the document, including the empty String. The
+        // Document/selector tables do not impose a nonempty identifier rule.
         let document_key = format!(
             "{}{}",
             scope.document_key_prefix,
@@ -150,7 +152,7 @@ impl DocumentScope {
         match kind {
             DocumentKind::State => {
                 let activity = required_iri(query, "activityId")?;
-                let parsed_agent = required_agent(query)?;
+                let parsed_agent = required_document_actor(query)?;
                 let agent_key = canonical_actor_ifi(&parsed_agent).ok_or_else(|| {
                     HttpError::new(
                         StatusCode::BAD_REQUEST,
@@ -170,7 +172,7 @@ impl DocumentScope {
                 agent = Some(parsed_agent);
             }
             DocumentKind::AgentProfile => {
-                let parsed_agent = required_agent(query)?;
+                let parsed_agent = required_document_actor(query)?;
                 let agent_key = canonical_actor_ifi(&parsed_agent).ok_or_else(|| {
                     HttpError::new(
                         StatusCode::BAD_REQUEST,
@@ -214,14 +216,18 @@ pub(crate) struct DocumentRecord {
 }
 
 impl DocumentRecord {
-    pub(crate) fn new(document_id: String, content: DocumentContent) -> Self {
+    pub(crate) fn new(
+        document_id: String,
+        content: DocumentContent,
+        updated_at: OffsetDateTime,
+    ) -> Self {
         let content_type = content.content_type().to_owned();
         Self {
             document_id,
             content,
             content_type,
             etag: new_etag(),
-            updated_at: OffsetDateTime::now_utc(),
+            updated_at,
         }
     }
 }
@@ -233,20 +239,14 @@ pub(crate) enum DocumentContent {
 }
 
 impl DocumentContent {
-    pub(crate) fn from_request(headers: &HeaderMap, body: &[u8]) -> Result<Self, HttpError> {
+    pub(crate) fn from_request(headers: &HeaderMap, body: &[u8]) -> Self {
         let content_type = document_request_content_type(headers);
-        if content_type_matches(&content_type, DOCUMENT_JSON_CONTENT_TYPE) {
-            return serde_json::from_slice::<Value>(body)
-                .map(Self::Json)
-                .map_err(|_error| {
-                    HttpError::new(StatusCode::BAD_REQUEST, "document body must be valid JSON")
-                });
-        }
-
-        Ok(Self::Bytes {
+        // A Document PUT stores the HTTP entity itself. JSON object parsing
+        // belongs to POST merge, not to arbitrary document representation.
+        Self::Bytes {
             content_type,
             body: body.to_vec(),
-        })
+        }
     }
 
     pub(crate) fn content_type(&self) -> &str {
@@ -256,9 +256,14 @@ impl DocumentContent {
         }
     }
 
-    pub(crate) fn as_json_object(&self) -> Option<&Map<String, Value>> {
+    pub(crate) fn as_json_object(&self) -> Option<super::lossless::Members> {
         match self {
-            Self::Json(value) => value.as_object(),
+            Self::Json(value) => serde_json::from_slice(&serde_json::to_vec(value).ok()?).ok(),
+            Self::Bytes { content_type, body }
+                if content_type_matches(content_type, DOCUMENT_JSON_CONTENT_TYPE) =>
+            {
+                serde_json::from_slice(body).ok()
+            }
             Self::Bytes { .. } => None,
         }
     }
@@ -267,6 +272,15 @@ impl DocumentContent {
         match self {
             Self::Json(value) if value.is_object() => DocumentContentShape::JsonObject,
             Self::Json(_value) => DocumentContentShape::JsonNonObject,
+            Self::Bytes { content_type, .. }
+                if content_type_matches(content_type, DOCUMENT_JSON_CONTENT_TYPE) =>
+            {
+                if self.as_json_object().is_some() {
+                    DocumentContentShape::JsonObject
+                } else {
+                    DocumentContentShape::JsonNonObject
+                }
+            }
             Self::Bytes { .. } => DocumentContentShape::Bytes,
         }
     }
@@ -275,11 +289,13 @@ impl DocumentContent {
 #[derive(Debug, Clone)]
 pub(crate) struct StoredStatement {
     pub(crate) statement: Value,
+    pub(crate) opaque_values: super::lossless::OpaqueValues,
     pub(crate) stored_at: OffsetDateTime,
     pub(crate) attachments: BTreeMap<String, AttachmentRecord>,
     // Admission-only provenance: an omitted incoming timestamp can reuse the
     // existing value on retry. Persisted records do not need this flag.
     pub(crate) defaulted_substatement_timestamp: bool,
+    pub(crate) defaulted_timestamp: bool,
 }
 
 impl StoredStatement {
@@ -290,9 +306,23 @@ impl StoredStatement {
     ) -> Self {
         Self {
             statement,
+            opaque_values: BTreeMap::new(),
             stored_at,
             attachments,
             defaulted_substatement_timestamp: false,
+            defaulted_timestamp: false,
+        }
+    }
+
+    pub(crate) fn record_at(&mut self, instant: OffsetDateTime) {
+        self.stored_at = instant;
+        let stored = Value::String(rfc3339(instant));
+        self.statement["stored"] = stored.clone();
+        if self.defaulted_timestamp {
+            self.statement["timestamp"] = stored.clone();
+        }
+        if self.defaulted_substatement_timestamp {
+            self.statement["object"]["timestamp"] = stored;
         }
     }
 }
@@ -311,12 +341,16 @@ pub(crate) struct StoredStatementMetadata {
 pub(crate) struct StoredPortabilityStatement {
     pub(crate) statement_id: Uuid,
     pub(crate) statement: Value,
+    pub(crate) opaque_values: super::lossless::OpaqueValues,
     pub(crate) stored_at: OffsetDateTime,
     pub(crate) voided: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct AttachmentRecord {
+    // Empty records an absent optional MIME-part Content-Type. Do not invent
+    // application/octet-stream and compare it against the metadata claim.
+    // Persistence retains this distinction; output omits that optional field.
     pub(crate) content_type: String,
     pub(crate) body: Vec<u8>,
 }
@@ -324,6 +358,7 @@ pub(crate) struct AttachmentRecord {
 #[derive(Debug)]
 pub(crate) struct StatementPayload {
     pub(crate) statement: Value,
+    pub(crate) opaque_values: super::lossless::OpaqueValues,
     pub(crate) attachments: BTreeMap<String, AttachmentRecord>,
 }
 
@@ -331,6 +366,7 @@ impl StatementPayload {
     pub(crate) const fn json(statement: Value) -> Self {
         Self {
             statement,
+            opaque_values: BTreeMap::new(),
             attachments: BTreeMap::new(),
         }
     }
@@ -351,19 +387,50 @@ pub(crate) struct CompactJwsSegments<'a> {
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Preconditions {
+    pub(crate) undefined_combination: bool,
     pub(crate) if_match: Option<String>,
     pub(crate) if_none_match: Option<String>,
+    pub(crate) if_unmodified_since: Option<OffsetDateTime>,
+    pub(crate) if_modified_since: Option<OffsetDateTime>,
 }
 
 impl Preconditions {
     pub(crate) fn from_headers(headers: &HeaderMap) -> Self {
         Self {
-            if_match: header_string(headers, IF_MATCH),
-            if_none_match: header_string(headers, IF_NONE_MATCH),
+            undefined_combination: [
+                ("if-match", "if-none-match"),
+                ("if-match", "if-modified-since"),
+                ("if-none-match", "if-unmodified-since"),
+                ("if-unmodified-since", "if-modified-since"),
+            ]
+            .iter()
+            .any(|(a, b)| headers.contains_key(*a) && headers.contains_key(*b)),
+            // Repeated list-valued fields are one ordered comma list (RFC2616
+            // 4.2); do not silently discard a later matching candidate.
+            if_match: joined_header(headers, IF_MATCH),
+            if_none_match: joined_header(headers, IF_NONE_MATCH),
+            if_unmodified_since: http_date_header(headers, "if-unmodified-since"),
+            if_modified_since: http_date_header(headers, "if-modified-since")
+                .filter(|instant| *instant <= OffsetDateTime::now_utc()),
         }
     }
 
     pub(crate) const fn has_any(&self) -> bool {
         self.if_match.is_some() || self.if_none_match.is_some()
     }
+}
+
+fn joined_header(headers: &HeaderMap, name: axum::http::HeaderName) -> Option<String> {
+    let values = headers
+        .get_all(name)
+        .iter()
+        .map(header_text)
+        .collect::<Vec<_>>();
+    (!values.is_empty()).then(|| values.join(","))
+}
+
+fn http_date_header(headers: &HeaderMap, name: &'static str) -> Option<OffsetDateTime> {
+    httpdate::parse_http_date(headers.get(name)?.to_str().ok()?)
+        .ok()
+        .map(OffsetDateTime::from)
 }

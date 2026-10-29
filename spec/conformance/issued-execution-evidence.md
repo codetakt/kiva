@@ -5,6 +5,65 @@ separate assertion that needs the exact definition and actual, current
 evidence. A target FAIL is an executed observation; it does not imply a missing
 test or a conforming product.
 
+`--require-conforming` adds the implementation acceptance gate. It requires
+complete execution, zero failing mandatory observations, a structurally valid
+HTTP report checked against the entire current suite without gap exceptions,
+consistent totals and retrieval attempts, a successful execution wrapper, and
+current implementation/build/database input hashes plus server/runner binary
+identities. `--require-complete` alone deliberately still permits observed FAILs.
+
+The resulting `test_specification_conformant` flag describes the configured,
+finite observation and binding gate. It does not assert semantic equivalence
+between the implementation and every requirement. Source-directed review and
+counterexample searches remain necessary, including combinations not enumerated
+by the fixed suite. A known semantic violation remains a product gap regardless
+of this flag. Provider delegation preserves the integration obligations: correct
+inputs, configuration, invocation, result handling and admission decisions.
+
+Every procedure also needs `definition_coverage`: an exact map from each leaf
+JSON pointer returned by `definition_obligations(spec)` to
+`{"sha256": "<current obligation digest>", "checks": ["<check id>"]}`.
+The map covers setup, action, expected result, fixture, steps, assertions, rubric,
+vectors and association controls when present. Missing/stale obligations and
+unknown/duplicate check links fail the gate. A single PASS label cannot replace
+the complete rubric. Links remain author evidence; their semantic adequacy needs
+review and is not established by hashing.
+
+After generating the locked artifacts and building release binaries, capture a
+fresh backend execution with:
+
+```sh
+python3 -B scripts/ci/capture_issued_test_execution.py \
+  --backend memory --out target/issued-execution/memory \
+  --fixture tests/conformance/controls/kiva_procedure_fixture.json
+```
+
+Repeat for `postgres` in a fresh directory. The producer records current inputs
+before and after the actual run, raw outputs, fixture and binary identities;
+failed/incomplete observations are preserved. The local fixture's policy input
+hashes must be checked against the implementation before use. The portable runner
+executes 25 partial procedures. `run_lrs_native_controls.py` additionally records
+the actual Rust/Python test inventory, binaries, toolchains, per-test outcomes
+and native HTTP/control observations. `collect_lrs_procedure_evidence.py` combines
+these with the full HTTP report through the explicit 145-procedure manifest.
+It checks exact rubric leaves, dependency order and every selected witness;
+missing executions or incomplete dependencies cannot be replaced by map counts.
+Only exact named partial capability gaps can be superseded, retaining their
+original observations. Actual failures and unrelated transport gaps remain.
+
+`--workers 4` uses PR #4's isolated HTTP shards and preserves their raw reports.
+Procedures run on one additional isolated backend; its one-case setup report
+stays separate from the full HTTP report. Release assessment reassembles the
+shards and checks their aggregate identities before considering completeness.
+
+`generate_conformance_evidence.sh --issued-execution-root target/issued-execution`
+includes both captures in a bundle. The default full release validator reassesses
+their original raw evidence, requires both backends to pass this gate, and ignores
+a supplied summary's claimed verdict. HTTP-only evidence cannot satisfy that
+release scope. `--allow-static-conformance` retains its explicit limited scope.
+This gate does not turn project policy choices into IEEE adjudications or replace
+independent execution acceptance and provider qualification.
+
 `report_issued_test_results.py --require-complete` requires all of the following:
 
 - Structural ledger/test completeness in the exact supplied projection; semantic
@@ -30,11 +89,14 @@ recommendations, while an unresolved mandatory check still blocks completion.
 An overall `observed` procedure outcome is allowed only for a definition whose
 procedure-level `level` is `advisory`; per-check completion is still required.
 
-The current collector does not verify applicability evidence:
-even a `not-applicable` label with a free-text reason stays incomplete. A future
-applicability adapter must establish the definition's condition and bind the
-supporting evidence before such an exemption can complete this gate. This limit
-does not classify the target as failing its IEEE duty.
+A `not-applicable` outcome with a free-text reason stays incomplete. Selected
+alternatives instead need explicit source-conditioned links to actual configured
+runtime witnesses. For example, the authenticated out-of-band status provider is
+exercised with certificate/issuer/time-bound good, revoked, unknown and missing
+evidence; it does not assert execution of the unselected CRL/OCSP mechanisms.
+Likewise, producer and display roles do not become invented HTTP rejections.
+These author applicability judgments remain visible in each binding's rationale;
+hashing or a passing neighboring test does not independently validate them.
 
 HTTP outcomes and completion are independent. A missing mandatory header and an
 interrupted body produce a FAIL plus an unresolved body observation. The runner
@@ -77,9 +139,9 @@ identity comparison, including members of identified and anonymous Groups.
 Identical invalid identifiers cannot establish a PASS. SHA-1 uses 40 hexadecimal
 digits; OpenID uses absolute URI syntax; mbox uses the bounded DC-MAILTO adapter;
 Account.homePage checks the necessary IRI syntax. Successful identity/shape
-checks do not establish Account locator semantics: the separate DC-IRL procedure
-still requires its provider evidence. Unsupported legal mailto forms remain
-NOT-RUN. An independent invalid member
+checks alone do not establish Account locator semantics. The DC-IRL adapter
+now recognizes HTTP(S) access after RFC 3987 mapping; other schemes retain
+unavailable locator checks. Unsupported legal mailto forms remain NOT-RUN. An independent invalid member
 still fails when another member needs a provider. These output checks do not
 change the separate input-acceptance waivers or supply unavailable providers.
 

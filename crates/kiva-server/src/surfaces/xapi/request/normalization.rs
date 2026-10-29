@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use axum::http::StatusCode;
 use kiva_xapi::{StatementValidationError, admit_json_object, validate_statement_shape};
 use serde_json::{Map, Value};
-use time::{OffsetDateTime, format_description::well_known::Rfc3339};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::{
@@ -23,6 +23,7 @@ pub(crate) fn normalize_statement_batch(
     stored_at: OffsetDateTime,
     authority: &Value,
     attachments: &BTreeMap<String, AttachmentRecord>,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
 ) -> Result<Vec<(Uuid, StoredStatement)>, HttpError> {
     let values = match body {
         Value::Array(values) => values,
@@ -47,9 +48,21 @@ pub(crate) fn normalize_statement_batch(
         }
         statements.push((
             statement_id,
-            normalized_statement_record(value, statement_id, stored_at, authority, attachments)?,
+            statement_record(
+                value,
+                statement_id,
+                stored_at,
+                authority,
+                attachments,
+                signature_policy,
+            )?,
         ));
     }
+    let referenced = statements
+        .iter()
+        .flat_map(|(_, record)| record.attachments.keys())
+        .collect::<BTreeSet<_>>();
+    validate_attachment_count(referenced.len(), attachments.len())?;
     Ok(statements)
 }
 
@@ -59,15 +72,48 @@ pub(crate) fn normalized_statement_record(
     stored_at: OffsetDateTime,
     authority: &Value,
     attachments: &BTreeMap<String, AttachmentRecord>,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
 ) -> Result<StoredStatement, HttpError> {
+    let record = statement_record(
+        value,
+        statement_id,
+        stored_at,
+        authority,
+        attachments,
+        signature_policy,
+    )?;
+    validate_attachment_count(record.attachments.len(), attachments.len())?;
+    Ok(record)
+}
+
+fn validate_attachment_count(referenced: usize, supplied: usize) -> Result<(), HttpError> {
+    if referenced != supplied {
+        return Err(HttpError::new(
+            StatusCode::BAD_REQUEST,
+            "multipart attachment parts must be referenced by Statement attachment metadata",
+        ));
+    }
+    Ok(())
+}
+
+fn statement_record(
+    value: Value,
+    statement_id: Uuid,
+    stored_at: OffsetDateTime,
+    authority: &Value,
+    attachments: &BTreeMap<String, AttachmentRecord>,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
+) -> Result<StoredStatement, HttpError> {
+    let defaulted_timestamp = value.get("timestamp").is_none();
     let defaulted_substatement_timestamp = value.get("object").is_some_and(|object| {
         object.get("objectType").and_then(Value::as_str) == Some("SubStatement")
             && object.get("timestamp").is_none()
     });
     let statement = normalized_statement(value, statement_id, stored_at, authority)?;
-    let attachments = attachments_for_statement(&statement, attachments)?;
+    let attachments = attachments_for_statement(&statement, attachments, signature_policy)?;
     let mut record = StoredStatement::new(statement, stored_at, attachments);
     record.defaulted_substatement_timestamp = defaulted_substatement_timestamp;
+    record.defaulted_timestamp = defaulted_timestamp;
     Ok(record)
 }
 
@@ -157,12 +203,12 @@ fn normalize_statement_timestamp(object: &mut Map<String, Value>) -> Result<(), 
             "statement timestamp must be a string",
         ));
     };
-    let timestamp = OffsetDateTime::parse(timestamp, &Rfc3339).map_err(|_error| {
+    let timestamp = crate::surfaces::xapi::timestamp::normalize(timestamp).ok_or_else(|| {
         HttpError::new(
             StatusCode::BAD_REQUEST,
-            "statement timestamp must be an RFC3339 timestamp",
+            "statement timestamp must be representable as a UTC RFC3339 timestamp",
         )
     })?;
-    object.insert("timestamp".to_owned(), Value::String(rfc3339(timestamp)));
+    object.insert("timestamp".to_owned(), Value::String(timestamp));
     Ok(())
 }

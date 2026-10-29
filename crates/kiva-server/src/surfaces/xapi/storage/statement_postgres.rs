@@ -4,6 +4,45 @@ use super::statement_queries::*;
 use super::*;
 
 impl PostgresStatementRepository {
+    #[cfg(test)]
+    pub(crate) async fn settled_snapshot(&self) -> Result<Value, StatementStoreError> {
+        let mut transaction = self.pool.begin().await?;
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1, 72927411))")
+            .bind(&self.tenant_id)
+            .execute(&mut *transaction)
+            .await?;
+        let ids = sqlx::query_as::<_, (Uuid,)>("SELECT statement_id FROM kiva.xapi_statements WHERE tenant_id=$1 ORDER BY statement_id")
+            .bind(&self.tenant_id).fetch_all(&mut *transaction).await?;
+        let mut values = Vec::new();
+        for (id,) in ids {
+            if let Some(record) =
+                select_statement_in_transaction(&mut transaction, &self.tenant_id, id).await?
+            {
+                values.push(snapshot_record(&record));
+            }
+        }
+        transaction.commit().await?;
+        Ok(Value::Array(values))
+    }
+
+    pub(crate) async fn opaque_values(
+        &self,
+        ids: &[Uuid],
+    ) -> Result<BTreeMap<Uuid, crate::surfaces::xapi::lossless::OpaqueValues>, StatementStoreError>
+    {
+        if ids.is_empty() {
+            return Ok(BTreeMap::new());
+        }
+        let rows=sqlx::query_as::<_,(Uuid,SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>)>(
+            "SELECT statement_id, opaque_values FROM kiva.xapi_statements WHERE tenant_id=$1 AND statement_id=ANY($2)"
+        ).bind(&self.tenant_id).bind(ids).fetch_all(&self.pool).await?;
+        Ok(rows
+            .into_iter()
+            .filter(|(_, values)| !values.0.is_empty())
+            .map(|(id, values)| (id, values.0))
+            .collect())
+    }
+
     pub(crate) fn new(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {
         if tenant_id.is_empty() {
             return Err(io::Error::new(
@@ -11,15 +50,60 @@ impl PostgresStatementRepository {
                 format!("{KIVA_TENANT_ID_ENV} must not be empty"),
             ));
         }
-        Ok(Self { pool, tenant_id })
+        Ok(Self {
+            pool,
+            tenant_id,
+            clock: RecordingClock::default(),
+            #[cfg(test)]
+            read_failure: super::read_failure::ReadFailure::default(),
+        })
+    }
+
+    pub(crate) async fn consistent_through(&self) -> Result<OffsetDateTime, StatementStoreError> {
+        let (instant,) = sqlx::query_as::<_, (Option<OffsetDateTime>,)>(
+            "SELECT max(stored_at) FROM kiva.xapi_statements WHERE tenant_id = $1",
+        )
+        .bind(&self.tenant_id)
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(instant.unwrap_or(EMPTY_WATERMARK))
+    }
+
+    async fn recording_time(
+        &self,
+        transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    ) -> Result<OffsetDateTime, StatementStoreError> {
+        // Shared by every writer for this tenant, including separate server
+        // processes. A later commit can never introduce an older stored time
+        // behind a watermark already observed by a reader.
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1, 72927411))")
+            .bind(&self.tenant_id)
+            .execute(&mut **transaction)
+            .await?;
+        let (previous,) = sqlx::query_as::<_, (Option<OffsetDateTime>,)>(
+            "SELECT max(stored_at) FROM kiva.xapi_statements WHERE tenant_id = $1",
+        )
+        .bind(&self.tenant_id)
+        .fetch_one(&mut **transaction)
+        .await?;
+        let instant = self.clock.next(previous.unwrap_or(EMPTY_WATERMARK));
+        self.clock.recorded(instant).await;
+        Ok(instant)
     }
 
     pub(crate) async fn get(
         &self,
         statement_id: Uuid,
     ) -> Result<Option<StoredStatement>, StatementStoreError> {
-        let row = sqlx::query_as::<_, (SqlJson<Value>, OffsetDateTime)>(
-            "SELECT statement, stored_at FROM kiva.xapi_statements \
+        let row = sqlx::query_as::<
+            _,
+            (
+                SqlJson<crate::surfaces::xapi::lossless::StoredJson>,
+                OffsetDateTime,
+                SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,
+            ),
+        >(
+            "SELECT statement, stored_at, opaque_values FROM kiva.xapi_statements \
              WHERE tenant_id = $1 AND statement_id = $2",
         )
         .bind(&self.tenant_id)
@@ -27,23 +111,21 @@ impl PostgresStatementRepository {
         .fetch_optional(&self.pool)
         .await?;
 
-        let Some((statement, stored_at)) = row else {
+        let Some((statement, stored_at, opaque_values)) = row else {
             return Ok(None);
         };
         let attachments =
             select_statement_attachments(&self.pool, &self.tenant_id, statement_id).await?;
-        Ok(Some(StoredStatement::new(
-            statement.0,
-            stored_at,
-            attachments,
-        )))
+        let mut record = StoredStatement::new(statement.0.0, stored_at, attachments);
+        record.opaque_values = opaque_values.0;
+        Ok(Some(record))
     }
 
     pub(crate) async fn list(
         &self,
         limit: Option<usize>,
     ) -> Result<Vec<Value>, StatementStoreError> {
-        let rows = sqlx::query_as::<_, (SqlJson<Value>,)>(
+        let rows = sqlx::query_as::<_, (SqlJson<crate::surfaces::xapi::lossless::StoredJson>,)>(
             "SELECT statement FROM kiva.xapi_statements \
              WHERE tenant_id = $1 \
              ORDER BY stored_at ASC, statement_id ASC \
@@ -56,7 +138,7 @@ impl PostgresStatementRepository {
 
         Ok(rows
             .into_iter()
-            .map(|(statement,)| statement.0)
+            .map(|(statement,)| statement.0.0)
             .collect::<Vec<_>>())
     }
 
@@ -68,7 +150,7 @@ impl PostgresStatementRepository {
             _,
             (
                 Uuid,
-                String,
+                Vec<u8>,
                 Option<String>,
                 Option<String>,
                 OffsetDateTime,
@@ -81,25 +163,25 @@ impl PostgresStatementRepository {
              ORDER BY stored_at ASC, statement_id ASC",
         )
         .bind(&self.tenant_id)
-        .bind(actor_ifi)
+        .bind(actor_ifi.as_bytes())
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(rows
-            .into_iter()
+        rows.into_iter()
             .map(
                 |(statement_id, actor_ifi, verb_id, object_id, stored_at, version)| {
-                    StoredStatementMetadata {
+                    Ok(StoredStatementMetadata {
                         statement_id,
-                        actor_ifi,
+                        actor_ifi: String::from_utf8(actor_ifi)
+                            .map_err(|error| sqlx::Error::Decode(Box::new(error)))?,
                         verb_id,
                         object_id,
                         stored_at,
                         version,
-                    }
+                    })
                 },
             )
-            .collect())
+            .collect()
     }
 
     pub(crate) async fn list_portability_page_by_actor_ifi(
@@ -114,7 +196,7 @@ impl PostgresStatementRepository {
                  WHERE tenant_id = $1 AND actor_ifi = $2 AND statement_id = $3",
             )
             .bind(&self.tenant_id)
-            .bind(actor_ifi)
+            .bind(actor_ifi.as_bytes())
             .bind(cursor)
             .fetch_optional(&self.pool)
             .await?;
@@ -129,14 +211,22 @@ impl PostgresStatementRepository {
             .map_or((OffsetDateTime::UNIX_EPOCH, Uuid::nil()), |position| {
                 position
             });
-        let rows = sqlx::query_as::<_, (Uuid, SqlJson<Value>, OffsetDateTime)>(
-            "SELECT statement_id, statement, stored_at FROM kiva.xapi_statements \
+        let rows = sqlx::query_as::<
+            _,
+            (
+                Uuid,
+                SqlJson<crate::surfaces::xapi::lossless::StoredJson>,
+                OffsetDateTime,
+                SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,
+            ),
+        >(
+            "SELECT statement_id, statement, stored_at, opaque_values FROM kiva.xapi_statements \
              WHERE tenant_id = $1 AND actor_ifi = $2 \
                AND (stored_at, statement_id) > ($3, $4) \
              ORDER BY stored_at ASC, statement_id ASC LIMIT $5",
         )
         .bind(&self.tenant_id)
-        .bind(actor_ifi)
+        .bind(actor_ifi.as_bytes())
         .bind(cursor_stored_at)
         .bind(cursor_id)
         .bind(sql_limit(Some(limit)))
@@ -145,14 +235,15 @@ impl PostgresStatementRepository {
         let all = self.list(None).await?;
         Ok(Some(
             rows.into_iter()
-                .map(
-                    |(statement_id, statement, stored_at)| StoredPortabilityStatement {
+                .map(|(statement_id, statement, stored_at, opaque_values)| {
+                    StoredPortabilityStatement {
                         statement_id,
-                        statement: statement.0,
+                        statement: statement.0.0,
+                        opaque_values: opaque_values.0,
                         stored_at,
                         voided: kiva_xapi::statement_is_voided(&all, statement_id),
-                    },
-                )
+                    }
+                })
                 .collect(),
         ))
     }
@@ -192,7 +283,12 @@ impl PostgresStatementRepository {
             .await
             .map_err(StatementStoreError::from)
             .map_err(PutBatchError::Store)?;
-        for (statement_id, statement) in batch {
+        let instant = self
+            .recording_time(&mut transaction)
+            .await
+            .map_err(PutBatchError::Store)?;
+        for (statement_id, mut statement) in batch {
+            statement.record_at(instant);
             let outcome = self
                 .insert_statement_in_transaction(&mut transaction, statement_id, &statement)
                 .await
@@ -207,7 +303,16 @@ impl PostgresStatementRepository {
                     .map_err(PutBatchError::Store)?;
             match existing {
                 Some(existing) if stored_statements_equivalent(&existing, &statement) => {}
-                Some(_) | None => return Err(PutBatchError::Conflict(statement_id)),
+                Some(_) | None => {
+                    // Finish rollback before acknowledging a rejected batch.
+                    // Dropping SQLx's transaction only schedules its rollback.
+                    transaction
+                        .rollback()
+                        .await
+                        .map_err(StatementStoreError::from)
+                        .map_err(PutBatchError::Store)?;
+                    return Err(PutBatchError::Conflict(statement_id));
+                }
             }
         }
 
@@ -225,8 +330,11 @@ impl PostgresStatementRepository {
         statement: &StoredStatement,
     ) -> Result<InsertOutcome, StatementStoreError> {
         let mut transaction = self.pool.begin().await?;
+        let instant = self.recording_time(&mut transaction).await?;
+        let mut statement = statement.clone();
+        statement.record_at(instant);
         let outcome = self
-            .insert_statement_in_transaction(&mut transaction, statement_id, statement)
+            .insert_statement_in_transaction(&mut transaction, statement_id, &statement)
             .await?;
         transaction.commit().await?;
         Ok(outcome)
@@ -241,19 +349,22 @@ impl PostgresStatementRepository {
         let metadata = StatementMetadata::from_statement(&statement.statement, XAPI_VERSION);
         let result = sqlx::query(
             "INSERT INTO kiva.xapi_statements \
-             (tenant_id, statement_id, actor_ifi, verb_id, object_id, authority, statement, stored_at, version) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
+             (tenant_id, statement_id, actor_ifi, verb_id, object_id, authority, statement, stored_at, version, opaque_values) \
+             VALUES ($1, $2, $3, $4, $5, $6::json, $7::json, $8, $9, $10::json) \
              ON CONFLICT (tenant_id, statement_id) DO NOTHING",
         )
         .bind(&self.tenant_id)
         .bind(statement_id)
-        .bind(metadata.actor_ifi)
+        .bind(metadata.actor_ifi.map(String::into_bytes))
         .bind(metadata.verb_id)
         .bind(metadata.object_id)
-        .bind(metadata.authority.map(SqlJson))
-        .bind(SqlJson(statement.statement.clone()))
+        // SQLx's Json<Value> parameter advertises jsonb. Bind JSON text and
+        // cast directly to json so U+0000 never passes through a jsonb decoder.
+        .bind(metadata.authority.map(|value| value.to_string()))
+        .bind(statement.statement.to_string())
         .bind(statement.stored_at)
         .bind(metadata.version)
+        .bind(serde_json::to_string(&statement.opaque_values).map_err(|error| sqlx::Error::Encode(Box::new(error)))?)
         .execute(&mut **transaction)
         .await?;
 

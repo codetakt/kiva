@@ -9,6 +9,7 @@ RUN_MEMORY=1
 RUN_POSTGRES=1
 RUN_POSTGRES_VERIFICATION=1
 RUN_ADL=0
+ISSUED_EXECUTION_ROOT=""
 REQUIRE_CLEAN_GIT=0
 REQUIRE_IEEE_REFERENCE="${KIVA_REQUIRE_IEEE_REFERENCE_ROOT:-1}"
 IEEE_REFERENCE_ROOT="${KIVA_IEEE_XAPI_REFERENCE_ROOT:-/home/claude/Codex/opensource.ieee.org/xapi/xapi-base-standard-documentation}"
@@ -16,7 +17,7 @@ ADL_ROOT="${KIVA_ADL_COMPATIBILITY_ROOT:-/home/claude/Codex/github.com/adlnet/lr
 
 usage() {
   cat <<'EOF'
-usage: scripts/ci/generate_conformance_evidence.sh [--out DIR] [--skip-live] [--skip-memory] [--skip-postgres] [--skip-postgres-verification] [--with-adl-run] [--require-clean-git] [--no-require-ieee-reference]
+usage: scripts/ci/generate_conformance_evidence.sh [--out DIR] [--issued-execution-root DIR] [--skip-live] [--skip-memory] [--skip-postgres] [--skip-postgres-verification] [--with-adl-run] [--require-clean-git] [--no-require-ieee-reference]
 
 Generates a fixed conformance evidence bundle under DIR.
 The default DIR is target/conformance-evidence/latest.
@@ -25,6 +26,11 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --issued-execution-root)
+      [[ $# -ge 2 ]] || { echo "--issued-execution-root requires a directory" >&2; exit 2; }
+      ISSUED_EXECUTION_ROOT="$2"
+      shift 2
+      ;;
     --out)
       if [[ $# -lt 2 ]]; then
         echo "--out requires a directory" >&2
@@ -164,6 +170,13 @@ LOG_DIR="$OUT_DIR/logs"
 METADATA_DIR="$OUT_DIR/metadata"
 rm -rf "$REPORT_DIR" "$JUNIT_DIR" "$LOG_DIR" "$METADATA_DIR" "$OUT_DIR/README.md"
 mkdir -p "$REPORT_DIR" "$JUNIT_DIR" "$LOG_DIR" "$METADATA_DIR"
+if [[ -n "$ISSUED_EXECUTION_ROOT" ]]; then
+  [[ ! -e "$OUT_DIR/issued" ]] || { echo "issued evidence already exists" >&2; exit 2; }
+  [[ -f "$ISSUED_EXECUTION_ROOT/memory/execution.json" && -f "$ISSUED_EXECUTION_ROOT/postgres/execution.json" ]] || {
+    echo "issued execution root requires memory and postgres captures" >&2; exit 2;
+  }
+  cp -a "$ISSUED_EXECUTION_ROOT" "$OUT_DIR/issued"
+fi
 
 run_logged() {
   local label="$1"

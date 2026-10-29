@@ -8,3 +8,169 @@ profiles:
     request_count: 3
     window_seconds: 1
     path: /__kiva/conformance/rate-limit
+  declared-parameter-vocabulary:
+    contexts:
+    - method: DELETE
+      path: /activities/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: DELETE
+      path: /activities/state
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: DELETE
+      path: /agents/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /about
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /activities
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /activities/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /activities/state
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /agents
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /agents/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: GET
+      path: /statements
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - kivaUnknownParameter
+    - method: HEAD
+      path: /about
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: HEAD
+      path: /activities
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: HEAD
+      path: /activities/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: HEAD
+      path: /activities/state
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: HEAD
+      path: /agents
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: HEAD
+      path: /agents/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: POST
+      path: /activities/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: POST
+      path: /activities/state
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: POST
+      path: /agents/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: POST
+      path: /statements
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: PUT
+      path: /activities/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: PUT
+      path: /activities/state
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: PUT
+      path: /agents/profile
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+    - method: PUT
+      path: /statements
+      evidence: 'Kiva query allowlists: crates/kiva-server/src/surfaces/xapi/request/query.rs and generated
+        OpenAPI operation contracts; these names have no extension handler.'
+      unrecognized:
+      - unknownParameter
+  signature-validation-context:
+    signature:
+      evidence: Kiva verifies original RS256/384/512 bytes, typed x5c paths against the independently
+        configured synthetic anchor and certificate/issuer/time-bound out-of-band status, and payload
+        structure/equivalence. The disposable fixture uses tests/conformance/controls/kiva_certificate_policy.json
+        and tests/conformance/fixtures/signing/cases.json. No live PKI or production trust is claimed;
+        no-x5c unknown keys are structurally admitted with crypto not-evaluated under D-10=A.
+      algorithms:
+      - RS256
+      - RS384
+      - RS512
+      certificate_signature: verify-supplied-x5c
+      without_certificate: accept-without-cryptographic-verification
+  declared-resource-absence:
+    case_evidence:
+      statements-get-empty-result-returns-statement-result: Disposable single-writer Kiva tenant; no suite
+        write uses the reserved kiva-conformance-empty-result-00000000-0000-4000-8000-000000000203@example.org
+        Agent.
+      standard-resource-families-are-addressable: Disposable single-writer Kiva tenant; the three kiva-support-resources-missing-*
+        document addresses are reserved for this read-only case and no suite writer creates them.

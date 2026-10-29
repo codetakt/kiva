@@ -1,4 +1,4 @@
-h1:ONCDwIayG2wbOJEFflXlwyFZQ/SPEs44uHSg2+0ZrEc=
+h1:sKQnis5Cp0+1XVQageF5F4iIKj30HFmik2+74l6jf9g=
 20260618090000_lrs_core.sql h1:QZmi2GA7qNlBIvUUXl51DtdlXNb6VUVJ8eN/BlTRtW0=
 20260618110000_statement_attachments.sql h1:G2n0R1HLR/aaZGkW8/Gf6fyFVjCDAkgyaIEDD3P+Mco=
 20260619090000_confidential_additive_share_replay_records.sql h1:O/2ClRGQn3wOCCKDodPde9MJrFwJO49iACejOBa4q9s=
@@ -22,3 +22,9 @@ h1:ONCDwIayG2wbOJEFflXlwyFZQ/SPEs44uHSg2+0ZrEc=
 20260619270000_pds_ledger_events.sql h1:VTxm2kA+vp8WbV3gy6qeIaqO6hx1J4f+YHF422A2cm8=
 20260619280000_pds_provider_bindings.sql h1:zyicvXt282JTU/0wkSCiHAfAgVFk3019BWdYFdPZsWE=
 20260729010000_pds_portability_export_audit.sql h1:MCOVLCiqnZg5CQWAIZCyLwk+IJlvVErmpPZiALnjfaw=
+20261026000000_xapi_json_and_sha2.sql h1:5D6263iHhqOut7ph3Ape4SY5Ialc70NOLiplRkMSF1U=
+20261027000000_xapi_document_unicode.sql h1:nmjdjaq+3GZ/2JCfoYD9g7rAK0Z1zQkCCpBJLXx+kiM=
+20261027010000_xapi_empty_values.sql h1:qX6tiQeom5Moef5KedOMoXLuMw6NOBQtowC39eripr4=
+20261027020000_xapi_opaque_values.sql h1:xXB8oIdm2SXrJtgJhDOyha7EcUwiRFnJot7MIXnwn8A=
+20261028000000_xapi_optional_part_type.sql h1:eoeDBmBSWeFF/qM8XBivn/iqta+x3Xzvh4fydF8PSOA=
+20261029000000_xapi_attachment_media_bytes.sql h1:vfrzW9jOIubsdkN6ghRnp0Qju7UrFD7GNtIacTDIrWY=

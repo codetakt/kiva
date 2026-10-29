@@ -38,22 +38,41 @@ pg_ctl -D "$PGDATA_DIR" -o "-k /tmp -p $PGPORT_NUM -h $PGHOST_ADDR" -l "$PGDATA_
 STARTED_POSTGRES=1
 
 createdb -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" "$PGDATABASE_NAME"
-kiva_apply_postgres_migrations "$ROOT_DIR" "$PGHOST_ADDR" "$PGPORT_NUM" "$PGUSER_NAME" "$PGDATABASE_NAME"
+XAPI_MIGRATION_CONTROL_RAN=0
+ATTACHMENT_MIGRATION_CONTROL_RAN=0
+for migration in "$ROOT_DIR"/db/migrations/[0-9]*.sql; do
+  if [[ "$migration" == */20261027000000_xapi_document_unicode.sql ]]; then
+    # One connection retains the temporary expectations across the upgrade.
+    # Include old JSON containing NUL outside the IFI and literal escape names.
+    psql -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" -d "$PGDATABASE_NAME" -v ON_ERROR_STOP=1 \
+      -f "$ROOT_DIR/tests/postgres/xapi_unicode_migration_before.sql" \
+      -f "$migration" \
+      -f "$ROOT_DIR/tests/postgres/xapi_unicode_migration_after.sql" >/dev/null
+    XAPI_MIGRATION_CONTROL_RAN=1
+  elif [[ "$migration" == */20261029000000_xapi_attachment_media_bytes.sql ]]; then
+    psql -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" -d "$PGDATABASE_NAME" -v ON_ERROR_STOP=1 \
+      -f "$ROOT_DIR/tests/postgres/xapi_attachment_media_migration_before.sql" \
+      -f "$migration" \
+      -f "$ROOT_DIR/tests/postgres/xapi_attachment_media_migration_after.sql" >/dev/null
+    ATTACHMENT_MIGRATION_CONTROL_RAN=1
+  else
+    psql -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" -d "$PGDATABASE_NAME" -v ON_ERROR_STOP=1 \
+      -f "$migration" >/dev/null
+  fi
+done
+[[ "$XAPI_MIGRATION_CONTROL_RAN" == 1 ]] || { echo "missing xAPI migration control" >&2; exit 1; }
+[[ "$ATTACHMENT_MIGRATION_CONTROL_RAN" == 1 ]] || { echo "missing attachment migration control" >&2; exit 1; }
 
 export KIVA_POSTGRES_TEST_DATABASE_URL="postgres://${PGUSER_NAME}@${PGHOST_ADDR}:${PGPORT_NUM}/${PGDATABASE_NAME}"
 
-cargo test -q -p kiva-server postgres_confidential_ \
-  -- --ignored --test-threads=1
-cargo test -q -p kiva-server postgres_pds_ \
-  -- --ignored --test-threads=1
-cargo test -q -p kiva-server postgres_analytics_ \
-  -- --ignored --test-threads=1
-cargo test -q -p kiva-server postgres_xapi_ \
-  -- --ignored --test-threads=1
+# Discover and run the same complete ignored PostgreSQL test selection. Keep
+# the receipt inventory synchronized when a new storage regression is added.
+cargo test -q -p kiva-server --lib postgres_ -- --ignored --list > "$PGDATA_DIR/test-inventory.txt"
+cargo test -q -p kiva-server --lib postgres_ -- --ignored --test-threads=1
 
 if [[ -n "$REPORT_FILE" ]]; then
   mkdir -p "$(dirname "$REPORT_FILE")"
-  python3 - "$REPORT_FILE" <<'PY'
+  python3 - "$REPORT_FILE" "$PGDATA_DIR/test-inventory.txt" <<'PY'
 from __future__ import annotations
 
 import json
@@ -62,6 +81,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 report_path = Path(sys.argv[1])
+checks = [line.removesuffix(": test") for line in Path(sys.argv[2]).read_text().splitlines()
+          if line.endswith(": test")]
+if not checks or len(set(checks)) != len(checks):
+    raise SystemExit("missing or duplicate PostgreSQL test inventory")
+checks.append("postgres_xapi_unicode_existing_row_migration")
+checks.append("postgres_xapi_attachment_media_existing_row_migration")
 report = {
     "schema_version": 1,
     "standard": "Kiva Architecture",
@@ -71,73 +96,7 @@ report = {
     "generated_at_utc": datetime.now(UTC).replace(microsecond=0).isoformat(),
     "temporary_cluster": True,
     "migrations_applied": True,
-    "checks": [
-        {
-            "id": "postgres_xapi_substatement_retries_preserve_stored_timestamps",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_xapi_continuations_survive_collection_changes",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_threshold_release_is_idempotent_under_retries",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_differential_privacy_budget_spend_is_serialized",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_differential_privacy_release_is_idempotent_under_retries",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_differential_privacy_sampled_release_is_idempotent_under_retries",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_differential_privacy_composition_summary_tracks_release_and_manual_spend",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_job_lifecycle_is_idempotent_and_audited",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_confidential_participant_lifecycle_is_idempotent_and_audited",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_pds_consent_revocation_and_access_audit_are_persistent",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_pds_data_products_require_available_release_and_owner_scope",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_pds_governance_profiles_are_strict_and_persistent",
-            "crate": "kiva-server",
-            "status": "passed",
-        },
-        {
-            "id": "postgres_pds_learner_portability_export_is_subject_bound_paged_and_audited",
-            "crate": "kiva-server",
-            "status": "passed",
-        }
-    ],
+    "checks": [{"id": name, "crate": "kiva-server", "status": "passed"} for name in checks],
 }
 report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY

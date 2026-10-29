@@ -30,9 +30,7 @@ pub fn document_preconditions_pass(
 pub enum DocumentWriteDecision {
     /// Write or replace the document.
     Write,
-    /// Existing document is byte-for-byte or JSON-equal and no precondition was supplied.
-    Noop,
-    /// Existing document differs and the request did not supply a precondition.
+    /// Existing document requires an `ETag` precondition, regardless of its content.
     Conflict,
     /// At least one HTTP precondition failed.
     PreconditionFailed,
@@ -49,20 +47,20 @@ pub enum DocumentDeleteDecision {
     PreconditionFailed,
 }
 
-/// Decides whether a document PUT should write, no-op, conflict, or fail.
+/// Decides whether a document PUT should write, conflict, or fail.
 #[must_use]
 pub const fn document_put_decision(
     preconditions_pass: bool,
     has_preconditions: bool,
-    existing_content_matches: Option<bool>,
+    existing_content_present: bool,
 ) -> DocumentWriteDecision {
     if !preconditions_pass {
         return DocumentWriteDecision::PreconditionFailed;
     }
-    match (existing_content_matches, has_preconditions) {
-        (Some(false), false) => DocumentWriteDecision::Conflict,
-        (Some(true), false) => DocumentWriteDecision::Noop,
-        (None | Some(_), true) | (None, false) => DocumentWriteDecision::Write,
+    if existing_content_present && !has_preconditions {
+        DocumentWriteDecision::Conflict
+    } else {
+        DocumentWriteDecision::Write
     }
 }
 

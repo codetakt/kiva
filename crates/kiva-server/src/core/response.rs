@@ -55,6 +55,23 @@ pub(crate) fn insert_header(
     }
 }
 
+/// Inverse of `request_util::header_text` for stored HTTP field octets.
+/// Do not serialize the internal ISO-8859-1 character mapping as UTF-8.
+pub(crate) fn latin1_header_value(value: &str) -> Result<HeaderValue, HttpError> {
+    let invalid = || {
+        HttpError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "stored HTTP header could not be serialized",
+        )
+    };
+    let bytes = value
+        .chars()
+        .map(u8::try_from)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| invalid())?;
+    HeaderValue::from_bytes(&bytes).map_err(|_| invalid())
+}
+
 pub(crate) fn http_date(value: OffsetDateTime) -> String {
     format!(
         "{}, {:02} {} {:04} {:02}:{:02}:{:02} GMT",
@@ -157,6 +174,27 @@ pub(crate) fn json_response(status: StatusCode, body: Value) -> Response {
     (status, version_headers(), Json(body)).into_response()
 }
 
+pub(crate) fn json_bytes_response(
+    status: StatusCode,
+    body: Result<Vec<u8>, serde_json::Error>,
+) -> Response {
+    match body {
+        Ok(body) => {
+            let mut headers = version_headers();
+            headers.insert(
+                ::http::header::CONTENT_TYPE,
+                HeaderValue::from_static("application/json"),
+            );
+            (status, headers, body).into_response()
+        }
+        Err(error) => backend_error_response(
+            &error,
+            "HTTP response projection failed",
+            "HTTP response projection failed",
+        ),
+    }
+}
+
 pub(crate) fn json_projection_response(
     status: StatusCode,
     body: Result<Value, serde_json::Error>,
@@ -191,23 +229,15 @@ pub(crate) fn version_headers() -> HeaderMap {
 }
 
 pub(crate) fn statement_result_headers() -> HeaderMap {
-    let mut headers = version_headers();
-    insert_header(
-        &mut headers,
-        ::http::header::HeaderName::from_static("x-experience-api-consistent-through"),
-        &consistent_through_value(),
-    );
-    headers
+    // The Statement route middleware supplies the repository watermark captured
+    // BEFORE the response's reads. Wall time here can race an unfinished write.
+    version_headers()
 }
 
 pub(crate) fn statement_resource_response(response: impl IntoResponse) -> Response {
     let mut response = response.into_response();
     response.headers_mut().extend(statement_result_headers());
     response
-}
-
-pub(crate) fn consistent_through_value() -> String {
-    rfc3339(OffsetDateTime::now_utc())
 }
 
 pub(crate) fn rfc3339(value: OffsetDateTime) -> String {

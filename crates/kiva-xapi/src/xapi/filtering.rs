@@ -132,7 +132,8 @@ impl StatementFilters {
             actor_ifi: query
                 .get("agent")
                 .map(|agent| {
-                    serde_json::from_str::<Value>(agent)
+                    validate_unique_json_properties(agent.as_bytes())
+                        .and_then(|()| serde_json::from_str::<Value>(agent))
                         .map_err(|_error| StatementFilterError::InvalidAgentJson)
                         .and_then(|agent| {
                             actor_validation::validate_filter_agent(&agent)
@@ -357,14 +358,18 @@ fn related_activity_matches_statement_or_substatement(
         })
 }
 
-fn context_activity_ids(value: &Value) -> Box<dyn Iterator<Item = &str> + '_> {
-    match value {
-        Value::Array(values) => Box::new(values.iter().filter_map(activity_id)),
-        Value::Object(object) => Box::new(object.values().flat_map(context_activity_ids)),
-        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {
-            Box::new(std::iter::empty())
-        }
-    }
+fn context_activity_ids(value: &Value) -> impl Iterator<Item = &str> {
+    // Both accepted representations name Activities directly. Their definitions
+    // and extension values do not introduce additional related Activities.
+    ["parent", "grouping", "category", "other"]
+        .into_iter()
+        .filter_map(move |role| value.get(role))
+        .flat_map(|activity| {
+            std::iter::once(activity)
+                .filter(|value| value.is_object())
+                .chain(activity.as_array().into_iter().flatten())
+        })
+        .filter_map(activity_id)
 }
 
 fn activity_id(value: &Value) -> Option<&str> {

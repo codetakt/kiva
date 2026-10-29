@@ -1,0 +1,75 @@
+{
+  "source": "https://crates.io/crates/pkix-path/0.3.2",
+  "version": "0.3.2",
+  "upstream_files": {
+    "Cargo.toml": "9d0da40f6f5d31f7ea4eb1bbe4a1f2a0f549995dba492b4ee62fb5b4a2123e8a",
+    "README.md": "4bb6fd6adc36ec817295b8676c02994531d8f5ba517172d1bc245b6d4d583e34",
+    "src/serde_der.rs": "bbb0b16cf7fa88e98b2b513fd961743948c94367baacefba91cdbc793b263224",
+    "src/lib.rs": "e5b44c2a071ead68f6cb81b7483ed61f9c9ba75e3c51effe295db853aa2c4ff8",
+    "tests/pkits/README.md": "a893e1617b93574c0602a72cbfee798b03f4444d7171730d2160fb11b89fe898",
+    "tests/fixtures/anchor-nc/README.md": "0770fc636d8a70f5ae17f8a432d1adbf223fa73f8fac8602d206097e2d1429f1"
+  },
+  "changes": [
+    {
+      "id": "KIVA-PKIX-01",
+      "file": "src/lib.rs",
+      "reason": "RFC5280 self-issued key rollover: issuer/subject DN equality does not require target SPKI equality with the trust anchor. Remove that extra guard and its helper; retain original-byte signature verification against the anchor key. Distinct-key rollover and an untrusted self-signed replacement are exercised by Kiva signature_policy tests."
+    },
+    {
+      "id": "KIVA-PKIX-02",
+      "files": [
+        "src/lib.rs",
+        "src/rfc4518.rs",
+        "src/rfc4518/unicode32.rs"
+      ],
+      "reason": "Replace ASCII-only DN preparation with RFC4518 Unicode3.2 mapping, RFC3454 B.2 case fold, NFKC, prohibited repertoire, combining-mark-aware insignificant spaces; use bijective AVA multiset matching. UTF8/Printable/BMP supported; optional Teletex/Universal unsupported. Full 5-column Unicode3.2 NormalizationTest invariants and prepared-output reference corpus are exercised."
+    },
+    {
+      "id": "KIVA-PKIX-03",
+      "file": "src/lib.rs",
+      "reason": "RFC822 mailbox constraints preserve exact local part and case-insensitive host. URI constraints isolate authority before parsing userinfo, reject non-DNS hosts, and do not interpret @ from path/query/fragment as authority. Actual signed path controls cover each mandatory name form."
+    },
+    {
+      "id": "KIVA-PKIX-04",
+      "file": "src/lib.rs",
+      "reason": "Remove a nonstandard SAN-identity bypass of issuer DN chaining; critical SAN does not waive RFC5280 6.1.3(a)(4). Distinguish actual repeated certificates from separate issuer/serial uniqueness duties. Signed single-cause path controls verify the linkage condition."
+    },
+    {
+      "id": "KIVA-PKIX-05",
+      "file": "src/lib.rs",
+      "reason": "Dispatch DN attribute matching by OID: domainComponent uses single-label IA5 ASCII case-insensitive exact comparison without DirectoryString whitespace handling. Required supported naming attributes use Unicode3.2 preparation with appropriate string types. Unknown attributes use an explicit typed binary equality policy instead of inferring DirectoryString semantics from their tags. Signed, otherwise-valid issuer-link controls and per-type boundary vectors exercise the integration."
+    },
+    {
+      "id": "KIVA-PKIX-06",
+      "files": [
+        "src/certificate_uri.rs",
+        "src/certificate_idna.rs",
+        "src/rfc4518.rs",
+        "src/rfc4518/unicode32.rs",
+        "Cargo.toml",
+        "src/lib.rs"
+      ],
+      "reason": "RFC5280 certificate URI syntax and http/https/ftp/ldap scheme normalization, including LDAP defaults and reserved escapes, is separate from xAPI IRI comparison. Frozen Unicode3.2 Nameprep with IDNA2003 flags converts only IDN hosts before comparison; producer mapping uses NFC then UTF8 escaping without premature IDNA. Only the RFC3492 punycode primitive is delegated to idna1.1; UTS46/IDNA2008 APIs are not called. Exact frozen NFC and NFKC corpus invariants are checked. URI name constraints use this comparison view and retain host-only semantics; original signed octets are untouched."
+    },
+    {
+      "id": "KIVA-PKIX-07",
+      "file": "src/lib.rs",
+      "reason": "Apply legacy subject emailAddress constraints when SAN is absent, per RFC5280 4.2.1.10. With SAN present, process its rfc822Name values instead. Signed single-cause controls reproduce the former over-rejection and retain independent SAN and no-SAN negative cases."
+    },
+    {
+      "id": "KIVA-PKIX-08",
+      "file": "src/lib.rs",
+      "reason": "RFC5280 6.1.4(g): retain each CA permittedSubtrees group and enforce their conjunction for each encountered name, with per-group name-type applicability. This represents intersection without treating constraint bases as concrete names, prevents an empty intersection being resurrected, and handles repeated URI/mail/IP constraints. Exact excluded-subtree deduplication preserves union. Four independently enumerated finite name-set models cover 8192 signed paths; those models are bounded evidence, not exhaustive PKIX qualification."
+    },
+    {
+      "id": "KIVA-PKIX-09",
+      "file": "src/lib.rs",
+      "reason": "RFC5280 4.2.1.10: any applicable URI constraint, including excluded-only constraints, requires a URI SAN with a DNS authority. Reject hostless and IP-literal URI names before exclusion matching. Unconstrained URIs retain their separate syntax requirements."
+    },
+    {
+      "id": "KIVA-PKIX-10",
+      "file": "src/lib.rs",
+      "reason": "RFC5280 4.2.1.10: remember unsupported name forms from critical constraints and reject when that form occurs in a subsequent non-exempt certificate. Preserve absent-form and nonfinal self-issued applicability boundaries; do not silently accept a registeredID SAN under an unprocessed critical registeredID constraint. Product HTTP controls verify admission, rejection, batch atomicity and preserved attachment bytes."
+    }
+  ]
+}

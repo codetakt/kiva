@@ -1,0 +1,351 @@
+{
+  "contract": "DC-MAILTO",
+  "sources": [
+    "RFC6068 sections 2, 5, 6",
+    "RFC5322 sections 3.2.3, 3.2.4, 3.4.1",
+    "RFC3987 section 3.1"
+  ],
+  "role": "xAPI output mailbox syntax; UTF8 local-part reservation is accepted without asserting SMTP internationalization or delivery semantics",
+  "vectors": [
+    {
+      "id": "ascii",
+      "iri": "MAILTO:Alice+tag@example.test",
+      "valid": true
+    },
+    {
+      "id": "case-preserved",
+      "iri": "mailto:Alice@EXAMPLE.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-space",
+      "iri": "mailto:%22not%20me%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-at",
+      "iri": "mailto:%22not%40me%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-comma",
+      "iri": "mailto:%22a%2Cb%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-backslash",
+      "iri": "mailto:%22oh%5C%5Cno%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-escape",
+      "iri": "mailto:%22a%5C%22b%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-space-escape",
+      "iri": "mailto:%22a%5C%20b%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "quoted-parentheses",
+      "iri": "mailto:%22a(b)%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "empty-quoted",
+      "iri": "mailto:%22%22@example.test",
+      "valid": true
+    },
+    {
+      "id": "reserved-percent",
+      "iri": "mailto:a%25b@example.test",
+      "valid": true
+    },
+    {
+      "id": "reserved-query",
+      "iri": "mailto:a%3Fb@example.test",
+      "valid": true
+    },
+    {
+      "id": "reserved-ampersand",
+      "iri": "mailto:a%26b@example.test",
+      "valid": true
+    },
+    {
+      "id": "reserved-slash",
+      "iri": "mailto:a%2Fb@example.test",
+      "valid": true
+    },
+    {
+      "id": "single-decoding",
+      "iri": "mailto:%2522literal%2522@example.test",
+      "valid": true
+    },
+    {
+      "id": "encoded-dot",
+      "iri": "mailto:a%2Eb@example.test",
+      "valid": true
+    },
+    {
+      "id": "utf8-domain",
+      "iri": "mailto:user@%E7%B4%8D%E8%B1%86.example.test",
+      "valid": true
+    },
+    {
+      "id": "iri-domain",
+      "iri": "mailto:user@納豆.example.test",
+      "valid": true
+    },
+    {
+      "id": "utf8-local-reserved",
+      "iri": "mailto:%C3%A9@example.test",
+      "valid": true
+    },
+    {
+      "id": "iri-local-reserved",
+      "iri": "mailto:é@example.test",
+      "valid": true
+    },
+    {
+      "id": "domain-literal",
+      "iri": "mailto:user@%5B192.0.2.1%5D",
+      "valid": true
+    },
+    {
+      "id": "ipv6-literal",
+      "iri": "mailto:user@%5BIPv6:2001:db8::1%5D",
+      "valid": true
+    },
+    {
+      "id": "hfields",
+      "iri": "mailto:a@example.test?cc=b@example.test&subject=caf%C3%A9",
+      "valid": true
+    },
+    {
+      "id": "body-crlf",
+      "iri": "mailto:a@example.test?body=first%0D%0Asecond",
+      "valid": true
+    },
+    {
+      "id": "body-encoded-delimiters",
+      "iri": "mailto:a@example.test?body=%26%3F%3D",
+      "valid": true
+    },
+    {
+      "id": "encoded-word",
+      "iri": "mailto:a@example.test?subject=%3D%3Fiso-8859-1%3FQ%3Fcaf%3DE9%3F%3D",
+      "valid": true
+    },
+    {
+      "id": "hfield-qchars",
+      "iri": "mailto:a@example.test?x=!$%27()*+,:@;",
+      "valid": true
+    },
+    {
+      "id": "empty-hfield-values",
+      "iri": "mailto:a@example.test?=&x=",
+      "valid": true
+    },
+    {
+      "id": "multiple-recipients",
+      "iri": "mailto:a@example.test,b@example.test",
+      "valid": true
+    },
+    {
+      "id": "domain-dot-atom-not-dns",
+      "iri": "mailto:a@x_y.test",
+      "valid": true
+    },
+    {
+      "id": "encoded-ascii-domain",
+      "iri": "mailto:a@%65xample.test",
+      "valid": true
+    },
+    {
+      "id": "numeric-iri-no-delivery",
+      "iri": "mailto:a@no-such-host.invalid",
+      "valid": true
+    },
+    {
+      "id": "wrong-scheme",
+      "iri": "https://example.test",
+      "valid": false
+    },
+    {
+      "id": "no-at",
+      "iri": "mailto:alice",
+      "valid": false
+    },
+    {
+      "id": "empty-local",
+      "iri": "mailto:@example.test",
+      "valid": false
+    },
+    {
+      "id": "empty-domain",
+      "iri": "mailto:a@",
+      "valid": false
+    },
+    {
+      "id": "empty-mbox",
+      "iri": "mailto:",
+      "valid": false
+    },
+    {
+      "id": "double-dot",
+      "iri": "mailto:a..b@example.test",
+      "valid": false
+    },
+    {
+      "id": "extra-at",
+      "iri": "mailto:a@b@example.test",
+      "valid": false
+    },
+    {
+      "id": "encoded-at-not-delimiter",
+      "iri": "mailto:a%40example.test",
+      "valid": false
+    },
+    {
+      "id": "local-comment",
+      "iri": "mailto:a(comment)@example.test",
+      "valid": false
+    },
+    {
+      "id": "domain-comment",
+      "iri": "mailto:a@example(comment).test",
+      "valid": false
+    },
+    {
+      "id": "raw-space",
+      "iri": "mailto:a b@example.test",
+      "valid": false
+    },
+    {
+      "id": "raw-quotes",
+      "iri": "mailto:\"a\"@example.test",
+      "valid": false
+    },
+    {
+      "id": "raw-semicolon",
+      "iri": "mailto:a;b@example.test",
+      "valid": false
+    },
+    {
+      "id": "raw-ampersand",
+      "iri": "mailto:a&b@example.test",
+      "valid": false
+    },
+    {
+      "id": "raw-equals",
+      "iri": "mailto:a=b@example.test",
+      "valid": false
+    },
+    {
+      "id": "raw-brackets",
+      "iri": "mailto:a@[192.0.2.1]",
+      "valid": false
+    },
+    {
+      "id": "bad-escape",
+      "iri": "mailto:a%xx@example.test",
+      "valid": false
+    },
+    {
+      "id": "truncated-escape",
+      "iri": "mailto:a%2@example.test",
+      "valid": false
+    },
+    {
+      "id": "overlong-utf8",
+      "iri": "mailto:a@%C0%AF.example.test",
+      "valid": false
+    },
+    {
+      "id": "surrogate-utf8",
+      "iri": "mailto:a@%ED%A0%80.example.test",
+      "valid": false
+    },
+    {
+      "id": "quoted-control",
+      "iri": "mailto:%22a%00b%22@example.test",
+      "valid": false
+    },
+    {
+      "id": "quoted-newline",
+      "iri": "mailto:%22a%0Ab%22@example.test",
+      "valid": false
+    },
+    {
+      "id": "quote-unclosed",
+      "iri": "mailto:%22a@example.test",
+      "valid": false
+    },
+    {
+      "id": "quote-unescaped",
+      "iri": "mailto:%22a%22b%22@example.test",
+      "valid": false
+    },
+    {
+      "id": "quote-backslash-end",
+      "iri": "mailto:%22a%5C%22@example.test",
+      "valid": false
+    },
+    {
+      "id": "obsolete-dot-quoted",
+      "iri": "mailto:a.%22b%22@example.test",
+      "valid": false
+    },
+    {
+      "id": "literal-backslash",
+      "iri": "mailto:a@%5Bfoo%5Cbar%5D",
+      "valid": false
+    },
+    {
+      "id": "literal-space",
+      "iri": "mailto:a@%5Bfoo%20bar%5D",
+      "valid": false
+    },
+    {
+      "id": "fragment",
+      "iri": "mailto:a@example.test#fragment",
+      "valid": false
+    },
+    {
+      "id": "missing-hfield-equals",
+      "iri": "mailto:a@example.test?subject",
+      "valid": false
+    },
+    {
+      "id": "second-query",
+      "iri": "mailto:a@example.test?cc=b@example.test?body=x",
+      "valid": false
+    },
+    {
+      "id": "raw-hfield-equals",
+      "iri": "mailto:a@example.test?x=a=b",
+      "valid": false
+    },
+    {
+      "id": "raw-hfield-slash",
+      "iri": "mailto:a@example.test?body=a/b",
+      "valid": false
+    },
+    {
+      "id": "trailing-hfield",
+      "iri": "mailto:a@example.test?x=a&",
+      "valid": false
+    },
+    {
+      "id": "invalid-hfield-utf8",
+      "iri": "mailto:a@example.test?subject=%FF",
+      "valid": false
+    },
+    {
+      "id": "trailing-recipient",
+      "iri": "mailto:a@example.test,",
+      "valid": false
+    }
+  ]
+}

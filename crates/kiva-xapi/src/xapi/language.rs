@@ -2,33 +2,86 @@
 
 use super::*;
 
-/// Parses an `Accept-Language` header value into preferred language ranges.
+/// An HTTP language range with its original quality and relative order.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LanguagePreference {
+    range: String,
+    quality: u16,
+}
+
+/// Parses language ranges, retaining exclusions and the sender's order.
 #[must_use]
-pub fn accepted_language_ranges(header: Option<&str>) -> Vec<String> {
+pub fn accepted_language_ranges(header: Option<&str>) -> Vec<LanguagePreference> {
     header
-        .map(|value| {
-            value
-                .split(',')
-                .filter_map(|language_range| {
-                    let language = language_range
-                        .split_once(';')
-                        .map_or(language_range, |(language, _quality)| language)
-                        .trim();
-                    (!language.is_empty() && language != "*").then(|| language.to_owned())
-                })
-                .collect()
-        })
         .unwrap_or_default()
+        .split(',')
+        .filter_map(|entry| {
+            let mut fields = entry.split(';');
+            let range = fields.next()?.trim();
+            if range != "*"
+                && !range.split('-').enumerate().all(|(index, part)| {
+                    (1..=8).contains(&part.len())
+                        && part.bytes().all(|byte| {
+                            if index == 0 {
+                                byte.is_ascii_alphabetic()
+                            } else {
+                                byte.is_ascii_alphanumeric()
+                            }
+                        })
+                })
+            {
+                return None;
+            }
+            let weight = match fields.next() {
+                None => 1000,
+                Some(parameter) => {
+                    let (name, value) = parameter.trim().split_once('=')?;
+                    // RFC 2616 permits SP/HTAB between tokens and separators.
+                    let name = name.trim_matches([' ', '\t']);
+                    let value = value.trim_matches([' ', '\t']);
+                    if !name.eq_ignore_ascii_case("q") {
+                        return None;
+                    }
+                    language_quality(value)?
+                }
+            };
+            if fields.next().is_some() {
+                return None;
+            }
+            Some(LanguagePreference {
+                quality: weight,
+                range: range.to_owned(),
+            })
+        })
+        .collect()
+}
+
+fn language_quality(value: &str) -> Option<u16> {
+    let (whole, fraction) = value.split_once('.').unwrap_or((value, ""));
+    if fraction.len() > 3 || !fraction.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    match whole {
+        "1" if fraction.bytes().all(|byte| byte == b'0') => Some(1000),
+        "0" => {
+            let digits = format!("{fraction:0<3}");
+            digits.parse().ok()
+        }
+        _ => None,
+    }
 }
 
 /// Retains preferred entries in xAPI language maps for a canonical response.
 #[must_use]
-pub fn canonicalize_statement_language_maps(mut statement: Value, languages: &[String]) -> Value {
+pub fn canonicalize_statement_language_maps(
+    mut statement: Value,
+    languages: &[LanguagePreference],
+) -> Value {
     canonicalize_statement_value(&mut statement, languages);
     statement
 }
 
-fn canonicalize_statement_value(statement: &mut Value, languages: &[String]) {
+fn canonicalize_statement_value(statement: &mut Value, languages: &[LanguagePreference]) {
     retain_preferred_language_map(statement, "/verb/display", languages);
     retain_preferred_language_map(statement, "/object/definition/name", languages);
     retain_preferred_language_map(statement, "/object/definition/description", languages);
@@ -63,7 +116,10 @@ fn canonicalize_statement_value(statement: &mut Value, languages: &[String]) {
     }
 }
 
-fn canonicalize_context_activity_language_maps(statement: &mut Value, languages: &[String]) {
+fn canonicalize_context_activity_language_maps(
+    statement: &mut Value,
+    languages: &[LanguagePreference],
+) {
     let Some(context_activities) = statement
         .pointer_mut("/context/contextActivities")
         .and_then(Value::as_object_mut)
@@ -83,7 +139,7 @@ fn canonicalize_context_activity_language_maps(statement: &mut Value, languages:
     }
 }
 
-fn canonicalize_activity_language_maps(activity: &mut Value, languages: &[String]) {
+fn canonicalize_activity_language_maps(activity: &mut Value, languages: &[LanguagePreference]) {
     retain_preferred_language_map(activity, "/definition/name", languages);
     retain_preferred_language_map(activity, "/definition/description", languages);
     for component_list in ["choices", "scale", "source", "target", "steps"] {
@@ -189,7 +245,11 @@ fn project_actor_ids(actor: Option<&mut Value>) {
         )
     });
 }
-fn retain_preferred_language_map(statement: &mut Value, pointer: &str, languages: &[String]) {
+fn retain_preferred_language_map(
+    statement: &mut Value,
+    pointer: &str,
+    languages: &[LanguagePreference],
+) {
     let Some(language_map) = statement
         .pointer_mut(pointer)
         .and_then(Value::as_object_mut)
@@ -207,19 +267,26 @@ fn retain_preferred_language_map(statement: &mut Value, pointer: &str, languages
 
 fn preferred_language_entry(
     language_map: &Map<String, Value>,
-    languages: &[String],
+    languages: &[LanguagePreference],
 ) -> Option<(String, Value)> {
-    for language in languages {
-        if let Some((key, value)) = language_map
-            .iter()
-            .find(|(key, _value)| key.eq_ignore_ascii_case(language))
-        {
-            return Some((key.clone(), value.clone()));
-        }
-    }
-    language_map
-        .iter()
-        .next()
+    // The longest matching range supplies a tag's quality, even when its
+    // quality is zero. Only then compare available tags by quality and order.
+    language_map.iter().filter_map(|(key, value)| {
+        let preference = languages.iter().enumerate().filter(|(_, preference)| {
+            let range = &preference.range;
+            range == "*" || key.eq_ignore_ascii_case(range)
+                || (key.len() > range.len()
+                    && key.get(..range.len()).is_some_and(|prefix| prefix.eq_ignore_ascii_case(range))
+                    && key.as_bytes().get(range.len()) == Some(&b'-'))
+        }).max_by_key(|(index, preference)| (
+            if preference.range == "*" { 0 } else { preference.range.len() },
+            std::cmp::Reverse(*index),
+        ));
+        let (index, preference) = preference?;
+        (preference.quality > 0).then_some(((preference.quality, std::cmp::Reverse(index), std::cmp::Reverse(key)), (key, value)))
+    }).max_by_key(|(rank, _)| *rank).map(|(_, entry)| entry)
+        // Kiva's adopted fallback applies when no available language is acceptable.
+        .or_else(|| language_map.iter().next())
         .map(|(key, value)| (key.clone(), value.clone()))
 }
 
@@ -227,7 +294,67 @@ fn preferred_language_entry(
 mod tests {
     use serde_json::json;
 
-    use super::{canonicalize_statement_language_maps, statement_ids_format};
+    use super::{
+        accepted_language_ranges, canonicalize_statement_language_maps, statement_ids_format,
+    };
+
+    #[test]
+    fn negotiates_weighted_ranges_in_every_nested_language_map() {
+        let maps = json!({"en": "English", "ja-JP": "Japanese"});
+        let statement = json!({
+            "verb": {"display": maps},
+            "object": {"objectType": "SubStatement", "object": {"definition": {
+                "name": maps, "choices": [{"description": maps}]
+            }}},
+            "attachments": [{"display": maps}]
+        });
+        for header in [
+            "en;q=0.1, ja-JP;q=0.9",
+            "ja;q=1, en;q=0.5",
+            "en;q=0, JA;q=1",
+            "en; q = 0, JA; q = 1",
+            "en;q\t=\t0, ja-JP; Q\t=\t1",
+            "*;q = 0, ja;q = 1",
+        ] {
+            let projected = canonicalize_statement_language_maps(
+                statement.clone(),
+                &accepted_language_ranges(Some(header)),
+            );
+            for pointer in [
+                "/verb/display",
+                "/object/object/definition/name",
+                "/object/object/definition/choices/0/description",
+                "/attachments/0/display",
+            ] {
+                assert_eq!(
+                    projected.pointer(pointer),
+                    Some(&json!({"ja-JP": "Japanese"})),
+                    "{header} {pointer}"
+                );
+            }
+        }
+        assert_eq!(
+            accepted_language_ranges(Some("de;q=0.6, fr;q=0.6, *;q=0.2, en;q=0, es;q=2")),
+            vec![
+                super::LanguagePreference {
+                    range: "de".into(),
+                    quality: 600
+                },
+                super::LanguagePreference {
+                    range: "fr".into(),
+                    quality: 600
+                },
+                super::LanguagePreference {
+                    range: "*".into(),
+                    quality: 200
+                },
+                super::LanguagePreference {
+                    range: "en".into(),
+                    quality: 0
+                },
+            ]
+        );
+    }
 
     #[test]
     fn canonicalizes_context_activity_language_maps_without_changing_other_fields() {
@@ -245,7 +372,10 @@ mod tests {
             }
         });
 
-        let projected = canonicalize_statement_language_maps(statement, &["en-GB".to_owned()]);
+        let projected = canonicalize_statement_language_maps(
+            statement,
+            &accepted_language_ranges(Some("en-GB")),
+        );
 
         assert_eq!(
             projected.pointer("/context/contextActivities/category/id"),

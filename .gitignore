@@ -28,3 +28,5 @@ __pycache__/
 /spec/conformance/issued-test-projection.json
 /spec/conformance/issued-test-matrix.md
 /spec/conformance/lrs-assertion-manifest.yaml
+/tests/conformance/fixtures/pkix-unicode32.json.gz
+/vendor/pkix-path/src/rfc4518/unicode32.rs

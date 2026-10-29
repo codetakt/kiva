@@ -1,0 +1,9 @@
+pkix-path 0.3.2
+Upstream package author: Mark Atwood <mark@reviewcommit.com>
+Source: https://crates.io/crates/pkix-path/0.3.2
+Repository: https://github.com/MarkAtwood/crate-pkix
+
+The upstream package declares Apache-2.0 OR MIT. This distribution uses the
+Apache-2.0 option; its text is in LICENSE-APACHE. Upstream shipped no separate
+NOTICE or license text. Original source-file notices are retained.
+Kiva modifications and original file digests are recorded in UPSTREAM.json.

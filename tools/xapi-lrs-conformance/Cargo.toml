@@ -18,15 +18,20 @@ path = "src/main.rs"
 [dependencies]
 clap.workspace = true
 iri-string.workspace = true
+num-bigint = { version = "0.4", default-features = false, features = ["std"] }
 reqwest.workspace = true
 serde.workspace = true
-serde_json.workspace = true
+# Separate package identity keeps arbitrary_precision out of the server's
+# dependency feature graph, even when the workspace builds both binaries.
+# This is the upstream source revision of the pinned serde_json 1.0.150 release.
+serde_json = { version = "=1.0.150", git = "https://github.com/serde-rs/json", rev = "a1ae73ac6a6940a4a57c673aebaa13ed4dfe3e8c", features = ["arbitrary_precision", "raw_value"] }
 serde_yaml.workspace = true
 sha2.workspace = true
 thiserror.workspace = true
 time.workspace = true
 tokio.workspace = true
 url.workspace = true
+yaml-rust2 = { version = "0.13", default-features = false }
 
 [lints]
 workspace = true

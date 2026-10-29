@@ -1,10 +1,10 @@
-"""A known IRL gap must neither abort the control nor hide malformed OpenIDs."""
+"""HTTP locator support must not hide malformed OpenIDs or unavailable observations."""
 import copy
 import unittest
 
 from check_conformance_regressions import STANDARD
 from run_lrs_person_identifier_controls import (
-    ACCOUNT, CASES, CHECKS, IRL_UNAVAILABLE, PROCEDURE_GAPS,
+    ACCOUNT, CASES, CHECKS, PROCEDURE_GAPS,
     validate_control_results, validate_procedure_checks,
 )
 
@@ -14,8 +14,7 @@ class PersonIdentifierControlTests(unittest.TestCase):
         names = sorted(CASES) + ([] if focused else ['ordinary', 'unrelated-known-gap'])
         definitions = {('person', name): {'requirements': ['person-arrays'], 'safety': 'isolated'}
                        for name in names}
-        gaps = {('person', ACCOUNT): {'outcome': 'not-run', 'failures': [],
-                                      'not_run_reasons': [IRL_UNAVAILABLE]}}
+        gaps = {}
         if not focused:
             gaps[('person', 'unrelated-known-gap')] = {
                 'outcome': 'not-run', 'failures': [], 'not_run_reasons': ['exact unrelated prerequisite']}
@@ -24,8 +23,6 @@ class PersonIdentifierControlTests(unittest.TestCase):
             row = dict(definitions['person', name], id=name, outcome='passed', failures=[], not_run_reasons=[])
             if ('person', name) in gaps:
                 row.update(copy.deepcopy(gaps['person', name]))
-            if name == ACCOUNT:
-                row['unresolved_checks'] = [IRL_UNAVAILABLE]
             if mode == 'invalid' and name in CASES:
                 index = 1 if name.endswith('-openid') else 0
                 row.update(outcome='failed', failures=[f'/openid/{index} is not valid uri direct syntax'],
@@ -33,47 +30,47 @@ class PersonIdentifierControlTests(unittest.TestCase):
             rows.append(row)
         report = {'schema_version': 2, 'standard': STANDARD, 'mode': 'execute-http',
                   'suites': [{'id': 'person', 'path': 'tests/person.yaml', 'cases': rows}],
-                  'status': 'failed' if mode == 'invalid' else 'incomplete',
+                  'status': 'failed' if mode == 'invalid' else 'passed' if focused else 'incomplete',
                   'totals': {'total': len(rows), 'validated': 0,
                              **{kind.replace('-', '_'): sum(c['outcome'] == kind for c in rows)
                                 for kind in ['passed', 'failed', 'not-run']}}}
         return report, definitions, {'person': 'tests/person.yaml'}, gaps
 
-    def validate(self, fixture, mode='valid', focused=True, exit_code=1):
+    def validate(self, fixture, mode='valid', focused=True, exit_code=None):
+        if exit_code is None: exit_code = 0 if mode == 'valid' and focused else 1
         report, definitions, suites, gaps = fixture
         return validate_control_results(report, exit_code, definitions, suites, gaps, mode, focused)
 
-    def test_exact_provider_gap_and_all_four_defects_in_both_selection_modes(self):
+    def test_resolved_http_locator_and_all_four_defects_in_both_selection_modes(self):
         for focused in [True, False]:
             valid = self.validate(self.fixture(focused=focused), focused=focused)
             invalid = self.validate(self.fixture('invalid', focused), 'invalid', focused)
-            self.assertEqual(valid[ACCOUNT]['outcome'], 'not-run')
-            self.assertEqual(valid[ACCOUNT]['not_run_reasons'], [IRL_UNAVAILABLE])
+            self.assertEqual(valid[ACCOUNT]['outcome'], 'passed')
+            self.assertEqual(valid[ACCOUNT]['not_run_reasons'], [])
             self.assertTrue(all(invalid[name]['outcome'] == 'failed' for name in CASES))
             self.assertEqual({name for name in valid if valid[name]['outcome'] != invalid[name]['outcome']}, CASES)
 
-    def test_provider_gap_never_allows_another_failure_or_unavailable_reason(self):
-        for mutation in ['wrong-reason', 'extra-reason', 'missing-reason', 'hidden-failure',
-                         'account-pass', 'ordinary-not-run', 'pass-unresolved', 'missing',
+    def test_resolved_provider_never_allows_failure_or_unavailable_reason(self):
+        for mutation in ['wrong-reason', 'extra-reason', 'hidden-failure',
+                         'account-not-run', 'ordinary-not-run', 'pass-unresolved', 'missing',
                          'duplicate', 'totals', 'status', 'exit', 'baseline', 'unknown-mode']:
             with self.subTest(mutation=mutation):
                 fixture = self.fixture(); report, _, _, gaps = fixture
                 rows = report['suites'][0]['cases']; by_id = {c['id']: c for c in rows}
                 account = by_id[ACCOUNT]; ordinary = by_id['person-response-all-identifiers-mbox']
-                exit_code, mode = 1, 'valid'
+                exit_code, mode = 0, 'valid'
                 if mutation == 'wrong-reason': account['not_run_reasons'] = ['transport unavailable']
                 elif mutation == 'extra-reason': account['not_run_reasons'].append('another unavailable check')
-                elif mutation == 'missing-reason': account['not_run_reasons'] = []
                 elif mutation == 'hidden-failure': account['failures'] = ['unexpected target violation']
-                elif mutation == 'account-pass': account['outcome'] = 'passed'
+                elif mutation == 'account-not-run': account['outcome'] = 'not-run'
                 elif mutation == 'ordinary-not-run': ordinary['outcome'] = 'not-run'
                 elif mutation == 'pass-unresolved': ordinary['unresolved_checks'] = ['body not evaluated']
                 elif mutation == 'missing': rows.pop()
                 elif mutation == 'duplicate': rows.append(copy.deepcopy(account))
-                elif mutation == 'totals': report['totals']['not_run'] = 0
-                elif mutation == 'status': report['status'] = 'passed'
-                elif mutation == 'exit': exit_code = 0
-                elif mutation == 'baseline': gaps['person', ACCOUNT]['not_run_reasons'] = ['unknown gap']
+                elif mutation == 'totals': report['totals']['not_run'] = 1
+                elif mutation == 'status': report['status'] = 'incomplete'
+                elif mutation == 'exit': exit_code = 1
+                elif mutation == 'baseline': gaps['person', ACCOUNT] = {'outcome':'not-run','failures':[],'not_run_reasons':['unknown gap']}
                 elif mutation == 'unknown-mode': mode = 'other'
                 with self.assertRaises(ValueError): self.validate(fixture, mode=mode, exit_code=exit_code)
 
@@ -108,8 +105,8 @@ class PersonIdentifierControlTests(unittest.TestCase):
                         row.setdefault('unresolved_checks', []).append('ORACLE-UNAVAILABLE: interrupted response')
                         with self.assertRaises(ValueError): self.validate(fixture, mode, focused)
 
-    def test_valid_account_requires_exactly_its_one_irl_observation(self):
-        for unresolved in [[], [IRL_UNAVAILABLE, IRL_UNAVAILABLE], ['another unavailable check']]:
+    def test_valid_account_rejects_any_unavailable_observation(self):
+        for unresolved in [['old IRL gap'], ['old IRL gap', 'old IRL gap'], ['another unavailable check']]:
             for focused in [True, False]:
                 with self.subTest(unresolved=unresolved, focused=focused):
                     fixture = self.fixture(focused=focused)

@@ -8,7 +8,7 @@ use kiva_http_core::{
     StatementGetQueryParameter, StatementGetQueryParameterSet, StatementGetQueryParameters,
     StatementLimitParameter, StatementTimestampParameter, statement_get_query_decision,
 };
-use kiva_xapi::{filter_statements, validate_agent};
+use kiva_xapi::{filter_statements, validate_agent, validate_document_actor};
 use serde_json::Value;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use uuid::Uuid;
@@ -43,27 +43,27 @@ pub(crate) fn required_iri<'a>(
 }
 
 pub(crate) fn optional_limit(query: &BTreeMap<String, String>) -> Result<Option<usize>, HttpError> {
-    query
-        .get("limit")
-        .map(|limit| {
-            let limit = limit.parse::<usize>().map_err(|_error| {
-                HttpError::new(
-                    StatusCode::BAD_REQUEST,
-                    "limit must be a non-negative integer",
-                )
-            })?;
-            if limit == 0 {
-                return Ok(None);
-            }
-            Ok(Some(limit))
-        })
-        .transpose()
-        .map(Option::flatten)
+    let Some(value) = query.get("limit") else {
+        return Ok(None);
+    };
+    let limit = parse_statement_limit(value).ok_or_else(|| {
+        HttpError::new(
+            StatusCode::BAD_REQUEST,
+            "limit must be a non-negative integer",
+        )
+    })?;
+    Ok((limit != 0).then_some(limit))
 }
 
 pub(crate) fn validate_statement_get_query(
     query: &BTreeMap<String, String>,
 ) -> Result<(), HttpError> {
+    for name in ["verb", "activity"] {
+        if query.contains_key(name) {
+            required_iri(query, name)?;
+        }
+    }
+    optional_registration(query)?;
     match statement_get_query_decision(statement_get_query_parameters(query)) {
         StatementGetQueryDecision::Allow => Ok(()),
         StatementGetQueryDecision::UnknownParameter => {
@@ -193,9 +193,25 @@ pub(crate) fn statement_timestamp_parameter(value: Option<&str>) -> StatementTim
 pub(crate) fn statement_limit_parameter(value: Option<&str>) -> StatementLimitParameter {
     match value {
         None => StatementLimitParameter::Missing,
-        Some(value) if value.parse::<usize>().is_ok() => StatementLimitParameter::Valid,
+        Some(value) if parse_statement_limit(value).is_some() => StatementLimitParameter::Valid,
         Some(_) => StatementLimitParameter::Invalid,
     }
+}
+
+fn parse_statement_limit(value: &str) -> Option<usize> {
+    let digits = value.strip_prefix('+').unwrap_or(value);
+    if digits.is_empty() || !digits.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    // The request specifies a nonnegative integer, not a machine-word bound.
+    // A larger count cannot constrain a Vec more than usize::MAX; the server
+    // page cap still applies. Validate every digit before saturating so that
+    // an invalid suffix cannot hide behind an overflowing prefix.
+    Some(digits.bytes().fold(0_usize, |count, digit| {
+        count
+            .saturating_mul(10)
+            .saturating_add(usize::from(digit - b'0'))
+    }))
 }
 
 pub(crate) fn unknown_statement_get_query_parameter(
@@ -247,13 +263,27 @@ pub(crate) fn filtered_statements(
 }
 
 pub(crate) fn parse_statement_id(value: &str) -> Result<Uuid, HttpError> {
-    Uuid::parse_str(value)
-        .map_err(|_error| HttpError::new(StatusCode::BAD_REQUEST, "statement id must be a UUID"))
+    parse_uuid_parameter(value, "statement id")
+}
+
+fn parse_uuid_parameter(value: &str, name: &str) -> Result<Uuid, HttpError> {
+    // The UUID library also accepts compact, braced and URN forms. xAPI uses
+    // the standard 36-character String form, in selectors as well as bodies.
+    let invalid = || {
+        HttpError::new(
+            StatusCode::BAD_REQUEST,
+            format!("{name} must be a standard UUID string"),
+        )
+    };
+    if value.len() != 36 {
+        return Err(invalid());
+    }
+    Uuid::parse_str(value).map_err(|_error| invalid())
 }
 
 pub(crate) fn required_agent(query: &BTreeMap<String, String>) -> Result<Value, HttpError> {
     let agent = required_query(query, "agent")?;
-    match serde_json::from_str::<Value>(agent) {
+    match super::json::parse_json_without_duplicate_properties(agent.as_bytes(), "agent") {
         Ok(value) if validate_agent(&value).is_ok() => Ok(value),
         Ok(_value) => Err(HttpError::new(
             StatusCode::BAD_REQUEST,
@@ -266,15 +296,21 @@ pub(crate) fn required_agent(query: &BTreeMap<String, String>) -> Result<Value, 
     }
 }
 
+pub(crate) fn required_document_actor(
+    query: &BTreeMap<String, String>,
+) -> Result<Value, HttpError> {
+    let agent = required_query(query, "agent")?;
+    let value = super::json::parse_json_without_duplicate_properties(agent.as_bytes(), "agent")?;
+    validate_document_actor(&value)
+        .map_err(|error| HttpError::new(StatusCode::BAD_REQUEST, error.to_string()))?;
+    Ok(value)
+}
+
 pub(crate) fn optional_registration(
     query: &BTreeMap<String, String>,
 ) -> Result<Option<Uuid>, HttpError> {
     query
         .get("registration")
-        .map(|value| {
-            Uuid::parse_str(value).map_err(|_error| {
-                HttpError::new(StatusCode::BAD_REQUEST, "registration must be a UUID")
-            })
-        })
+        .map(|value| parse_uuid_parameter(value, "registration"))
         .transpose()
 }

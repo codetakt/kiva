@@ -2,8 +2,8 @@
 
 use super::prelude::{
     BTreeMap, HeaderMap, HttpError, IntoResponse, PDS_DATA_PORTABILITY_EXPORTS_PATH,
-    PdsApplicationHttpContext, Query, Response, State, StatusCode, json_projection_response,
-    pds_read_model_error_response, wire,
+    PdsApplicationHttpContext, Query, Response, State, StatusCode, pds_read_model_error_response,
+    wire,
 };
 
 const DEFAULT_PAGE_SIZE: usize = 20;
@@ -63,5 +63,17 @@ pub(crate) async fn get_pds_data_portability_exports(
         Ok(export) => export,
         Err(error) => return pds_read_model_error_response(&error),
     };
-    json_projection_response(StatusCode::OK, wire::portability_export_response(&export))
+    let mut opaque = crate::surfaces::xapi::lossless::OpaqueValues::new();
+    for (index, record) in export.statements.iter().enumerate() {
+        crate::surfaces::xapi::lossless::extend_prefixed(
+            &mut opaque,
+            &record.opaque_extension_values,
+            &format!("/statements/{index}/statement"),
+        );
+    }
+    crate::core::response::json_bytes_response(
+        StatusCode::OK,
+        wire::portability_export_response(&export)
+            .and_then(|body| crate::surfaces::xapi::lossless::render(&body, &opaque)),
+    )
 }

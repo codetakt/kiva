@@ -3,7 +3,7 @@ use thiserror::Error;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use uuid::Uuid;
 
-use super::validation::{is_absolute_iri, is_language_tag};
+use super::validation::{is_absolute_iri, is_absolute_irl, is_language_tag};
 
 const INTERACTION_PROPERTIES: [&str; 7] = [
     "interactionType",
@@ -14,7 +14,7 @@ const INTERACTION_PROPERTIES: [&str; 7] = [
     "target",
     "steps",
 ];
-const SUBSTATEMENT_PROPERTIES: [&str; 9] = [
+const SUBSTATEMENT_PROPERTIES: [&str; 8] = [
     "objectType",
     "actor",
     "verb",
@@ -23,7 +23,6 @@ const SUBSTATEMENT_PROPERTIES: [&str; 9] = [
     "context",
     "timestamp",
     "attachments",
-    "extensions",
 ];
 const ATTACHMENT_PROPERTIES: [&str; 7] = [
     "usageType",
@@ -178,7 +177,7 @@ fn validate_activity_definition(
         false,
     )?;
     optional_absolute_iri(definition.get("type"), &format!("{path} type"))?;
-    optional_absolute_iri(definition.get("moreInfo"), &format!("{path} moreInfo"))?;
+    optional_absolute_irl(definition.get("moreInfo"), &format!("{path} moreInfo"))?;
     super::validation::validate_extensions(definition.get("extensions"))
         .map_err(|error| ObjectValidationError::new(error.to_string()))?;
 
@@ -398,27 +397,29 @@ fn validate_attachments(value: Option<&Value>, path: &str) -> Result<(), ObjectV
             attachment.get("contentType"),
             &format!("{attachment_path} contentType"),
         )?;
-        let media_type = content_type.split(';').next().unwrap_or_default().trim();
-        if !media_type
-            .split_once('/')
-            .is_some_and(|(kind, subtype)| !kind.is_empty() && !subtype.is_empty())
-        {
+        if super::media::parse_media_type(content_type, true).is_err() {
             return Err(ObjectValidationError::new(format!(
                 "{attachment_path} contentType is invalid"
             )));
         }
-        if attachment.get("length").and_then(Value::as_u64).is_none() {
+        if !attachment
+            .get("length")
+            .and_then(Value::as_number)
+            .is_some_and(super::number::is_nonnegative_integer)
+        {
             return Err(ObjectValidationError::new(format!(
                 "{attachment_path} length must be a non-negative integer"
             )));
         }
         let sha2 = required_string(attachment.get("sha2"), &format!("{attachment_path} sha2"))?;
-        if sha2.len() != 64 || !sha2.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        if !matches!(sha2.len(), 56 | 64 | 96 | 128)
+            || !sha2.bytes().all(|byte| byte.is_ascii_hexdigit())
+        {
             return Err(ObjectValidationError::new(format!(
-                "{attachment_path} sha2 must be a SHA-256 hexadecimal value"
+                "{attachment_path} sha2 must be a full SHA-224, SHA-256, SHA-384, or SHA-512 hexadecimal value"
             )));
         }
-        optional_absolute_iri(
+        optional_absolute_irl(
             attachment.get("fileUrl"),
             &format!("{attachment_path} fileUrl"),
         )?;
@@ -439,13 +440,14 @@ fn validate_language_map(
         };
     };
     let map = expect_object(value, path)?;
-    if map.is_empty()
-        || map
-            .iter()
-            .any(|(language, value)| !is_language_tag(language) || !value.is_string())
+    // Language Maps have typed/tagged entries, but no minimum entry count.
+    // Sender population advice does not authorize rejecting an empty map.
+    if map
+        .iter()
+        .any(|(language, value)| !is_language_tag(language) || !value.is_string())
     {
         return Err(ObjectValidationError::new(format!(
-            "{path} must be a non-empty language map"
+            "{path} must contain valid language tags and String values"
         )));
     }
     Ok(())
@@ -473,6 +475,17 @@ fn optional_absolute_iri(value: Option<&Value>, path: &str) -> Result<(), Object
     if !is_absolute_iri(value) {
         return Err(ObjectValidationError::new(format!(
             "{path} must be an absolute IRI"
+        )));
+    }
+    Ok(())
+}
+
+fn optional_absolute_irl(value: Option<&Value>, path: &str) -> Result<(), ObjectValidationError> {
+    if let Some(value) = value
+        && !value.as_str().is_some_and(is_absolute_irl)
+    {
+        return Err(ObjectValidationError::new(format!(
+            "{path} must be an absolute IRL"
         )));
     }
     Ok(())
@@ -584,6 +597,14 @@ mod tests {
             "fileUrl": "https://example.org/evidence.txt"
         }]);
         assert!(validate_statement_object_model(&value).is_ok());
+        for length in [56, 64, 96, 128] {
+            value["attachments"][0]["sha2"] = json!("a".repeat(length));
+            assert!(validate_statement_object_model(&value).is_ok());
+        }
+        for invalid in ["a".repeat(55), "a".repeat(65), "g".repeat(96)] {
+            value["attachments"][0]["sha2"] = json!(invalid);
+            assert!(validate_statement_object_model(&value).is_err());
+        }
     }
 
     #[test]

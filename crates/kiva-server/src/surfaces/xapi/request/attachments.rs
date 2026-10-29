@@ -3,7 +3,6 @@
 use std::collections::BTreeMap;
 
 use axum::http::StatusCode;
-use kiva_xapi::statements_equivalent;
 use serde_json::Value;
 
 use crate::{
@@ -12,7 +11,8 @@ use crate::{
 };
 
 use super::{
-    json::parse_json_without_duplicate_properties, signature_comparison::canonical_signed_statement,
+    json::parse_json_without_duplicate_properties,
+    signature_comparison::statements_logically_equivalent,
 };
 
 #[cfg(test)]
@@ -21,6 +21,7 @@ mod tests;
 pub(crate) fn attachments_for_statement(
     statement: &Value,
     attachments: &BTreeMap<String, AttachmentRecord>,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
 ) -> Result<BTreeMap<String, AttachmentRecord>, HttpError> {
     let substatement = statement
         .get("object")
@@ -41,8 +42,12 @@ pub(crate) fn attachments_for_statement(
     for (statement, entry) in metadata {
         let sha2 = required_attachment_string(entry, "sha2")?;
         let content_type = required_attachment_string(entry, "contentType")?;
+        // Metadata has its own syntax obligation, even without a MIME type
+        // to compare (an omitted part header or a fileUrl-only attachment).
+        super::media::media_type(content_type, true)?;
         let length = required_attachment_length(entry)?;
-        let Some(record) = attachments.get(sha2) else {
+        let hash = sha2.to_ascii_lowercase();
+        let Some(record) = attachments.get(&hash) else {
             if entry.get("fileUrl").is_some()
                 && entry.pointer("/usageType").and_then(Value::as_str)
                     != Some(SIGNATURE_ATTACHMENT_USAGE_TYPE)
@@ -54,13 +59,15 @@ pub(crate) fn attachments_for_statement(
                 "Statement attachment metadata references a missing attachment part",
             ));
         };
-        if record.content_type != content_type {
+        if !record.content_type.is_empty()
+            && !super::media::matching_types(&record.content_type, content_type)?
+        {
             return Err(HttpError::new(
                 StatusCode::BAD_REQUEST,
                 "Statement attachment contentType does not match its attachment part",
             ));
         }
-        if record.body.len() != length {
+        if !kiva_xapi::attachment_length_matches(length, record.body.len()) {
             return Err(HttpError::new(
                 StatusCode::BAD_REQUEST,
                 "Statement attachment length does not match its attachment part",
@@ -69,21 +76,15 @@ pub(crate) fn attachments_for_statement(
         if entry.pointer("/usageType").and_then(Value::as_str)
             == Some(SIGNATURE_ATTACHMENT_USAGE_TYPE)
         {
-            if content_type != "application/octet-stream" {
+            if super::media::media_type(content_type, true)?.essence != "application/octet-stream" {
                 return Err(HttpError::new(
                     StatusCode::BAD_REQUEST,
                     "signed Statement attachment contentType must be application/octet-stream",
                 ));
             }
-            validate_signed_statement_attachment(statement, record)?;
+            validate_signed_statement_attachment(statement, record, signature_policy)?;
         }
-        referenced.insert(sha2.to_owned(), record.clone());
-    }
-    if referenced.len() != attachments.len() {
-        return Err(HttpError::new(
-            StatusCode::BAD_REQUEST,
-            "multipart attachment parts must be referenced by Statement attachment metadata",
-        ));
+        referenced.insert(hash, record.clone());
     }
     Ok(referenced)
 }
@@ -91,6 +92,7 @@ pub(crate) fn attachments_for_statement(
 fn validate_signed_statement_attachment(
     statement: &Value,
     attachment: &AttachmentRecord,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
 ) -> Result<(), HttpError> {
     let jws = std::str::from_utf8(&attachment.body).map_err(|_error| {
         HttpError::new(
@@ -99,7 +101,18 @@ fn validate_signed_statement_attachment(
         )
     })?;
     let segments = compact_jws_segments(jws)?;
+    // D-10 permits crypto-not-evaluated without a known key, but every compact
+    // segment still has to be valid unpadded base64url in that branch.
+    base64_url_decode(segments.signature).map_err(|()| malformed_jws_error())?;
     let header = jws_json_segment(segments.header, "JWS protected header")?;
+    // No critical extension has been negotiated by this compact-JWS profile.
+    // Silently ignoring one would change the protected signing semantics.
+    if header.get("crit").is_some() {
+        return Err(HttpError::new(
+            StatusCode::BAD_REQUEST,
+            "unsupported JWS critical extension",
+        ));
+    }
     if !matches!(
         header.pointer("/alg").and_then(Value::as_str),
         Some("RS256" | "RS384" | "RS512")
@@ -110,7 +123,11 @@ fn validate_signed_statement_attachment(
         ));
     }
     let payload = super::openapi::statement_body_from_openapi_contract(
-        jws_json_segment(segments.payload, "JWS payload")?,
+        crate::surfaces::xapi::lossless::parse_statement(
+            &base64_url_decode(segments.payload).map_err(|()| malformed_jws_error())?,
+            "JWS payload",
+        )?
+        .0,
         "JWS payload",
     )?;
     kiva_xapi::validate_statement_shape(&payload).map_err(|error| {
@@ -119,10 +136,8 @@ fn validate_signed_statement_attachment(
             format!("invalid signed Statement: {error}"),
         )
     })?;
-    verify_certificate_signature(&header, &segments)?;
-    let received = canonical_signed_statement(statement);
-    let signed = canonical_signed_statement(&payload);
-    if !statements_equivalent(&received, &signed) {
+    verify_certificate_signature(&header, &segments, signature_policy)?;
+    if !statements_logically_equivalent(statement, &payload) {
         return Err(HttpError::new(
             StatusCode::BAD_REQUEST,
             "signed Statement JWS payload must match the received Statement",
@@ -156,9 +171,26 @@ fn compact_jws_segments(value: &str) -> Result<CompactJwsSegments<'_>, HttpError
 fn verify_certificate_signature(
     header: &Value,
     segments: &CompactJwsSegments<'_>,
+    signature_policy: &crate::core::signature_policy::SignaturePolicy,
 ) -> Result<(), HttpError> {
+    let algorithm = match header.get("alg").and_then(Value::as_str) {
+        Some("RS256") => jsonwebtoken::Algorithm::RS256,
+        Some("RS384") => jsonwebtoken::Algorithm::RS384,
+        Some("RS512") => jsonwebtoken::Algorithm::RS512,
+        _ => return Err(malformed_jws_error()),
+    };
+    let message = format!("{}.{}", segments.header, segments.payload);
+    let kid = header
+        .get("kid")
+        .map(|value| value.as_str().ok_or_else(malformed_jws_error))
+        .transpose()?;
     let Some(chain) = header.get("x5c") else {
-        return Ok(());
+        return signature_policy.verify_without_certificate(
+            kid,
+            message.as_bytes(),
+            segments.signature,
+            algorithm,
+        );
     };
     let chain = chain
         .as_array()
@@ -167,19 +199,16 @@ fn verify_certificate_signature(
     if chain.iter().any(|certificate| !certificate.is_string()) {
         return Err(malformed_jws_error());
     }
-    // JWS uses the first certificate's public key. Trust-chain policy is separate
-    // from checking that this signature matches the supplied signing certificate.
-    let certificate = chain[0].as_str().ok_or_else(malformed_jws_error)?;
-    let pem = format!("-----BEGIN CERTIFICATE-----\n{certificate}\n-----END CERTIFICATE-----\n");
-    let key = jsonwebtoken::DecodingKey::from_rsa_pem(pem.as_bytes())
-        .map_err(|_error| malformed_jws_error())?;
-    let algorithm = match header.get("alg").and_then(Value::as_str) {
-        Some("RS256") => jsonwebtoken::Algorithm::RS256,
-        Some("RS384") => jsonwebtoken::Algorithm::RS384,
-        Some("RS512") => jsonwebtoken::Algorithm::RS512,
-        _ => return Err(malformed_jws_error()),
-    };
-    let message = format!("{}.{}", segments.header, segments.payload);
+    let verified_key = signature_policy.validate_chain(
+        &chain
+            .iter()
+            .filter_map(Value::as_str)
+            .map(str::to_owned)
+            .collect::<Vec<_>>(),
+    )?;
+    // Only a path with locally established trust, validity, permitted key use,
+    // and authenticated good status may supply the JWS verification key.
+    let key = jsonwebtoken::DecodingKey::from_rsa_der(&verified_key);
     if !jsonwebtoken::crypto::verify(segments.signature, message.as_bytes(), &key, algorithm)
         .map_err(|_error| malformed_jws_error())?
     {
@@ -209,6 +238,11 @@ fn jws_json_segment(segment: &str, label: &str) -> Result<Value, HttpError> {
 }
 
 fn base64_url_decode(value: &str) -> Result<Vec<u8>, ()> {
+    // Six leftover zero bits are not padding: a base64url encoding can never
+    // contain exactly one sextet in its final quantum (RFC4648 section 4).
+    if value.len() % 4 == 1 {
+        return Err(());
+    }
     let mut output = Vec::with_capacity(value.len() * 3 / 4);
     let mut accumulator = 0_u32;
     let mut bits = 0_u8;
@@ -247,17 +281,15 @@ fn required_attachment_string<'a>(entry: &'a Value, name: &str) -> Result<&'a st
     })
 }
 
-fn required_attachment_length(entry: &Value) -> Result<usize, HttpError> {
-    let length = entry.get("length").and_then(Value::as_u64).ok_or_else(|| {
-        HttpError::new(
-            StatusCode::BAD_REQUEST,
-            "Statement attachment length must be a non-negative integer",
-        )
-    })?;
-    usize::try_from(length).map_err(|_error| {
-        HttpError::new(
-            StatusCode::BAD_REQUEST,
-            "Statement attachment length is too large",
-        )
-    })
+fn required_attachment_length(entry: &Value) -> Result<&serde_json::Number, HttpError> {
+    entry
+        .get("length")
+        .and_then(Value::as_number)
+        .filter(|number| kiva_xapi::is_nonnegative_integer(number))
+        .ok_or_else(|| {
+            HttpError::new(
+                StatusCode::BAD_REQUEST,
+                "Statement attachment length must be a non-negative integer",
+            )
+        })
 }

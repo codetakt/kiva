@@ -13,8 +13,11 @@ publish.workspace = true
 
 [dependencies]
 axum.workspace = true
+base64.workspace = true
 getrandom.workspace = true
+num-bigint.workspace = true
 http.workspace = true
+httpdate.workspace = true
 jsonwebtoken.workspace = true
 kiva-application = { path = "../kiva-application", version = "0.0.0" }
 kiva-analytics-openapi-contract = { path = "../kiva-analytics-openapi-contract", version = "0.0.0" }
@@ -29,6 +32,12 @@ kiva-policy = { path = "../kiva-policy", version = "0.0.0" }
 kiva-secret-provider-contract = { path = "../kiva-secret-provider-contract", version = "0.0.0" }
 kiva-xapi = { path = "../kiva-xapi", version = "0.0.0" }
 kiva-xapi-openapi-contract = { path = "../kiva-xapi-openapi-contract", version = "0.0.0" }
+der.workspace = true
+pkix-path.workspace = true
+ring.workspace = true
+signature.workspace = true
+spki.workspace = true
+x509-cert.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
@@ -39,9 +48,13 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 url.workspace = true
 uuid.workspace = true
+x509-parser.workspace = true
 
 [dev-dependencies]
+idna = { version = "1.1.0", default-features = false, features = ["alloc"] }
+flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 ed25519-dalek.workspace = true
+reqwest.workspace = true
 
 [[bin]]
 name = "kiva-server"

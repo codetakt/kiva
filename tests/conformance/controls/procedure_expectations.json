@@ -10,7 +10,7 @@
     "canonical-language-negotiation"
   ],
   "unexecuted_checks": [
-    "person-semantic-identifiers/full-external-grammar"
+    "person-semantic-identifiers/person-association-inventory"
   ],
   "models": {
     "none": {

@@ -38,7 +38,7 @@
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
         kani' = pkgs.callPackage ./nix/kani/package.nix { };
 
-        src = lib.cleanSourceWith {
+        sourceInputs = lib.cleanSourceWith {
           src = ./.;
           filter =
             path: type:
@@ -62,6 +62,7 @@
                 "spec"
                 "tests"
                 "tools"
+                "vendor"
               ];
               keepFiles = [
                 "Cargo.lock"
@@ -81,6 +82,15 @@
             );
         };
 
+        # Rust and its tests consume these locked tables before the full LRS
+        # expansion runs. Materialize them in the build source, not in Git.
+        src = pkgs.runCommand "kiva-source" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+          cp -r ${sourceInputs} "$out"
+          chmod -R u+w "$out"
+          cd "$out"
+          python3 -B scripts/ci/generate_pkix_unicode32.py --if-needed
+        '';
+
         cargoArtifacts = craneLib.buildDepsOnly {
           pname = "kiva-cargo-artifacts";
           version = "0.0.0";
@@ -98,18 +108,31 @@
           + "-D clippy::todo -D clippy::unimplemented -D clippy::dbg_macro";
 
         pre-commit-check = git-hooks.lib.${system}.run {
-          src = ./.;
+          inherit src;
           hooks = {
+            generated-artifacts-index = {
+              enable = true;
+              name = "generated artifacts stay untracked";
+              entry = "${pkgs.python3}/bin/python3 scripts/ci/check_generated_artifacts_index.py";
+              language = "system";
+              pass_filenames = false;
+              always_run = true;
+            };
             check-added-large-files = {
               enable = true;
               # Source-bound conformance artifacts are checked for reproducibility and drift.
               excludes = [
                 "^tests/conformance/http/generated/(behaviors|tables)\\.yaml$"
                 "^spec/conformance/lrs-(assertion-manifest|duty-review|table-bindings)\\.yaml$"
+                "^spec/conformance/implementation-procedure-bindings\\.json$"
               ];
             };
             end-of-file-fixer.enable = true;
-            trim-trailing-whitespace.enable = true;
+            trim-trailing-whitespace = {
+              enable = true;
+              # Preserve the pinned RFC's original page breaks and source bytes.
+              excludes = [ "^spec/conformance/reference/rfc3454\\.txt$" ];
+            };
             rustfmt.enable = true;
             nixfmt = {
               enable = true;

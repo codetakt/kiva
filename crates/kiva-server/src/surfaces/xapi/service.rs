@@ -49,6 +49,13 @@ pub(crate) async fn list_statements(
     services.statements.list(limit).await
 }
 
+pub(crate) async fn statement_opaque_values(
+    services: XapiServices<'_>,
+    ids: &[Uuid],
+) -> Result<std::collections::BTreeMap<Uuid, super::lossless::OpaqueValues>, StatementStoreError> {
+    services.statements.opaque_values(ids).await
+}
+
 pub(crate) async fn put_statement(
     services: XapiServices<'_>,
     statement_id: Uuid,
