@@ -12,20 +12,24 @@ pub(crate) fn statement_body_from_openapi_contract(
     label: &'static str,
 ) -> Result<Value, HttpError> {
     if value.is_array() {
-        serde_json::from_value::<Vec<xapi_contract::Statement>>(value.clone()).map_err(
-            |_error| {
-                HttpError::new(
-                    StatusCode::BAD_REQUEST,
-                    format!("{label} must match the xAPI Statement OpenAPI contract"),
-                )
-            },
-        )?;
+        serde_json::from_value::<Vec<xapi_contract::Statement>>(
+            crate::surfaces::xapi::lossless::contract_view(&value),
+        )
+        .map_err(|_error| {
+            HttpError::new(
+                StatusCode::BAD_REQUEST,
+                format!("{label} must match the xAPI Statement OpenAPI contract"),
+            )
+        })?;
         validate_statement_actor_contract(&value, label)?;
         validate_statement_context_result_contract(&value, label)?;
         return Ok(value);
     }
 
-    serde_json::from_value::<xapi_contract::Statement>(value.clone()).map_err(|_error| {
+    serde_json::from_value::<xapi_contract::Statement>(
+        crate::surfaces::xapi::lossless::contract_view(&value),
+    )
+    .map_err(|_error| {
         HttpError::new(
             StatusCode::BAD_REQUEST,
             format!("{label} must match the xAPI Statement OpenAPI contract"),

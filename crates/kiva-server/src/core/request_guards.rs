@@ -24,6 +24,14 @@ pub(crate) struct RequestGuards {
 }
 
 impl RequestGuards {
+    pub(crate) fn may_read_statement(
+        &self,
+        principal: Option<&AuthenticatedPrincipal>,
+        id: uuid::Uuid,
+    ) -> bool {
+        self.auth.statement_visibility.permits(principal, id)
+    }
+
     pub(crate) const fn new(limits: RuntimeLimits, auth: AuthConfig) -> Self {
         Self { limits, auth }
     }

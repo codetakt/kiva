@@ -204,6 +204,7 @@ async fn authorize_credentials(
 #[derive(Clone)]
 pub(crate) struct AuthConfig {
     pub(crate) require_authorization: bool,
+    pub(crate) statement_visibility: crate::core::statement_visibility::StatementVisibility,
     refused_bearer_tokens: BTreeSet<String>,
     statement_read_only_tokens: BTreeSet<String>,
     bearer_subjects: BTreeMap<String, String>,
@@ -225,6 +226,8 @@ impl Default for AuthConfig {
     fn default() -> Self {
         let mut config = Self {
             require_authorization: false,
+            statement_visibility:
+                crate::core::statement_visibility::StatementVisibility::unrestricted(),
             refused_bearer_tokens: BTreeSet::new(),
             statement_read_only_tokens: BTreeSet::new(),
             bearer_subjects: BTreeMap::new(),
@@ -314,6 +317,10 @@ impl AuthConfig {
         }
         if let Some(token) = optional_env_string(KIVA_CONFORMANCE_INVALID_TOKEN_ENV)? {
             config.register_refused_token(&token);
+        }
+        if let Some(value) = optional_env_string("KIVA_XAPI_STATEMENT_VISIBILITY_JSON")? {
+            config.statement_visibility =
+                crate::core::statement_visibility::StatementVisibility::from_json(&value)?;
         }
         Ok(config)
     }
@@ -443,7 +450,7 @@ fn validate_xapi_version_header(headers: &HeaderMap) -> Result<(), HttpError> {
     } else {
         Err(HttpError::new(
             StatusCode::BAD_REQUEST,
-            "X-Experience-API-Version must be 2.0 or 2.0.0",
+            "X-Experience-API-Version must be 2.0 or a normal 2.0.x version; the requested version is unsupported or malformed",
         ))
     }
 }

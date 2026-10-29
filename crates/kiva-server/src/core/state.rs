@@ -28,6 +28,7 @@ pub(crate) use http_context::{
 pub(crate) struct XapiApp {
     pub(crate) statements: StatementRepository,
     pub(crate) documents: DocumentRepository,
+    pub(crate) signature_policy: crate::core::signature_policy::SignaturePolicy,
 }
 
 #[derive(Debug, Clone)]
@@ -86,6 +87,7 @@ impl AppState {
             xapi: XapiApp {
                 statements,
                 documents,
+                signature_policy: crate::core::signature_policy::SignaturePolicy::default(),
             },
             pds: PdsApp { repository: pds },
             application: ApplicationApp {
@@ -102,6 +104,7 @@ impl AppState {
         XapiHttpContext::new(
             self.xapi.statements.clone(),
             self.xapi.documents.clone(),
+            self.xapi.signature_policy.clone(),
             self.request_guards(),
         )
     }

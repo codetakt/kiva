@@ -38,6 +38,9 @@ impl PdsSubjectAccountNamespace {
 /// Returns the canonical xAPI actor IFI for a PDS account subject.
 #[must_use]
 pub fn pds_subject_actor_ifi(account_home_page: &str, subject: &str) -> String {
+    // Match kiva-xapi's canonical Account IFI: the final component must not
+    // alias a homePage containing the delimiter or a literal escape sequence.
+    let subject = subject.replace('%', "%25").replace(':', "%3A");
     format!("account:{account_home_page}:{subject}")
 }
 

@@ -1,6 +1,8 @@
 #![allow(clippy::wildcard_imports)]
 
-use super::document_mapping::{merged_json_document, preconditions_pass, put_document_decision};
+use super::document_mapping::{
+    merged_json_document, preconditions_pass, put_document_decision, scope_preconditions_pass,
+};
 use super::*;
 
 impl MemoryDocumentRepository {
@@ -35,14 +37,18 @@ impl MemoryDocumentRepository {
     ) -> DocumentWriteOutcome {
         let mut documents = self.documents.write().await;
         let existing = documents.get(&address.document_key);
-        let decision = put_document_decision(existing, &content, &preconditions);
+        let decision = put_document_decision(existing, &preconditions);
         if decision != DocumentWriteDecision::Write {
             return decision.into();
         }
 
         documents.insert(
             address.document_key,
-            DocumentRecord::new(address.document_id, content),
+            DocumentRecord::new(
+                address.document_id,
+                content,
+                crate::core::response::postgres_microsecond_timestamp(self.clock.now()),
+            ),
         );
         DocumentWriteOutcome::Stored
     }
@@ -55,16 +61,23 @@ impl MemoryDocumentRepository {
     ) -> DocumentWriteOutcome {
         let mut documents = self.documents.write().await;
         let existing = documents.get(&address.document_key);
-        if !preconditions_pass(existing, &preconditions) {
-            return DocumentWriteOutcome::PreconditionFailed;
-        }
         let Some(merged) = merged_json_document(existing, &content) else {
             return DocumentWriteOutcome::InvalidMerge;
         };
+        if preconditions.undefined_combination {
+            return DocumentWriteOutcome::UndefinedPreconditions;
+        }
+        if !preconditions_pass(existing, &preconditions) {
+            return DocumentWriteOutcome::PreconditionFailed;
+        }
 
         documents.insert(
             address.document_key,
-            DocumentRecord::new(address.document_id, merged),
+            DocumentRecord::new(
+                address.document_id,
+                merged,
+                crate::core::response::postgres_microsecond_timestamp(self.clock.now()),
+            ),
         );
         DocumentWriteOutcome::Stored
     }
@@ -95,15 +108,16 @@ impl MemoryDocumentRepository {
                     .filter(|key| key.starts_with(&scope.document_key_prefix))
                     .cloned()
                     .collect::<Vec<_>>();
+                if !scope_preconditions_pass(
+                    keys.iter()
+                        .filter_map(|key| documents.get(key))
+                        .map(|record| record.document_id.as_str()),
+                    preconditions,
+                ) {
+                    return DocumentDeleteOutcome::PreconditionFailed;
+                }
                 if keys.is_empty() {
                     return DocumentDeleteOutcome::NotFound;
-                }
-                if keys.iter().any(|key| {
-                    documents
-                        .get(key)
-                        .is_some_and(|record| !preconditions_pass(Some(record), preconditions))
-                }) {
-                    return DocumentDeleteOutcome::PreconditionFailed;
                 }
                 for key in keys {
                     documents.remove(&key);

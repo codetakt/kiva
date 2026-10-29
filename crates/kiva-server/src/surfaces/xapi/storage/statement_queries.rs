@@ -3,13 +3,27 @@
 use super::*;
 use time::{UtcOffset, format_description::well_known::Rfc3339};
 
+#[cfg(test)]
+std::thread_local! {
+    // Native admission controls use a current-thread Tokio runtime. Recording
+    // the actual call is advisory evidence, never a replacement comparator.
+    static REPLAY_OBSERVATIONS: std::cell::RefCell<Vec<Value>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
 pub(super) async fn select_statement_in_transaction(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     tenant_id: &str,
     statement_id: Uuid,
 ) -> Result<Option<StoredStatement>, StatementStoreError> {
-    let row = sqlx::query_as::<_, (SqlJson<Value>, OffsetDateTime)>(
-        "SELECT statement, stored_at FROM kiva.xapi_statements \
+    let row = sqlx::query_as::<
+        _,
+        (
+            SqlJson<crate::surfaces::xapi::lossless::StoredJson>,
+            OffsetDateTime,
+            SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,
+        ),
+    >(
+        "SELECT statement, stored_at, opaque_values FROM kiva.xapi_statements \
          WHERE tenant_id = $1 AND statement_id = $2",
     )
     .bind(tenant_id)
@@ -17,16 +31,14 @@ pub(super) async fn select_statement_in_transaction(
     .fetch_optional(&mut **transaction)
     .await?;
 
-    let Some((statement, stored_at)) = row else {
+    let Some((statement, stored_at, opaque_values)) = row else {
         return Ok(None);
     };
     let attachments =
         select_statement_attachments_in_transaction(transaction, tenant_id, statement_id).await?;
-    Ok(Some(StoredStatement::new(
-        statement.0,
-        stored_at,
-        attachments,
-    )))
+    let mut record = StoredStatement::new(statement.0.0, stored_at, attachments);
+    record.opaque_values = opaque_values.0;
+    Ok(Some(record))
 }
 
 pub(super) async fn insert_statement_attachments_in_transaction(
@@ -123,7 +135,16 @@ pub(super) fn stored_statements_equivalent(
     let mut existing = left.statement.clone();
     normalize_nested_timestamp_for_comparison(&mut existing);
     normalize_nested_timestamp_for_comparison(&mut incoming);
-    statements_equivalent(&existing, &incoming) && left.attachments == right.attachments
+    let equivalent = crate::surfaces::xapi::lossless::mask_equivalent_values(
+        &mut existing,
+        &left.opaque_values,
+        &mut incoming,
+        &right.opaque_values,
+    ) && statements_equivalent(&existing, &incoming)
+        && left.attachments == right.attachments;
+    #[cfg(test)]
+    REPLAY_OBSERVATIONS.with(|values| values.borrow_mut().push(serde_json::json!({"existing_id":existing["id"],"incoming_id":incoming["id"],"equivalent":equivalent})));
+    equivalent
 }
 
 fn normalize_nested_timestamp_for_comparison(statement: &mut Value) {

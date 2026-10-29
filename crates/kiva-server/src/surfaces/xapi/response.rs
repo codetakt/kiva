@@ -1,5 +1,7 @@
 //! xAPI HTTP response mapping.
 
+mod attachments;
+
 use std::collections::BTreeMap;
 
 use axum::{
@@ -17,15 +19,16 @@ use uuid::Uuid;
 use crate::core::{
     config::{MULTIPART_MIXED_CONTENT_TYPE, XAPI_HASH_HEADER},
     response::{
-        HttpError, backend_error_response, http_date, insert_header, statement_result_headers,
-        version_headers,
+        HttpError, backend_error_response, http_date, insert_header, latin1_header_value,
+        statement_result_headers, version_headers,
     },
     runtime::RuntimeLimits,
 };
 use crate::surfaces::xapi::{
+    lossless::{self, OpaqueValues},
     model::{
-        DocumentAddress, DocumentContent, DocumentIdRequirement, DocumentKind, DocumentRecord,
-        DocumentSelection, StoredStatement,
+        DocumentAddress, DocumentContent, DocumentIdRequirement, DocumentKind, DocumentList,
+        DocumentRecord, DocumentSelection, StoredStatement,
     },
     outcome::{DocumentStoreError, StatementStoreError},
     wire,
@@ -45,7 +48,13 @@ pub(crate) fn required_document_address(
 }
 
 pub(crate) fn document_response(status: StatusCode, record: &DocumentRecord) -> Response {
-    let headers = document_headers(record);
+    let headers = match document_headers(record) {
+        Ok(headers) => headers,
+        Err(error) => return error.into_response(),
+    };
+    if status == StatusCode::NOT_MODIFIED {
+        return (status, headers, Body::empty()).into_response();
+    }
     match &record.content {
         DocumentContent::Json(value) => match serde_json::to_vec(value) {
             Ok(body) => (status, headers, Body::from(body)).into_response(),
@@ -59,6 +68,21 @@ pub(crate) fn document_response(status: StatusCode, record: &DocumentRecord) -> 
             (status, headers, Body::from(body.clone())).into_response()
         }
     }
+}
+
+pub(crate) fn document_list_response(ids: &[String], request_headers: &HeaderMap) -> Response {
+    let DocumentList { body, etag } = DocumentList::new(ids.iter().map(String::as_str));
+    let status = super::request::document_read_status(&etag, None, request_headers);
+    if status == StatusCode::PRECONDITION_FAILED {
+        return HttpError::new(status, "document list precondition failed").into_response();
+    }
+    let mut headers = version_headers();
+    insert_header(&mut headers, ETAG, &etag);
+    if status == StatusCode::NOT_MODIFIED {
+        return (status, headers, Body::empty()).into_response();
+    }
+    insert_header(&mut headers, CONTENT_TYPE, "application/json");
+    (status, headers, Body::from(body)).into_response()
 }
 
 pub(crate) fn single_statement_response(
@@ -77,6 +101,7 @@ pub(crate) fn statement_json_response(status: StatusCode, record: &StoredStateme
         status,
         single_statement_headers(record.stored_at),
         wire::statement_response(record.statement.clone()),
+        &record.opaque_values,
     )
 }
 
@@ -85,7 +110,7 @@ pub(crate) fn statement_multipart_response(
     record: &StoredStatement,
 ) -> Response {
     let statement = match wire::statement_response(record.statement.clone())
-        .and_then(|statement| serde_json::to_string(&statement))
+        .and_then(|statement| lossless::render(&statement, &record.opaque_values))
     {
         Ok(statement) => statement,
         Err(error) => {
@@ -101,13 +126,16 @@ pub(crate) fn statement_multipart_response(
     append_multipart_line(&mut body, &format!("--{boundary}"));
     append_multipart_line(&mut body, "Content-Type: application/json");
     append_multipart_line(&mut body, "");
-    append_multipart_line(&mut body, &statement);
+    body.extend_from_slice(&statement);
+    append_multipart_line(&mut body, "");
     for (sha2, attachment) in &record.attachments {
         append_multipart_line(&mut body, &format!("--{boundary}"));
-        append_multipart_line(
-            &mut body,
-            &format!("Content-Type: {}", attachment.content_type),
-        );
+        if !attachment.content_type.is_empty() {
+            append_multipart_line(
+                &mut body,
+                &format!("Content-Type: {}", attachment.content_type),
+            );
+        }
         append_multipart_line(&mut body, "Content-Transfer-Encoding: binary");
         append_multipart_line(&mut body, &format!("{XAPI_HASH_HEADER}: {sha2}"));
         append_multipart_line(&mut body, "");
@@ -130,16 +158,12 @@ pub(crate) fn append_multipart_line(body: &mut Vec<u8>, line: &str) {
     body.extend_from_slice(b"\r\n");
 }
 
-pub(crate) fn document_headers(record: &DocumentRecord) -> HeaderMap {
+pub(crate) fn document_headers(record: &DocumentRecord) -> Result<HeaderMap, HttpError> {
     let mut headers = version_headers();
     insert_header(&mut headers, ETAG, &record.etag);
     insert_header(&mut headers, LAST_MODIFIED, &http_date(record.updated_at));
-    insert_header(
-        &mut headers,
-        ::http::header::CONTENT_TYPE,
-        &record.content_type,
-    );
-    headers
+    headers.insert(CONTENT_TYPE, latin1_header_value(&record.content_type)?);
+    Ok(headers)
 }
 
 pub(crate) fn single_statement_headers(stored_at: OffsetDateTime) -> HeaderMap {
@@ -183,7 +207,11 @@ pub(crate) fn statement_body_limit_response(
     None
 }
 
-pub(crate) fn statement_result_response(status: StatusCode, body: Value) -> Response {
+pub(crate) fn statement_result_response(
+    status: StatusCode,
+    body: Value,
+    opaque: &OpaqueValues,
+) -> Response {
     let last_modified = body
         .get("statements")
         .and_then(Value::as_array)
@@ -195,13 +223,19 @@ pub(crate) fn statement_result_response(status: StatusCode, body: Value) -> Resp
     if let Some(last_modified) = last_modified {
         insert_header(&mut headers, LAST_MODIFIED, &http_date(last_modified));
     }
-    xapi_json_projection_response(status, headers, wire::statement_result_response(body))
+    xapi_json_projection_response(
+        status,
+        headers,
+        wire::statement_result_response(body),
+        opaque,
+    )
 }
 
 pub(crate) fn statement_result_multipart_response(
     status: StatusCode,
     body: Value,
-    attachments: &BTreeMap<String, crate::surfaces::xapi::model::AttachmentRecord>,
+    mut attachments: BTreeMap<String, crate::surfaces::xapi::model::AttachmentRecord>,
+    opaque: &OpaqueValues,
 ) -> Response {
     let body = match wire::statement_result_response(body) {
         Ok(body) => body,
@@ -213,6 +247,7 @@ pub(crate) fn statement_result_multipart_response(
             );
         }
     };
+    attachments::reconcile_content_types(&body, &mut attachments);
     let last_modified = body
         .get("statements")
         .and_then(Value::as_array)
@@ -225,8 +260,11 @@ pub(crate) fn statement_result_multipart_response(
     append_multipart_line(&mut multipart, &format!("--{boundary}"));
     append_multipart_line(&mut multipart, "Content-Type: application/json");
     append_multipart_line(&mut multipart, "");
-    match serde_json::to_string(&body) {
-        Ok(body) => append_multipart_line(&mut multipart, &body),
+    match lossless::render(&body, opaque) {
+        Ok(body) => {
+            multipart.extend_from_slice(&body);
+            append_multipart_line(&mut multipart, "");
+        }
         Err(error) => {
             return backend_error_response(
                 &error,
@@ -237,10 +275,12 @@ pub(crate) fn statement_result_multipart_response(
     }
     for (sha2, attachment) in attachments {
         append_multipart_line(&mut multipart, &format!("--{boundary}"));
-        append_multipart_line(
-            &mut multipart,
-            &format!("Content-Type: {}", attachment.content_type),
-        );
+        if !attachment.content_type.is_empty() {
+            append_multipart_line(
+                &mut multipart,
+                &format!("Content-Type: {}", attachment.content_type),
+            );
+        }
         append_multipart_line(&mut multipart, "Content-Transfer-Encoding: binary");
         append_multipart_line(&mut multipart, &format!("{XAPI_HASH_HEADER}: {sha2}"));
         append_multipart_line(&mut multipart, "");
@@ -265,8 +305,9 @@ fn xapi_json_projection_response(
     status: StatusCode,
     mut headers: HeaderMap,
     body: Result<Value, serde_json::Error>,
+    opaque: &OpaqueValues,
 ) -> Response {
-    match body.and_then(|body| serde_json::to_vec(&body)) {
+    match body.and_then(|body| lossless::render(&body, opaque)) {
         Ok(body) => {
             insert_header(&mut headers, CONTENT_TYPE, "application/json");
             (status, headers, Body::from(body)).into_response()

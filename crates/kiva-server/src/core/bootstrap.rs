@@ -26,7 +26,8 @@ impl AppState {
     ) -> Result<Self, io::Error> {
         let auth = AuthConfig::from_env(token_verifier)?;
         let limits = RuntimeLimits::from_env()?;
-        match std::env::var(DATABASE_URL_ENV) {
+        let signature_policy = crate::core::signature_policy::SignaturePolicy::from_env()?;
+        let mut state = match std::env::var(DATABASE_URL_ENV) {
             Ok(database_url) if database_url.is_empty() => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 format!("{DATABASE_URL_ENV} must not be empty when set"),
@@ -60,6 +61,8 @@ impl AppState {
                 io::ErrorKind::InvalidInput,
                 format!("failed to read {DATABASE_URL_ENV}: {error}"),
             )),
-        }
+        }?;
+        state.xapi.signature_policy = signature_policy;
+        Ok(state)
     }
 }

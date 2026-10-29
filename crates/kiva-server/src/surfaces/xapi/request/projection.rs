@@ -31,12 +31,12 @@ pub(crate) fn authority_agent(name: &str) -> Value {
 }
 
 pub(crate) fn formatted_single_statement(
-    statement: StoredStatement,
+    mut statement: StoredStatement,
     query: &BTreeMap<String, String>,
     headers: &HeaderMap,
 ) -> StoredStatement {
-    let projected = formatted_statement(statement.statement, query, headers);
-    StoredStatement::new(projected, statement.stored_at, statement.attachments)
+    statement.statement = formatted_statement(statement.statement, query, headers);
+    statement
 }
 
 pub(crate) fn formatted_statement(
@@ -58,11 +58,13 @@ pub(crate) fn canonical_statement(mut statement: Value, headers: &HeaderMap) -> 
 }
 
 pub(crate) fn accepted_languages(headers: &HeaderMap) -> Vec<kiva_xapi::LanguagePreference> {
-    accepted_language_ranges(
-        headers
-            .get(ACCEPT_LANGUAGE)
-            .and_then(|value| value.to_str().ok()),
-    )
+    let combined = headers
+        .get_all(ACCEPT_LANGUAGE)
+        .iter()
+        .filter_map(|value| value.to_str().ok())
+        .collect::<Vec<_>>()
+        .join(",");
+    accepted_language_ranges(Some(&combined))
 }
 
 pub(crate) fn statements_equivalent(left: &Value, right: &Value) -> bool {

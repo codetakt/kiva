@@ -47,6 +47,34 @@ impl Default for DocumentRepository {
 }
 
 impl StatementRepository {
+    #[cfg(test)]
+    pub(crate) const fn read_failure(&self) -> &super::storage::read_failure::ReadFailure {
+        match self {
+            Self::Memory(repository) => &repository.read_failure,
+            Self::Postgres(repository) => &repository.read_failure,
+        }
+    }
+
+    pub(crate) async fn opaque_values(
+        &self,
+        ids: &[Uuid],
+    ) -> Result<std::collections::BTreeMap<Uuid, super::lossless::OpaqueValues>, StatementStoreError>
+    {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.opaque_values(ids).await),
+            postgres => repository.opaque_values(ids).await,
+        })
+    }
+
+    pub(crate) async fn consistent_through(
+        &self,
+    ) -> Result<time::OffsetDateTime, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.consistent_through().await),
+            postgres => repository.consistent_through().await,
+        })
+    }
+
     pub(crate) fn postgres(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {
         Ok(Self::Postgres(PostgresStatementRepository::new(
             pool, tenant_id,
@@ -57,6 +85,8 @@ impl StatementRepository {
         &self,
         statement_id: Uuid,
     ) -> Result<Option<StoredStatement>, StatementStoreError> {
+        #[cfg(test)]
+        self.read_failure().check()?;
         dispatch_repository!(self, |repository| {
             memory => Ok(repository.get(statement_id).await),
             postgres => repository.get(statement_id).await,
@@ -67,6 +97,8 @@ impl StatementRepository {
         &self,
         limit: Option<usize>,
     ) -> Result<Vec<Value>, StatementStoreError> {
+        #[cfg(test)]
+        self.read_failure().check()?;
         dispatch_repository!(self, |repository| {
             memory => Ok(repository.list(limit).await),
             postgres => repository.list(limit).await,

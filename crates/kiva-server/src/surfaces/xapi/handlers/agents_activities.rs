@@ -50,8 +50,50 @@ pub(crate) async fn get_activity(
         Err(error) => return store_error_response(&error),
     };
     let definition = wire::merged_activity_definition(&statements, activity_id);
-    json_projection_response(
+    let sources = wire::activity_definition_sources(&statements, activity_id);
+    let ids = sources
+        .iter()
+        .filter_map(|(index, _, _)| {
+            statements[*index]["id"]
+                .as_str()
+                .and_then(|id| uuid::Uuid::parse_str(id).ok())
+        })
+        .collect::<Vec<_>>();
+    let raw_values = match xapi_service::statement_opaque_values(state.xapi_services(), &ids).await
+    {
+        Ok(values) => values,
+        Err(error) => return store_error_response(&error),
+    };
+    let mut opaque = crate::surfaces::xapi::lossless::OpaqueValues::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for (index, path, source) in sources {
+        let raw = statements[index]["id"]
+            .as_str()
+            .and_then(|id| uuid::Uuid::parse_str(id).ok())
+            .and_then(|id| raw_values.get(&id));
+        if let Some(extensions) = source
+            .get("extensions")
+            .and_then(serde_json::Value::as_object)
+        {
+            for key in extensions.keys() {
+                if seen.insert(key.clone()) {
+                    let source_path = crate::surfaces::xapi::lossless::pointer(
+                        &format!("{path}/extensions"),
+                        key,
+                    );
+                    if let Some(value) = raw.and_then(|raw| raw.get(&source_path)) {
+                        opaque.insert(
+                            crate::surfaces::xapi::lossless::pointer("/definition/extensions", key),
+                            value.clone(),
+                        );
+                    }
+                }
+            }
+        }
+    }
+    crate::core::response::json_bytes_response(
         StatusCode::OK,
-        wire::activity_response(activity_id, definition),
+        wire::activity_response(activity_id, definition)
+            .and_then(|value| crate::surfaces::xapi::lossless::render(&value, &opaque)),
     )
 }

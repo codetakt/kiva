@@ -15,6 +15,7 @@ impl From<DocumentWriteDecision> for DocumentWriteOutcome {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum DocumentWriteOutcome {
+    UndefinedPreconditions,
     Stored,
     Conflict,
     PreconditionFailed,
