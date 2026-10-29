@@ -14,7 +14,83 @@ from unittest.mock import patch
 from report_issued_test_results import (
     assess, execution_complete, file_sha256, procedure_incomplete,
     verify_execution_receipt,
+    definition_obligations, procedure_coverage_complete, test_specification_conformant,
+    implementation_inputs, verify_implementation_receipt,
 )
+
+
+class ImplementationConformanceControls(unittest.TestCase):
+    def test_executed_failure_is_complete_but_never_conforming(self):
+        projection = {'cases': {'a': {'sha256': 'a'}}, 'procedures': {}, 'rules': [],
+                      'summary': {'test_definition_projection_complete': True, 'semantic_coverage_complete': False}}
+        http = {'mode': 'execute-http', 'status': 'passed',
+                'suites': [{'cases': [{'id': 'a', 'outcome': 'passed'}]}]}
+        report = assess(projection, http, projection['cases'], [])
+        report['summary'].update(execution_evidence_verified=True, implementation_evidence_verified=True,
+                                 http_evidence_verified=True, wrapper_exit=0)
+        self.assertTrue(test_specification_conformant(report))
+        for key, value in [('implementation_evidence_verified', False), ('http_evidence_verified', False),
+                           ('wrapper_exit', 1), ('http_report_status', 'failed'),
+                           ('http_outcomes', {'failed': 1}), ('failed_procedure_checks', 1),
+                           ('incomplete_procedure_coverage', 1), ('inconsistent_http_cases', 1)]:
+            changed = copy.deepcopy(report)
+            changed['summary'][key] = value
+            self.assertTrue(execution_complete(changed))
+            self.assertFalse(test_specification_conformant(changed), key)
+        http['suites'][0]['cases'][0]['failures'] = ['mandatory assertion failed']
+        self.assertEqual(assess(projection, http, projection['cases'], [])['inconsistent_http_cases'], ['a'])
+
+    def test_every_authored_rubric_item_needs_current_check_links(self):
+        spec = {'fixture': 'independent fixture', 'steps': ['first', 'second'],
+                'assertions': ['both effects'], 'level': 'required'}
+        obligations = definition_obligations(spec)
+        result = {'outcome': 'passed', 'checks': [{'id': 'witness', 'outcome': 'passed'}],
+                  'definition_coverage': {p: {'sha256': h, 'checks': ['witness']} for p, h in obligations.items()}}
+        self.assertTrue(procedure_coverage_complete(result, spec))
+        for pointer in obligations:
+            changed = copy.deepcopy(result)
+            del changed['definition_coverage'][pointer]
+            self.assertFalse(procedure_coverage_complete(changed, spec))
+        for links in ([], ['unknown'], ['witness', 'witness'], None):
+            changed = copy.deepcopy(result)
+            changed['definition_coverage']['/steps/0']['checks'] = links
+            self.assertFalse(procedure_coverage_complete(changed, spec))
+        self.assertFalse(procedure_coverage_complete(result, dict(spec, steps=['changed', 'second'])))
+        self.assertFalse(procedure_coverage_complete(dict(result, checks=result['checks'] * 2), spec))
+
+    def test_partial_procedure_cannot_be_promoted_by_its_passed_label(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = {'id': 'p', 'level': 'required', 'expected': 'mandatory postcondition'}
+            (root / 'procedures.json').write_text(json.dumps({'tests': [spec]}))
+            projection = {'cases': {}, 'procedures': {'p': {'file': 'procedures.json'}}, 'rules': [],
+                          'summary': {'test_definition_projection_complete': True, 'semantic_coverage_complete': False}}
+            result = {'outcome': 'passed', 'checks': [{'id': 'postcondition', 'outcome': 'failed'}],
+                      'rubric_sha256': hashlib.sha256(json.dumps(spec, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()}
+            with patch('report_issued_test_results.ROOT', root):
+                report = assess(projection, {'suites': []}, {}, [{'procedures': {'p': result}}])
+            self.assertEqual(report['summary']['incomplete_procedures'], 0)
+            self.assertEqual(report['summary']['failed_procedure_checks'], 1)
+            self.assertEqual(report['incomplete_procedure_coverage'], ['p'])
+
+    def test_implementation_receipt_rejects_source_database_and_binary_omissions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ['Cargo.toml', 'crates/server/src/lib.rs', 'db/migrations/1.sql']:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('before')
+            receipt = {'implementation': {'backend': 'memory', 'input_sha256': implementation_inputs(root),
+                       'server_binary_sha256': 'a' * 64, 'runner_binary_sha256': 'b' * 64}}
+            verify_implementation_receipt(receipt, root)
+            for name in receipt['implementation']['input_sha256']:
+                (root / name).write_text('changed')
+                with self.assertRaisesRegex(ValueError, 'input drift'):
+                    verify_implementation_receipt(receipt, root)
+                (root / name).write_text('before')
+            del receipt['implementation']['server_binary_sha256']
+            with self.assertRaisesRegex(ValueError, 'server_binary'):
+                verify_implementation_receipt(receipt, root)
 
 
 class ResultControls(unittest.TestCase):
@@ -342,10 +418,19 @@ class ExecutionReceiptControls(unittest.TestCase):
         # unchanged but can alter the runner's JSON number representation.
         manifest = self.root / 'Cargo.toml'
         source = manifest.read_text()
-        original = 'serde_json = "1.0"'
-        self.assertIn(original, source)
-        manifest.write_text(source.replace(original,
-            'serde_json = { version = "1.0", features = ["arbitrary_precision"] }', 1))
+        import tomllib
+        dependency=tomllib.loads(source)['workspace']['dependencies']['serde_json']
+        original=next(line for line in source.splitlines() if line.startswith('serde_json = '))
+        changed_dependency=({'version':dependency} if isinstance(dependency,str) else dict(dependency))
+        features=list(changed_dependency.get('features',[]))
+        if 'arbitrary_precision' in features:
+            features.remove('arbitrary_precision')
+        else:
+            features.append('arbitrary_precision')
+        changed_dependency['features']=features
+        replacement='serde_json = { '+', '.join(key+' = '+json.dumps(value) for key,value in changed_dependency.items())+' }'
+        self.assertNotEqual(original,replacement)
+        manifest.write_text(source.replace(original,replacement,1))
         changed = collect_execution_contract(self.root)
         self.assertEqual(contract['Cargo.lock'], changed['Cargo.lock'])
         self.assertNotEqual(digest(contract), digest(changed))
@@ -439,7 +524,7 @@ class EndpointProfileVocabularyControls(unittest.TestCase):
         profile_schema = json.loads((root / 'spec/conformance/schemas/endpoint-profile.schema.json').read_text())
         declarable = set(profile_schema['properties']['profiles']['properties'])
         self.assertLessEqual(declarable, names)
-        self.assertEqual(names - declarable, {'signature-validation-context'})
+        self.assertEqual(declarable, names)
         # A typo in any one of the three authoritative consumers is detected.
         marker = 'signature-validation-context'
         changed_schema = copy.deepcopy(schema)

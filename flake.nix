@@ -116,6 +116,7 @@
               excludes = [
                 "^tests/conformance/http/generated/(behaviors|tables)\\.yaml$"
                 "^spec/conformance/lrs-(assertion-manifest|duty-review|table-bindings)\\.yaml$"
+                "^spec/conformance/implementation-procedure-bindings\\.json$"
               ];
             };
             end-of-file-fixer.enable = true;
