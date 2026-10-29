@@ -31,6 +31,11 @@ std::thread_local! {
 }
 
 #[cfg(test)]
+pub(crate) fn take_jws_observations() -> Vec<serde_json::Value> {
+    JWS_OBSERVATIONS.with(|values| std::mem::take(&mut *values.borrow_mut()))
+}
+
+#[cfg(test)]
 fn observe_jws(
     kid: Option<&str>,
     message: &[u8],

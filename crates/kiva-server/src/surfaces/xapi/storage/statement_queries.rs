@@ -1,13 +1,23 @@
 #![allow(clippy::wildcard_imports)]
 
 use super::*;
-use time::{UtcOffset, format_description::well_known::Rfc3339};
 
 #[cfg(test)]
 std::thread_local! {
     // Native admission controls use a current-thread Tokio runtime. Recording
     // the actual call is advisory evidence, never a replacement comparator.
     static REPLAY_OBSERVATIONS: std::cell::RefCell<Vec<Value>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+#[cfg(test)]
+pub(crate) fn take_replay_observations() -> Vec<Value> {
+    REPLAY_OBSERVATIONS.with(|values| std::mem::take(&mut *values.borrow_mut()))
+}
+
+#[cfg(test)]
+pub(super) fn snapshot_record(record: &StoredStatement) -> Value {
+    let attachments = record.attachments.iter().map(|(hash, attachment)| serde_json::json!({"sha2":hash,"media_type":attachment.content_type,"body_hex":crate::core::response::hex_lower(&attachment.body)})).collect::<Vec<_>>();
+    serde_json::json!({"statement":record.statement,"opaque_values":record.opaque_values,"stored_at":record.stored_at.unix_timestamp_nanos().to_string(),"attachments":attachments})
 }
 
 pub(super) async fn select_statement_in_transaction(
@@ -56,7 +66,7 @@ pub(super) async fn insert_statement_attachments_in_transaction(
         .bind(tenant_id)
         .bind(statement_id)
         .bind(sha2)
-        .bind(&attachment.content_type)
+        .bind(attachment.content_type.as_bytes())
         .bind(&attachment.body)
         .execute(&mut **transaction)
         .await?;
@@ -69,7 +79,7 @@ pub(super) async fn select_statement_attachments(
     tenant_id: &str,
     statement_id: Uuid,
 ) -> Result<BTreeMap<String, AttachmentRecord>, StatementStoreError> {
-    let rows = sqlx::query_as::<_, (String, String, Vec<u8>)>(
+    let rows = sqlx::query_as::<_, (String, Vec<u8>, Vec<u8>)>(
         "SELECT sha2, content_type, body FROM kiva.xapi_statement_attachments \
          WHERE tenant_id = $1 AND statement_id = $2 \
          ORDER BY sha2 ASC",
@@ -79,7 +89,7 @@ pub(super) async fn select_statement_attachments(
     .fetch_all(pool)
     .await?;
 
-    Ok(attachment_records_from_rows(rows))
+    attachment_records_from_rows(rows)
 }
 
 pub(super) async fn select_statement_attachments_in_transaction(
@@ -87,7 +97,7 @@ pub(super) async fn select_statement_attachments_in_transaction(
     tenant_id: &str,
     statement_id: Uuid,
 ) -> Result<BTreeMap<String, AttachmentRecord>, StatementStoreError> {
-    let rows = sqlx::query_as::<_, (String, String, Vec<u8>)>(
+    let rows = sqlx::query_as::<_, (String, Vec<u8>, Vec<u8>)>(
         "SELECT sha2, content_type, body FROM kiva.xapi_statement_attachments \
          WHERE tenant_id = $1 AND statement_id = $2 \
          ORDER BY sha2 ASC",
@@ -97,14 +107,18 @@ pub(super) async fn select_statement_attachments_in_transaction(
     .fetch_all(&mut **transaction)
     .await?;
 
-    Ok(attachment_records_from_rows(rows))
+    attachment_records_from_rows(rows)
 }
 
 pub(super) fn attachment_records_from_rows(
-    rows: Vec<(String, String, Vec<u8>)>,
-) -> BTreeMap<String, AttachmentRecord> {
+    rows: Vec<(String, Vec<u8>, Vec<u8>)>,
+) -> Result<BTreeMap<String, AttachmentRecord>, StatementStoreError> {
     rows.into_iter()
-        .map(|(sha2, content_type, body)| (sha2, AttachmentRecord { content_type, body }))
+        .map(|(sha2, content_type, body)| {
+            let content_type = String::from_utf8(content_type)
+                .map_err(|error| sqlx::Error::Decode(Box::new(error)))?;
+            Ok((sha2, AttachmentRecord { content_type, body }))
+        })
         .collect()
 }
 
@@ -141,10 +155,27 @@ pub(super) fn stored_statements_equivalent(
         &mut incoming,
         &right.opaque_values,
     ) && statements_equivalent(&existing, &incoming)
-        && left.attachments == right.attachments;
+        && attachment_records_equivalent(&left.attachments, &right.attachments);
     #[cfg(test)]
     REPLAY_OBSERVATIONS.with(|values| values.borrow_mut().push(serde_json::json!({"existing_id":existing["id"],"incoming_id":incoming["id"],"equivalent":equivalent})));
     equivalent
+}
+
+fn attachment_records_equivalent(
+    left: &BTreeMap<String, AttachmentRecord>,
+    right: &BTreeMap<String, AttachmentRecord>,
+) -> bool {
+    // Existing records may predate canonical digest keys. A spelling change
+    // at the MIME boundary must not turn an identical retry into a conflict.
+    let left = left
+        .iter()
+        .map(|(hash, record)| (hash.to_ascii_lowercase(), record))
+        .collect::<BTreeMap<_, _>>();
+    let right = right
+        .iter()
+        .map(|(hash, record)| (hash.to_ascii_lowercase(), record))
+        .collect::<BTreeMap<_, _>>();
+    left == right
 }
 
 fn normalize_nested_timestamp_for_comparison(statement: &mut Value) {
@@ -157,12 +188,10 @@ fn normalize_nested_timestamp_for_comparison(statement: &mut Value) {
     let Some(timestamp) = object
         .get("timestamp")
         .and_then(Value::as_str)
-        .and_then(|timestamp| OffsetDateTime::parse(timestamp, &Rfc3339).ok())
+        .and_then(crate::surfaces::xapi::timestamp::normalize)
     else {
         return;
     };
     // Normalize comparison copies only; legacy JSON retains its stored spelling.
-    if let Ok(timestamp) = timestamp.to_offset(UtcOffset::UTC).format(&Rfc3339) {
-        object.insert("timestamp".to_owned(), Value::String(timestamp));
-    }
+    object.insert("timestamp".to_owned(), Value::String(timestamp));
 }

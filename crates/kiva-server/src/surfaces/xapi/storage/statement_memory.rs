@@ -4,6 +4,21 @@ use super::statement_queries::stored_statements_equivalent;
 use super::*;
 
 impl MemoryStatementRepository {
+    #[cfg(test)]
+    pub(crate) async fn settled_snapshot(&self) -> Value {
+        // Acquire the SAME admission lock used by every memory writer. A
+        // request completion receipt must precede this read; this lock alone
+        // does not claim that an unregistered future job has finished.
+        let _admission = self.admission.lock().await;
+        let statements = self.statements.read().await;
+        Value::Array(
+            statements
+                .values()
+                .map(super::statement_queries::snapshot_record)
+                .collect(),
+        )
+    }
+
     pub(crate) async fn opaque_values(
         &self,
         ids: &[Uuid],

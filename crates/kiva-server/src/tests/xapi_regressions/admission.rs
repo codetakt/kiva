@@ -113,6 +113,17 @@ async fn assert_legacy_retries(state: &AppState, timestamp: Option<&str>) -> Res
         .await
         .map_err(|error| format!("{error:?}"))?;
     assert_eq!(stored, StoreOutcome::Stored);
+    // Admission now assigns recording time inside the repository. Capture the
+    // seeded legacy row BEFORE retries, then require exact preservation of it.
+    let seeded = state
+        .xapi
+        .statements
+        .get(id)
+        .await
+        .map_err(|error| format!("{error:?}"))?
+        .ok_or("seeded legacy record")?;
+    legacy = seeded.statement;
+    let recorded_at = seeded.stored_at;
     expect_status(
         submit(state, &value, false).await?,
         StatusCode::NO_CONTENT,
@@ -157,7 +168,7 @@ async fn assert_legacy_retries(state: &AppState, timestamp: Option<&str>) -> Res
         .map_err(|error| format!("{error:?}"))?
         .ok_or("legacy record")?;
     assert_eq!(original.statement, legacy);
-    assert_eq!(original.stored_at, fixed_time());
+    assert_eq!(original.stored_at, recorded_at);
 
     // Adding a missing timestamp or changing its instant remains a conflict.
     value["object"]["timestamp"] = json!("2024-01-01T00:00:00.000000001Z");

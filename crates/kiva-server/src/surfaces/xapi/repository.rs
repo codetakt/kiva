@@ -55,6 +55,14 @@ impl StatementRepository {
         }
     }
 
+    #[cfg(test)]
+    pub(crate) async fn settled_snapshot(&self) -> Result<Value, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.settled_snapshot().await),
+            postgres => repository.settled_snapshot().await,
+        })
+    }
+
     pub(crate) async fn opaque_values(
         &self,
         ids: &[Uuid],
@@ -73,6 +81,14 @@ impl StatementRepository {
             memory => Ok(repository.consistent_through().await),
             postgres => repository.consistent_through().await,
         })
+    }
+
+    #[cfg(test)]
+    pub(crate) const fn clock(&self) -> &crate::core::recording_clock::RecordingClock {
+        match self {
+            Self::Memory(repository) => &repository.clock,
+            Self::Postgres(repository) => &repository.clock,
+        }
     }
 
     pub(crate) fn postgres(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {

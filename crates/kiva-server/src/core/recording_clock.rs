@@ -52,6 +52,11 @@ impl RecordingClock {
             }
         }
     }
+
+    #[cfg(test)]
+    pub(crate) fn set(&self, instant: OffsetDateTime) {
+        *self.fixed.write().expect("recording clock lock") = Some(instant);
+    }
 }
 
 #[cfg(test)]
