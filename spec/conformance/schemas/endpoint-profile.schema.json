@@ -32,6 +32,9 @@
         },
         "declared-resource-absence": {
           "$ref": "#/$defs/resourceAbsence"
+        },
+        "signature-validation-context": {
+          "$ref": "#/$defs/signatureContext"
         }
       }
     }
@@ -149,6 +152,44 @@
             "pattern": "\\S"
           },
           "description": "Independent fixture evidence keyed by exact current case id. Establish absence of every negatively queried Statement/document selector under the request credentials immediately before that case and maintain it throughout. A fresh/isolated label or the response under test is not evidence. The runner checks availability; fixture validity/integration is a later stage."
+        }
+      }
+    },
+    "signatureContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signature"
+      ],
+      "properties": {
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "evidence",
+            "algorithms",
+            "certificate_signature",
+            "without_certificate"
+          ],
+          "properties": {
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            },
+            "algorithms": {
+              "const": [
+                "RS256",
+                "RS384",
+                "RS512"
+              ]
+            },
+            "certificate_signature": {
+              "const": "verify-supplied-x5c"
+            },
+            "without_certificate": {
+              "const": "accept-without-cryptographic-verification"
+            }
+          }
         }
       }
     }

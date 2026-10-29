@@ -13,21 +13,59 @@ product revision conforms additionally requires the execution evidence below.
 Official review is the GitHub PR merge. The structural gate does not measure
 review acceptance, and no repository adoption record is required.
 
-## Temporary integration policy for PR #3
+## HTTP execution gate after the PR #3 follow-up
 
-The project uses ledger-first integration, with implementation completion in
-separate follow-up work. The required Nix `memory-conformance` and
-`postgres-conformance` checks therefore apply the explicit
-[CI execution baseline](../../spec/conformance/ci-execution-baseline.json).
-Their success means **no change from the reviewed, known-gap execution baseline**;
-it does not mean that the LRS conforms or that all cases were executed.
+The required Nix `memory-conformance` and `postgres-conformance` checks apply the
+explicit [CI execution baseline](../../spec/conformance/ci-execution-baseline.json).
+The follow-up removes all 117 former residual cases after local execution on
+both disposable backends. The baseline now has no permitted FAIL or NOT-RUN:
+all 17,933 HTTP cases per backend must PASS without unresolved checks.
+This gate concerns the HTTP case inventory; it does not establish full LRS
+conformance or completion of the separate 145 procedures.
 
-The baseline contains 117 distinct residual cases: 10 FAIL and 104 NOT-RUN for
-memory, 13 FAIL and 104 NOT-RUN for PostgreSQL, out of 17,933 cases per backend.
-The 13 FAIL cases expose SHA-384/512 attachment support, comma decimal durations
-and PostgreSQL U+0000 persistence gaps. NOT-RUN retains missing signature,
-parameter-vocabulary and resource-absence prerequisites, plus numeric and IRL
-provider limitations. These are product/provider work items, not IEEE exceptions.
+The former failures covered SHA-384/512 attachments, comma decimal durations and
+PostgreSQL U+0000 Statement storage. The former NOT-RUN cases required explicit
+signature policy, parameter vocabulary and fixture resource absence, plus numeric
+and IRL providers. The endpoint profile binds those prerequisites to Kiva's fresh,
+single-writer fixture environment; it is not evidence for an arbitrary deployment.
+Local author execution does not constitute independent review or an IEEE ruling.
+
+The final test-specification gate is
+`report_issued_test_results.py --require-conforming`, described in
+[issued execution evidence](../../spec/conformance/issued-execution-evidence.md).
+It requires current implementation/build/database and binary identities,
+exhaustive passing HTTP evidence, and complete decided procedure rubrics with
+explicit links to their checks. Full release validation reassesses captures for
+both backends and rejects HTTP-only or partial procedure evidence. The 25 portable
+partial executors are supplemented by actual native HTTP, storage, provider and
+oracle controls. The implementation procedure manifest links all 145 rubrics to
+explicit witnesses, including their actor, policy and applicability boundaries.
+Those author links do not establish execution: the gate reconstructs them from
+fresh passing observations and preserves every unresolved partial-executor check
+unless its exact capability gap is discharged by its named witnesses.
+
+`test_specification_conformant: true` reports success of this finite execution
+and binding gate. It is not a proof that the implementation satisfies every
+requirement's semantics. Review must also examine the source-derived conditions,
+exceptions and their composition, seek counterexamples beyond the fixed cases,
+and inspect provider calls and result handling. A confirmed semantic
+counterexample is an implementation gap even when this gate passes. Delegation
+does not transfer Kiva's responsibility for correctly configured admission and
+storage decisions; neither local checks nor provider use constitute independent
+acceptance or IEEE certification.
+
+The Rust numeric provider retains decimal tokens through suite loading, request
+serialization and response decoding. Ordinary equality and ordering compare
+exact decimals; preservation applies the DC-NUMBER binary32 interval and endpoint
+serialization relation. Decimal exponents outside its signed 64-bit bounds and
+non-equal overflowing binary32 comparisons remain unavailable. A suite mapping
+using Serde's reserved `$serde_json::private::Number` key is rejected at load time
+instead of being silently interpreted as a number; actual HTTP objects retain
+that literal key. Python procedure snapshots retain raw Decimal tokens, while
+previously rounded Python float inputs still cannot establish lossless precision.
+The IRL provider recognizes the HTTP(S) access mechanism after RFC 3987 mapping;
+other schemes retain their unavailable disposition. Neither provider claims
+independent qualification of every external grammar or runtime primitive.
 
 The gate binds the entire case-file inventory and both fixture profiles. Every
 case must appear exactly once in the HTTP execution report; cases outside the
@@ -110,6 +148,8 @@ An evidence bundle for a Kiva revision must include:
 - Validate-only execution of the language-neutral YAML conformance cases.
 - Live HTTP execution against the memory backend.
 - Live HTTP execution against the PostgreSQL backend.
+- Both implementation-bound issued-test captures, all procedure rubric evidence
+  and their full test-specification assessments for a full release claim.
 - Case matrix and coverage reports.
 - ADL compatibility report.
 - Optional full ADL xAPI 2.0 execution report and raw logs when the evidence
@@ -124,7 +164,8 @@ An evidence bundle for a Kiva revision must include:
 Generate a release-candidate local bundle with:
 
 ```sh
-scripts/ci/generate_conformance_evidence.sh --require-clean-git
+scripts/ci/generate_conformance_evidence.sh --require-clean-git \
+  --issued-execution-root target/issued-execution
 ```
 
 The default bundle location is `target/conformance-evidence/latest`. The
