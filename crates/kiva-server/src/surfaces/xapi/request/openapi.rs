@@ -40,6 +40,24 @@ pub(crate) fn statement_body_from_openapi_contract(
     Ok(value)
 }
 
+pub(super) fn substatement_body_from_openapi_contract(
+    value: Value,
+    label: &'static str,
+) -> Result<Value, HttpError> {
+    serde_json::from_value::<xapi_contract::SubStatement>(
+        crate::surfaces::xapi::lossless::contract_view(&value),
+    )
+    .map_err(|_error| {
+        HttpError::new(
+            StatusCode::BAD_REQUEST,
+            format!("{label} must match the xAPI SubStatement OpenAPI contract"),
+        )
+    })?;
+    validate_statement_actor_contract(&value, label)?;
+    validate_statement_context_result_contract(&value, label)?;
+    Ok(value)
+}
+
 fn validate_statement_actor_contract(value: &Value, label: &str) -> Result<(), HttpError> {
     let values: Vec<&Value> = match value {
         Value::Array(values) => values.iter().collect(),

@@ -60,6 +60,19 @@ pub fn validate_statement_object_model(statement: &Value) -> Result<(), ObjectVa
     validate_attachments(statement.get("attachments"), "Statement attachments")
 }
 
+pub(super) fn validate_substatement_object_model(
+    value: &Value,
+) -> Result<(), ObjectValidationError> {
+    reject_nulls(value, "SubStatement", false)?;
+    let object = expect_object(value, "SubStatement")?;
+    if object.get("objectType").and_then(Value::as_str) != Some("SubStatement") {
+        return Err(ObjectValidationError::new(
+            "SubStatement objectType must be SubStatement",
+        ));
+    }
+    validate_substatement(object, "SubStatement")
+}
+
 fn reject_nulls(
     value: &Value,
     path: &str,

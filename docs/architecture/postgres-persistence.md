@@ -34,6 +34,15 @@ Atlas owns migration planning and checksum validation. SQLx owns runtime query
 execution from Rust. The application should not generate schema changes at
 runtime.
 
+Migration `20261030000000_xapi_sha1_identity.sql` canonicalizes hexadecimal
+`mbox_sha1sum` values in derived Statement IFIs and State/Agent Profile keys.
+Received JSON, document content, ETags and modification times stay intact.
+It checks for collisions before changing data: if the old case-sensitive keys
+contain multiple documents at the same logical address, an operator must reconcile
+those documents before retrying. The migration never selects a winner or deletes
+a conflicting document. Apply it with the server version that uses canonical
+SHA-1 keys; older writers must not create case-sensitive keys during the upgrade.
+
 ## Schema Shape
 
 The current desired schema lives in `db/schema.sql` and the versioned migration

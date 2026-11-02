@@ -1,6 +1,7 @@
 #![allow(clippy::wildcard_imports)]
 
 use super::*;
+use crate::surfaces::xapi::request::Query;
 
 #[path = "xapi_regressions/admission.rs"]
 mod admission;
@@ -206,7 +207,7 @@ async fn submit(
     let headers = confidential_headers_for("statement-writer-a");
     let body = json_body(value, "Statement")?;
     Ok(if post {
-        post_statements(context, headers, empty_query(), body).await
+        post_statements(context, headers, Query(BTreeMap::new()), body).await
     } else {
         let query = BTreeMap::from([(
             "statementId".to_owned(),

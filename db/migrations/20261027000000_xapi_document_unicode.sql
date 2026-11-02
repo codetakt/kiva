@@ -26,25 +26,6 @@ RETURNS text LANGUAGE SQL IMMUTABLE AS $$
     SELECT label || ':' || octet_length(value)::text || ':' || value || '|'
 $$;
 
-WITH accounts AS (
-    SELECT tenant_id, resource_kind, document_key,
-        'account:' || (agent->'account'->>'homePage') || ':' ||
-        replace(replace(agent->'account'->>'name', '%', '%25'), ':', '%3A') AS ifi
-    FROM kiva.xapi_documents WHERE agent->'account' IS NOT NULL
-)
-UPDATE kiva.xapi_documents AS documents
-SET document_key = pg_temp.kiva_document_key_part('kind', documents.resource_kind) ||
-    CASE WHEN documents.resource_kind = 'state'
-        THEN pg_temp.kiva_document_key_part('activity_id', documents.activity_id) ELSE '' END ||
-    pg_temp.kiva_document_key_part('agent', accounts.ifi) ||
-    CASE WHEN documents.resource_kind = 'state'
-        THEN pg_temp.kiva_document_key_part('registration', coalesce(documents.registration::text, 'none')) ELSE '' END ||
-    pg_temp.kiva_document_key_part('document_id', documents.document_id)
-FROM accounts
-WHERE documents.tenant_id = accounts.tenant_id
-    AND documents.resource_kind = accounts.resource_kind
-    AND documents.document_key = accounts.document_key;
-
 ALTER TABLE kiva.xapi_statements
     ALTER COLUMN actor_ifi TYPE bytea USING convert_to(actor_ifi, 'UTF8');
 
@@ -53,7 +34,21 @@ ALTER TABLE kiva.xapi_documents
     DROP CONSTRAINT xapi_documents_document_key_check,
     DROP CONSTRAINT xapi_documents_document_id_check,
     DROP CONSTRAINT xapi_documents_agent_check,
-    ALTER COLUMN document_key TYPE bytea USING convert_to(document_key, 'UTF8'),
+    -- Rebuild keys during the table rewrite, before the primary-key index is
+    -- rebuilt. In-place UPDATE can collide with another Account's OLD key
+    -- (b:c -> b%3Ac, while b%3Ac -> b%253Ac), despite distinct final keys.
+    ALTER COLUMN document_key TYPE bytea USING convert_to(
+        CASE WHEN agent->'account' IS NOT NULL THEN
+            pg_temp.kiva_document_key_part('kind', resource_kind) ||
+            CASE WHEN resource_kind = 'state'
+                THEN pg_temp.kiva_document_key_part('activity_id', activity_id) ELSE '' END ||
+            pg_temp.kiva_document_key_part('agent',
+                'account:' || (agent->'account'->>'homePage') || ':' ||
+                replace(replace(agent->'account'->>'name', '%', '%25'), ':', '%3A')) ||
+            CASE WHEN resource_kind = 'state'
+                THEN pg_temp.kiva_document_key_part('registration', coalesce(registration::text, 'none')) ELSE '' END ||
+            pg_temp.kiva_document_key_part('document_id', document_id)
+        ELSE document_key END, 'UTF8'),
     ALTER COLUMN document_id TYPE bytea USING convert_to(document_id, 'UTF8'),
     ALTER COLUMN agent TYPE json USING agent::json,
     ALTER COLUMN content_json TYPE json USING content_json::json,

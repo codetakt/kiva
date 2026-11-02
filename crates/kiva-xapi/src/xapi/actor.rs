@@ -10,7 +10,12 @@ pub fn canonical_actor_ifi(actor: &Value) -> Option<String> {
         return Some(format!("mbox:{mbox}"));
     }
     if let Some(mbox_sha1sum) = actor.get("mbox_sha1sum").and_then(Value::as_str) {
-        return Some(format!("mbox_sha1sum:{mbox_sha1sum}"));
+        // The IFI is a hex-encoded digest, not an opaque case-sensitive name.
+        // Canonicalize the identity key without changing the submitted Agent.
+        return Some(format!(
+            "mbox_sha1sum:{}",
+            mbox_sha1sum.to_ascii_lowercase()
+        ));
     }
     if let Some(openid) = actor.get("openid").and_then(Value::as_str) {
         return Some(format!("openid:{openid}"));

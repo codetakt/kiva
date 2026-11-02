@@ -10,6 +10,13 @@ use jsonwebtoken::{Algorithm, EncodingKey};
 use sha2::{Digest, Sha256};
 use std::fmt::Write;
 
+#[path = "signatures/names.rs"]
+mod names;
+#[path = "signatures/owners.rs"]
+mod owners;
+#[path = "signatures/typed_identity.rs"]
+mod typed_identity;
+
 use crate::core::{
     config::SIGNATURE_ATTACHMENT_USAGE_TYPE, response::hex_lower, signature_policy::SignaturePolicy,
 };
@@ -271,6 +278,8 @@ async fn verify_signatures(mut state: AppState) -> Result<(), String> {
         }
         if mode == "good" {
             verify_equivalence(&state, &client, &base).await?;
+            typed_identity::verify(&state, &client, &base).await?;
+            names::verify(&state, &client, &base).await?;
             for cause in [
                 "valid",
                 "noncritical",

@@ -1,4 +1,12 @@
 DO $$ BEGIN
+    IF (SELECT count(*) FROM expected_account_rekey_rows) <> 32
+       OR (SELECT count(*) FROM kiva.xapi_documents WHERE tenant_id LIKE 'account-rekey-%') <> 32
+       OR EXISTS (
+           SELECT row_json FROM expected_account_rekey_rows
+           EXCEPT SELECT to_jsonb(d) FROM kiva.xapi_documents d WHERE tenant_id LIKE 'account-rekey-%'
+       ) THEN
+        RAISE EXCEPTION 'coexisting Account migration changed document identities or record contents';
+    END IF;
     IF (SELECT count(*) FROM expected_actor_keys) <> 6
        OR (SELECT count(*) FROM expected_document_keys) <> 6 THEN
         RAISE EXCEPTION 'incomplete migration controls';
@@ -27,3 +35,4 @@ END $$;
 
 DELETE FROM kiva.xapi_statements WHERE tenant_id IN (SELECT tenant_id FROM expected_actor_keys);
 DELETE FROM kiva.xapi_documents WHERE tenant_id IN (SELECT tenant_id FROM expected_document_keys);
+DELETE FROM kiva.xapi_documents WHERE tenant_id LIKE 'account-rekey-%';

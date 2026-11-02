@@ -65,6 +65,16 @@ pub fn validate_statement_shape(statement: &Value) -> Result<(), StatementValida
     Ok(())
 }
 
+/// Validates a `SubStatement` in its contained role, including signature payloads.
+/// Root-only properties and further nested `SubStatement` objects remain forbidden.
+pub fn validate_substatement_shape(statement: &Value) -> Result<(), StatementValidationError> {
+    super::object_validation::validate_substatement_object_model(statement)
+        .map_err(|error| StatementValidationError::new(error.to_string()))?;
+    validate_statement_actors(statement)
+        .map_err(|error| StatementValidationError::new(error.to_string()))?;
+    validate_substatement(statement_object(statement)?)
+}
+
 /// Validates Statement Context, Result, and nested `SubStatement` Context/Result data.
 pub fn validate_statement_context_result_shape(
     statement: &Value,

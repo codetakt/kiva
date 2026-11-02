@@ -122,15 +122,25 @@ fn validate_signed_statement_attachment(
             "signed Statement JWS alg must be RS256, RS384, or RS512",
         ));
     }
-    let payload = super::openapi::statement_body_from_openapi_contract(
-        crate::surfaces::xapi::lossless::parse_statement(
-            &base64_url_decode(segments.payload).map_err(|()| malformed_jws_error())?,
-            "JWS payload",
-        )?
-        .0,
+    let payload = crate::surfaces::xapi::lossless::parse_statement(
+        &base64_url_decode(segments.payload).map_err(|()| malformed_jws_error())?,
         "JWS payload",
-    )?;
-    kiva_xapi::validate_statement_shape(&payload).map_err(|error| {
+    )?
+    .0;
+    // The received attachment owner selects the role, never the untrusted
+    // payload discriminator. Keep root and contained property sets distinct.
+    let contained = statement.get("objectType").and_then(Value::as_str) == Some("SubStatement");
+    let payload = if contained {
+        super::openapi::substatement_body_from_openapi_contract(payload, "JWS payload")?
+    } else {
+        super::openapi::statement_body_from_openapi_contract(payload, "JWS payload")?
+    };
+    let shape = if contained {
+        kiva_xapi::validate_substatement_shape(&payload)
+    } else {
+        kiva_xapi::validate_statement_shape(&payload)
+    };
+    shape.map_err(|error| {
         HttpError::new(
             StatusCode::BAD_REQUEST,
             format!("invalid signed Statement: {error}"),

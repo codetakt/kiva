@@ -24,10 +24,14 @@ mod mime_persistence;
 mod name_constraints;
 #[path = "review_gaps/query.rs"]
 mod query;
+#[path = "review_gaps/query_encoding.rs"]
+mod query_encoding;
 #[path = "review_gaps/query_limit.rs"]
 mod query_limit;
 #[path = "review_gaps/related_activities.rs"]
 mod related_activities;
+#[path = "review_gaps/sha1_identity.rs"]
+mod sha1_identity;
 #[path = "review_gaps/shape.rs"]
 mod shape;
 #[path = "review_gaps/shared_attachments.rs"]

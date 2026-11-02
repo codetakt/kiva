@@ -199,7 +199,7 @@ pub(super) async fn assert_continuations(state: &AppState) -> Result<(), String>
             post_statements(
                 State(state.xapi_http_context()),
                 confidential_headers_for("statement-writer-a"),
-                empty_query(),
+                Query(BTreeMap::new()),
                 json_body(&batch, "batch")?,
             )
             .await,

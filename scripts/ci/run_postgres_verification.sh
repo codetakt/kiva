@@ -40,6 +40,7 @@ STARTED_POSTGRES=1
 createdb -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" "$PGDATABASE_NAME"
 XAPI_MIGRATION_CONTROL_RAN=0
 ATTACHMENT_MIGRATION_CONTROL_RAN=0
+SHA1_MIGRATION_CONTROL_RAN=0
 for migration in "$ROOT_DIR"/db/migrations/[0-9]*.sql; do
   if [[ "$migration" == */20261027000000_xapi_document_unicode.sql ]]; then
     # One connection retains the temporary expectations across the upgrade.
@@ -55,6 +56,10 @@ for migration in "$ROOT_DIR"/db/migrations/[0-9]*.sql; do
       -f "$migration" \
       -f "$ROOT_DIR/tests/postgres/xapi_attachment_media_migration_after.sql" >/dev/null
     ATTACHMENT_MIGRATION_CONTROL_RAN=1
+  elif [[ "$migration" == */20261030000000_xapi_sha1_identity.sql ]]; then
+    python3 "$ROOT_DIR/tests/postgres/xapi_sha1_identity_migration.py" \
+      "$PGHOST_ADDR" "$PGPORT_NUM" "$PGUSER_NAME" "$PGDATABASE_NAME"
+    SHA1_MIGRATION_CONTROL_RAN=1
   else
     psql -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" -d "$PGDATABASE_NAME" -v ON_ERROR_STOP=1 \
       -f "$migration" >/dev/null
@@ -62,6 +67,7 @@ for migration in "$ROOT_DIR"/db/migrations/[0-9]*.sql; do
 done
 [[ "$XAPI_MIGRATION_CONTROL_RAN" == 1 ]] || { echo "missing xAPI migration control" >&2; exit 1; }
 [[ "$ATTACHMENT_MIGRATION_CONTROL_RAN" == 1 ]] || { echo "missing attachment migration control" >&2; exit 1; }
+[[ "$SHA1_MIGRATION_CONTROL_RAN" == 1 ]] || { echo "missing SHA-1 identity migration control" >&2; exit 1; }
 
 export KIVA_POSTGRES_TEST_DATABASE_URL="postgres://${PGUSER_NAME}@${PGHOST_ADDR}:${PGPORT_NUM}/${PGDATABASE_NAME}"
 
@@ -87,6 +93,7 @@ if not checks or len(set(checks)) != len(checks):
     raise SystemExit("missing or duplicate PostgreSQL test inventory")
 checks.append("postgres_xapi_unicode_existing_row_migration")
 checks.append("postgres_xapi_attachment_media_existing_row_migration")
+checks.append("postgres_xapi_sha1_identity_existing_row_migration")
 report = {
     "schema_version": 1,
     "standard": "Kiva Architecture",

@@ -12,6 +12,7 @@ mod person;
 mod preconditions;
 mod projection;
 mod query;
+mod query_encoding;
 mod signature_comparison;
 
 pub(crate) use attachments::attachments_for_statement;
@@ -30,5 +31,6 @@ pub(crate) use preconditions::{
 };
 pub(crate) use projection::*;
 pub(crate) use query::*;
+pub(crate) use query_encoding::Query;
 #[cfg(test)]
 pub(crate) use signature_comparison::take_logical_observations;

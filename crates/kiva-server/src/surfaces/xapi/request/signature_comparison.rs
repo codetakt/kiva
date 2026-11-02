@@ -69,6 +69,15 @@ fn normalize_signed_statement(statement: &mut Value) {
         match target.get("objectType").and_then(Value::as_str) {
             Some("SubStatement") => normalize_signed_statement(target),
             Some("Agent" | "Group") => normalize_signed_actor(target),
+            Some("StatementRef") => {
+                if let Some(id) = target
+                    .get("id")
+                    .and_then(Value::as_str)
+                    .and_then(|id| uuid::Uuid::parse_str(id).ok())
+                {
+                    target["id"] = Value::String(id.to_string());
+                }
+            }
             None | Some("Activity") => remove_activity_definition(target),
             _ => {}
         }
@@ -77,6 +86,17 @@ fn normalize_signed_statement(statement: &mut Value) {
 
 fn normalize_signed_actor(actor: &mut Value) {
     if let Some(actor) = actor.as_object_mut() {
+        // SP-01 retains type-compatible non-IRI case equivalence. This is a
+        // comparison copy; the received JSON and original JWS bytes stay intact.
+        // Names are human-readable strings; IFI IRIs and account-owned names
+        // retain their own comparison rules. No Unicode casefold is implied.
+        for field in ["mbox_sha1sum", "name"] {
+            if let Some(text) = actor.get_mut(field)
+                && let Some(value) = text.as_str()
+            {
+                *text = Value::String(value.to_ascii_lowercase());
+            }
+        }
         actor
             .entry("objectType")
             .or_insert_with(|| Value::String("Agent".to_owned()));
