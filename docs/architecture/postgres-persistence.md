@@ -2,6 +2,18 @@
 
 Kiva should use PostgreSQL as the primary persistence backend.
 
+Development shells, PostgreSQL verification and conformance checks, and the
+Atlas development database target PostgreSQL **18.6**. `flake.nix` pins the
+upstream release tag and source hash using the existing nixpkgs build recipe;
+`nix build .#postgresql` builds the same package used by both shells and CI.
+When updating it, keep the Atlas image version in `atlas.hcl` aligned.
+
+For an existing PostgreSQL 18 cluster, follow the
+[18.6 migration notes](https://www.postgresql.org/docs/release/18.6/), including
+the linked instructions for releases before 18.2 where applicable. Upgrading a
+PostgreSQL 17 cluster requires `pg_upgrade` or dump/restore; changing the Nix
+package does not migrate existing database directories.
+
 ## Decision
 
 Use relational tables for governed state and PostgreSQL `json` for Statement

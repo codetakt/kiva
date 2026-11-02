@@ -5,6 +5,7 @@
   src,
   cargoArtifacts,
   kani',
+  postgresql,
   sourceRevision ? "unknown",
   sourceDirty ? true,
   ...
@@ -17,11 +18,13 @@ let
       craneLib
       src
       cargoArtifacts
+      postgresql
       ;
   };
 in
 
 {
+  inherit postgresql;
   kani = kani';
   # Evidence packages always retain completed/partial runs. They are not checks.
   memory-conformance-evidence = conformance.memory.evidence;

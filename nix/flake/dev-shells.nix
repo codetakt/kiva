@@ -4,6 +4,7 @@
   cargoArtifacts,
   rustToolchain,
   kani',
+  postgresql,
   pre-commit-check,
   ...
 }:
@@ -21,7 +22,7 @@ let
     cargo-nextest
     git
     nixfmt
-    postgresql_18
+    postgresql
     python
     rust-analyzer
     rustToolchain

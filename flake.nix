@@ -38,6 +38,14 @@
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
         kani' = pkgs.callPackage ./nix/kani/package.nix { };
 
+        # Pin PostgreSQL independently until the locked nixpkgs provides 18.6.
+        # Share this package across development shells and database checks.
+        postgresql = pkgs.postgresql_18.override {
+          version = "18.6";
+          rev = "refs/tags/REL_18_6";
+          hash = "sha256-ySffxlG7jlNyzx++BmIN+WuaQ9TMAJt/qER9wIjd6B8=";
+        };
+
         sourceInputs = lib.cleanSourceWith {
           src = ./.;
           filter =
@@ -160,6 +168,7 @@
             cargoArtifacts
             rustToolchain
             kani'
+            postgresql
             pre-commit-check
             strictClippyArgs
             ;

@@ -5,7 +5,7 @@ variable "database_url" {
 
 variable "dev_database_url" {
   type    = string
-  default = "docker://postgres/18.1/dev"
+  default = "docker://postgres/18.6/dev"
 }
 
 env "local" {
