@@ -30,3 +30,5 @@ pub(crate) use preconditions::{
 };
 pub(crate) use projection::*;
 pub(crate) use query::*;
+#[cfg(test)]
+pub(crate) use signature_comparison::take_logical_observations;

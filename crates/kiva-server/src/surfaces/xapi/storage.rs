@@ -2,6 +2,9 @@
 
 use std::{collections::BTreeMap, io, sync::Arc};
 
+#[cfg(test)]
+pub(crate) use statement_queries::take_replay_observations;
+
 use kiva_http_core::{
     DocumentJsonMergeDecision, DocumentWriteDecision, StatementPutDecision,
     document_json_merge_decision, document_preconditions_pass, document_put_decision,

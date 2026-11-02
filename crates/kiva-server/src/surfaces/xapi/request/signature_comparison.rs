@@ -22,6 +22,11 @@ std::thread_local! {
     static LOGICAL_OBSERVATIONS: std::cell::RefCell<Vec<Value>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
+#[cfg(test)]
+pub(crate) fn take_logical_observations() -> Vec<Value> {
+    LOGICAL_OBSERVATIONS.with(|values| std::mem::take(&mut *values.borrow_mut()))
+}
+
 fn canonical_signed_statement(statement: &Value) -> Value {
     let mut statement = statement.clone();
     normalize_signed_statement(&mut statement);

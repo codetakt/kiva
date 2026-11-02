@@ -4,6 +4,27 @@ use super::statement_queries::*;
 use super::*;
 
 impl PostgresStatementRepository {
+    #[cfg(test)]
+    pub(crate) async fn settled_snapshot(&self) -> Result<Value, StatementStoreError> {
+        let mut transaction = self.pool.begin().await?;
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1, 72927411))")
+            .bind(&self.tenant_id)
+            .execute(&mut *transaction)
+            .await?;
+        let ids = sqlx::query_as::<_, (Uuid,)>("SELECT statement_id FROM kiva.xapi_statements WHERE tenant_id=$1 ORDER BY statement_id")
+            .bind(&self.tenant_id).fetch_all(&mut *transaction).await?;
+        let mut values = Vec::new();
+        for (id,) in ids {
+            if let Some(record) =
+                select_statement_in_transaction(&mut transaction, &self.tenant_id, id).await?
+            {
+                values.push(snapshot_record(&record));
+            }
+        }
+        transaction.commit().await?;
+        Ok(Value::Array(values))
+    }
+
     pub(crate) async fn opaque_values(
         &self,
         ids: &[Uuid],

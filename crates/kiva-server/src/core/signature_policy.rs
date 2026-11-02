@@ -22,12 +22,19 @@ mod der;
 mod provider;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+pub(crate) use tests::name_constraints::integration_cases as name_constraint_cases;
 
 const POLICY_ENV: &str = "KIVA_XAPI_CERTIFICATE_POLICY";
 
 #[cfg(test)]
 std::thread_local! {
     static JWS_OBSERVATIONS: std::cell::RefCell<Vec<serde_json::Value>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+#[cfg(test)]
+pub(crate) fn take_jws_observations() -> Vec<serde_json::Value> {
+    JWS_OBSERVATIONS.with(|values| std::mem::take(&mut *values.borrow_mut()))
 }
 
 #[cfg(test)]
