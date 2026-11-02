@@ -36,12 +36,12 @@ subject partition. Foreign and unknown cursors are rejected.
 
 ## Statement Preservation
 
-The export reads the accepted `serde_json::Value` or PostgreSQL `jsonb` value
+The export reads the accepted `serde_json::Value` or PostgreSQL `json` value
 directly from the Statement repository and inserts it into the response. It
 does not deserialize and reserialize through an OpenAPI Statement DTO. This
-preserves JSON values according to the export contract;
-PostgreSQL `jsonb` does not preserve insignificant source whitespace or object
-member byte ordering.
+preserves JSON values according to the export contract, including escaped
+U+0000. The admission and export JSON serialization do not promise insignificant
+source whitespace or object member byte ordering.
 
 ## Voided Statements
 

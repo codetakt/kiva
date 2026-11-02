@@ -31,12 +31,25 @@ impl AnalyticsHttpContext {
 }
 
 impl XapiHttpContext {
+    pub(crate) fn may_read_statement(
+        &self,
+        principal: Option<&AuthorizedOperationPrincipal<AuthorizedXapiRead>>,
+        id: uuid::Uuid,
+    ) -> bool {
+        self.guards.may_read_statement(
+            principal.map(AuthorizedOperationPrincipal::as_principal),
+            id,
+        )
+    }
+
     pub(crate) async fn authorize_about_request(
         &self,
         headers: &HeaderMap,
         query: &BTreeMap<String, String>,
     ) -> Result<Option<AuthenticatedPrincipal>, HttpError> {
-        self.guards.authorize_about_request(headers, query).await
+        let principal = self.guards.authorize_about_request(headers, query).await?;
+        self.runtime_limits().xapi.admit(principal.as_ref()).await?;
+        Ok(principal)
     }
 
     pub(crate) async fn authorize_xapi_read_request(
@@ -44,9 +57,19 @@ impl XapiHttpContext {
         headers: &HeaderMap,
         query: &BTreeMap<String, String>,
     ) -> Result<Option<AuthorizedOperationPrincipal<AuthorizedXapiRead>>, HttpError> {
-        self.guards
+        let principal = self
+            .guards
             .authorize_typed_xapi_request::<AuthorizedXapiRead>(headers, query)
-            .await
+            .await?;
+        self.runtime_limits()
+            .xapi
+            .admit(
+                principal
+                    .as_ref()
+                    .map(AuthorizedOperationPrincipal::as_principal),
+            )
+            .await?;
+        Ok(principal)
     }
 
     pub(crate) async fn authorize_xapi_write_request(
@@ -54,9 +77,19 @@ impl XapiHttpContext {
         headers: &HeaderMap,
         query: &BTreeMap<String, String>,
     ) -> Result<Option<AuthorizedOperationPrincipal<AuthorizedXapiWrite>>, HttpError> {
-        self.guards
+        let principal = self
+            .guards
             .authorize_typed_xapi_request::<AuthorizedXapiWrite>(headers, query)
-            .await
+            .await?;
+        self.runtime_limits()
+            .xapi
+            .admit(
+                principal
+                    .as_ref()
+                    .map(AuthorizedOperationPrincipal::as_principal),
+            )
+            .await?;
+        Ok(principal)
     }
 }
 

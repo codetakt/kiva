@@ -33,6 +33,9 @@ pub struct PortabilityStatementRecord {
     pub statement_id: Uuid,
     /// Stored Statement JSON, read without typed DTO reprojection.
     pub statement: Value,
+    /// Raw extension-owned JSON indexed by JSON pointer, for lossless export.
+    /// This metadata is internal and is never exposed as a Statement property.
+    pub opaque_extension_values: std::collections::BTreeMap<String, String>,
     /// Statement stored timestamp.
     pub stored_at: OffsetDateTime,
     /// Whether the Statement is the target of an accepted voiding Statement.

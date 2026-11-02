@@ -15,7 +15,7 @@ import yaml
 
 from lrs_issued_bindings import select, DIRECT, identifier_format_bindings
 from issued_test_design import obligations, review_binding
-from issued_definition_contracts import load_contracts
+from issued_definition_contracts import load_contracts, branch_interpretations
 from lrs_procedure_definitions import load_procedures
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,12 +29,27 @@ OUTPUT = ROOT / 'spec/conformance/issued-test-projection.json'
 def collect_execution_contract(root=ROOT):
     """Bind actual oracle inputs, including inherited workspace dependency settings."""
     return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted([
-        *root.glob('tools/xapi-lrs-conformance/src/*.rs'),
+        *root.glob('tools/xapi-lrs-conformance/src/**/*.rs'),
+        *root.glob('scripts/ci/**/*.py'),
+        *root.glob('tests/conformance/controls/*.json'),
+        *root.glob('tests/conformance/fixtures/**/*.json'),
+        *root.glob('tests/conformance/fixtures/**/*.der'),
+        *root.glob('tests/conformance/fixtures/**/*.pem'),
         *root.glob('scripts/ci/lrs_projection_*.py'),
         *root.glob('scripts/ci/test_*.py'),
         *[root / p for p in ['Cargo.toml','Cargo.lock','tools/xapi-lrs-conformance/Cargo.toml',
             'scripts/ci/generate_lrs_projection_cases.py','scripts/ci/lrs_issued_bindings.py',
             'scripts/ci/generate_issued_test_projection.py','scripts/ci/report_issued_test_results.py',
+            'scripts/ci/capture_issued_test_execution.py',
+            'scripts/ci/collect_lrs_procedure_evidence.py','scripts/ci/run_lrs_native_controls.py',
+            'scripts/ci/lrs_mailbox.py','scripts/ci/lrs_language_vectors.py',
+            'scripts/ci/generate_pkix_unicode32.py',
+            'spec/conformance/implementation-procedure-bindings.json',
+            'spec/conformance/lrs-product-capabilities.yaml',
+            'tests/conformance/fixtures/mailto-contract.json',
+            'tests/conformance/fixtures/sha2-integration.json',
+            'tests/conformance/fixtures/pkix-unicode32.json.gz',
+            'scripts/ci/validate_release_evidence_set.py',
             'scripts/ci/report_lrs_interpretations.py',
             'scripts/ci/report_conformance_case_matrix.py',
             'scripts/ci/validate_lrs_projection.py', 'scripts/ci/audit_lrs_source_projection.py',
@@ -194,6 +209,9 @@ def project():
             policy_selections={d['id']: d['selection'] for d in definition_contracts['decision_options'] if d['id'] in b['decision_ids']},
             project_policy=b.get('project_policy'),
             definition_state='authored expectations; source residuals remain explicit') for b in branches]
+        for branch, projected in zip(branches, design['interpretation_branches']):
+            if interpretations := branch_interpretations(definition_contracts, branch):
+                projected['source_interpretations'] = interpretations
         design['incorporated_contracts'] = [d['id'] for d in definition_contracts['dependency_contracts'] if rule['id'] in d['rule_ids']]
         if not names and not proc:
             raise ValueError('rule has no concrete test or procedure: ' + rule['id'])

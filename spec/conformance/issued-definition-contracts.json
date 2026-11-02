@@ -52682,6 +52682,141 @@
         "about-response-shape-2-1-0",
         "about-response-shape-99-99-99"
       ]
+    },
+    {
+      "id": "REF-FILTER-01",
+      "parent_id": "SP-REFERENCE-CONJUNCTION",
+      "title": "Conjunction across Object StatementRef targets",
+      "classification": "source_settled",
+      "rules": [
+        "IP-statementref-filters",
+        "IP-statementref-time",
+        "IP-get-param-agent",
+        "IP-get-param-verb",
+        "IP-get-param-activity",
+        "IP-get-param-registration",
+        "IP-get-param-since",
+        "IP-get-param-until",
+        "IP-get-param-limit",
+        "IP-get-param-ascending"
+      ],
+      "actor": "LRS",
+      "conditions_exceptions": [
+        {
+          "rule": "IP-statementref-filters",
+          "strength": "data-contract",
+          "when": "Multiple-Statement query.",
+          "exceptions": [
+            "No expansion for statementId/voidedStatementId lookup.",
+            "Context.statement references do not expand filters."
+          ]
+        },
+        {
+          "rule": "IP-statementref-time",
+          "strength": "shall",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-agent",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-verb",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-activity",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-registration",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-since",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-until",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-limit",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        },
+        {
+          "rule": "IP-get-param-ascending",
+          "strength": "data-contract",
+          "when": "Within the stated clause and resource/data scope.",
+          "exceptions": []
+        }
+      ],
+      "oracle": "For each supplied non-time selector p, a returned Statement S meets p when S or a Statement reached recursively through Object StatementRef meets p directly. Conjoin those independently inherited predicates. Different selectors may have different witnesses along the same reachable chain. Apply since/until and ordering/limit to S itself.",
+      "source_residual": "",
+      "decision_ids": [],
+      "settled_proposals": [
+        "SP-REFERENCE-CONJUNCTION"
+      ],
+      "interpretation_ids": [
+        "SP-REFERENCE-CONJUNCTION"
+      ],
+      "source_basis": {
+        "file": "spec/conformance/issued-definition-source-anchors.json",
+        "pointer": "/IEEE:1524-1549",
+        "anchors": [
+          {
+            "id": "IEEE:1524-1549",
+            "source": "IEEE",
+            "clause": "4.1.6.1.4",
+            "file": "target/ieee-lrs-suite-audit/20261014T055444Z/source/ieee-layout.txt",
+            "file_sha256": "7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876",
+            "lf_start": 1524,
+            "lf_end": 1549,
+            "byte_start": 98730,
+            "byte_length": 1807,
+            "sha256": "d76a7bc33c54be2fd0e573c32de6edaa5c3ab10eaaceb45d57b9bfcce724fa4f",
+            "coordinate": "1-based LF only; form-feed is not a line break; end LF included if present",
+            "raw_pdf": {
+              "file": "target/ieee-lrs-suite-audit/20261014T055444Z/source/927411-2023.pdf",
+              "sha256": "fa57dbaa0fbc0800b8c5a693af884032e782110c1f446ef865797fd0e0811526"
+            },
+            "physical_pdf_pages": [
+              27
+            ]
+          }
+        ]
+      },
+      "test": {
+        "fixture": "Authenticated isolated endpoint with independently assigned stored seconds 1..8, maximum page size two, ordinary A, B->A, C->B, D->C through Object StatementRefs. A supplies Activity a, B supplies Agent b, C supplies Verb c, D supplies registration d. F directly satisfies b/c/d but references A only in Context.statement. M directly satisfies b/c/d but has a missing Object target. U<->V supplies b/c/d across the cycle and has no Activity a seed. All unrelated roles have fresh disjoint identifiers. Capture exact submitted and returned records before querying.",
+        "steps": [
+          "Apply SP-REFERENCE-CONJUNCTION. For agent=B.actor and verb=A.verb expect B/C/D. For agent=A.actor and verb=A.verb expect A/B/C/D. These distinguish per-condition inheritance from requiring a common direct witness.",
+          "Query agent=b, verb=c, activity=a and registration=d together: require exactly D. None of A/B/C/D directly satisfies all four. F, M and U/V must be absent. Remove only activity: require D/F/M/U/V, proving that cycles with real predicate seeds do not fabricate a missing Activity or lose established matches.",
+          "Independently replace each of the four selectors with a fresh absent value while retaining the other three: require an empty collection every time. Do not accept OR across selectors or seed values from disconnected statements.",
+          "For the B.actor/A.verb pair combine since=B.stored and until=C.stored: require C only. Until=B.stored alone includes B. Exercise ascending true/false and request limits one/two with the configured maximum two, following every continuation to terminal exhaustion and checking the complete expected order without extras or duplicates.",
+          "Retrieve A/B/C/D by statementId with format=exact: return only the selected record. A statementId request combined with collection selectors remains 400. Retain actual request/response evidence and interpretation IDs; do not select an interpretation from observed results."
+        ],
+        "assertions": [
+          "Under SP-REFERENCE-CONJUNCTION, independently inherited non-time predicates are conjoined. Split-node positive cases and independently absent predicates have fixed expected ID inventories; observation without an expectation does not discharge this procedure.",
+          "Context.statement and missing targets never extend scope. A cycle requires an actual reachable seed for every selected predicate. Time/order/limit refer to each returned targeting Statement; single-ID exceptions remain enforced.",
+          "This source_settled classification records an explicit project source interpretation with its competing reading and derivation; it is not IEEE adjudication or an unrestricted permitted choice. Keep that provenance visible in execution results. Any failure remains FAIL and cannot be relabelled as source uncertainty after the run."
+        ]
+      },
+      "related_cases": []
     }
   ],
   "source_interpretations": [
@@ -53319,6 +53454,35 @@
         "file": "/home/claude/Workspaces/conceptual/kiva/target/ieee-test-definition-full-completion/20261019T213601Z/candidate-02/impact/rule-inheritance.json",
         "resolution_id": "SP-FULL-VERSION"
       }
+    },
+    {
+      "id": "SP-REFERENCE-CONJUNCTION",
+      "title": "Conjoin individually inherited StatementRef filter predicates",
+      "branches": [
+        "REF-FILTER-01"
+      ],
+      "classification": "source_settled",
+      "actor": "LRS Statement collection retrieval",
+      "force": "Interpret the existing non-time filter contracts with 4.1.6.1.4; retain targeter time/sequence duties and single-ID exceptions",
+      "conditions": "Multiple-Statement queries with two or more of agent, verb, activity and registration. Only Object StatementRef edges participate. Existing related_agents/related_activities scopes remain unchanged.",
+      "exceptions": "No expansion for statementId/voidedStatementId or Context.statement; existing visibility and voiding duties remain.",
+      "conclusion": "For each supplied non-time selector p, a returned Statement S meets p when S or a Statement reached recursively through Object StatementRef meets p directly. Conjoin those independently inherited predicates. Different selectors may have different witnesses along the same reachable chain. Apply since/until and ordering/limit to S itself.",
+      "reasoning": "The first operative paragraph grants inheritance of the filter condition for non-time filter parameters. Once each condition holds directly or by this rule, the ordinary conjunction holds. The following recursive example establishes transitive inheritance; it does not add a requirement that all selectors have a single directly matching witness. Requiring one common witness would remove a condition already inherited under the first rule.",
+      "competing_reading": "One could read the later plural filter conditions as requiring a single target to satisfy every predicate directly. This project interpretation rejects that added common-witness restriction. This interpretation is derived from clause structure, and its expected inventories were fixed before executing the new procedure. Earlier review had already observed the current implementation behavior; that observation is not the authority for the interpretation.",
+      "allowed": [
+        "A selector may match S while another matches its target, or selectors may match different ancestors.",
+        "A cycle with actual predicate seeds can match; an absent predicate cannot be invented by cycling."
+      ],
+      "forbidden": [
+        "Requiring all selectors to be directly satisfied on one Statement after each independently holds by the inheritance rule.",
+        "Using OR across the query selectors, unrestricted cross-Statement matches, Context.statement edges or a missing target to manufacture a match.",
+        "Using a target timestamp instead of the returned Statement timestamp for since/until, or emitting forbidden/duplicate IDs while paging."
+      ],
+      "residual": "",
+      "source_anchor_ids": [
+        "IEEE:1524-1549"
+      ],
+      "status": "Authored source interpretation for this projection; not official IEEE adjudication or independent review acceptance"
     }
   ],
   "decision_options": [
@@ -55181,7 +55345,7 @@
         "IP-multipart-match-length",
         "IP-number-precision"
       ],
-      "adapter_boundary": "Current Rust precision/preservation adapter handles retained i64/u64 JSON integers through i128 comparisons of integer binary32 bounds; decimal/exponent Number representations are unavailable before equality. Python floats are unavailable before equality; explicit int/Decimal inputs use the exact-input adapter. Full lossless decimal provider integration is deferred. Ordinary Rust JSON comparison/capture/enum/MIME length now rejects binary64 evidence as ORACLE-UNAVAILABLE; exact signed/unsigned integer Values remain comparable. Structural equality is not substituted for the xAPI preservation allowance relation."
+      "adapter_boundary": "Rust exact_yaml retains suite decimal/exponent tokens and the isolated serde_json dependency retains response tokens. numeric.rs compares normalized decimal values without binary64 and implements enclosing binary32 bounds plus directed decimal endpoint spellings that round-trip. Exact equality includes underflow/overflow-sized decimals; differing values requiring binary32 overflow or exponents outside i64 remain unavailable. Subnormals and signed zero are covered. Python load_json_members retains Decimal inputs; preexisting binary64 float objects remain unavailable rather than being promoted to exact evidence. Ordinary equality, capture and numeric enums use exact values; preservation retains the distinct minimum-precision relation."
     },
     {
       "id": "DC-LANGUAGE",
@@ -55295,7 +55459,7 @@
         "Require original IRI, mapped URI, and independently documented scheme/resource access-mechanism classification. A known pure name with no access mechanism fails the locator predicate; a known locator satisfies it even if the resource is unreachable or absent. Insufficient classification evidence yields oracle-unavailable, not invalid or valid.",
         "No invented global scheme allowlist/denylist. In particular do not classify every urn: as invalid; name/locator roles can overlap. The negative pure-name fixture carries independent namespace semantics and absence of an access mechanism, not merely a lexical urn prefix.",
         "Apply to Account.homePage including Person account elements, ActivityDefinition.moreInfo and Attachment.fileUrl, subject to each field/role and IEEE input validation waiver. Query more handling retains its own relative-URL rules. Do not dereference a URL to prove syntax or preservation.",
-        "Current Rust format:irl and Python Person account checks perform necessary type/IRI syntax checks but lack locator classification evidence. They emit ORACLE-UNAVAILABLE/None after syntax success. xAPI preservation comparisons do not substitute for classification."
+        "Rust locator.rs and Python locator_validity retain necessary IRI syntax checks and RFC3987 section 3.1 URI mapping. For HTTP and HTTPS, RFC9110 sections 4.2.1–4.2.2 independently supply the resource identity and primary access mechanism; require an authority with a nonempty host. No request is issued to test reachability. Other schemes/resources remain oracle-unavailable until independently classified; this bounded provider does not treat them as invalid."
       ],
       "outputs": [
         "valid",
@@ -55318,7 +55482,7 @@
         "IP-Person-account-type",
         "IP-person-array-members"
       ],
-      "later": "Provider integration/behavioral execution after static definition completion"
+      "later": "Other scheme/resource classifiers and independent provider qualification remain separate from the bounded local HTTP(S) execution."
     }
   ],
   "equality_matrix": [

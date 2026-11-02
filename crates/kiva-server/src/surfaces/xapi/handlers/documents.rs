@@ -2,6 +2,11 @@
 #![allow(clippy::wildcard_imports)]
 
 use super::common::*;
+use crate::core::runtime::xapi_limits::BodyKind;
+use crate::surfaces::xapi::request::{
+    document_read_status, mixed_condition_response, undefined_condition_response,
+};
+use crate::surfaces::xapi::response::document_list_response;
 
 pub(crate) async fn get_state_document(
     State(state): State<XapiHttpContext>,
@@ -118,23 +123,39 @@ async fn get_document(
         return error.into_response();
     }
 
-    match DocumentAddress::from_query(kind, &query, DocumentIdRequirement::Optional) {
-        Ok(DocumentSelection::Single(address)) => {
+    let selection = match DocumentAddress::from_query(kind, &query, DocumentIdRequirement::Optional)
+    {
+        Ok(selection) => selection,
+        Err(error) => return error.into_response(),
+    };
+    if let Some(response) = mixed_condition_response(&headers) {
+        return response;
+    }
+    match selection {
+        DocumentSelection::Single(address) => {
             match xapi_service::get_document(state.xapi_services(), &address).await {
-                Ok(Some(record)) => document_response(StatusCode::OK, &record),
+                Ok(Some(record)) => {
+                    match document_read_status(&record.etag, Some(record.updated_at), &headers) {
+                        StatusCode::PRECONDITION_FAILED => HttpError::new(
+                            StatusCode::PRECONDITION_FAILED,
+                            "document precondition failed",
+                        )
+                        .into_response(),
+                        status => document_response(status, &record),
+                    }
+                }
                 Ok(None) => {
                     HttpError::new(StatusCode::NOT_FOUND, "document was not found").into_response()
                 }
                 Err(error) => document_store_error_response(&error),
             }
         }
-        Ok(DocumentSelection::Scope(scope)) => {
+        DocumentSelection::Scope(scope) => {
             match xapi_service::list_document_ids(state.xapi_services(), &scope).await {
-                Ok(document_ids) => json_response(StatusCode::OK, json!(document_ids)),
+                Ok(document_ids) => document_list_response(&document_ids, &headers),
                 Err(error) => document_store_error_response(&error),
             }
         }
-        Err(error) => error.into_response(),
     }
 }
 
@@ -148,24 +169,37 @@ async fn put_document(
     if let Err(error) = kind.validate_query(&query, false) {
         return error.into_response();
     }
-    if let Err(error) = state.authorize_xapi_write_request(&headers, &query).await {
+    let principal = match state.authorize_xapi_write_request(&headers, &query).await {
+        Ok(principal) => principal,
+        Err(error) => return error.into_response(),
+    };
+    if let Err(error) = state.runtime_limits().xapi.body(
+        principal
+            .as_ref()
+            .map(kiva_identity::AuthorizedPrincipal::as_principal),
+        BodyKind::Document,
+        body.len(),
+    ) {
         return error.into_response();
     }
     let address = match required_document_address(kind, &query) {
         Ok(address) => address,
         Err(error) => return error.into_response(),
     };
-    let content = match document_content_from_request(&headers, &body) {
-        Ok(content) => content,
-        Err(error) => return error.into_response(),
-    };
+    let content = document_content_from_request(&headers, &body);
+    if let Some(response) = mixed_condition_response(&headers) {
+        return response;
+    }
     let preconditions = Preconditions::from_headers(&headers);
 
     match xapi_service::put_document(state.xapi_services(), address, content, preconditions).await {
+        Ok(DocumentWriteOutcome::UndefinedPreconditions) => undefined_condition_response(),
         Ok(DocumentWriteOutcome::Stored) => empty_response(StatusCode::NO_CONTENT),
-        Ok(DocumentWriteOutcome::Conflict) => {
-            HttpError::new(StatusCode::CONFLICT, "document already exists").into_response()
-        }
+        Ok(DocumentWriteOutcome::Conflict) => HttpError::new(
+            StatusCode::CONFLICT,
+            "Check current state and use If-Match with the current ETag.",
+        )
+        .into_response(),
         Ok(DocumentWriteOutcome::PreconditionFailed) => HttpError::new(
             StatusCode::PRECONDITION_FAILED,
             "document precondition failed",
@@ -188,26 +222,43 @@ async fn post_document(
     if let Err(error) = kind.validate_query(&query, false) {
         return error.into_response();
     }
-    if let Err(error) = state.authorize_xapi_write_request(&headers, &query).await {
+    let principal = match state.authorize_xapi_write_request(&headers, &query).await {
+        Ok(principal) => principal,
+        Err(error) => return error.into_response(),
+    };
+    if let Err(error) = state.runtime_limits().xapi.body(
+        principal
+            .as_ref()
+            .map(kiva_identity::AuthorizedPrincipal::as_principal),
+        BodyKind::Document,
+        body.len(),
+    ) {
         return error.into_response();
     }
     let address = match required_document_address(kind, &query) {
         Ok(address) => address,
         Err(error) => return error.into_response(),
     };
-    let content = match document_content_from_request(&headers, &body) {
-        Ok(content) => content,
-        Err(error) => return error.into_response(),
-    };
+    let content = document_content_from_request(&headers, &body);
+    if content.as_json_object().is_none() {
+        return HttpError::new(
+            StatusCode::BAD_REQUEST,
+            "document merge requires an application/json object",
+        )
+        .into_response();
+    }
     let preconditions = Preconditions::from_headers(&headers);
 
     match xapi_service::post_json_merge(state.xapi_services(), address, content, preconditions)
         .await
     {
+        Ok(DocumentWriteOutcome::UndefinedPreconditions) => undefined_condition_response(),
         Ok(DocumentWriteOutcome::Stored) => empty_response(StatusCode::NO_CONTENT),
-        Ok(DocumentWriteOutcome::Conflict) => {
-            HttpError::new(StatusCode::CONFLICT, "document already exists").into_response()
-        }
+        Ok(DocumentWriteOutcome::Conflict) => HttpError::new(
+            StatusCode::CONFLICT,
+            "Check current state and use If-Match with the current ETag.",
+        )
+        .into_response(),
         Ok(DocumentWriteOutcome::PreconditionFailed) => HttpError::new(
             StatusCode::PRECONDITION_FAILED,
             "document precondition failed",
@@ -242,6 +293,9 @@ async fn delete_document(
         Ok(selection) => selection,
         Err(error) => return error.into_response(),
     };
+    if let Some(response) = mixed_condition_response(&headers) {
+        return response;
+    }
     let preconditions = Preconditions::from_headers(&headers);
 
     match xapi_service::delete_document(state.xapi_services(), selection, preconditions).await {

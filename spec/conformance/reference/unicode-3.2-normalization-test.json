@@ -1,0 +1,6 @@
+{
+  "source": "https://raw.githubusercontent.com/unicode-org/unicodetools/main/unicodetools/data/ucd/3.2.0-Update/NormalizationTest.txt",
+  "original_file": "NormalizationTest-3.2.0.txt",
+  "original_sha256": "c4513869bb7098d19838be4a1fd5d760843c5804bfe03bd6bbb20623ceb6e57d",
+  "gzip_sha256": "6426742593abea5c3a1a92d4f97aa986d5b5bdefa5aaef6ea99f0b4ee7176cff"
+}

@@ -87,7 +87,7 @@ class VisibilityTests(unittest.TestCase):
                     executor.http=Mock(side_effect=prefix+[reply(99,more),reply(100,'')])
                     self.assertIsNone(executor.collect_statements({},'probe'))
                     self.assertEqual(executor.http.call_count,len(prefix)+1)
-                    self.assertTrue(any(c['id']=='probe-more-syntax' and c['outcome']=='failed'
+                    self.assertTrue(any(c['id']==f'probe-page-{len(prefix)}-more-syntax' and c['outcome']=='failed'
                                         for c in executor.results['probe']['checks']))
 
     def test_relative_continuation_requires_a_base_and_keeps_origin_boundary(self):
@@ -114,6 +114,9 @@ class VisibilityTests(unittest.TestCase):
             (['pages/','next/','next/',''],
              ['/xapi/statements?limit=1','/xapi/pages/',
               '/xapi/pages/next/','/xapi/pages/next/next/']),
+            (['学習?言語=日本語','%E6%AC%A1?x=%2F','?q=次',''],
+             ['/xapi/statements?limit=1','/xapi/%E5%AD%A6%E7%BF%92?%E8%A8%80%E8%AA%9E=%E6%97%A5%E6%9C%AC%E8%AA%9E',
+              '/xapi/%E6%AC%A1?x=%2F','/xapi/%E6%AC%A1?q=%E6%AC%A1']),
         ]:
             with self.subTest(continuations=continuations), TemporaryDirectory() as directory:
                 executor=Executor.__new__(Executor)
@@ -134,6 +137,42 @@ class VisibilityTests(unittest.TestCase):
                 self.assertEqual([c.request.call_args.args[1] for c in connections],expected)
                 records=[json.loads(line) for line in (executor.out/'http.jsonl').read_text().splitlines()]
                 self.assertEqual([r['response']['url'] for r in records],['http://example.test'+p for p in expected])
+
+    def test_unicode_and_escaped_continuations_reach_same_http_resource(self):
+        from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
+        import threading
+        seen=[]
+        class Peer(BaseHTTPRequestHandler):
+            def log_message(self,*args):pass
+            def do_GET(self):
+                seen.append((self.path,self.headers.get('Authorization')))
+                data=b'{"statements":[],"more":""}'
+                self.send_response(200)
+                self.send_header('X-Experience-API-Version','2.0.0')
+                self.send_header('X-Experience-API-Consistent-Through','2026-01-01T00:00:00Z')
+                self.send_header('Content-Length',str(len(data)))
+                self.end_headers();self.wfile.write(data)
+        with ThreadingHTTPServer(('127.0.0.1',0),Peer) as server,TemporaryDirectory() as directory:
+            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            try:
+                root=Path(directory);fixture=root/'fixture.json';fixture.write_text('{}')
+                endpoint=f'http://127.0.0.1:{server.server_port}'
+                executor=Executor(SimpleNamespace(out=root,fixture=fixture,endpoint=endpoint))
+                executor.current='iri-control';executor.results[executor.current]={'checks':[]}
+                executor.headers['Authorization']='Bearer controlled-local-credential'
+                mapped='/xapi/%E5%AD%A6%E7%BF%92?q=%E6%97%A5%E6%9C%AC%E8%AA%9E&literal=%2F'
+                for more in ['/xapi/学習?q=日本語&literal=%2F',mapped]:
+                    response=executor.http('GET','/statements',continuation=more,
+                        continuation_base=endpoint+'/xapi/statements',expected_statuses=(200,))
+                    self.assertEqual(response['json'],{'statements':[],'more':''})
+                    self.assertEqual(response['url'],endpoint+mapped)
+                self.assertEqual(seen,[(mapped,'Bearer controlled-local-credential')]*2)
+                records=[json.loads(line) for line in (root/'http.jsonl').read_text().splitlines()]
+                self.assertEqual([r['request']['wire_target'] for r in records],[mapped,mapped])
+                self.assertNotEqual(records[0]['request']['resolved_iri'],records[1]['request']['resolved_iri'])
+                self.assertNotIn('controlled-local-credential',(root/'http.jsonl').read_text())
+            finally:
+                server.shutdown();thread.join()
 
     invalid_response_dates = [
         'Thu, 01 Jan 2026 00:00 GMT',
@@ -168,7 +207,7 @@ class VisibilityTests(unittest.TestCase):
                 for items,incomplete in [([],False),([{'stored':'2026-01-01T00:00:00Z'}],False),([],True)]:
                     with self.subTest(header=header,continuation=continuation,items=items,incomplete=incomplete):
                         e,_=self.collect(items,header,continuation=continuation,incomplete=incomplete)
-                        checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                        checks=[c for c in e.results['probe']['checks'] if c['id'].startswith('probe-page-') and c['id'].endswith('-last-modified')]
                         self.assertEqual(checks[-1]['outcome'],'failed')
 
     def test_complete_response_dates_keep_page_semantics(self):
@@ -182,14 +221,14 @@ class VisibilityTests(unittest.TestCase):
             for items,incomplete in [([],False),([{'stored':stored}],False),([],True)]:
                 with self.subTest(header=header,items=items,incomplete=incomplete):
                     e,_=self.collect(items,header,incomplete=incomplete)
-                    checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
-                    self.assertEqual(checks[-1]['outcome'],'not-run' if incomplete else 'passed')
+                    checks=[c for c in e.results['probe']['checks'] if c['id'].startswith('probe-page-') and c['id'].endswith('-last-modified')]
+                    self.assertEqual(checks[-1]['outcome'],'not-run' if incomplete or not items else 'passed')
         for header,outcome in [('Sat, 01 Jan 0000 00:00:00 GMT','not-run'),
                                ('Sun, 01 Jan 0000 00:00:00 GMT','failed'),
                                ('Wed, 30 Feb 0000 00:00:00 GMT','failed')]:
             with self.subTest(header=header):
                 e,_=self.collect([],header)
-                checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                checks=[c for c in e.results['probe']['checks'] if c['id'].startswith('probe-page-') and c['id'].endswith('-last-modified')]
                 self.assertEqual(checks[-1]['outcome'],outcome)
 
     def test_document_last_modified_uses_same_sender_syntax(self):
@@ -242,6 +281,8 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
                                  json={'statements':[],'more':'/next'}))
         e.http=lambda *a,**kw:pages.pop(0)
         result=e.collect_statements({},'probe')
+        identities=[check['id'] for check in e.results['probe']['checks']]
+        self.assertEqual(len(identities),len(set(identities)))
         return e,result
 
     def test_page_header_syntax_survives_empty_or_interrupted_body(self):
@@ -252,10 +293,10 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
                         e,result=self.collect([],header,incomplete=incomplete,continuation=continuation)
                         self.assertEqual('failed' in self.outcomes(e),header=='invalid')
                         self.assertEqual(result,None if incomplete else [])
-                        checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                        checks=[c for c in e.results['probe']['checks'] if c['id'].startswith('probe-page-') and c['id'].endswith('-last-modified')]
                         self.assertTrue(checks)
                         self.assertEqual(checks[-1]['outcome'],
-                                         'failed' if header=='invalid' else 'not-run' if incomplete else 'passed')
+                                         'failed' if header=='invalid' else 'not-run' if incomplete or header is not None else 'passed')
 
     def test_unavailable_page_time_does_not_hide_definite_stored_or_max_defect(self):
         unknown={'stored':'2016-12-31T23:59:60Z'}
@@ -274,7 +315,7 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
             ([{'stored':'2025-12-31T23:59:59Z'}],'Thu, 01 Jan 2026 00:00:00 GMT','failed')]:
             with self.subTest(items=items,header=header):
                 e,_=self.collect(items,header)
-                checks=[c for c in e.results['probe']['checks'] if c['id']=='probe-page-last-modified']
+                checks=[c for c in e.results['probe']['checks'] if c['id'].startswith('probe-page-') and c['id'].endswith('-last-modified')]
                 self.assertEqual(checks[-1]['outcome'],outcome)
 
     def executor(self, statuses, *, missing_header=False, wrong_id=False, seen=False,
@@ -304,6 +345,15 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
         with patch('run_lrs_procedures.time.sleep'):
             self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
         self.assertEqual(len(e.calls),2);self.assertNotIn('failed',self.outcomes(e))
+    def test_repeated_visibility_reads_keep_each_attempt_observation(self):
+        e=self.executor([404,200])
+        with patch('run_lrs_procedures.time.sleep'):
+            self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
+            self.assertIsNotNone(e.read_visible({'id':'s'},{'status':204}))
+        identities=[check['id'] for check in e.results['probe']['checks']]
+        self.assertEqual(len(identities),len(set(identities)))
+        self.assertEqual(len(e.calls),3)
+        self.assertEqual(sum(name.endswith('-stored') for name in identities),2)
     def test_deadline_is_not_run(self):
         e=self.executor([404]);self.assertIsNone(e.read_visible({'id':'s'},{'status':204}))
         self.assertIn('not-run',self.outcomes(e));self.assertNotIn('failed',self.outcomes(e))
@@ -322,6 +372,7 @@ response_http_date(' '*4096+'Thu, 01 Jan 2026 00:00:00 GMT'+' '*4096)
             ('1970-01-01T09:00:00+09:00', '1970-01-01T00:00:00Z', 'not-run'),
             ('1970-01-01T00:00:00Z', '1969-12-31T23:59:59Z', 'not-run'),
             ('1970-01-01T00:00:00Z', '1970-01-01T00:00:00.0000000001Z', 'failed'),
+            ('1969-12-31T23:59:59Z', '1969-12-31T23:59:59.0000001Z', 'failed'),
             ('2016-12-31T23:59:60Z', '2017-01-01T00:00:01Z', 'not-run'),
             ('2017-01-01T00:00:00Z', '2016-12-31T23:59:60Z', 'not-run'),
             ('2016-12-31T23:59:60Z', '2026-02-30T00:00:00Z', 'failed'),

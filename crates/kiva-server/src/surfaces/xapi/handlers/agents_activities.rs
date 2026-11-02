@@ -18,6 +18,12 @@ pub(crate) async fn get_agent_person(
         Ok(agent) => agent,
         Err(error) => return error.into_response(),
     };
+    if state.capabilities().config.person_enrichment {
+        return match super::super::capabilities::people::person(&state, &agent).await {
+            Ok(person) => json_projection_response(StatusCode::OK, wire::person_response(person)),
+            Err(error) => error.into_response(),
+        };
+    }
     person_from_agent(&agent).map_or_else(
         || {
             HttpError::new(
@@ -45,13 +51,90 @@ pub(crate) async fn get_activity(
         Ok(activity_id) => activity_id,
         Err(error) => return error.into_response(),
     };
+    if state.capabilities().config.canonical_inventory {
+        super::super::capabilities::fetch::encountered(
+            &state,
+            &[json!({"object":{"id":activity_id}})],
+        )
+        .await;
+        return match super::super::capabilities::canonical::Inventory::load(&state).await {
+            Ok(inventory) => match inventory.activity_bytes(activity_id) {
+                Ok(body) => (
+                    StatusCode::OK,
+                    [(axum::http::header::CONTENT_TYPE, "application/json")],
+                    body,
+                )
+                    .into_response(),
+                Err(error) => error.into_response(),
+            },
+            Err(error) => error.into_response(),
+        };
+    }
     let statements = match xapi_service::list_statements(state.xapi_services(), None).await {
         Ok(statements) => statements,
         Err(error) => return store_error_response(&error),
     };
+    // Rollback is independent of the optional canonical inventory. Select the
+    // same surviving contributions for both merged values and opaque bytes.
+    let statements = if state.capabilities().config.rollback_voided_metadata {
+        let voided = kiva_xapi::voided_statement_ids(&statements);
+        statements
+            .into_iter()
+            .filter(|statement| {
+                !statement["id"]
+                    .as_str()
+                    .and_then(|id| uuid::Uuid::parse_str(id).ok())
+                    .is_some_and(|id| voided.contains(&id))
+            })
+            .collect()
+    } else {
+        statements
+    };
     let definition = wire::merged_activity_definition(&statements, activity_id);
-    json_projection_response(
+    let sources = wire::activity_definition_sources(&statements, activity_id);
+    let ids = sources
+        .iter()
+        .filter_map(|(index, _, _)| {
+            statements[*index]["id"]
+                .as_str()
+                .and_then(|id| uuid::Uuid::parse_str(id).ok())
+        })
+        .collect::<Vec<_>>();
+    let raw_values = match xapi_service::statement_opaque_values(state.xapi_services(), &ids).await
+    {
+        Ok(values) => values,
+        Err(error) => return store_error_response(&error),
+    };
+    let mut opaque = crate::surfaces::xapi::lossless::OpaqueValues::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for (index, path, source) in sources {
+        let raw = statements[index]["id"]
+            .as_str()
+            .and_then(|id| uuid::Uuid::parse_str(id).ok())
+            .and_then(|id| raw_values.get(&id));
+        if let Some(extensions) = source
+            .get("extensions")
+            .and_then(serde_json::Value::as_object)
+        {
+            for key in extensions.keys() {
+                if seen.insert(key.clone()) {
+                    let source_path = crate::surfaces::xapi::lossless::pointer(
+                        &format!("{path}/extensions"),
+                        key,
+                    );
+                    if let Some(value) = raw.and_then(|raw| raw.get(&source_path)) {
+                        opaque.insert(
+                            crate::surfaces::xapi::lossless::pointer("/definition/extensions", key),
+                            value.clone(),
+                        );
+                    }
+                }
+            }
+        }
+    }
+    crate::core::response::json_bytes_response(
         StatusCode::OK,
-        wire::activity_response(activity_id, definition),
+        wire::activity_response(activity_id, definition)
+            .and_then(|value| crate::surfaces::xapi::lossless::render(&value, &opaque)),
     )
 }

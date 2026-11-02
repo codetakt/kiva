@@ -5,8 +5,8 @@ use super::{
     StatementGetQueryParameters, StatementLimitParameter, StatementPutDecision,
     StatementTimestampParameter, bearer_token_start, document_delete_decision,
     document_json_merge_decision, document_preconditions_pass, document_put_decision,
-    etag_list_matches, statement_get_query_decision, statement_put_decision,
-    xapi_version_is_supported,
+    etag_list_matches, etag_list_matches_weak, statement_get_query_decision,
+    statement_put_decision, xapi_version_is_supported,
 };
 
 fn any_known_version() -> &'static str {
@@ -29,29 +29,22 @@ fn any_authorization_header() -> Option<&'static str> {
     }
 }
 
-fn any_etag() -> &'static str {
-    match kani::any::<u8>() % 2 {
-        0 => "\"a\"",
-        _ => "\"b\"",
-    }
-}
-
-fn any_etag_condition() -> Option<&'static str> {
-    match kani::any::<u8>() % 5 {
-        0 => None,
-        1 => Some("*"),
-        2 => Some("\"a\""),
-        3 => Some("\"b\""),
-        _ => Some("\"a\", \"b\""),
-    }
-}
-
-fn any_existing_etag() -> Option<&'static str> {
-    match kani::any::<u8>() % 3 {
-        0 => None,
-        1 => Some("\"a\""),
-        _ => Some("\"b\""),
-    }
+// Enumerate every finite input explicitly so the verifier can specialize the
+// parser loops to each literal, instead of exploring symbolic slice aliases.
+// Independent masks use bit 0 for "a" and bit 1 for "b", with separate
+// strong/weak results. None is compared as "a" by the matching proof.
+macro_rules! each_etag_condition {
+    ($check:ident $(, $argument:expr)*) => {
+        $check(None, 1, 1 $(, $argument)*);
+        $check(Some("*"), 3, 3 $(, $argument)*);
+        $check(Some("\"a\""), 1, 1 $(, $argument)*);
+        $check(Some("\"b\""), 2, 2 $(, $argument)*);
+        $check(Some("\"a\", \"b\""), 3, 3 $(, $argument)*);
+        $check(Some(r#""a,*,b""#), 0, 0 $(, $argument)*);
+        $check(Some(r#""a\",*,b""#), 0, 0 $(, $argument)*);
+        $check(Some(r#""a,*,b", "a""#), 1, 1 $(, $argument)*);
+        $check(Some(r#"W/"a""#), 0, 1 $(, $argument)*);
+    };
 }
 
 fn any_existing_content_matches() -> Option<bool> {
@@ -177,16 +170,13 @@ fn any_statement_get_query_parameters() -> StatementGetQueryParameters {
     }
 }
 
-fn known_condition_matches(condition: &str, etag: &str) -> bool {
-    condition == "*"
-        || condition == etag
-        || (condition == "\"a\", \"b\"" && (etag == "\"a\"" || etag == "\"b\""))
-}
-
 #[kani::proof]
 fn xapi_version_support_is_exact_for_known_inputs() {
     let value = any_known_version();
-    assert!(xapi_version_is_supported(value) == (value == "2.0" || value == "2.0.0"));
+    assert!(
+        xapi_version_is_supported(value)
+            == (value == "2.0" || value == "2.0.0" || value == "2.0.1")
+    );
 }
 
 #[kani::proof]
@@ -209,25 +199,64 @@ fn bearer_token_classification_is_exact_for_known_inputs() {
 
 #[kani::proof]
 fn etag_matching_honors_star_exact_values_and_comma_lists() {
-    let condition = any_etag_condition().unwrap_or("\"a\"");
-    let etag = any_etag();
+    // Same 2 x 9 Cartesian product for both strong and weak comparison.
+    each_etag_condition!(check_etag_matching);
+}
 
-    assert!(etag_list_matches(condition, etag) == known_condition_matches(condition, etag));
+fn check_etag_matching(condition: Option<&str>, strong: u8, weak: u8) {
+    let condition = condition.unwrap_or("\"a\"");
+    assert!(etag_list_matches(condition, "\"a\"") == (strong & 1 != 0));
+    assert!(etag_list_matches(condition, "\"b\"") == (strong & 2 != 0));
+    assert!(etag_list_matches_weak(condition, "\"a\"") == (weak & 1 != 0));
+    assert!(etag_list_matches_weak(condition, "\"b\"") == (weak & 2 != 0));
 }
 
 #[kani::proof]
 fn document_preconditions_follow_if_match_and_if_none_match_rules() {
-    let existing = any_existing_etag();
-    let if_match = any_etag_condition();
-    let if_none_match = any_etag_condition();
+    // Together these three proofs cover all 3 x 9 x 9 combinations. Keeping
+    // the existence states separate bounds each CI verification job's cost.
+    each_etag_condition!(check_document_if_match, None, 0);
+}
 
-    let if_match_passes = if_match.is_none_or(|condition| {
-        existing.is_some_and(|etag| known_condition_matches(condition, etag))
-    });
-    let if_none_match_passes = match (if_none_match, existing) {
-        (Some(condition), Some(etag)) => !known_condition_matches(condition, etag),
-        (None | Some(_), None) | (None, Some(_)) => true,
-    };
+#[kani::proof]
+fn document_preconditions_with_existing_etag_a() {
+    each_etag_condition!(check_document_if_match, Some("\"a\""), 1);
+}
+
+#[kani::proof]
+fn document_preconditions_with_existing_etag_b() {
+    each_etag_condition!(check_document_if_match, Some("\"b\""), 2);
+}
+
+fn check_document_if_match(
+    if_match: Option<&str>,
+    if_match_mask: u8,
+    _weak: u8,
+    existing: Option<&str>,
+    existing_mask: u8,
+) {
+    each_etag_condition!(
+        check_document_conditions,
+        if_match,
+        if_match_mask,
+        existing,
+        existing_mask
+    );
+}
+
+fn check_document_conditions(
+    if_none_match: Option<&str>,
+    if_none_match_mask: u8,
+    _weak: u8,
+    if_match: Option<&str>,
+    if_match_mask: u8,
+    existing: Option<&str>,
+    existing_mask: u8,
+) {
+    let if_match_passes =
+        if_match.is_none() || (existing.is_some() && if_match_mask & existing_mask != 0);
+    let if_none_match_passes =
+        if_none_match.is_none() || existing.is_none() || if_none_match_mask & existing_mask == 0;
     let expected = if_match_passes && if_none_match_passes;
 
     assert!(document_preconditions_pass(existing, if_match, if_none_match) == expected);
@@ -236,23 +265,23 @@ fn document_preconditions_follow_if_match_and_if_none_match_rules() {
 #[kani::proof]
 fn document_put_decision_fails_closed_on_precondition_failure() {
     let has_preconditions = kani::any();
-    let existing_content_matches = any_existing_content_matches();
+    let existing_content_present = kani::any();
 
     assert_eq!(
-        document_put_decision(false, has_preconditions, existing_content_matches),
+        document_put_decision(false, has_preconditions, existing_content_present),
         DocumentWriteDecision::PreconditionFailed
     );
 }
 
 #[kani::proof]
-fn document_put_decision_conflicts_only_without_preconditions_on_changed_existing_content() {
+fn document_put_decision_conflicts_only_without_preconditions_on_existing_content() {
     let has_preconditions = kani::any();
-    let existing_content_matches = any_existing_content_matches();
-    let decision = document_put_decision(true, has_preconditions, existing_content_matches);
+    let existing_content_present = kani::any();
+    let decision = document_put_decision(true, has_preconditions, existing_content_present);
 
     assert!(
         matches!(decision, DocumentWriteDecision::Conflict)
-            == (existing_content_matches == Some(false) && !has_preconditions)
+            == (existing_content_present && !has_preconditions)
     );
 }
 

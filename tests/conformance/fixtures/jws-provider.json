@@ -1,0 +1,1619 @@
+{
+  "scope": "independent fixture producer; author evidence, not independent review; test-only keys",
+  "openssl": {
+    "path": "/nix/store/ndv550fkbmsfvdxax71d4d5d59x4lq80-openssl-3.6.5-bin/bin/openssl",
+    "sha256": "06f28db6df53ad5be0a1e4113208f39a4fd790ad91207123f839a3403c9cd578",
+    "version": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)"
+  },
+  "keys": {
+    "2047": {
+      "spki_der_base64": "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQB3siqCzkybOrlNYh51I6xUAW9jzzis1alLiZvStYofJUdKcRSeYQup2C1Dw4JXsut3hER1zbJyTNplTpde1vg0CQLbqAFzcRqICjY7oHg8rsqh94GZU4OK+HOyK1tbgRO8DajLV+vhnBqmzYlaeipKni3t9+yuoNtvAl+D/FjCsY3/zAnh9FlaKAvt9gmPAVV8sB+rPBwQ9LA4ciJqSzPAdc6Du/i0JlO3OMLYs/Iu444uj3T1Ncd9etr5dQ1JjzAeuvulOmplTxx7xD2/VWBEJFFhVhSyy7xr5MqUDMgySESyXLAUjbpmoJOqCTQtTFQWmIEJ3mUeL4a9DTJAT5SbAgMBAAE=",
+      "modulus_hex": "77b22a82ce4c9b3ab94d621e7523ac54016f63cf38acd5a94b899bd2b58a1f25474a71149e610ba9d82d43c38257b2eb77844475cdb2724cda654e975ed6f8340902dba80173711a880a363ba0783caecaa1f7819953838af873b22b5b5b8113bc0da8cb57ebe19c1aa6cd895a7a2a4a9e2dedf7ecaea0db6f025f83fc58c2b18dffcc09e1f4595a280bedf6098f01557cb01fab3c1c10f4b03872226a4b33c075ce83bbf8b42653b738c2d8b3f22ee38e2e8f74f535c77d7adaf9750d498f301ebafba53a6a654f1c7bc43dbf5560442451615614b2cbbc6be4ca940cc8324844b25cb0148dba66a093aa09342d4c5416988109de651e2f86bd0d32404f949b",
+      "exponent": 65537
+    },
+    "2048": {
+      "spki_der_base64": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvnd4L4myqnJDJOUvi5ltwJpzcelfW+ecG5iY11sGEP+rPoCixdT97CuKVGU9afopxMkgJg1O/6iHylCw9eQE8PxvqsnfZZm/I3Ofv7WEmjn7Y0/glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM+uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v/40WLHx51VX9bZ+q4UBj0HFTmhVZ4sNQxb2t+RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH+5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSQIDAQAB",
+      "modulus_hex": "be77782f89b2aa724324e52f8b996dc09a7371e95f5be79c1b9898d75b0610ffab3e80a2c5d4fdec2b8a54653d69fa29c4c920260d4effa887ca50b0f5e404f0fc6faac9df6599bf23739fbfb5849a39fb634fe094e537310c2f338e37da0bd4745b115e71a9d506e980d0583dfda6ca94b333eb8f85f83a98cbfb75d85d6e60871297cadebeb971aaee93cbba52758a7b8091e368336e048aac57a03f8bf8bffe3458b1f1e75557f5b67eab85018f41c54e6855678b0d4316f6b7e44c4e0f2a5c6c83027b2c242790a49c2cac34a361cbd765b3906a9c9fb4149e8878248a41182638377f1787fb99a6c2a0fd443982d57727ccadb518a6c90bd6a824625749",
+      "exponent": 65537
+    }
+  },
+  "payload": {
+    "actor": {
+      "mbox": "mailto:rsa-boundary@example.org"
+    },
+    "verb": {
+      "id": "https://example.org/rsa"
+    },
+    "object": {
+      "id": "https://example.org/activity"
+    }
+  },
+  "vectors": [
+    {
+      "id": "2047-RS256-valid",
+      "bits": 2047,
+      "alg": "RS256",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ3In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "TVWNOD-CBgjlH_KQxOjECl3q1GVgh4VZFeOGt-1hLuEHBIOqxB6k56SG8UuzpHw67rDlxtqupSzz3IPpMPMudpIfgkFroLzjZ1uQSc5FVhW9sr6tqouEjmszoXJjiHeeyb-hq1yfy7GKGeLkxTheRBCs-wcJ4wsH9yFtxk2N13bpkyqeG_P6-RfgsdVDw7kwWnckY8bjDO8sZs3uvPTAq0EPNU_uNraFrNmkaxrPCZyB-o-eFtJSGvNG-L7NIuoPozRbnFKOW1b3-VyglPb2p-DhtLwAUMz89VAF3A0il1db5aGWviDhc3Zo4Gw52qpRMEtBtmhgo-Ls-_O3Uo04Hg",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": false,
+      "x5c_jws": "eyJhbGciOiJSUzI1NiIsIng1YyI6WyJNSUlDN2pDQ0FkYWdBd0lCQWdJQ0JCY3dEUVlKS29aSWh2Y05BUUVMQlFBd0tURW5NQ1VHQTFVRUF3d2VTMmwyWVNCemVXNTBhR1YwYVdNZ2QyVmhheUJTVTBFZ2MybG5ibVZ5TUI0WERUSTFNREV3TVRBd01EQXdNRm9YRFRNMU1ERXdNVEF3TURBd01Gb3dLVEVuTUNVR0ExVUVBd3dlUzJsMllTQnplVzUwYUdWMGFXTWdkMlZoYXlCU1UwRWdjMmxuYm1WeU1JSUJJVEFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUTRBTUlJQkNRS0NBUUIzc2lxQ3preWJPcmxOWWg1MUk2eFVBVzlqenppczFhbExpWnZTdFlvZkpVZEtjUlNlWVF1cDJDMUR3NEpYc3V0M2hFUjF6Ykp5VE5wbFRwZGUxdmcwQ1FMYnFBRnpjUnFJQ2pZN29IZzhyc3FoOTRHWlU0T0srSE95SzF0YmdSTzhEYWpMVit2aG5CcW16WWxhZWlwS25pM3Q5K3l1b050dkFsK0QvRmpDc1kzL3pBbmg5RmxhS0F2dDlnbVBBVlY4c0IrclBCd1E5TEE0Y2lKcVN6UEFkYzZEdS9pMEpsTzNPTUxZcy9JdTQ0NHVqM1QxTmNkOWV0cjVkUTFKanpBZXV2dWxPbXBsVHh4N3hEMi9WV0JFSkZGaFZoU3l5N3hyNU1xVURNZ3lTRVN5WExBVWpicG1vSk9xQ1RRdFRGUVdtSUVKM21VZUw0YTlEVEpBVDVTYkFnTUJBQUdqSVRBZk1CMEdBMVVkRGdRV0JCVHRRUEhLQVp5cHM3Q0ZQTm5aMWJ6M1pzSnltakFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBRmgwQll5RWpoMUw0d0U0OFpjVHZ1Nm5idHlBZTJGTUtXR296KytvSWUwNGdBYjNmRVFVMVdzTFBUZlVONTl3anIyblZQNThhQlFiVFA2SmRhclluRDh6eVBaam81VXVUR1FBUTR6Y2dGWUkwTDg2djBMeFBYdHNCWWtBTitUSkdTblVkbTE3ekkxc0VMRFI0aW5OUW85S1BTSXZFREdQYWpnSXNXMlFBek5udEN2RmMxbitTK3dRazYxNkkzeHZ4RHl4cDhZbHZZZkRLMEl4UC8vVmFKb2dUL0ZkSjNZTnBlMjEvZ3BITklLQTZEWVZ1NmlWczVOREdXOXZ0am0wWW90YlJaM0N3VldBblUvUVZzY243R3VYNnErNmlIN0tWaStCUFMvSHBHZlM3K1JiNmh0V3JzVmFqM1J6bzVFbGx1bzIwV1I1R0ZuVklaUDdlcDArZHdnPT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.VR0OLXFOlH6lsRe34mRXyTqx7ikJHoW1u-IFcCXswtnqPSS_C4yyPEUNlCCOlS_5tgOXsQj_ckDPW6Qpps0QNKSMMOn59e1Ze0Ab663e5SzIUkolkxTawi-v7fehfbG2HFU2aSSR1QLmTI1ovKVq2jLVBuyLoJWK9WWmRLwSOsilabRmFZsBh3JUeUJKs3abA01s9bBcAkQ9gb5sBfVgCJMTkZ06hfhiBku2U7Hkqi99URXnTgmeKm0Q_jaJFZHYojkUBx5tg-8MsmH1TIeJ7-Ni9BUbnx4qEGdxwVPqUdC0pOkmOrDL78bvFjjorsvBc5Y5x8x2ENWz_OriIaLldg",
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004207826923b95b7f7ede94cd46b936b608d8738c4ef21a8e4e464f1db8c1da0dce3"
+    },
+    {
+      "id": "2047-RS384-valid",
+      "bits": 2047,
+      "alg": "RS384",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ3In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "HpEF7yLCwrF2N5nPW9JuSc4lQrpPiN_QvUyVXd-kwCzJvUq98XA75exq-9OZhgNCf1kDcqkIjGzu9MHPvmG2rUee9Apxf-VAPud3h3MLeBoWh1bp5lbgCl1VllVGvNR4a2KVPC29bNs0dmq4qvUCPmK53YlWJtiHtmr6e1iMtOCvYBhpeXbUjBCljFaJKVmJ9jYPigWtlr084labDc2Bj3otde3tkR9JKlQhRIpUdzaoMKyJ4I7bAXTCCeLKgVC4Z_ZZEmJwe6ZMwK7kS6F-1YMRvhO-eNb3UB1A0abP_O33Po3E3r9kgDUriMtvBkaGkp5s_qFazSOxEXgiV7iQUg",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": false,
+      "x5c_jws": "eyJhbGciOiJSUzM4NCIsIng1YyI6WyJNSUlDN2pDQ0FkYWdBd0lCQWdJQ0JCY3dEUVlKS29aSWh2Y05BUUVMQlFBd0tURW5NQ1VHQTFVRUF3d2VTMmwyWVNCemVXNTBhR1YwYVdNZ2QyVmhheUJTVTBFZ2MybG5ibVZ5TUI0WERUSTFNREV3TVRBd01EQXdNRm9YRFRNMU1ERXdNVEF3TURBd01Gb3dLVEVuTUNVR0ExVUVBd3dlUzJsMllTQnplVzUwYUdWMGFXTWdkMlZoYXlCU1UwRWdjMmxuYm1WeU1JSUJJVEFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUTRBTUlJQkNRS0NBUUIzc2lxQ3preWJPcmxOWWg1MUk2eFVBVzlqenppczFhbExpWnZTdFlvZkpVZEtjUlNlWVF1cDJDMUR3NEpYc3V0M2hFUjF6Ykp5VE5wbFRwZGUxdmcwQ1FMYnFBRnpjUnFJQ2pZN29IZzhyc3FoOTRHWlU0T0srSE95SzF0YmdSTzhEYWpMVit2aG5CcW16WWxhZWlwS25pM3Q5K3l1b050dkFsK0QvRmpDc1kzL3pBbmg5RmxhS0F2dDlnbVBBVlY4c0IrclBCd1E5TEE0Y2lKcVN6UEFkYzZEdS9pMEpsTzNPTUxZcy9JdTQ0NHVqM1QxTmNkOWV0cjVkUTFKanpBZXV2dWxPbXBsVHh4N3hEMi9WV0JFSkZGaFZoU3l5N3hyNU1xVURNZ3lTRVN5WExBVWpicG1vSk9xQ1RRdFRGUVdtSUVKM21VZUw0YTlEVEpBVDVTYkFnTUJBQUdqSVRBZk1CMEdBMVVkRGdRV0JCVHRRUEhLQVp5cHM3Q0ZQTm5aMWJ6M1pzSnltakFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBRmgwQll5RWpoMUw0d0U0OFpjVHZ1Nm5idHlBZTJGTUtXR296KytvSWUwNGdBYjNmRVFVMVdzTFBUZlVONTl3anIyblZQNThhQlFiVFA2SmRhclluRDh6eVBaam81VXVUR1FBUTR6Y2dGWUkwTDg2djBMeFBYdHNCWWtBTitUSkdTblVkbTE3ekkxc0VMRFI0aW5OUW85S1BTSXZFREdQYWpnSXNXMlFBek5udEN2RmMxbitTK3dRazYxNkkzeHZ4RHl4cDhZbHZZZkRLMEl4UC8vVmFKb2dUL0ZkSjNZTnBlMjEvZ3BITklLQTZEWVZ1NmlWczVOREdXOXZ0am0wWW90YlJaM0N3VldBblUvUVZzY243R3VYNnErNmlIN0tWaStCUFMvSHBHZlM3K1JiNmh0V3JzVmFqM1J6bzVFbGx1bzIwV1I1R0ZuVklaUDdlcDArZHdnPT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.H89LK-Q6HlmQmVkim58HzU-GSHxMGlNIUAqES65RtWx86POJjrGPRxUBpC3M1FZslCI81LP0swamwCncAnuhGyzifn4W_1cL6_BVzRD-REquabY5rtbyqfl4wZOm4y8HzHwtgxuYds2aSeGf28Q3E7j_PDrP8-C0b4DZ1810uUjhj2hjFLNQ4MM6t9xCeKDVKWnGE9E1rPgGXxNmmR2tQgXkGIJpvnU4DK1tBsNkugfBKCgcRtyNfq83pXyyL3zH7XtHvlIMAdWDUCXEgU2D0JhP5kvGw1kGoCjTi6yMRXs0Ads2SQclptJ2Lo4EIJO30lIsbbVn6sV2SOgKPowetg",
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d0609608648016503040202050004306968cf2a38ecf9731ba8a250fadfa3aa4788e2e26d4f46ae34a39abe46f036f842531e42e2a404328538ace51b93b6da"
+    },
+    {
+      "id": "2047-RS512-valid",
+      "bits": 2047,
+      "alg": "RS512",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ3In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "OBHTFcaFKTZVFKBbo26FuEEA8FAlkIbpZ5sZ8D7UD0qmTY7gKl9P_LXbpIVaIEXoJY4ofZ3_bbWN4o0XmZARiIa8hUVvIV2i-Ak9eZPY8dmXwSqRBJ2pqYf8tXeqyHuUsdBCvfaQT50EvAXBsOHU46L-U5-qEA1SmSvTt3yMkoQ2C0smoCuiqIDSehIIYwqikbwLjBceID9IFM_uMdIGnFosxvnNpg2jxNbgPBOIFt3DrKM5Xd1fJOUHsPdFSm-dyZ_4METtsl6yu3U8IyQotZHaKj62mj4HY0YOKo8n6iAKNTXrsp6NnUz21VoyjifpLxo1Pe_fWg4GC0FdAzSP5Q",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": false,
+      "x5c_jws": "eyJhbGciOiJSUzUxMiIsIng1YyI6WyJNSUlDN2pDQ0FkYWdBd0lCQWdJQ0JCY3dEUVlKS29aSWh2Y05BUUVMQlFBd0tURW5NQ1VHQTFVRUF3d2VTMmwyWVNCemVXNTBhR1YwYVdNZ2QyVmhheUJTVTBFZ2MybG5ibVZ5TUI0WERUSTFNREV3TVRBd01EQXdNRm9YRFRNMU1ERXdNVEF3TURBd01Gb3dLVEVuTUNVR0ExVUVBd3dlUzJsMllTQnplVzUwYUdWMGFXTWdkMlZoYXlCU1UwRWdjMmxuYm1WeU1JSUJJVEFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUTRBTUlJQkNRS0NBUUIzc2lxQ3preWJPcmxOWWg1MUk2eFVBVzlqenppczFhbExpWnZTdFlvZkpVZEtjUlNlWVF1cDJDMUR3NEpYc3V0M2hFUjF6Ykp5VE5wbFRwZGUxdmcwQ1FMYnFBRnpjUnFJQ2pZN29IZzhyc3FoOTRHWlU0T0srSE95SzF0YmdSTzhEYWpMVit2aG5CcW16WWxhZWlwS25pM3Q5K3l1b050dkFsK0QvRmpDc1kzL3pBbmg5RmxhS0F2dDlnbVBBVlY4c0IrclBCd1E5TEE0Y2lKcVN6UEFkYzZEdS9pMEpsTzNPTUxZcy9JdTQ0NHVqM1QxTmNkOWV0cjVkUTFKanpBZXV2dWxPbXBsVHh4N3hEMi9WV0JFSkZGaFZoU3l5N3hyNU1xVURNZ3lTRVN5WExBVWpicG1vSk9xQ1RRdFRGUVdtSUVKM21VZUw0YTlEVEpBVDVTYkFnTUJBQUdqSVRBZk1CMEdBMVVkRGdRV0JCVHRRUEhLQVp5cHM3Q0ZQTm5aMWJ6M1pzSnltakFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBRmgwQll5RWpoMUw0d0U0OFpjVHZ1Nm5idHlBZTJGTUtXR296KytvSWUwNGdBYjNmRVFVMVdzTFBUZlVONTl3anIyblZQNThhQlFiVFA2SmRhclluRDh6eVBaam81VXVUR1FBUTR6Y2dGWUkwTDg2djBMeFBYdHNCWWtBTitUSkdTblVkbTE3ekkxc0VMRFI0aW5OUW85S1BTSXZFREdQYWpnSXNXMlFBek5udEN2RmMxbitTK3dRazYxNkkzeHZ4RHl4cDhZbHZZZkRLMEl4UC8vVmFKb2dUL0ZkSjNZTnBlMjEvZ3BITklLQTZEWVZ1NmlWczVOREdXOXZ0am0wWW90YlJaM0N3VldBblUvUVZzY243R3VYNnErNmlIN0tWaStCUFMvSHBHZlM3K1JiNmh0V3JzVmFqM1J6bzVFbGx1bzIwV1I1R0ZuVklaUDdlcDArZHdnPT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.YogtUPagkChXD9VVWqrW-TuW9t8gRXCpAaa2s9wxSBLE5vZ7bKYqkl8ev9LMB0Q4yorTRim8RERCtAfaeKV6LSRfOnKMeU0n3xfuGETZubjruJEPUmy9vTHf3IgR5Ji8UDVJYPvGskHHJSGRglVOnRALca5vKbZwClZQwXuYlSX6o13XnMqH7vv4ZmjFTtwGSaSknwNGXCdSIDK3SzjSQHELFAD8S7-zx60BwUR8NFfZWn17uVmuOIInNihe-9gubH4dzM0SJOnym16dSS8RXdu6T6H-ucUsToNihi_LyLR_pWzOkwHdHfc9YcJSinodnXKHH4Z8QUwIhUDWrKWISw",
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d0609608648016503040203050004401ae7061718d348452992785fde790ba208f9c8e7d555c9275bd7106cc5d5dd58913f9f997a529d2ab286c70ad60d79b8ffac64a32b4ce650fd4722b370e3bd6f"
+    },
+    {
+      "id": "2048-RS256-valid",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-signature-k-plus-one",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "signature-k-plus-one",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "AAUIMJAjHC_trlhXFYl2brX84eMyK5YvdWQjLuCmAnaD_KUTyd696O-Q1EBXXRuYmGP1VP5msD3JiELQegiWex0wApz10iMzDWFVLLu0tmcXzld5nQG6g73YkhE58SoaV2e_nyVLemRDsumw4Y_m8rxgbUibgaO3qdyEi896FgpEOCA4QAKLV_kZp4Nda8spN2ODeXzD-tRyoIDbnJ4qCJvhOF4FgLxdWkM-xh1Z1H2uT4xDI4DOW8FY6S9Poydizy3XOJes0n2IFzUgvLweVueTAEAGdpYDHaoiYDRD1b7-VguP2cdbjt6V7AltAJYyk93Laa0-dstsBmSl_qpOlq0",
+      "signature_octets": 257,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-representative-n-minus-one",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "representative-n-minus-one",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "be77782f89b2aa724324e52f8b996dc09a7371e95f5be79c1b9898d75b0610ffab3e80a2c5d4fdec2b8a54653d69fa29c4c920260d4effa887ca50b0f5e404f0fc6faac9df6599bf23739fbfb5849a39fb634fe094e537310c2f338e37da0bd4745b115e71a9d506e980d0583dfda6ca94b333eb8f85f83a98cbfb75d85d6e60871297cadebeb971aaee93cbba52758a7b8091e368336e048aac57a03f8bf8bffe3458b1f1e75557f5b67eab85018f41c54e6855678b0d4316f6b7e44c4e0f2a5c6c83027b2c242790a49c2cac34a361cbd765b3906a9c9fb4149e8878248a41182638377f1787fb99a6c2a0fd443982d57727ccadb518a6c90bd6a824625748"
+    },
+    {
+      "id": "2048-RS256-representative-n",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "representative-n",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false
+    },
+    {
+      "id": "2048-RS256-reserialized-equivalent-payload",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "reserialized-equivalent-payload",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ewogICJhY3RvciI6IHsKICAgICJtYm94IjogIm1haWx0bzpyc2EtYm91bmRhcnlAZXhhbXBsZS5vcmciCiAgfSwKICAidmVyYiI6IHsKICAgICJpZCI6ICJodHRwczovL2V4YW1wbGUub3JnL3JzYSIKICB9LAogICJvYmplY3QiOiB7CiAgICAiaWQiOiAiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSIKICB9Cn0",
+      "signature_base64url": "BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-wrong-block-type",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "wrong-block-type",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "JNlGBdbgynZMGIdnv15iKTzaGHn7RHIirFE-QqD1tJK6K37dSWpT-iZELn4id6tqaCXZWOEJ-Gbq2TaWDIuNOdT7TmFoE9M2BODSfjCK7eztu4guO_11QR04fE7xzTB_OXZODbxJasMbFftTBVJXQqCOATBqZOuzKM6TfV-fwhV_wv6Hp3zSIHsbR_FgJ2raWiw1c57khlx0cOdlZP91Q2yqubWW5ujJL4YpabRCsyovpJrpPT6hOgBcrYHc1y4uJKsVCjE6ZhyFmvz_DW7YN0bNpzHxfod-gMFkfxbe4wY87u-X9_l2S7csVXNVNBhDobaUtaZwb9pWAZI4ULLFCQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-non-ff-padding",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "non-ff-padding",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "u0QUa7Fyqzh2QssMDURl5kds-9UoswU7Fh0RYxKZaD3NqmpOD5nvlwUMBtJ9btOhnIhXlov2OEcn65FIFueVEqeuMO4PCcdev9Yt-_B_TS6SwgEinsy5Y8-DRxtUtG0pxrKJ6u5IedbDlXhFN1J9VzyMyexSavrgld3k4iA-V_DFBeFu-EX1oa-OlCiSGHWiUoXZMB_0iasOITG4yuHpqdX_Qz3VUPRA97wzfdEu0DCSGhjIbbtd0LworGqCQNdNeq_m6-oEcnxNhFFgfj8hKk8irGox0813gHaS2QkugykkVRONzntaL5cO2EEFxoHP4lf6gDqdeFGNbKE1ltStIw",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffff42ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-seven-padding-octets",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "seven-padding-octets",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "Thi7pAfy1zZSF8vOFQZQg0sWOHcUkICtUO65dWIKq0zH3qK-pOL-CURvufYiZgzFVeVgPWhtLtCIA6drPVYDFtRqAIi5OtgA9wbbuuNrZLRYVCrcV5gXKCUQ-_lF_Vxbl0xEKR-iD9cgPoyYUp0mF-MvLXZ-KeyMr9PIFI_778HHE9URL1hH69k6q1vaxtZ9qa2uCo4sxoMARYDziDJlude2nuWIh39jlQNxpoBP4RghBJ-fYTJ3L--mmjKCjObag5JeOoGeqTOrjfgScDoALzZZsaED_LXAT04DMQ1Xnt8Siom2RNi3FqLM_bX22HaloEaq5ZATF_qdUBq3SQEWuQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-wrong-full-digest",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "wrong-full-digest",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "lIKKjvIe5neLJtKRzyC3lr1n4SgojNKK4PJCxQ4QPhjJXm9oVinFi4MzTOtnam-_w0yK41qZsYz8Mb3t5tBaXlS7iog9Lw2uPLU5rEZD1Cc1Nl6vNCtBBDG3CPQFvnee2hfU0LOn4lTvvbG9Xa8edTlXhve5kX1M3Gcg96WRZwJoAlDBdiXK-iVHVGkjKyPuSyzikORmk99Gdamfo7hOcYmqeF02b8FQMJqnILH9TCLpWlvCBX9sgrfTqKEJZTvjPeLdrKymgUXpxtaffyNW6-deKjiHvYIouur-GDUFu3yvVDLvhQdPD2TCBvVL8IWGVX1c_Hq1v_a51J8Z5NR57w",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e7"
+    },
+    {
+      "id": "2048-RS256-wrong-digestinfo-oid",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "wrong-digestinfo-oid",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "XMSA_CDU2iiepqPz7hT9xTY8vdS8kDs6I7J01RNZVdNWAokr9Ea2lTHWm5gXTfavz6kVIz7qSlwmB_pUldo5HOpyqx0hfL6stBKHc4VHfpdRr2OheRE2k5N7JFHGTnBPbcQzIFj4yccJ3kocuHiProIk_tgJD9jh6mB7TRwlYJw0PaCleZsQjmktJE-UYKdgx5wRGdVzbNuAHZ8jgpZaxkb88f6kly0tSz8WMacZEVEi23khkLCJoD2mQ_qEtWNUkGseWEwv4DrO54qxFeKk3bG8xbY3smAUKNe--gvc4ouSAMrl7t7HryweDGDWl75bTAft3exntUKeK9aSSMcRXg",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020005000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e6"
+    },
+    {
+      "id": "2048-RS256-extra-digestinfo",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "extra-digestinfo",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "HqvPoK8j_zXQK6l0C4mawr0Dkh7N3e4hiXwrIee2FZjGvOrYpGontyYhu19H9aEKSDIv71S5lRxjqdbZlyiA5YFV2xNg2uXc-P6wtsF8RsTuGMrmGWgrttOhr74ujkvIN3lVpNC2ZSlLOqFFuBeFkXux976jpasSg1oOdB9yrIEAAmQtmNVihsmfN8nLg8antI1nyIPIUnjZfbOA4Ni92Q89ZfCwWv3czR1kqOWx4CqD73W_udLngg0Zf4uiCczWuOG4XE6EJFy7gCbCuvMdCZGehykP0e5-9M0ZFas8Ore_IveD0oEAI0UqRGDXWTQYQR8_p94_cLC3SKGBd9wK_g",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420c790daf89a63c5830246cedfa26970665e536c26ba2150d87bff1beec8c1a5e600"
+    },
+    {
+      "id": "2048-RS256-leading-zero-signature-valid",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "leading-zero-signature-valid",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjIyOH0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "AOhdvg5Wdz5LbmBX8gQKTfR9b5l7aWtapHwovpLhkOhT6ld9oQFYuDLymTSH3JQoy6Loir-78EWiPGn_C6WVFmRgWVCdZiXokAztzchRF7VrADQ5pgdvfTAFhUNYKM175yCeDOFW59ZJhC04ZrMJs28mvqSbmgXe9maDcFMJEgIAsHBrlP7VHGxoD15ysgjpvKBVYW4vouIzJFpGQB8y3jx9qa1jcvl-_O27egkrq-FgykJa5R_36JxDAocrjyquGaNzJCt7bE8As912gvaFEVyv5qCRFYTeA0MUbQRZuD5BcewGuC2RH4cHDNYmNwP7R1mZp4PvmqhxCxHi-cQq5A",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420aa0801d32d88f7d6752c0fa67cbe9014558ea7690526ca6410047378b53880ff"
+    },
+    {
+      "id": "2048-RS256-signature-k-minus-one-same-representative",
+      "bits": 2048,
+      "alg": "RS256",
+      "cause": "signature-k-minus-one-same-representative",
+      "message_ascii": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjIyOH0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "6F2-DlZ3PktuYFfyBApN9H1vmXtpa1qkfCi-kuGQ6FPqV32hAVi4MvKZNIfclCjLouiKv7vwRaI8af8LpZUWZGBZUJ1mJeiQDO3NyFEXtWsANDmmB299MAWFQ1gozXvnIJ4M4Vbn1kmELThmswmzbya-pJuaBd72ZoNwUwkSAgCwcGuU_tUcbGgPXnKyCOm8oFVhbi-i4jMkWkZAHzLePH2prWNy-X787bt6CSur4WDKQlrlH_fonEMChyuPKq4Zo3MkK3tsTwCz3XaC9oURXK_moJEVhN4DQxRtBFm4PkFx7Aa4LZEfhwcM1iY3A_tHWZmng--aqHELEeL5xCrk",
+      "signature_octets": 255,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d060960864801650304020105000420aa0801d32d88f7d6752c0fa67cbe9014558ea7690526ca6410047378b53880ff"
+    },
+    {
+      "id": "2048-RS384-valid",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-signature-k-plus-one",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "signature-k-plus-one",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "AKoYKTSTANrWPmUlC55gGqIkCaVQtcW3afeaB8-Qw2xcidABv8Gcxzvg23QbjP4LBw9l8C5bZLJjdS_toWeWaUEwjPpESH8u4949_-H3hNdtKmzNFdrKNBbYizI8Zt1XKuoWdkzxU6ajFKMFGS0AYNK-sg1bPknFMDE9hbytNwufoJbWMx8SOkLvnfjNcKOm2A7QSut9LDxT5icMHfk0Pge6dSsCbSXovSEIUcJUWx7qZtk_q2oBoOBShyn1c41ZgdsuZMNbCZLnavXu_9NeY8MCrTfFGAz5xzHAECCtrYL-sDozxbWaLvCtONbXgqdeJoexDd_PHihaPlAYu2aAJOQ",
+      "signature_octets": 257,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-representative-n-minus-one",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "representative-n-minus-one",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "be77782f89b2aa724324e52f8b996dc09a7371e95f5be79c1b9898d75b0610ffab3e80a2c5d4fdec2b8a54653d69fa29c4c920260d4effa887ca50b0f5e404f0fc6faac9df6599bf23739fbfb5849a39fb634fe094e537310c2f338e37da0bd4745b115e71a9d506e980d0583dfda6ca94b333eb8f85f83a98cbfb75d85d6e60871297cadebeb971aaee93cbba52758a7b8091e368336e048aac57a03f8bf8bffe3458b1f1e75557f5b67eab85018f41c54e6855678b0d4316f6b7e44c4e0f2a5c6c83027b2c242790a49c2cac34a361cbd765b3906a9c9fb4149e8878248a41182638377f1787fb99a6c2a0fd443982d57727ccadb518a6c90bd6a824625748"
+    },
+    {
+      "id": "2048-RS384-representative-n",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "representative-n",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false
+    },
+    {
+      "id": "2048-RS384-reserialized-equivalent-payload",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "reserialized-equivalent-payload",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ewogICJhY3RvciI6IHsKICAgICJtYm94IjogIm1haWx0bzpyc2EtYm91bmRhcnlAZXhhbXBsZS5vcmciCiAgfSwKICAidmVyYiI6IHsKICAgICJpZCI6ICJodHRwczovL2V4YW1wbGUub3JnL3JzYSIKICB9LAogICJvYmplY3QiOiB7CiAgICAiaWQiOiAiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSIKICB9Cn0",
+      "signature_base64url": "qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-wrong-block-type",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "wrong-block-type",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "tnJAZcT2_e7xObl_2LjHTizVNqT9djGTLWllqRNx6cNW4q5pedvpJxi_sUS9C7DLS8K7RnYVv1NVIMIdYc0uFTJoPD50k_YcKDCLCxUtpzHGb1QNuwUKrm_WwoLrm88kJT9U1ySSCJsn_no1etcSPXlQgXOvK9w8Ab06RGik5QLOkpvG5PbMTcugLdGoj4c7NfaGuEwngpKV4WFsL1wSM6YQbmxf-KvE5CeCYNyG_cQERCeeQrfh2_M8P8jgKEHIf4U6P3UUFGxvDunOUFagHU8-FOf1ffGkDT965DckK9bv1HKeEz5fl4_Npjxhk4Ttu_A7Csk97POOvrWRHJAFcQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-non-ff-padding",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "non-ff-padding",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "o34O4ALWtMfYYr92aZGglNZfiH0WzfMuYm2EVqUaAzxL6qFu-dqMoKfCEenble4ntLHCwK2gsgzUPP64VE7H4NtqlOmNw_PxyiWd-5EQyjHbvbvgrLxB8zImoP1zO7FZQZy1pPyvoZTlmAPFK9vA8am90Vr4ac6fjl5f3CHjFRpfANMxnNI1W5ol5fwDSVF9Y1rUn8w358dyRxr2ahQ4Gswig1JVoquiWgaML1DpG9ghQaRFqG_BzUXa4WmnVGaXtpSTcWX7nGCy2Rhpkz33G816wob4gEd7QggsaGvSGTmMBcVAWFd1vhSfBX4CzMv1EMeYP4R4YYDAk6UfMVbHKQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffff42ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-seven-padding-octets",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "seven-padding-octets",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "ASqz1J4mvINsz6Lxt-HTd3JfCokemkzWb2AZ2rMnsJ7nUEYWZzkJo0EYm1s3fVNSdpR1zZXoGLnkg3I2dm9GaOs5yE61W_kmEh8q0qvbVxm-nYFehCstCMRPJvu_Q_sS13AMB4OAZuQNPkGAOe4WK02MxUpL5tHlzayvoXcgQBzc2snWPjfES4JUB7CkHM8ZRkrcgmIieZha0Ddw2bGUO-YyD0bGwUNJ_ZRLuFnLVKoGZF32BLdtlHWKbeXZHE8OR3mqWMw6CuD7p4048g16nAbDkEVgJuo9dykTBGckblTlB8ME9xkhFbtmlzpwOUpOVwNtJnBwZE28jpPcj7bD5Q",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-wrong-full-digest",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "wrong-full-digest",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "QA31tuF-pi9ffRsZZ_cERFUg_pRO-OVtpHXfhU-QfpV2qYV0yR043owqXy0jei-_roetxR3GfZVoquX-eFFCFX0IiK_gue24VIF28A2O9cp_aGAPb2fbe50UZKySAArRlnYyjGFIVuApnSkvYEVb_ympp6FMPVtWniK3u5__fajAM4y0u-JHeKn-4-P32NQY3QkzO_fC0MTG64Hv7PcJohTf5ZPDkt5tB3GHhwkE60DGOMzVU5tqucvRdZOOqCGjOz6opV3zN0zGEFzAAxFWAMajhwX2c6eeWvqCLfm2s5KPtfxNeRBMvEcDEy1KcJK6Dr5PKzbfWxY92pjXNyWjCA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aef"
+    },
+    {
+      "id": "2048-RS384-wrong-digestinfo-oid",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "wrong-digestinfo-oid",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "H4cxCBgoE7HLkbkUjB0Oayr1BFnglkfsgelgwEZQxKRm2E060kuiyXOZdgTE7T5D39ZYEhn74Uw-fHc8JjqDjmDgneX5w9csJ2MWhW1C8_u-odVQAdbi_V5GclQDn_hFwYMr0ntL2ITH6Omqlz3qjeAbcP2SzpQ4_Eu8WcHFm2yLDnG92NFKK8mo1RoFQb2ZVU4CfHZsW9PhOX_eO3f5Np8gGRNlL5BeI4D3xXcFWQlgUBqiOd4wyLFQVYIKgZvgSDdBY7QEHYtWaaWXZT85nQycJj2YGucgpLWLUTZjLTi3uphquegr1TPxVoAKShQZP4yrCevIjCGqDhtOCXXZPw",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402030500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee"
+    },
+    {
+      "id": "2048-RS384-extra-digestinfo",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "extra-digestinfo",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "o1X1Wjr-1W_vWZhBDarEu1O7eKTDfXj9icHbaBapzAV9_mjZ9_S4rM3MJ8hes3BYYSfZZWF8jJm8KUWHwe0ZzMYGOGcMNtnjdwHfsYzKK238x2XW7KgNjrxyeefspYoEaQI_8Iysa5IcohQYcE942gyLgclHBUszyC64zOUCARUpA2SnoEzvGWN_ZjoVS-oU8rENcbsgZwjL9-o2tw0Z89Um-0U1YnpoHYXTIO6O9gkchd2WmBA3dzmi8sVgF9b9qYAEvzXjshKKh29T0ndm-KHOZ5JSm3ptEshJauRqpeoc_WPZpVKEPRgAF6965l_VmDH1Dh7W3GIAjf543Rbhqw",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d06096086480165030402020500043012e333a456709b55ed15fdb31e0fb8d532470c0ade84cbaaa40791ebd59a31663484c7fe86ca08890e4133b3a3483aee00"
+    },
+    {
+      "id": "2048-RS384-leading-zero-signature-valid",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "leading-zero-signature-valid",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjI2fQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "APElv9t1yDhj6IDlUbawzcp2bf37oeyp_PBRrcwo_HhF1S2aPrmVblGO7xU7cSkNd_TBzzwUEcZGUEJYIsVOFRBqDGO4HWyAavQuEsrUoHTj_Wx5mh1TwZV4uUzYWz2tlBESHuesop8k3bLOQAgn55VlKwzxjpurYxYNHYC4B_eG7anWD7u4noY8QhlUof2mHDeU5WQJ_8YxaD8prcsOHGySV7e89wOnMzNRji6vTbx_V_YkNguBRK7Q2T6CzJwuSykS4x-VmrJhhQPwK53NtkplLTEFrepJ3svGTwKPWFCLqQP_weYNVOcngjFayz7WdjsEBOEOTiOrKc2fSWp8Ug",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d060960864801650304020205000430987760b50b569bdc30ad1acbfb15e7aca772d0d4dde1aec6c1115970d913c633465e9ad4bd8ea1ae04a666165f99ce66"
+    },
+    {
+      "id": "2048-RS384-signature-k-minus-one-same-representative",
+      "bits": 2048,
+      "alg": "RS384",
+      "cause": "signature-k-minus-one-same-representative",
+      "message_ascii": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjI2fQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "8SW_23XIOGPogOVRtrDNynZt_fuh7Kn88FGtzCj8eEXVLZo-uZVuUY7vFTtxKQ139MHPPBQRxkZQQlgixU4VEGoMY7gdbIBq9C4SytSgdOP9bHmaHVPBlXi5TNhbPa2UERIe56yinyTdss5ACCfnlWUrDPGOm6tjFg0dgLgH94btqdYPu7iehjxCGVSh_aYcN5TlZAn_xjFoPymtyw4cbJJXt7z3A6czM1GOLq9NvH9X9iQ2C4FErtDZPoLMnC5LKRLjH5WasmGFA_Arnc22SmUtMQWt6kney8ZPAo9YUIupA__B5g1U5yeCMVrLPtZ2OwQE4Q5OI6spzZ9JanxS",
+      "signature_octets": 255,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003041300d060960864801650304020205000430987760b50b569bdc30ad1acbfb15e7aca772d0d4dde1aec6c1115970d913c633465e9ad4bd8ea1ae04a666165f99ce66"
+    },
+    {
+      "id": "2048-RS512-valid",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "valid",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-signature-k-plus-one",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "signature-k-plus-one",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "ADDBpaWDE3FYGyFy5f8nFGN11zyLwO6vW4OBVk7uJSd3vP5JqGJmH51xwEnxLb6f8dEAP_Iv1Jd7lDQ3uWb2nFKFnoVG3yDCr6I5482KJEJ8oPFic7SJSjPRAxxEFoxsn0vpZyMm4mnfottjgCHir0Jr3q8qxkQudONfqJKv29GbitWd-3SQSS8pObDBhxnT7l4g0bZlUpLuIj1AtjLWKG4g3R5zilrXGnFI-uW_-w73kiTIVrBTSgI5jaNraKBmbV-TNSLdlV3aCbydWkIStkIFSI7r9jZRDTAfAsvS25sv25nGw7VWEW66sMc4bza-CyPgSAb8tgELlj-DQMUA66g",
+      "signature_octets": 257,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-representative-n-minus-one",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "representative-n-minus-one",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "be77782f89b2aa724324e52f8b996dc09a7371e95f5be79c1b9898d75b0610ffab3e80a2c5d4fdec2b8a54653d69fa29c4c920260d4effa887ca50b0f5e404f0fc6faac9df6599bf23739fbfb5849a39fb634fe094e537310c2f338e37da0bd4745b115e71a9d506e980d0583dfda6ca94b333eb8f85f83a98cbfb75d85d6e60871297cadebeb971aaee93cbba52758a7b8091e368336e048aac57a03f8bf8bffe3458b1f1e75557f5b67eab85018f41c54e6855678b0d4316f6b7e44c4e0f2a5c6c83027b2c242790a49c2cac34a361cbd765b3906a9c9fb4149e8878248a41182638377f1787fb99a6c2a0fd443982d57727ccadb518a6c90bd6a824625748"
+    },
+    {
+      "id": "2048-RS512-representative-n",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "representative-n",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "vnd4L4myqnJDJOUvi5ltwJpzcelfW-ecG5iY11sGEP-rPoCixdT97CuKVGU9afopxMkgJg1O_6iHylCw9eQE8PxvqsnfZZm_I3Ofv7WEmjn7Y0_glOU3MQwvM4432gvUdFsRXnGp1QbpgNBYPf2mypSzM-uPhfg6mMv7ddhdbmCHEpfK3r65caruk8u6UnWKe4CR42gzbgSKrFegP4v4v_40WLHx51VX9bZ-q4UBj0HFTmhVZ4sNQxb2t-RMTg8qXGyDAnssJCeQpJwsrDSjYcvXZbOQapyftBSeiHgkikEYJjg3fxeH-5mmwqD9RDmC1XcnzK21GKbJC9aoJGJXSQ",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false
+    },
+    {
+      "id": "2048-RS512-reserialized-equivalent-payload",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "reserialized-equivalent-payload",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ewogICJhY3RvciI6IHsKICAgICJtYm94IjogIm1haWx0bzpyc2EtYm91bmRhcnlAZXhhbXBsZS5vcmciCiAgfSwKICAidmVyYiI6IHsKICAgICJpZCI6ICJodHRwczovL2V4YW1wbGUub3JnL3JzYSIKICB9LAogICJvYmplY3QiOiB7CiAgICAiaWQiOiAiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSIKICB9Cn0",
+      "signature_base64url": "MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-wrong-block-type",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "wrong-block-type",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "K1_FO77hRE6otHpp31p353D9jJQLirWAz1wLWZEomjVkjdlnZvuG6K-myX2GtDAAFudyoxDG1j3f7lI5QS23gH4j67H6s3G4I8jauFfELKvZYP0RaAtNXIx9SpDYZHdTW_MUp0eomwY42Ypv6csPeY_NszWpn_66Aq666H3IBAiSutjCSDAtcE03Gzldty9_fy0a7vYIYNMbVM2saW3hpSKO1ZI5-EmfroMEwIQ1UTLFvlMRtUWV6lMRuy8LKNOXF63noqY25ep7vmUYYnG0CfH3m9nnkRw3mCkvFZFZE5LGLU7Y4AiJy3zThwapOh4pouvXJJMHhmkZ7vAvBcbdGw",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-non-ff-padding",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "non-ff-padding",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "tHAaVBD7Ap9O9RPDijSx-2hfUSf8-Iui86wmbmMIF222mbYVDNY3Lhasrl5jjim7KCqQPBnDUmZxeSR_8-xvc4XYSRP6BSrh6pqrcF10Kl6kLrR0plxaPWAwgxiblSDMZ2FOypG5tfeFAhiMeGSwpAxd6LVfG_F7p7uWIA1n1d_gZK4BS42b3TASqJK8DspOzpqUkiZm4_NnvHJkKnqc4C-tSv-Jxx7D5LeMM3bp0KFgahTIzs8qcPm41PPgjRHszx3RmzILwUUVhRqFUPvRMcai72YEMszvVtaR-hLcobFbY5FwpHM57gKxW9n5kMsfWVg6CKdHEnuSJNuYqpojLA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffff42ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-seven-padding-octets",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "seven-padding-octets",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "e-4Bn0WUYupJpjWpUIgzky4lz0zcY4CuG6ojg8ovsNE63LomEqnTewMM5tj-nV69E3IMHJNL6AiGWD63sdJd63bycHwbBqRU2IStvi5MZE65sOrQZx8yr8Op25t8qC6-dRIEsM4JBSss16rRY416EvHY-uX4xvNOvHvwcvymyLOxW3ca8lXym0wVD2dEKV6F4t7fqm6X9CCjJshs4bQxZTW_JfZFzQcYgPMQnRQszRPXWgn-qhWJHSRd8Aj6jXNI3uRRBgb9Zm4NTen-4uz1Tsg1gGuObUw_qwYvn8hwLAnhSpnAfp11xKk1YaPDjF4wE2PHfORY2f_sQfvu4GhJAA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-wrong-full-digest",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "wrong-full-digest",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "ZF45xGDRS3CGTI8LqZM5UwQNTI1QNX8ny2yzk29MUtYwZ6gABaiEv_PBXvejhC5rwyLL6KENjFI68XUpNPXz_l0wtFMcA-uMDcWMS8KDVYf-3m_rVuaAVcj1_ib5_Cli4TpIBbvyWe-Z_JWxWb8u_Ww7UATKx6gn6tToetxbc3vn7gIo0MRVYmQ3D1eKG1aN27VmDRWRcEorkCzhTN0yrlFs4TjZBnOel04xufqAwXw24Dl_QjKeZ93TInIlRuAI0P1cJOaoQRqNdZEFr746KEMwSt9DJfwq1KIA1IQFZN6nCugvNyWHQn8sdcTAIxxduNGoWWtAQ_taQJgBQtedhA",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00e"
+    },
+    {
+      "id": "2048-RS512-wrong-digestinfo-oid",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "wrong-digestinfo-oid",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "X8nhPpGX84vhrIRQo8hyEA2PgEuNGPQ6fEfIEYf4PeJZgDX-tpgTc_TSzd1zYAKgA14yOBr0FMj_OF_T3zwcWSJGt2FjzZQVd7jAIPr_EEgC20q2uuebowDn2yx8BK6y5DSsaxVqsksuUhHPY3YQeej63KNettu9tX_vb3opgMxYZNVK52FLmUB-ogvKTIPNkkOgqOidCNJ8EXV5NoF1ukZGNXRvEGZxar7NoUfi87BNAPJZFXZuyYAjiPDG2_pjVHNkUvBORjxn0o1x8maEpVlBNSJ61OCG7YtD-gUZLLVD5yyW9C6FOmxNvbCHBTJ5ZZgVPB88dggkTe-s6mboiw",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020205000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f"
+    },
+    {
+      "id": "2048-RS512-extra-digestinfo",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "extra-digestinfo",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "OND0xKD0wh1U5UzW6slI6OxZKqfaRmlS8KphX6OdLG2ys_nhXdKDDqjjbQEeolxg1aiVZ26zaokf_tZk6WzmXEHK1taKkOCyTkafZinN3s1fdOmee9P-9A1OuJ-wH4mIwZ32beNnfFG4lzvqOtwldZfwawVggjE3eYbavZnnXL3KaCHIlTUGfDWKqxN7PaOJmzFOIFpb2M-CQSFyAMyaqsB9GWHWVPMwsVzY_bjO7QMD_DX6Q6zqnOPSsT6J6-WQpglhWLbOQVUSSjbaMzO59jARP_Q06KnF3DcAP307kH3TBbVQ66vx19mlUG-FDHTlM9r5VZLTODmHJ8qv-ArK7w",
+      "signature_octets": 256,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d060960864801650304020305000440dbf6efdedfc6fc188226c312f35bb76aa30f58155f16ba94c85f6877347202e3f3e3e8e9471762dff42d20b2c897b0bf68493837ea821a6e05543f97fbe9e00f00"
+    },
+    {
+      "id": "2048-RS512-leading-zero-signature-valid",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "leading-zero-signature-valid",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjEwMH0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "AI-h44vQWBTwEoAOlQtjUbm8tM38VAA0mkw77oVFcpc8gJuLe8MQL8I6KgakXTN6uENdDpBTzg5tQZcuiel_W-y7Gp283bAuDmj2d3NoqX22AOY0IsDzYI9-WfmLQs54tFCysHxKttwvxIhYZKiks0GtSPz20lFf0KcwE-Gz66KYlF5lLPlKlN9f_2PPLfQpLXGhZZpOe2WtpUHPU7rMXdAzhrXy6pgjF8FhTaZ-RdI1EyeoL8tR2p8udgoAPx1s74S4wVOafwoNO_yaEr4NqREy-9_ozpoxM0dwdtR8sVtCvlWPqJTA4ugVK-kJxcxe0tQw8JKxXkY8PEaffaJLLA",
+      "signature_octets": 256,
+      "openssl_verified": true,
+      "jws_permitted": true,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d0609608648016503040203050004402ee15a8afd8c9f09f5a6521d465da948b86c5446b2e58f1b11d9abcadde54a71a76152ca8142ba2f1994b6fc9ea13087d6288d5d9e14c3262d754a789fb698be"
+    },
+    {
+      "id": "2048-RS512-signature-k-minus-one-same-representative",
+      "bits": 2048,
+      "alg": "RS512",
+      "cause": "signature-k-minus-one-same-representative",
+      "message_ascii": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwibm9uY2UiOjEwMH0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "signature_base64url": "j6Hji9BYFPASgA6VC2NRuby0zfxUADSaTDvuhUVylzyAm4t7wxAvwjoqBqRdM3q4Q10OkFPODm1Bly6J6X9b7LsanbzdsC4OaPZ3c2ipfbYA5jQiwPNgj35Z-YtCzni0ULKwfEq23C_EiFhkqKSzQa1I_PbSUV_QpzAT4bPropiUXmUs-UqU31__Y88t9CktcaFlmk57Za2lQc9Tusxd0DOGtfLqmCMXwWFNpn5F0jUTJ6gvy1Hany52CgA_HWzvhLjBU5p_Cg07_JoSvg2pETL73-jOmjEzR3B21HyxW0K-VY-olMDi6BUr6QnFzF7S1DDwkrFeRjw8Rp99okss",
+      "signature_octets": 255,
+      "openssl_verified": false,
+      "jws_permitted": false,
+      "recovered_encoded_message_hex": "0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003051300d0609608648016503040203050004402ee15a8afd8c9f09f5a6521d465da948b86c5446b2e58f1b11d9abcadde54a71a76152ca8142ba2f1994b6fc9ea13087d6288d5d9e14c3262d754a789fb698be"
+    }
+  ],
+  "padding_boundary": "With >=2048-bit RSA and RS256/384/512 DigestInfo, valid padding is >=170 octets; no allowed-key valid-PS8 vector exists. The seven-octet negative deliberately inserts an early separator and retains the remaining full block, so it is not claimed a positive PS8 boundary proof.",
+  "jose_vectors": [
+    {
+      "id": "RS256-header-valid",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-escaped",
+      "jws": "eyJhbGciOiJcdTAwNTJTMjU2Iiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.cN6SsA70P4xzXBqGQqTQoYEG2zN09YOtBaHtR_aycJiplenJRz-TSbq-KpBmNzTdBHSn0TTvnhVsKzyOPTnfPY23bChczFNp0-lSzF5MOMEAfT_IZN73v3-M9wfDJWyH5huec6tgockVlwDYF2v7I7ByzFvO7Fudo9n9WFbAoxc8N-P_K2Rr3dPJdqFGjtnP48CY--MmjOWZwfAvSRQJ78L4moTfLADB5RyEuKdtz-RQJh8klUlLHNPzk-0StcgMwgYJOgbQqf8svA-BIX9tiSeLJUhmxZOkzpcok5Cc5H1mol83hAXLfqwvDfD0takpfjza16ZiMBry_Dw6FiUR5g",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-kid-escaped",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDRcdTAwMzgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.tT-6LpaJcC3QoCq_WVT-oZ5QiuTQ00GSTKvzuMMhKKuc8nNQvB3t4Uryys0lIPVkQZ9AvPq1hflpCEDSW4XFxOOAD9csOEFuyg2MwcRA6YucXTTrzfexrn1WvMxXgQRMwY0Ce_DRuEZunqZ7Rs-fdvNtDK-aTjOp9dbtc6JvtXAmOYmABqq9xlo8aPYI5NeTmswg9PV_iB2JAdd65cWPf4ozn0hT_ZXDKoYPhB_mV2xqOIWMo1sYdApcW97Zuzwca-Z4Ou8gFg7VDiHGPxzCw0jaVnQBRwMq2Z_qhYnZDCfoUfJJNoGyPkakf1umeaxvauX_CRNCUCJhZB4Nd4P_4A",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-kid-case",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.HuSxwOTFX-w-KK2Z49E3gWz9XT7eNxSaKynFJ5BgZw-Vz7aftR3D_Q8ryqwwHKa9kQlYG0qazwXxFeJpBKMyiPP-pK-kyhfAoE3LBcRo046KwfjSSqaAxh8oiGrjHeQdjpZFbHHbBFft9G0vbVxGqpNFvzfXsRNdTwOMVCST9VR6EiQeqo1XG0B6eZqJBIPHmIHg5EFggD3by74hraY0eS-9qohg4YvfQRMWfRKKsYTIHilzjPj34cYhXxSQ32C84UtrD7P7-KDqSrOUB5EGIAfVYwPY2YjbPgP7I11HREm19PoxUkYBUoT3BU89SBgom56lxK1YV-Fm-RK6Bl4G3g",
+      "accepted": true,
+      "role": "D10-unknown-not-evaluated",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-noncritical",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.RHRL1ctZvUql6WZGAgxd4fRl1zhBPeqeRknOuJp-AYegJymSCtPSnlb-UNO1pyyoNJChrRzb3KySNGDpj_NUxS8qwe0joEB_7j1A5qSp01Js8N6KPwrRs3vGPbD1Q_73fEU7yyhVVXCb2VXLPEIVdhYhgtVgg-x8yv68oXVmPL8kovfDjaJtbfaErKWBzIkTH7Xb4xmlElj8nf1fb32cWT773ojsfmNWLNc6Wy8IEILRuozaRDauUE56xRaYyRieqsA-UNYb0AAE1I6LEJQ9LKWBNqy6Httrl7H0h30XcA3J3YnrWHcDwvbqTx27hj2AHu4pm1SssIYRMgdu4aNIKQ",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-typ-cty-case",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwidHlwIjoiSldUIiwiY3R5IjoiQXBwbGljYXRpb24vSlNPTiJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.U0B-IPTfN0JCUAQ6AMyPfcWicMFzE3MV1IXHwxu-jDBZez5jlDuGDqRdd5l90xkHKRVIyw-GTvuCh1ewhG_ZJKZZ3tdSukQsxOWPvQTza8bhJ_aaf6DZe5ZGZwdhgVdAb5wuwnJGx7AC8q8LSeAotgheTq6LvNO4LcKWX3rPwGkoOkktY-Pl1WVUmTaiv-DFXO-BMiAQbCjq52s33u8YvM7Z3pqqXK45osXh6LQfT_XNMzAQ00LqRWbbWAppfKp2wikyxhYPICovGONNTY-z-iN1OzETH6eT7fq9egQqJLvaLh7U0w5sprDsvpdmkDcvV_aAPwBTNL_EqSrrJsw2gg",
+      "accepted": true,
+      "role": "optional-application-hints",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-nonbmp-literal",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.iZudvxeua2y73jVwyoLfpB1fmqkiPvVc2vDYcGer0b8uekE1ds-7oAU7p94-plG97-VbTR0p-WyPtHYjg1aeSLNUn5UaP4tTlzY5n8QKpZwtBYTJip-H3RQ0n_Q1hpYE3TGwzbF17SDdT_gdtTiErGDBjiYAupg6_qLZIdX9Mlj0-E3uWGtl8Pv7VEFiwVctQGL3t33e0lWi8-7E7r_uMR8WT5gDoWzeICu4XZIObPTZEBvVzgkPOCyd8M3fsN-RDVfvfLiEEcjeQQIxTD9DiBmv3lr0Mxfyp8c-pAH5S_bfiGBvJj1CvlDMnkGk5yA-6iW8R1Ahhw98VdTPbCvArg",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-nonbmp-escaped",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHVkODM0XHVkZDFlIjoxfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.QRiF9Obc8Z3j2X1RcVmhciOAEAE_Ku1QNlu6fK0oq6TMoJiUeM-YFQdngM2Ive5Ttlp9NBRFaL99ZVet63G5_4rITvqUyPQPWptKe7F_Js1ieXCPCcijMnu7A3_ErZ3ZF-dnKbQcUS4NF042WYnrgPe7N4iLRFNwKyU5Qz6cyLqz2_qOhNaHdpkYEhFnTKd9TJILZm8Yggt8whUkPoMUK73IQmui1fRhaRbbK0dq4Tna1BCiis4SMbgtMaZlqZvcaLeWhZkTfJQyDAj0WRuTh192YNdQamx0_WPeVYBpOJKaEUa250kDCaZ50Y-vfCVmXrBkR98D8YB9xZ5t2XL_aw",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-nonbmp-distinct",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFmIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.XUe2eYapiFkHGgstRCxULifI3PGnce-7FfC5zRJRn2br5n2PYmT_lHqgwkKQnckZm40BTpHo5elFOFB2ST75or96UOUH2arn2PwYI46VBv3jWtXUpkw3SKXEEmsjnCyy0vupV44sc9Twn9HMtMJIy4XsflXmdDBp2zH09v7aNtJ-db7f5_4YmdI3aUCc5Oza2ZcdOfdzKo8M9gAmEPY1NbVpDsjwixUR9VLsy66HzZRxtMhipOdT2csEARb3F8VHOdChRymkNjQhj0kRNfiCWeznr8grLwqsfyw5Nm5DHWVuhe-dMwtkzqzs6X0o5VW7P3e8FAGbeCJYnhtXFNWuMA",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-nonbmp-duplicate",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFlIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.dsYzHECOqy7LPfncAlZhNztzfcMXR1_ndId6m7IaH617KUh-KCcqR2fBg5tv7G7caUPeZprCxrU3Ba2uIEoOyHVj9gUqc3JjvSM-ZPGnQ-d4Qg5SPMKFC-RjRqOAJqVCAFOceJfwbpy-gcOWEZYpQZadkCLhdn26pG2W_tdMGvxs_sIY73D5613pPHb02vUyR3cjfVW-qqT53LiDtrlBhnqNP-7-sxpazpwtIFdSk4S2JdYZmFhPfQ7jsBASaVl9g_z0IH38G0UKEwDB15y2iFXU-KF5SQex3ITCp6UXQ8AboTnfy6Q02IbdJVANrOn5cpWQOHR6aZAOd-FMenOHxQ",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-duplicate-same",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoiUlMyNTYifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.lyFJnVmpeDTa5t9yRLq8fXFLIAWmLZTJXS6rO-9enfFk9ZdmCsmPh4yZWK_-avA-rRBQfjWknJA2ZViIeh0PbRHx1mD4Kydz_bjWmV6j7-0Y-gbcqOudVo5JJZLQodYaRo2TKAZY2iNno6ynjogyWBIK0R832cQXDw__ATtdO4-hGkVPUnbdtkB_75DOMWjxXuM4W55DkuQTDYGoZ7OZDUpQ7l2rI0c1Z9XLylBh7GNxihtFbGVPUUTRcIFtmipEKqeRqwB6F_7eE6eVniDumGpROJZYrKmNoKhRF-vAFLEaZPpIOX-9KrmFZri9IGStKhFOipzyESq4FPRqOdt7HQ",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-duplicate-conflict",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoibm9uZSJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.doBvax5wqgLabE-XDxKtHFXQkGbtGMqU5M-rHnZUicsLsFU09u7vhGaOF_FAycK8rydOvMCtnI5n7jNSUWL04JrRHm8j9ukuCx6ioZ1Rm1oqLGtZgfuy9yRC11594Irnmfh1XKdyjMUa5TNIaUyfx35CzOPE_8nF6EV-MjyQTM-94e2smphaoRrqHwhpulv_4vCKO_PcvefNTdL-hSK1j4R2v93Sw_YYXrOBrjHPktE3NXKHIWA50aMOl3c184lg03-xpM3rRsktCsHaGAPUTBmRgE4c1eFTf_iNhaTjyGggbXNu-1JZfswxjCkouQavOGeS9irGNATUc5cyi8LItQ",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-escaped-duplicate",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHUwMDYxbGciOiJSUzI1NiJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Zqi4MQUdxpwJyD9HMRbGQY7HEIHjavXXRPQ0Xbw7qlThAnRdjHAFXuF2bziX41BeyYZhEdHiVttjiQwLNL7inDlDHnMF3GU_-TUX3jBTANTSyTrpKShLsXq-dBgku5OF7FDbpdybvA2BVWpmAr8I7Si6TCxPzehU_e2DGB285VUP8L-k7_snaeEkaRDzbV8OU13k70nEPFmrDkL6WaCj4lP3oF7MTj-ihW7Wm7XggDrVYCtuhLcBo-eOPtPERB_5Qk_0XOkoL-34uMgQF0lSG080vX9lztLRp9zQ_Cs04sYRLaWYqDbIThC4PgiqTe8LUGz2Vw6DnAral63wOmvcww",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-critical-unknown",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXSwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.rBlQISRXvQshNWmlty7W8ejFQD_PRj14Yeo4PVA88XD5lEdZkxpPbBMR5z9O928hETSSxAZO3NrvW-FOrYupxWoHXTb68i3VaIatQHhvl73N2MKeb-3JaK88nGwjfL0QCLZRD2QgFdj2lXPtzsR9cxxAYNQ2ODJgnfB2sXBy4wVPUQfLVUHcDHsJ1JbGsyIIPXvUQAcIcxgPgLen4Uh0BZDO2T-c6hiGvvWkGHiXTG_nk7pNSmYeZ1uN6d9SAqI5kToqjVDOYm3DXN2kXy5d-1kQMz-2szT02z9dvumGeJu2FDotBj1z7djYietQQdf7FY-OwhDQ_pmSV5L_Yjt5-Q",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-critical-empty",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.RJnnH63tB3M3v3fTxSE3JN9bbKrDz9D7EXCNZqqtP0YAsw_cGfsguFVfRlxytwK9uLw6nQk1_lKX2PZ8QR9xe2fhwClJj962EQcm3tCUTY_Og_dqou1E65O1o-9mkZ8kwNMQGykwNOCCnlQ5ynlQPDtoapVrlU-xEdXTaJiBDQoV_rsboV0soTQQnO9ccb1CihVtDRk0SNvgp5Q5ohwKcOAYRt-fVM_LWxKqL-hub-8VEB54E0qX55bYf4bBMTbE3sfT10Kua2B4F-KLFA_y9KtxC-EKxbDW_3QvW98DUZiBoo1HhouSnXLs01b551byj4b49Qxh7WUK16pvOSSVdQ",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-critical-missing",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Cm4AcQJE_X5KD0ktntjORtN8GNC4gRV55dOF7BezJjIARdccEJUD8CLTBQo7f_lhBrRGUN9so8-2t24PKoB2ewgbM6Q2drR7lmdBCif8cxiX-m_M4AyTWq9AydnxNmDV9eTIDUCXhJmmFqy4xEitpmW4q7jPwfVRIQipKMGXjrzrZL3QIRJsB8pi0OXry7JSxBWSqdWdSDKNQ2ovEnfnT4havBp0_p6m9-Zcd7hDzXdj1Ay6b_GIpFDNNujlW-hg95_ARcZmQ-zgDipAJyaLC5sqfzSwKdrC_jpQckBf4tWa6PrcDOP-oKUeJY2_6BWXQwM78iQXVPtdV3pp7aU-_Q",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-array",
+      "jws": "W10.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.tPjPRgI73OKBx7uo6Fql6I22XjEp0a_gDUar4s9WYlSv10IrV8RO3vwDfohlKaq8_IZSMyK45sgQ6MzFU2vSN7b0_RIl-MusAwludvZL-h3r3yWVRv_mqH1aNOsD0UImGrw3BpyARBW4pgeliWIfukOLyxQCJ8eOawsKiqVhY1-O94lMGMuuVX3jfAt3euE7Wq5Km5__sWBh2v-zE4BZQF8Qu_OJ0CyGx8SDnuocW9YpQCk9_HdB6lMzmg9pQcKrMOO7ZHnHAP206YctOuwRt6yN6xZxPt2st-Q2Pgx3CzsNGerKpEiixrq6vtJaA7wjlMjNnHBAlKXB2vDeFIvokw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-null",
+      "jws": "bnVsbA.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.U1WpjwtiIGTe7H-X1yVPf-2IKof--rrTJm1BdvCyr0sK5uxRYu9Upc0N3Wbe4dNvtoFDxWYbKmNUQgz6pQNbdMdu69xmeec9gQeK9fffYcITrrrLEaEQN5O_YobIcFW3xqtzV3obJyRlFMhnl9BNSmD6HKGA8MzYI0ApGBzN_jp04CN_WKQILwHWmTf7Y_24_3icPvfgiLvzkzgveXFdPr_gNF7EbvFnObhHz-aT5JmuirN5Kk4zHSWXaECVxXJgcA-8jvAEmPHlli-kIffbI1eqSu2HvkXIJHpsxiZp_4d3E-rCFgXRy-Q7hZLym2jc6xm_NmcuELotBW5QYxtJ8w",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-invalid-utf8",
+      "jws": "_w.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.hwcoJWU0zT3atJFq0jmzPP1yXxRUcOtU5zTSWBIf8qeq70s3sqOZI98Mgj0anUbmq66Q_JJNkGqbJXouF35xeG6mgFAZsgRdBKZIGFJOMEQbf3K-5Wk-_Gl3NJzau9e_OJVcBVAnQ3mpZSoEvYFjkLszyVAFQAC4VmcHanzNZfNSJrCbLGxQL1GRDOt7aMFY-4bkRk3hEL4-yZWglDq5_oeJLfFkZ-PuR_sXh88Kk43w-bPck4LjwK5mBW6ASLiWfPjBGomKI-u6kNHu5e9BZaMJMBjlO89K1MovtWtrEQ_WHtM0NX1oTz-f0KIPEgSIk7PsfIUmHaaa9HH8NG7xEg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-invalid-json",
+      "jws": "ew.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.dGmg1xm47EvNAD2gAROiQMLhTW7LRs5GNXWOS9zesqotm6LilQ5qCVdkz9aT0cZihxah3Rx_XtPgBK4sGA06Pzhp1NP7PsBxuxYYy3hHW_Szx_jVLXUT2008Ej9ds0kCt6BTOarNHvys-6PMHx1dmNXUWE5iBU5dat6x4Wgie6psosfaJ80aaCBwBq5fTrqYLZcLtBvXln-R9rGK_YXseSdkM7k77Z1ZK4DiIMaiI3r2qhDEnNLoFuE-U756KXAYQNyOI1PBdh92_HYurU1-QqgeCUkXa4BtDi4JW121oAJYgKLwqxrg2hDGH9QE5qRjw64lMe0qFF58SEuvZ0Rptw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-missing-alg",
+      "jws": "eyJraWQiOiJmaXh0dXJlMjA0OCJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.M-UwZohAl5-4b6O4SbekQBLgrt5ARJ2yrbggRju8dFmgfFktSn6YlyvIXLOdcppOD0SJWs3SbRvpp2oDrgf0Be_5Q0BIpWEicvDn8K65wsc2slHyGLKwzPU0kipvKolSFWSV6bLx7JXg_8uuLln8WU98bbtvx3X_eUrsZCQbRnUzjDPy_Pu8GY6uyuHrHRaWB7-ePPCpop5zh3vaFagJsl_h_e3gBQPYlKWLB380D3P4oMLHX8zgZf49FhacATq5WCzctDqQne31kxWe6cbFkb-kL1AmZrsbtmXZyY3pet4yAjKxP3pTvakPjRL9x8RDOOJHraMGZ_n0-wVsfCgPfg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-kid-type",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.YmD15geHvqRG8Qgbmerc5HP9zk8W0R6e7cnya37exZ51jT-4nQIFc3rhiDMW_MnIYyPzMUOO-_pSFjaE8Rsa6ny4dvHPx3T6b2zdSQ8gOmp5jGQ3gz_8lZU4LSuK0pAlVomlKPg7jjt3kNI50t_oOH38tGgH14ME22R9NwuAIKTFdNNz0CcEK9RvMZ1PvadTYI8lJN4jyIkc7ucrRYxo9I7C174N8i941eKf6Uxy6m2sGeGHHnRK_q45p_cHe0NVFpI-PqQyB6sit7i2kJ5q8nqg675bY-GulTX9tTx091ih_IDZPylGNHpCFB4YC9rFsFSSufIsoZLZIv4zP7969A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-standard-base64",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.NUa29uEJ9TxWnDVwj9EhsHtNN8rHB9DMRvvZnmKHZvdc1zMIOkGQkyPw8BAPJJTdI6fLeTl5GGlPJ9lKjgXBxHqcocUB_DSzsqVu4ubcjyzXMaz64OGym6Y_lOh4dEYvX4DW_9gaTBvapC_RQkPKX_WIzGv0vfe16U9UWyI1uWg63Xop7rM_okVWNyYwh1wDu59yVQBlTT2a21NJNvfVCJ4eZ865xxDiskApBURIj7FcpKpor_CSsOfDnHMHQ8_e1kociylb06c3HfIZZJIV0Nln7TCETRLnKTTvI-JiLK8h3V0DPQCzmDXIXmNj6f61whbJqAO0_n3EIY4x-Xj6gA",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-url-alphabet",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDLWQzZ3ZpYktxY2tNazVTLUxtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVFfNnMtZ0tMRjFQM3NLNHBVWlQxcC1pbkV5U0FtRFU3X3FJZktVTEQxNUFUd19HLXF5ZDlsbWI4amM1LV90WVNhT2Z0alQtQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOV9hYktsTE16NjQtRi1EcVl5X3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QV9pX2lfX2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkotMEZKNkllQ1NLUVJnbU9EZF9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQLS1kT0lqb05YbnFDSjVSYnBFS0VUX0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bl9IZFFBV1JlX3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXLTNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcV80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWtfdS05YmN4cENUY0lNa05fNjNwMWdXTUdDNUlpeDNqY24xXzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5LUJTNFdLX21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eV96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Uo8eb4emzqBOICtKXXWmAr4qn4ONZ6A7hLPqDmJBnLVlHIvu_bjOWmJxtQwXCL8OiS7X8JBpUhZ3JotHxDDfqEKqvoni2GyVmiV2FYB1n6g6sPaQptrXBo9uAulvLDNd8uU4pIuEmy6MhKH5RI48-j6qqTabxSo-uyr86n4QL_0k--sJB15-o_yP1PP87H4qjnifFRxXJGc4JjtCAwN9MGvRlKTThWqquFX8mWxhZGo8kA4DPjMtAPdh09VAG7mF8zMEu-M-ZRrDx9ow9XJE8UOW9QZcVlO03ZMZrUmvvPU_2m3xkC5dSzoQI5-pbRgBcNDgTtOmkNBX_BBm-aqyHA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-trailing-der",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S29BIl19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.LE7PBBmZqpeuNdQOfDRBNh2PVJxq3J3Li-ZXakcEDOkk_ppZ5GfNqz5VsCM5na64X25wHHZtz7XZ4zOkudxdJEG-in79wyDKKVFUkOITqNOE8apbQMNfR_lVITZg2GhHHVq8Ci9zY0WKvWLkf9I60zSjZbMSHWLCLrSE3yzyQyzBWUvM07lJVH0Fw5rMG0nR8HgrOW-rjOHMV4_4Zl8Xx-Qizk0BYi3hi9VcpRzTybqGl6DPYotV0HDYwlTGsLMqNGP7Y5DqvPebdPmHklMgjFDQDBMyN-B_BrayOLlhM0ykoMKU6DqBAe5y5TyepJ7Hk9B81WMuXeWTuKNuLreNVA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-malformed-der",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1BQT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.p6BFOuBSALiJLL12IkU2RaAtHLO4L-GM_OTe7rljxtVyh0m55E52qY5rSVcS_ZJpW7ksF6KzfVLY8t6tF91v4JkLGTtyNoFNgpNUO8BukVMAcfN8dUlPOHEmEnPHga9dRE-dsNRhxTRH279mE_O67VUeoO_AzS8lkI5jAuNiT1borJQiOJ0u4HyyatXC46E6o8PjnA0rSTnLSdEyBtwZGT01jzY57tC_FYB-T9SG4oRZVgQ2P3ck-P1E_09oMGwj9IB3I0apaFOAxg5c4R7gO39fwSEpUsx1z-sriXjiFP8gH1xLl5ITI3CSSXGY_uBdOuzJgIn6Z39-JWhjB8T24A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-empty",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.NcPS9z7b8_nZnpr7pbmMLvY3HY0Z1OGE_rEzKMdi1jaI_jwRufUJjMK1z3pzUhtk3b9UAlDBY8UOIYmkn4UANX0wLAuQ00a_reSZCtChR2zEOkVvPfHd4cT-bDUWDmSq5JStlDeWRO2aqY7V3TuernLDHKzIlHcsApt0ov6z2YfFoHS9gTK37oQyaOzhZ56O2Zod3dU3dmEkBOBIF9BZzghRZlzCpNPRZ-5OXqDNw4bSDZl0uDjJuilXE0A9D1VrXkXgBpRM0CO4C1bxVPzjtcwFPcF4Xzg4_krH1vZ20276QbPEIb1uVcHsq3qf3VhdVlwb3GyqaDfLmdlEgXrP9g",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-x5c-nonstring",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbbnVsbF19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.i43eskbJyvxQwY92g3v_9yd-vuFoVIbpNWJ9lGeLf7TmBPs--86y0QtTA68a_pLJM-d3Kj4IR0wWjDytpK-E7hA0q0VugvRVqC4eRHeEztPbB4eJmHgjCitHPcXRUSS6A0jX1g9D_KPyVWPFN3GRwKKFH_Iy7KxBedaHaBpWtQlfNwjG1Q5BmYEpE6bcYRL8NsT3XnjyMxTK3zuVO6Y6n1EreX5-cxQDAgMZ5w1eYl8gIOmfaCsnj9ZRYUngjXNrXjtpTaO6FdmKtWHq0Ntjt5r92kdG23aIe8_QHVBL4LF-A2RkryrQtQw05J8tPmW2MWljTfXpWy6Q8-l7xXR6Yg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-rs256",
+      "jws": "eyJhbGciOiJyczI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.X0LwxnyFaFu8-VRjuBbbLjmAAeh29l7h5npUUO7WcMY3wCYYl3dcaGt7g9KEKk3paZpjhaxmmB9sYfDTPxy58ZRRpYuydC0MJh0aYozHOA2BWPHmj3r3eLsr7sqhlxBOj6lPqG9_KXU6WoUv8DpzYK3WejqSK2tG7_UWsuLhr58h26MxfTwrztCgX68ScOw5X_mB5crfYvgkEK49xZomqqvUJZC-CS6BP5GWQY1nTYOoLyhqQ5ILenrhUx_Kz0WAcuF8fBo997UYgqEkqx39Y0Qdpk8gnmYKgl3mhrVPehvhHA-QmJIYBiHvHn3jsa9NBK20KbqRdwCD7LrbEJwfEQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-none",
+      "jws": "eyJhbGciOiJub25lIiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.kcrO1VcIn4UH6oWGt992OrzSghCoXHjH0GxWFoFuFpb-nQsTtkFfhucAAhKxJ3vNnl4-idR_mpB37s0trt83WAHqNk3sr88mpvynZ0GEt6s4_QVSVEEy_otLHamkpWHDqHmXg1Yb-MoIIqaV5BSU3Sd4yo2_P2TL6E6ncfw5UxlHvj8crpaUwJZFDEBiyPHG7GNnqgG0M0g9e4k3l8Amda4glU0Bq1s85mY9e6yFwTfuOshBebniuhdQ-yV2GlvSY3k26dXKJVqJp_3KoRKgQnJamYS5qXqj0jMi9lZP7GtrUvzeI-92j2zP9MJ3PzA2ar0amaxa0y6x_m6LL7kGMQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-HS256",
+      "jws": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.fzq_M743G3L14zUuhhJOMkszS0ZwYvvX4K9Zaw0-pAkzwy-nH_8xZFUnAsNA6nRgqe19IxRmqhGdqRH1vF7P8mDhaHm3Z9zALvWKrAxZiwFbMRgoGCtsz7rY5E8MLRxjEuUcthcLREEUUtHO10iz8DE83A3a5jm1PUAUH2BWYtyi8FYuy9rRzaxig3B-o6cK3GFugZ5xmzz7XPDXOwVS-1Ktt6iaDM7pgL8L7CfeZ-yOnZxov-hecIHM7G6emvlTcFS9uOg8V2NaZwJv4bQ2oshMgvLunqbLwwiFCAxXYzVQ6FiNlN96G3BnNdkzYiUBITzWRcAY_TltMpPTkr0sJQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-header-alg-ES256",
+      "jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.eqsi7v5G3wlVDZYvTcPT--enzkZjXNxN3-svnIgcJJoEwl9_GTecPljXVq9sT2DR4V4uc4HS_La94wc_MpYO8SQWqQelGe6efyXWgxkkLzFAxht1fqEBhHGDutawUTLVfaraC1e6S9QS7Em1sVrCFQet5uMXJSIJv_QjZ7s0a_rr3O5OJc-wH0kwe9rqqSAX5UbKgzTqU9c6V6oRFYgrtmIeM5nCQdybB-2-dzWiJ7o4-By-V9-UPTezwrhMx7jpV-KaW6yjAIoV6QL_QfhCMf1gyPwIgmOetNUJkWBKrPeRuGAjgMtzEZNCcLKqZvGnoIB_Ui_oEg3ht1pZRk1KSA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-missing-actor",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.VcbBmfHV7J3JswMqM7AnvKxcLLmaFq6smrxuIqiR1iT-6s81QdcolRr3IFt43l97wzM99z6Xom15k_QO21R_hLJl53p2ocbOIq9gAyZ4SmuyS2tFWEf6jgqAcRph6xamFuVNfGz8iwMmXKJLvSeDHhCU85vViMCT6UN0M6YUS95oj6rfSPG5L1Xa9FYolKpXjMb4W9hw_GY3HPvjp_10woBAphS93LFlkaGL7I7-nd003QFtRuY_lvP5nkLlvTdfnvUmQxl--TBYach0YL5gMebIVi0IX25bzlSxZWklAUc9FvCKanqd4jNWAWVIrOsR2U7HkEuy85fOj-MkOqy1ZQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-missing-verb",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJvYmplY3QiOnsiaWQiOiJodHRwczovL2V4YW1wbGUub3JnL2FjdGl2aXR5In19.J765pguLmWerc3CF16uZg1a1X87hpSQlPUszuAovwtzWtCZ8lGiNTAKDDIzOeSWTVVUI8ahAETUQLx6QUWJneaDHrA2ojEu8d98WYG9T8-bj_6kRrNId4mjQaNk2nEB5AyGDslBsN8-puZcicl6p-C3WK06HD_Xk_I9xNfQKJ_YW8foX8U1V8iojlV6D80NkqZ9AW9uNSym6-yfiUaCT3WHUsPDj1VZuPZr0_iElOOpfEhQigMH4Ggd0hniBVtTBl0VTPpBjWRILhG-HpdTWBHJYaC5k2Jx49qO4WbaFKPWHFZpEIpHZfJ6zM4A0oEpw_spWMdEKy0eZ2X8Pac5ClA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-missing-object",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifX0.EPyKTGT75n7JLh2gtxIiyKsvtjowy96LDbOP_IgZzVn9QI7KZEW6DzPr5wlugSPlvX4njO7RBrjKiUWxZDgfaVJYQYOFWTosAurNSqot3-7yAaQTPfY9-qsWyQVifj6DkNnOR74fVO5e1x2gOEOd8K_M26YYM-30Q9OpQigN3Al33uq2SvOvsH1tw4saZvKVextlzFYuOGwMWeqFUbykUOcHkh9wQKaA6FyHA6BelDADYnajn39Z6tkemG7kcgtBN1lnFmUJrp5gm5JvIUXjtvld3ZGDVgADBiAX9z_XUxO1iwwkEBTHVrQEE1bphMSujBoVfiP7BlnGX_fwyDbuXg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-empty",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0..h2G0OVjzR8YL1wiXTpWtUhsG1mBdv_9ab-QUsSpTmjJkNC-6A9ZrXSSquIAwcbdkIirmAku4byfdlbgNSMzAbgzszQgbQEX7Vw5ZEbVuGMCXfVe1dWylMNG9mhIvBp1ZOFMm2c83LMGjxx4B0w3BAakgsRVc8miKSTPIfV1Bx_WbaYzH0SJ9LWoM8tjuxI7TqtiNBd2NfSOGYV5SjXiF5d9aVAQ8hpYRGpUri5_1Aq3I8Ngw-mzYYMAtnbjokH7JyOYVPvEX_q7y86Vks0bjqsIVUlO6NyVy9bJqQ37RKeBzCpKANdVIBiTbe74D0uaVlWG2VhegQ1x3ReKFiD2reQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-invalid-json",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ew.mpO62EBjLuXxQVRpGporPZdX357iZwcOhCI8g-ZS5lsnGBMI0FS-JZ373m7Pmx0oDz-5v1klERgI-A0D_qFxAf3o5rX3n9jT00eZdM5Yef_y0aJ7cQTPm-T_WRsItg_TAiHiP-pCLf-rMIR7b7tcgebkyJ5tl-qoW4wnnyVqNC7QXivcf4iWEHGbZJQumWz5MkaDMt5-H09KZLwQzOuXhCYOLtvyvS_rGVAdGbl5SdOG9-ronif7Ju445r4Or1udZFhzWIxX9JONrPXyeebMMRcGiR3oLcb97vY3DDB8wcD6uDInwP9-yfrsg_HtBM7v8UrATH1PJhXpKDBF0bEqUg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-invalid-utf8",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0._w.dP9gHHuuGY4MIm9fxmYnWhGc83CAwFPB5xVdevzLLl5VsfaL74F9PBdg8p9fnJsMOHVNStZ26SPqXGBjmAVktjmoMCZ2fuz9Cb_Cg0LBBJYvW4ZcFYRxisQxVEj8zgrgqsaScUS1cIvOeQqUweTU-1SEubKpxME2boftTlH2vLZnTZom6sxse0lMDj_-AdEeeTTv5SxLlDn-m1VmHx669chXepkQInX12yYPohVN_ELrGtPvsF9melHwwdw5cXqBbjP-DtrciTdzmG-AYH9-WxU9Uh2Ygv4Oto0lEWsTwI30LWqpgot24GwI8C3v8p5TCLwokdiSVLNup5D9pyAYQw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-payload-null",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.bnVsbA.OT0F_czsrdIWRalCuSYR3xVkRqiuCObokXi5cmQE6yNZNl2-ObuSm9MvKG0SO2_hOcEwdMb_KJvfBko5hCV5r0vgKiNwIYv88Je8IFAHOxhDFSNZ0g-sC6zLcqBi4DfC0gzeVhZzPFhLpOXb45RAiEI1rOj27AboEuD9TycNb8skiM5VARUVrhldmj_llaCxYugMz8hDYeoceO3IPyqFDKnVxE7NW2iXU0HDIf2wiGlZeaeABHhQKsTHJz0bre_JQfZPtzqzUnDnep1e0wEa6xj6K76-7QcJi4vjL-8CBrRjbNBs_PQOQFvEwqbCGu8HI1-Xr-eEcRNFoDGXJxNrEA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-two-segments",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-four-segments",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ.AAAA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-padding-segment-0",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0=.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-whitespace-segment-0",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0 .eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-padding-segment-1",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ=.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-whitespace-segment-1",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ .BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-padding-segment-2",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ=",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-whitespace-segment-2",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrQ ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-standard-alphabet-compact",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL+2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY/VU/mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7+fJUt6ZEOy6bDhj+byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX+Rmng11ryyk3Y4N5fMP61HKggNucnioIm+E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0+jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4/Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX+qk6WrQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS256-nonzero-unused-bits",
+      "jws": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BQgwkCMcL-2uWFcViXZutfzh4zIrli91ZCMu4KYCdoP8pRPJ3r3o75DUQFddG5iYY_VU_mawPcmIQtB6CJZ7HTACnPXSIzMNYVUsu7S2ZxfOV3mdAbqDvdiSETnxKhpXZ7-fJUt6ZEOy6bDhj-byvGBtSJuBo7ep3ISLz3oWCkQ4IDhAAotX-Rmng11ryyk3Y4N5fMP61HKggNucnioIm-E4XgWAvF1aQz7GHVnUfa5PjEMjgM5bwVjpL0-jJ2LPLdc4l6zSfYgXNSC8vB5W55MAQAZ2lgMdqiJgNEPVvv5WC4_Zx1uO3pXsCW0AljKT3ctprT52y2wGZKX-qk6WrR",
+      "accepted": false,
+      "role": "canonical-decoder-policy",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-valid",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-escaped",
+      "jws": "eyJhbGciOiJcdTAwNTJTMzg0Iiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.lRZUSFCKH82808Cp1yDsFY6Jf7B0wUprOVRq8Ahf1A_uBDj9RGCwTdJ0ls6aOskvUyyiYR5DZLbzIIAorXEh599IawBBvAmnGrbVzelJ7mcaiW-wIWOsQ3Qoy-guEj9WyJKg4o0NNeLQzNAfv2Uwd54TpAl5GAjuTiN5LmAIJTJ8V9tbu9d1VDH8doHgh-_ovtF5Wg4ySog7gmm6CQrQ1GCNu3lMVb2CpB3UH88JRrNt3VoYvrbds_DptVs6-7DHWJQasXrAtT43OJPz78Iq8lsKTbXyZOpjeNqW6P5bGVfWC9XKJ1lS1ZPj23IKLVAP8NSytodr0Nl-MKDgko-VnQ",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-kid-escaped",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDRcdTAwMzgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.DLZsr14BNw6gOAQPzTBw_LjgdofbSZs1j596MGSgCyqrl0xOIltho2We8fh74Kxxilf27WfCAMBS12woJwSUeLiqg6P9aShYEmxI8VePECqYu_WMslZZAjpL50nGJa8eM4i0xs1KBWT1Iq_OYwZnTs5EaKd7C-fOJpf87lLpyO2o6tBedRhB3VKJdlZkeFJ0IwmMYJ77tAuDxP5KpTp6TzBngioWLo35agtvMaUnnOueOcqAoT4ATWGm6q6uKusduIZ4qaKb7l0xJE61UJF8eKow8_PIf2lqkGk5948vVC1trvxLO8YfOZTKQyzAf9uotj1rZJJZzamEpy_eTXc18g",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-kid-case",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6IkZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.upJvAsAsbozxc1IX27CjNBdypCAwl4Kfn9uXEqqxLHzz3GKgDO7jMUDqLbhslJAq1NiYB5NwvMHE0sqisihhSm6O49RB2eI534IpeXcYejJhQrYfbPbjru-nxX_KqyJ7UZDszU1r-vmrDa1u6tlVP5J6C0kzmxd0NuCKpsc9RrOeANTTX_C6_WU9AbJvYuFOqJkbnEiItM9AlcgQiS65pG67EfK1qZDGNI82LXzrPyDXR5k0pefrb-dUxVKh-WxkzuKYYcoI0kPMTR__ssWpmQRJrMCK1jwNVEoIXjSh8OngZO1LAyaXNdGiB1H1Cfq_9dmGTL3Yo3no7oJBimj8jA",
+      "accepted": true,
+      "role": "D10-unknown-not-evaluated",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-noncritical",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.T6WDDVnOlv4swfcXl9zYwsX83enp5-qtwYM26vOJlu2jfNmSrYC2KGlPvOEWcK2gEF8Hh7WYtGKW3QhVfjAYL05_1LssGpSWKHaFnGx9sTn_63X0IGYcIyob2qt5aNPm7Uo4nGRpB3wZ_gZkdUcRmHlz3HywYTfhSUTgsXch7yattRz0vHmjvpbCqdAYpDp31g3Yx4BQPjylW93GBwzkjkiud043mkT-fMxn0vLloTvAv8O-7y-7XH4AsilPHYMpgANTRVTQwfNpZpX7GWwSgBMv2eGiiaO-t3XvgJL_CdoUL_Mtt9SiWJAy97PECSA2yiYjEMx5v8VDAWhZBEIzMw",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-typ-cty-case",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwidHlwIjoiSldUIiwiY3R5IjoiQXBwbGljYXRpb24vSlNPTiJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.SIO_Wm73sRi9hq2Q7YMYOUBEIEN_nqhqfclqC8VLKQWW3qa0nhdlwrkWkP-OthuNtVMt4mlprQD0CFg-3s1QW2eoEXbQgDg3EQiwNim8aMBBOnKk68OmTfxwJg-q8T0zuJTXIiUOl9yRHYJIXevnm5NKUzSG8HuBz8MqzGsbOxJuczPU4dmj2LibWAJmEtSr6cgfh0fFVXkFc3ilKMEBpwRUJOlvBrCWI5GD2FHftafxLM0V2hjc8cm8Armc3dofJF42dvrGnP2ZUohPX1N-Oz6XjOGfxtNwo9EDyfbL3gthqqA7oFRmVSMhXXvOzEaFPD63hesNKZCiVc-z1rRGKQ",
+      "accepted": true,
+      "role": "optional-application-hints",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-nonbmp-literal",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.OCFyzgxEsLeUwgluN88WtS7QHlyxDJrxTLX_afK6G8EYomtMbjxAWqSGwk7gskj4hVsgbqgpPluZLwRjcHqLW4IuMLHJCpMEUkQcZOO6-_SlDy74MhIuZcpngvvOwVv5oVq0PM5N2ORp1sFYi7RKqOS-PtfoRKmmN89bWyjLQ59-fI9-uc_nKOW7rHnQquMBesWtk4YuSyqzX4_Sg5slXXVFh1z-D4kjh_sojRf_r6PoSrWriLfVFYacWJQo2TZJcycgJqyy_41nxiqvPyPPfuul8mARYAemyWanQvqaSzcil-hWSiVphXoYK8WeNOBKfEmt4lpg2ViHusDMzB9Mpg",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-nonbmp-escaped",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHVkODM0XHVkZDFlIjoxfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.UOR_RtyD6jpW-QmJ7sm1Rshkwj5gk8xq4rxHg3NZFAEshM08YrBNjPjoD-6CZRETAtTS-QqGitbWqQUK1JkgZJChDT9vw2QhA0OW1U7RdWGYnDqrCuduPjugOIuERbR6i80EjZBcijuhSG1-RE_fdwtXhaMZ6gUld4pJHBC1SJOvlf52gPlnwVbHxFw6fHVS-cHqzH0IjMgnj8PzQsB1wgyTx4tFS4WAGBX3GVpUd9mrvDtUKHSb2On0LcmpD03_vYYBCJxnadbRO2jcQXVFjkWltr0XgCYkgh4SECJ1KucotxEC94LBOgYNINYVJRTidDlOvhAXQdunUCMXS_Uf0g",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-nonbmp-distinct",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFmIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.nUrq2Z-8k28HySFXcJ86FeE08BqhGxmZcTWYml29XOMUC4-rUYACKj46n4wcEbnlmpqHGz93tMAE5NE3bRC-hf2sHhSBqrtgRNObYg6YXeKDmvr432U8K2ZKvaiymboarIvUurL_yOVTU8YNcM-uzjx5P_ZLON4MduiuJLyS3DB7oUtymKRp-1wOYcFqEOzMXZ6hnBzpH4a21OcWu5wS7RJN0RYTilCcoCMS_tM1mlDiwu5IhK_wBWQJkdr6j31tg2lTXZHhXVnrBpEZDBS2xKy1KpgSNMvKWEvO3ryiOBzHhTGwzMb-ojovzBn-_Luk0NW4XuNhw1AWncvfuW_5hg",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-nonbmp-duplicate",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFlIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.G1DM9zKCzYuwhGXn4k6LE8jtGA8hJ7T__zgKt2O8Rw9-exe5XnhA3i72mah0QU7OV-0984mxmnoeHQxR82mTedBDb97jqIgLkJbobjUyIcgxNOgdfXksaFeTz1wU60DyGmx-0OfqQOLZPKM0ZSw-qd2WQ6nLIMdg9XUeQS53IyBOQAgtoyqMXEV4bwhJr3Z0Ujw1YPN8jWRT2LUKk8GZe0_-ku9CpujSE5ln_iTa026QbIcgF1bloOEvYNOjI4-kFRAcP6GPL6vVrJ7eXp3wno1hiBqRaZI-Bh0valtZaEJk9M4hWz_x3srb5m6CRdN--R32IsZeSfzAjcNWekSIcg",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-duplicate-same",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoiUlMzODQifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.RPfN70c_h3pO-5C7bMxzER7emEpPoi1KOtQjoWNQdCe42cL9FfXe8CHuT5yWzkw7gZtm25Tyan01YrRISXOepYlJ4GT31SLKg0O8-JxKWJ4fi6kEnxum-DTLm4Y7_efQxeyQ7zWLRFosaxoUjCLpxG20SpjhkKVs-Sige00Z2dbUIVgvSsIikFcAwzpx32peg_ppdo5Z3zNgvirPkKrsQMVlJBgVYZeAR_nGWeAX1FG-GJu3W4EWtROyMg2M78AorayJuw7UOmgsss5v-v8peIwUAH4ugE8Hz7PIohSFF1uYh052kOVKPWFO4L9Vta_6CwtKy5OSmz-6Ujf-NWrkCQ",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-duplicate-conflict",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoibm9uZSJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.uLdu0Ovj3eLvQ9AT8NhAr0r8Ul2XNsjpSaFrA0DviEV2lEcmARqS7lZFyfhjaRL26YKcbrv0ejmOLtpb9KmkWEGQs-2ntkZ3AyUEmiyzt72lbPVIWyz_lvCdQFwX8HnB2XMU769FNxd17fE_9tMSrTwKvNoZrefodFsDlMwy66sT4QVwZmMcygPZPqXxzQzNz3ANzBOgLvCg1afLSfOIemOwOCup28BcJ8fNF7MjxxfCzv_5M6-7vYxSxn-ViDMi8o9HXthcCd8pBITRnfL5nnats_-tI9mu7xVfvkFIwLmW4pvCAB9gL_jUcTPzcpkJNwNwHUeLx1A7hsBrAHKSoA",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-escaped-duplicate",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHUwMDYxbGciOiJSUzM4NCJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.aqQMDKZrlo-1nHlv7xPPQ5UOO10klT6v_mClP45pZ8pzaaCdAx8_tptuXy1HOQhPACvNxokcrk4XyrkyyWPeYDN3JSfkkeIhQ1GNEYXAzAVGHjXt88Kl0XRV1IB5jGtPbubO2I6mjptLN2uv81YGOVQrfI_0SIx1q_CVt5ToWdqcpe5jsdvACpWPe9qBWa7wH1EV5dZeM-7alj7DRv1XO34iH6l976hnITnNHA-ixr061kE5HWT3nLVRIkogH42wZCWLk2B0dro7Sem_y1sl6Z95k9SzfNoJvWRpGvmIB6UDpA6NKNa8Xr9cnnrZ6R7tX7x2TWwAbStpWMxTHCatuQ",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-critical-unknown",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXSwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.VK67jaR4t3juFiphUEtwFvjzK9ll8Yes56wryiZk_CwcT7R0-Q857tjLmgmYujNqhnjSBqnuMM5peVbXOR1aCQc_ZmLwV-IXhJirgYTYNAr5qG27B9dl4SBC8gsRbP8NVq3qHwlBTRvAWw9pvmlQ8QPci8Vib5DuQot-AQzYmpTpRO4uuX1aJvpJ0q2hslLTjEfW962ipE_o7r7i7rxZoSi6gz53ZAoOMWQrdnvdYsZSPLeARXuPrbZgvGmHw17bi3d9y-2vVUnmst_Ruago3r7ciSpPEnhRAk1XsYgBtz5SPzI4U4OcdrRWUJYbK7mkXqN9DYF2Gb3NP-pT9hu7Mw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-critical-empty",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.VkyfDu3Oj8QGhS3osuM0mzhodTAY0RKBstfGidAKUokYZD9hVPxME2JYkwYBTQlYjiwa1u5uto0irlu6QcigY3R9jxoECXJnwr5M30uoPZINmXJ2C9DQoMuDtXbCjjGtNK-cGNTZex4GQEZpxuL-PJju0pC_9gba2I87PJOj3mGNgFVCUx21AAjXHdG9vAhmN1FPGOsHzwk2gfDKTylDwyfi5RBGMpibWpbgc_DQ616R1lCO3yhgY75S4J7muWqd7vh_KqcOks2298v9EswYljbrIjR2hZxIyCvnCgJN_V6-Jq_1ri0qZCnykpPVY-sb43G0pPwGLzuWnuG_SImJ2w",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-critical-missing",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.mj4n2ooYQPSplPM4vmTAzMX4frNjeekOAWZqGzI7maBDZ7a1KOXsTBpth0cBsCmzcBHzCIyO3SxC4_kjlD1CZp6mZmAIhGOTyGdxqmjKasnWlTW9ZGj6mFipoONMq9Ip5vxwPwu3kAtrLqIdWrz3B8qZadOTENUAgxQqusSX9YtSsad4coLAse1PW4F9lhjfrqezCf5zUEDFL0BoEyne8A_yHxArDc507s37dO41NvniMN8fcLNIK-DLalh39VodDkNkxVDHRZ_8VuwIfBTHoO72bLl3CdYdwfJpl3EczosrK4Ecw8zILiUImIO_S3dZcwbYTSVflG_bQws6k2qTTg",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-array",
+      "jws": "W10.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.nIPxTtgMj_mXQvCkROoO2nyGjk6fdxBpeMy0DWuGDks2ig5i4QxvUfBTqGUOHA87-o9sRf1qwqRm4zBlZdXSETAPmLNBL1jrxbXryez3VwctQgPDvuGllWeIwI8_3xJ7IZ3XYgrMTvCNjyKQXIKKQWl6zCausWbefNYn1wTbc5-DIQf8X864Ddq_ofmqKnH3A-7vvKghWLch6DUGUI0RfeBzrZ3WJDfNgi9vHdd2FbKgpFigPaIusReu34MNMD-0Ww64yH9tvUbsuwdglpN9iNaZMXrAIp6JheRBu4nJG03uoe1OCAR0JCEMO2gfeesEGHU3rbAbQGJrJTC2jPluJw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-null",
+      "jws": "bnVsbA.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.grvQYmYagmjz1OvJAL8sj-e0QLmfbSX38ach25oJ_NzncxEcS7wLMVyE5kUMbPZ_XQzVNPIZYK5M1_rm9aH8EhauQ8O7CIYYnC7K_f8h90o1Ucvrh_kceOfntxn5t25JZ2xrnYpzApQXEN9qhuM705nuLKDmqFGTVxDzyOwAI3h0jF7RieSLfI4cILCbM6FM5N9WKZqdlYkQHjRw4iCBJsETWsLvRG1xwVFALaliqIr84k6HEIMDmOpKU_yDfEZVi4MsBdccPuqNK1LhspA9r4uaN8L7QCjnyh7DO_FsamcDw8-aSQ0ZJmfiYEK5sgO2srp5o57wbCk_FnByqI4r4A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-invalid-utf8",
+      "jws": "_w.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.dBL-w2yXpKpR2BU397Ncvoaz-GgRB7GWnYW_ZXcoSKTx6W2ZCeJbmwQVs3KLTPM56QHKHILPfwQarm9xNlhrh9rnkUJiPk64MFM6x8K0NruKnB9R734i1umUxAGg8Xdc5rgkxyr89wD_JQxUPc6DaxZKNEkNLKcli1pkcr0_ZH48fp0uaESUvraAg3x2VX3MtCRQzHvr_xo6IUTZCZwo2NgrvJCnhImtGu2_CM-CH4bj2X9JYd5cmFb1y5lVFVz3772M-GWn-NsKCHdLFpseLm9U67u4r1HBzK6tBR3LqFahzqN6w7NJYYlbfDm483_6qR2IDORy7KRnvBhRB4S9IA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-invalid-json",
+      "jws": "ew.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.k-UCQtDEvUwdqhDEnuB6QFNW2mf9cbEIdZRGke-ib0mJytIn0SkHz9nG8LODXU2UA51aWdeMGeDGG-o1CfkCKYEIUbWfnrcb6s16G7C2KetS8IR5trCMfCQ9FjgrFDcso-htssT1ewVvh9jzspapU2IN2ntro5M9brNjoXr4od3lWgypwNOU_HB06drGbXqL9EAbnjBHTGc6-7Lutu1cijEUH7uxDeqieXiP-SivYAjY_du5ZsbiXRJ6UnHWfhOPeVXiTrRsLE1kxfWXYPvJrWsCU3q936mzS3PXBPEH8Ei1lVN0Bm0T6oJ2Lertp65a-MZnkuPu8WYXEkeNW7N_Bw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-missing-alg",
+      "jws": "eyJraWQiOiJmaXh0dXJlMjA0OCJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.bizGrjCdnnCHmZF36bASMD49pac9jBxJIRK5kIfJ_4t6sGwLHS_OU2dUBN0hfuTBDLT95b5uQMAswfmZ7matG4w-xbbs3Dh3vgkqZcVE3ZGTkC9EWSAGlnD0PKXjObIfb4gdwGQtzGuQG6y1U2eHCdpQDhQWf0UL6iPwoap_KOndAlE2l8RT4DB9y71TN4sbBfz66n_bx5eZeRTt6q05K9DYB2CjfvIIV5OE--d2v2eXEMtdYyIbjhTTXYpwZFN_2cNXAFZRlXdEJWsIgh83TZT1SDy1bEdAGBl17uvEVJIHxnNh3bonJhgsvTsajW44t1Q3t4tihpkodhxqXpyDig",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-kid-type",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.D1Q1ZMWhdo2NXJOGsJycvGyzDJaSX8eXv38B5Jj3Xi1VTzNgsWgN6fMjwzLmeL89Pi2G0UuT2Hazqv_HY6grSKEOqFeh92K-tg2KoeALNJFpUydKE3ZAZgzojBUaIQfGarXvtFRDTYIhqCfNj9snZUlv2Q9xEKb_8xSeRc8Pu3wugM1T-CKBZ5AGpW-vjs55iu_v_Wb4h2dWe5dc0LDf9HQAAx50H4BhVukJipCLKov82c6oyNokG6EH8vTZ0csrzPMDzPpkFNS1jHGsWwRU_P5WUqM7JR1ulgmbd6yBNwetkNoDKZf0_OQ67qwr6xQiO-5mDU20l1apOjXQIg67WA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-standard-base64",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.tSFMfH4XzUVCQl5TPKUdqc8fnTcJWiKNGbEwAtGpDVmYussBIRNf4UD7lonC78esA12pNndKtoNp4vyIp4Mo0PFNDEoWucweBgOfGWtnmBam5eccp0ZGjd3t_4VM6uNikmydgRMGjYzS00bSqE-Vt7zExozAlEnQPMSo4R1Ps1NZ1dq5Lcjf4S132-CljjyzYX8WNQ5eurVne_dEkka5mCe1Nysc9dZBkxnPVUcGMDHqEJvkncd4ix-Vm9MFE_3Ojdhl7a7Mo9_zMMhA3DWuvZn4v0WYw8h6Rm-PkieYGHl2A0wpPhlPjNR3-XP5rAHB1eeMdUjtIU-X-Ij8i2if7Q",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-url-alphabet",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDLWQzZ3ZpYktxY2tNazVTLUxtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVFfNnMtZ0tMRjFQM3NLNHBVWlQxcC1pbkV5U0FtRFU3X3FJZktVTEQxNUFUd19HLXF5ZDlsbWI4amM1LV90WVNhT2Z0alQtQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOV9hYktsTE16NjQtRi1EcVl5X3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QV9pX2lfX2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkotMEZKNkllQ1NLUVJnbU9EZF9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQLS1kT0lqb05YbnFDSjVSYnBFS0VUX0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bl9IZFFBV1JlX3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXLTNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcV80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWtfdS05YmN4cENUY0lNa05fNjNwMWdXTUdDNUlpeDNqY24xXzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5LUJTNFdLX21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eV96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.BHtDhRMkjau1zo3Rp1ql-iXeRlxx-bRKCLE3tBzyM6KNtmADkp8KxSiGZQjOB1BhnZiX_uTJnlDvvSnR16NRpOZ1u1-W52q3d8jXsiLXGzoioUy09OJbxMaGJfsNUh-TY_Lc05XIWNUCJnUeMJXRhwK1awBC5VDKMX8SZUHYcKCV8godJCLwaqnpy5qncIg6ZeIdruw0zb38XneiqJ-sbua7xIO5EQGF3XzcfXI9Za6dQi_4fuk917RcqtKDD5p_SnINxzKGpYo6D5WE1EfQS5ndjUs_6kawG56Ak3I_lTQt4HDL6aqz6pZwEgfY55J22uglASD65YaiYqItZLAeLA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-trailing-der",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S29BIl19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.CqQr9912rUGufX2MoKm1SRd2Z6bWx0w7zcZj05AhiBkUjnRccMyw5qyQrjjeYXUBps7acBPzfO06suhVvy_9LlINACWiE2SvNp2QJXFDoDfwSnCQAHFh-8xEg6MaiNxJIYZ9J5fIrLQR9P-Z7pFHRIfqBeMxlNk6BFtY--K8yGC9IBFWsMc63xS2_ON0WPDIFLMnqvaSsKjF7ty0sd486VAAi1dA0Q2I4ptxY6QdCEM47bzew_p0n8imamBWdtjN8NS3Je1xinpHq_-SgEBUM1ZSFRUANAvjRop7LLSLbMCi7iKM4ZCnVGe1Ga6CRUixitXqw_6NLdErIRoe9gC9pg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-malformed-der",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1BQT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.khgBdKprvnwScwL6LKmPeTlDnx8IFakWfObW6GrWkaPXDwBGPi4B1qPfLoNbGzQEnXs7nN7tL6pBijraM-yX6HIqp0U4t-NmgQUqBAtkuIseNPNSPVPnCKFUWkdlG81oIV8LGOGOIiuuA-va7fsbwyxI2I-M5GIhu2ZhX-HFqjkhVRlX6GPTzDVbdaEDpJX9lm20lSMRGaEefuViyVCl-op3Eo8vsLEGlhcjSCip2GlrjPjfQ4wr9wkVZu-JXCT6-uUorNrdeRP8j2S3ABIXNGVrMYr-7LjdA00K9MeUj3bYQuveRS1w3Urglccaj_W_OC1h5Q1VLJyfauKTgTP8Sw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-empty",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.XC3WM9Z8DadjUG_BrlQem8zXW1iWZTNNDSJ0r01WaCsaTuYpkUY3BpqJ8_gBrZGPiwi_9lgZv8jOtWZny_XdRjXlmt7d5moN0PxUZW-SxyRFGbH3Pv5LpaLSTLOv6T2Qpdt-iGtTZlpsGEpYS14WmJVQhBD8ufRLtD8kxAUB-3xLLIHYX5jDFzh7ou38cz8WK95SKOgqXfQ-Y7HCdfzGsJ9ZeAhd5e_0ttrtEirIJEXYygc0WbWLNDffD257YYoP1T85Bz5h6VuUCuvN2sreQiRIHHoGfhZY6rI-SvdKuFfH1sSi4WpnNBvsxU3pSxcUcIxejUXrK8knphP4UIEmcw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-x5c-nonstring",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbbnVsbF19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.aCYH4B8j9DfvGcVY4-wdJryXPs-ucpKQfsOgNPBd16K9-x4yuk0VA__6-RLOm5lbEchTQg2pRYmet2J948Ce-6HmjM09frS7e0VPuhDS95EAcGgyKZzaHuWWOZFnMhO4rIEnQaB1RAK0qNm-jdCNGkQBWZKCZ3mYPvyL3P72K9eF2FK9v0M7Gupkh3dudAXQFyjbTfCfFO_TvUb_YNNDwKLdi8PiNDzLhMST2CeSNMQrHoH2lByn7WiTQwLYH5qqK3u4JlNGVIMhariVRrcnQpTpbWK_tesEHrqi6bWVplfMi1oaQf43IK4PR81fqDl1BEGg37wzKnjgX1K3yrDHxg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-rs384",
+      "jws": "eyJhbGciOiJyczM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Oh8PoqKUCUtdeXQihE5iw3AOsn4ZaZIn2GqBkFluugiB2toM55aQZph5Or-49kv3Lqo7EKTUu2db-_Y3JH-em0YgFbSQ8PNDy3Z_aaO5qMAzRy5CqdJreRG2-ADFk1iKniybCrYRKq8aD2wtNlVd2Wrdmftvonex_7-3OjZSMpsQbuNhdFl4GKuop2czHxSeGjkOCTLDXhdxQMMEFnC21M8dIO_CYk4D17qONFjag9m39A08tnk6PQ1lGDxYrv2zmhLKay9xt9FepNVO_z_v6uu4Zmlv7RZsBOE_5a-WeGFQoYtnR_WHm10BemOYnj-JEUL8SD3d0HcF-xvPkMIV2g",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-none",
+      "jws": "eyJhbGciOiJub25lIiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.doG9coBa99qKSkagPoyyw96wK1AF8rv7XBln7z23tHXWRdeUPIMITVbdFgy5xP2Ji2rPXv21W0r-He3a6H8cD5w11ONAh4VucNp2fg4wJ2HzMAUKiKp7jZgfvwESUL60mFJaU9fcZi2fMGje22FOuNbmH26VI-5Igyab2QI2XZukXdAqv_fql-iC_6PaKy5dB7z6dB0-Tha5iMROZ4Hh8QbTRJkfRW8OpniejAhjhZ_mR8LIlRRbPNUlkVTB9qupPI4GKGC1eH2tzXHysmg9AkhWifYebzyEc27sBq24nzTRtIyJtU6sBx9kp5aonmmBCyjrjXv6SZIZzaxoMxvwuA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-HS256",
+      "jws": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.AEMALsoeZJ3WMTyZ94RwRfnBw4-JgtOvJhHZl-3CjhZ86DSlvMyq7D2Mg5JsUDUe9RSC6kUug7fI8x9fLGd5U7MzEh6Mhgd3lvi0DcYzn8WWO20pSk_kw28lb4hGH1RiCyAIx-kh6u7zZQS1za545XmMPztLPNa1574m7ZLCTmvoqnHdgsHtiDqZJlEvVJqTEG5RiriItD_p-gjGYwZ78JCMYUFgpRHG5pgaVNOLqp-37-fgcKusna4HwVSDntxoDCSq0vdSmIm8pdquPN7tUcnE1BF3P3HoGGbieLD3HyzoyBbTnyjCrX4vTqFsbs-ym7NsqreaipHreX0ZLKNwBw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-header-alg-ES256",
+      "jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.cCbsrUubQEcpiMOrmHpmDpTIqZrttJJKuQYVwKtyXEm9DAAI8XdnVfsCZI92PH14SqjW883CsJH36uTsSSyXwDdt-FDSA18HaEJkHQCeq3h9WwUu4yQnQoGuarIm1dMajXqUm1ZCgxyZER1v_3I8gUHjdvq5ZCSRnK5AUp6Z8aCXX8gXQfGdHHUtDGwLowiMHukBH9OmGeJXujFgixH-HXncwu5vdJD9LxZu_LAO2dhsxMW0Ux_-uRKhz62j-WTEMjg6GQJ6zHB422j5sNz4jkMK6qEyO_D2op5-aD777t0_B5PcMoHuSqHT_OVTgsBHnbPDLtHpf-rBYvxF5U1NFg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-missing-actor",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.G6--MonuF4OpqIHUxq1Z17NJm6vVq37d0cozSONT4OX2J0Zmo44dWg7KfpkRmnyUgbCJsOnKkVrklcy0R6h2G-HDSs7rZTANQIt4ADKxuBmP0M6uQbzaReYhPKYj_PilIh17tcVXqdmRNxFkdB4FPHjvJQqBO2ymDD__zYOlbbd8zjR9M6NvlkkDAbv3vfLc4A_7GUu3Yzd7cKdQMSTHTmreczPeCXpnZW49grJGmoacFAp9pPYJ3KUwUdgenx4v_MLg2x0XI0QIXk4Mh2-AAzJ7AVMPA8Nzc94-LC2vbBathNBGoqqqqfED5jLQXzkIsMiQpQ38OfgaVxs7qXyIjQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-missing-verb",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJvYmplY3QiOnsiaWQiOiJodHRwczovL2V4YW1wbGUub3JnL2FjdGl2aXR5In19.b6oWT8EME2652pANWbQ8Ub0B4nXk3BtSfy-CdyPjAvHZTrNX-SfnzYDu3jaMe0rq170HJ7GCprEmgwE8Z19wr17XMRDtQsZpfQ8Xs6nfxcFCZXOrhKbKC184foRr98YpSFPN8pCo6ocYm_SWyAYrFFGh0euA_oh45BiLJnAH8PsE35tCmtuC1z8EgUzZl-bPf5_TlkXcpz_O6KTa4C3ewVkrjkXtctAdIHcgXifcxLGIcQEOZ2FozurjZCyn5x3CKcJdAVw7eM_Bgqp-Ugio_mxd_iUIJSTZ3tTbG3TV04KR8oBORFtqic6x_TMccP2zahiYit_cuHWxSGG-SXWcLA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-missing-object",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifX0.INF8-OK2eRnWkNry8uXgkCbZmCo7ZeqgB8Xm8vdRlhYvkZfiNSCoSI8YclnEe-7tjFSaXdK8sG642k6Xi3cQ_ieKjs1u_TDjd3ursi9-fSGY58JeuoxRTlfLPjZ7i7nbQLKX0CUXLJ29h_yrzvnoHqLST-uY0YLCg6oKw0ahwtLwlXLJOPl1_pyGhk8gXfYvLUTP-acU2xUE9LfkPzhPFYZEqx4V9HrzqDWpGm5iPW26yT3mMli71c_mD-M2Zzphi4Cw-h0oTXBcIQT8oQ8Ehkp0kwx-86NJDdba3qjEzwMFRsyjcghdYry3fbA7D2ma9YMKAjnCXZsHxXXHE6N5fA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-empty",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0..KUssdhMhn_XzFDHrKR7Z_95QeSpekLMbpFo1AbdtSref-NtrsMx5mHWdRIOUGCsj4pdFx8Y2blmM_49MkS1JOGQ3YZeVAbW8laBziNbhKIZUFmUHyPSlQCxSjpxKUCoHj7_cWaA0DocQuXTQxjZCA2hkPpH-zF6dibUC-cy7cnlKyT3bb4Ss1MCbuzln7yJjArY7Q3tZruKG8rXm40O_Vz5_czlde5WMMzis07pvpsBatIDHPn7k9crwRlRVkvsEB0_c11CY95rTBy3TSR6W8k1fgwqycUVk0IIB4p1J7AE-vmeF5KM8k3PHR5_oswwG_eOOe89RsZpU-PT__H9TBg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-invalid-json",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ew.R5Z7JVmujvCECggX7Po18noYBQl1BrA0ZGcIbbS0PWTuNW3bp7JluK72BU1F3H3OtSOhdwgWSqLgF9ni1Q0gnw25XhF15xL8qE439m0mRWCwxSBkF3ZsY3WOPnWJYUpjri2iGMc5yS9fGYcLBQCKJHN_BDIeyH2S22ZVkHgq5-IhllQI-VQBlrFl-2iudpzTxhzYyam4VmqU91zH62F2aj0pWssIfoy21YmGYKmaNS-2cge7QYU0Wd9wQeHplMGlcFdpuShateLDd_zFTzuvftMOoNkJ2YmOkUC6BJZH14VMML7LrC5Lol43SAxqFACojIzVprCDUTUt1oSHf6Td7A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-invalid-utf8",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0._w.tJH3QTCj8yDCAk6mVcvq2SfvIBvp6cQtJCAOgopEZegds1wDl3jk03S-IIWXRarYL0bCeUzovC6Z9Ms9ZWaJJkhYRYJ66niPCirA0PkLLE0dcZrQc7AObdSr66D6gTAZVX7-PAwSv2KGdHk3YlI-ZPHcbUm2HiPzpiYYI0MrnJ4kzhaiGuQoOU3U829dgwNDVEmetk1YJIBAgJCZurYSzpq-1QG0rrjjQHTETjjNJJvcg6jlQ-Ukz71-pbRC9mokTy_Xt_bfKwY1Mwdum3tnTMksg4QAdRfuph6jnvfxcLPzicdzOMs_WnTsbM1rr4OYe4b6RU9mVPSI_fmTev_NiQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-payload-null",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.bnVsbA.YxllE_Way_YvbddFZqtKOOOsHjiDbhkJlumXO_Vr1GJIbc-mypnSS4yw2CFeIXd0o7Z9Yw60GcfDXA4jHt2FSmuarKb_Nzd7G7vaVKL6v87Edy8B5R1q24GA8dWWuJqzzPkiOW5kjbLqH3laF-j_fKw8CZ_u9x_PvTrdu2MqqtRVDP3P0DgvdZdqwsxM9NNvv0rnjzQJid9cY-MsH8Zq4DxtnPUO9NUVZx3tXgTgEoGtf-Vo-lNmj1-dmj5s0FflKuX67tOREERdG5k2tPr5dvLuryn8z-mu3vzlkBheHdSu5E0deQEeQ5Ct86fsx0hwP798JMw7UsrT85AYZmAggg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-two-segments",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-four-segments",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A.AAAA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-padding-segment-0",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0=.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-whitespace-segment-0",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0 .eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-padding-segment-1",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ=.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-whitespace-segment-1",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ .qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-padding-segment-2",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A=",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-whitespace-segment-2",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5A ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-standard-alphabet-compact",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY+ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG/wZzHO+DbdBuM/gsHD2XwLltksmN1L+2hZ5ZpQTCM+kRIfy7j3j3/4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs+ScUwMT2FvK03C5+gltYzHxI6Qu+d+M1wo6bYDtBK630sPFPmJwwd+TQ+B7p1KwJtJei9IQhRwlRbHupm2T+ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7/015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo+UBi7ZoAk5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS384-nonzero-unused-bits",
+      "jws": "eyJhbGciOiJSUzM4NCIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.qhgpNJMA2tY-ZSULnmAaoiQJpVC1xbdp95oHz5DDbFyJ0AG_wZzHO-DbdBuM_gsHD2XwLltksmN1L-2hZ5ZpQTCM-kRIfy7j3j3_4feE120qbM0V2so0FtiLMjxm3Vcq6hZ2TPFTpqMUowUZLQBg0r6yDVs-ScUwMT2FvK03C5-gltYzHxI6Qu-d-M1wo6bYDtBK630sPFPmJwwd-TQ-B7p1KwJtJei9IQhRwlRbHupm2T-ragGg4FKHKfVzjVmB2y5kw1sJkudq9e7_015jwwKtN8UYDPnHMcAQIK2tgv6wOjPFtZou8K041teCp14mh7EN388eKFo-UBi7ZoAk5B",
+      "accepted": false,
+      "role": "canonical-decoder-policy",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-valid",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-escaped",
+      "jws": "eyJhbGciOiJcdTAwNTJTNTEyIiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.LxgO2_o-ol0A7t3miPaFCVeTgNv9jZR4pXamEf6jI2wjJnGPqBgIHUJKeiqRXGNywkqmIBQTMXkdqWIvGsoazpaKR2dDpNaQCYWmYaHhkSpUGPCkYC_e9wrA1Jykn2SrS4Q3saJxPs0l3BRCQKL_V3Wmi5B1qX4TxWqc8ThD9mf-di8tbOLp68qYtqOWE59IG64Ovp8_buCEzRdNr5dJMvHwFAvlpic9vD6tH_EiCFtwkf7NHd-KnJGdu7ICMMfMgrbnXHvV5TRlXLho49lFz15rucEk4Zz5PGoOq2hqNrnajFXKJk6OA0d-7sNUUSolzVpXw1OgGqDhLflntOtbhw",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-kid-escaped",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDRcdTAwMzgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.AZsKHiyb8ijwigKLfIQ18hJ4bN_XHRks3UMK1k8xrkbC78UYLahxoi7hZztCTlm39gxZhZwvXUt0r-9z6cBaiWoFxwRFu1TaCj0h2GKP9FCZnotYx4azW7K3vnJdUDAzeWqV5qNfkZkbO44jX0zndxDHkZgpSfoiuyD8UlnuaycQeqXI70d5y53uDq46Zu2mZ8as8lDHOOqHS-Y80IBRKuSh9Kj-jiE5xHpvFMLWRy3L24bC1GzyiVSGANbjYuiRaPuUGVhjpwgnjT3RRDJALZ43iyCDCffxxjYAv3AofQKthCMQkmd1NRhXUlyXz1xbzffj_ib5kskVf_iIj6nQ3w",
+      "accepted": true,
+      "role": "decoded-string",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-kid-case",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6IkZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.bHavUVUIYw1PSZ6ZyA-XHUgYbQpRSlrOXr6G5cL0C45-hq_L7EUMKL--qJJbTtJSVMiVBRJKr1ZDwDnE1BC0NU0ytXuyT9hv1zLMd0xMN_sSexq_LJlCCK7ZkxucpMS-USn-ngAwGwp_7gmZY189PpNlb4h-rG3HCexpssEc2s4Brf4IabaS-w4Ni0MSoiItXi2PnLne0SrfSdJyJfECini9viEK9FqvYTKD7Pri5_10owUwM_IhYOm6ArZfJiWuXJlVx-syWgcKYQGrrK5_Fm1FdxtMYbaP64EtlWzOalpJ1Bf66sed9_bwno66t8L8l2P57_aBs1vcvTU_umVWYA",
+      "accepted": true,
+      "role": "D10-unknown-not-evaluated",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-noncritical",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Ci-yvcZHx4oPfqOo4Hs-6-eIdaHC9grp8ESj8kRtsO4-zi-tEBDjB66z7XLYudanegwuQnhOwNbqMJRI8hGO-UaPrWMzOKe8fOBwHbJeSeXONqI8q1uGxHuVp_U90v_6q7PhXjUEqzPkavWihYhaxdBNAKHNc9J8f2WMJSXMVVD2Zz7iBZA1r6iO7RNy74XteSyR-EgSx141HXy7mijjTx392240fcTcOFk6oNeQHVHhnMkzWR-6dSA6URq0VgK3yYjoAsBty9jJ6XLR9v1shONTmwUqqo_CvmVTPDPbm-hhpiBTcUCLcvylbLfRf4o9T1RiGI3GVo_oI-l0rl4zWQ",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-typ-cty-case",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwidHlwIjoiSldUIiwiY3R5IjoiQXBwbGljYXRpb24vSlNPTiJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.A1S-kPzBcnXl9sY74XNUVF5K5YmaSiJJcfxwhiUN7pY1T2q4LeMbVtP633oIDl4_i9m8S3m__ActZMb0WCOQjc3xKKe99_5e0YlH5zms_JC-M2-1ZVlm_2qH8WT4pUN9J-YdOx05TY911X1Zs_i_yo7mNTibh-ntGKZt0wVTn6U3yHMvNPYRm8yoiwW4gFKNMjGzJySubhTYxggomR6aGi9DxSu1htVF-orokorZxfdWqvR9F5oiPYw42a7K_FvFxYMNqw64p7ObZdqx6c8TzINWhipJUVpjRKc4SUA4XNyuT16pt56bevf4MHJSuDW6SDdqNTa6tCUjkH0E6RQ4pg",
+      "accepted": true,
+      "role": "optional-application-hints",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-nonbmp-literal",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.gYlE9DObEb5x94gkr7TQ5ihkaQks-u8prwIStmAwpDu3YUQNoEpvA6nn37iiT6Pgi12s3tld2M23nHKjfcIbQflRPSaqqy1DkYskCAeZl0oNtI0EfCIbDyoYkunPMON2jNDvrnHYy54x3Hm6oPMYCwZXHI4r_h4golN3DQH5oA4vaAT7iXjS6hLFdOMIyjogUVuzieZMS2PwsqNiIHLMTaYjJ4xmljAmNH2bLnAIlPz_tGTHQXtgnwdxC3ne7KhGLw01rq-Z2BVtiMGHuwj83FvD8gEZGxtLf5MPLRC-SAZeWIbv3nMBHoOWGt-Y4EDjJpOafx0Teo5QhxIkR37HZg",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-nonbmp-escaped",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHVkODM0XHVkZDFlIjoxfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.TyQy3HlNhdcIhZD0oW9IZ1SndCnKs4H2lUIbmYSiPAydjhGLRSleC3vaH4tgDB_-6OdiQX8GptfmjOlXzHDhW1Ed7ClZyvapIWAdQ_YGz2pQDgt7tUyAFiuxU941mFPW8Wnjm99FdqiZF0_18I9LuIIgPQP_-1lb8oUvbZXMdSL6GNElJTMrTXnMOOQ1jn0zoVutE-y1gGQWUIIq43A9_mr52vvdeHbiVRbVDLQjyQAqDFewRm1p0kEYHXcMkFZzZoGO7BVcPrNinXvJYqkuflMrNf49qDPKXFCcYraIEjVHpeUqesi_f6rmAeZyeWxhUgldFtxepcgbvEdHu3C6Lg",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-nonbmp-distinct",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFmIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.hTaXumlkA12vXpvcuPz3FOd6p0sjFivZL4nFW5FNUdar3XjJeUztlSnddRssBs_ZNALmvRKpSpsrgux-xkCQ5i2IcdsAqbdfYG88h-QvwFlBojb9dlu74pSy1d2My_dB7aupTo1BT8IsxpPr10T9hnUoSqPCo_00GXqjQijyjaUBoD6jP7wWvMM3RY9JXL8YnDybDuWBdPllAT31riLVyYtt6x1rqBlj1Weif_cWXAXcbq8SBxt0Ig1_j6HmYireUoTnc1ZkIwN8aSmsLSiKWTleBNjkUry-BNb921WKVYgH43T1bcFvSQCNi7_LyTmEqm1BfWck4f50Fn7hB_UdLQ",
+      "accepted": true,
+      "role": "unicode-capable",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-nonbmp-duplicate",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4Iiwi8J2EniI6MSwiXHVkODM0XHVkZDFlIjoyfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Owi-ZQ1eFATJM4Ilpx55rVHKP7xmiWrFdMdoW9CaD8VNVdvUYt3lU0pPHt_KLtW-htoVkq9HZCMN4V9HMQcKewyKtFE6kJ24M1fcjlmjEYBWBFyNZ7egDhg7Ph2YDjd114NpZUOSfbs2wJlpDXP-dZvkf7kWpT5zWUY-a99dOAgZh5NlERnmV0U9OhCyx1-raJYGvZJPslpIjYzZ4YhHbB1BfLs_TOm-v7wARb5rJtiHbCWkaJuTmuBGE-gF_nmsM7eJNbiQdoRdfgGADezB72ZOzCzpnB6E6yk1p8I3Gm7l3GmVeWKHS7FJbcE3QfXfKbIKhpt3uVCzQkO-hPZTxA",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-duplicate-same",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoiUlM1MTIifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.FedVRcm-pQepgIwzimjOd3Bl21CESUXWbwQbCUUNOtaUOl7sY_ZPKcwhgO-H88S9jesZZAxzQW5WEkcwdIf_z9RSR3LYcs_8iu8pMhwxzw2lJNa27tuzQnIJUL4Af5bTIXhPCu0vA8uNFp0H12hFVcnybtj9EbiWk-fVK3lY-bAfQ8Xaau5jHWdJrjV9eUq9yNk6Or9YP0GVt_FDgzfgUiBP3kCV9QC261BwhG1xnL_QJv8G55B7s9ste6CdBkJ92fDL-IHwBb4jU8E8ZQMUq_G0LC0BGP0jktk8cc-xYnpRG1UxaUQI90R-8OAC5SIwN4n-n10yJVJ0eT6rUkajvw",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-duplicate-conflict",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiYWxnIjoibm9uZSJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.g5oKZ4gIaGo5Niec_Q_2trMCdRuT35UFRdKGHaAOypsJzxsDdVBT50ThIX4_iFuv0ZY9F8-y2Fr-1HsCqzEmJLgBEy8EEkU6M6ha5VeatWNlT3dGSdWMvkv_Cep7RAhUH-m8TZJTdgTZtcMeaaR7-RfmePtw0bol8-HKP757EXbhRugy11WOoqeLlgnxbI7QpzH04YssEs5BA2J5OHvFoV1s2ERJsE3S-0cVuNRrKVgIuBMXmOhRAztROYhMFuAX7hA5ypiEQ2vspbwO4gdPYAmO7TcrZFPUlqOm3UT22pLE0Cxe7ANxGRWOaApauzhgI170ME7O-k6V4ORZsHNW_A",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-escaped-duplicate",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiXHUwMDYxbGciOiJSUzUxMiJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.UsOZ1_6V8g1rNXnxRO85Uh4sDG_vnEU0awX-YIIuBkgjHFHFvCbOipwMkt_qnIulZohqAgLAeHHdc9YAouX6OHyXveqKqTOJfTmBZX61o-XzP3nUfevgZ9hH0S1idAbn5h1zvRK6NPEeX0EOdeoauEafIkcAjHjtCL5eLAq1dZhFaM4ZL944R8fjxOxbHoV4swt98a1L4WJaWE1S5j098wxSOHYUgc9dXlUX8gbyGSmTgt492NSLf4iuOBJtzZkXT9baGPc9rU9Yt7lG8185B_1LqZjwzOgAcKjMsooGBGy2ICQAydzNOrWL8mrWfchIV0HGhXsdEXK-Wjg3SfHlrw",
+      "accepted": false,
+      "role": "D11-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-critical-unknown",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXSwiZXh0ZW5zaW9uIjp0cnVlfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.pL8v0oPLTPDiOERTuAps3woV80l1imsJE_ByVyyGx2Dodm0xYIcTiFAtYGXXqsuoediMHRrrX-R3GMxfs2BfkRc2n3p4zjfhyjVr93ooupL4HA9TJ25k-n-xvAUB1pfl8gbrlm64LwM5nOcFRYEjzi7aUBN_-PhX6dXKQWgll6bDd8xQRaALIG27M80h44E9g8v7xEoInmWKhM_YKNiEvAvJ7BkXJBSxUiy13J6oDZqxcqgwgVDbtu2YCNjUWXhj8hILNvEeh_tU3IaJ5BQmKb60QoTQRKOf6HgXPR7oaaND9gVtPIqPIV6goHQq-fbes9x3e5uQHd7lKUGPB4JAVQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-critical-empty",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.CJzA6vcHGMzK_9Yjr0fbTz9-u39hwp5plmSc-gko50JDjbfTWlFdLmhvpjpCsSoLrn3ARn_x5-HvzflCaw2R69scft2l-VQLiiBUi8htUqdNnnCa9BqoaAe82wSnj_24WjxXlcnqRs8D7B0OJcfgRVVyhRX9TQfeTVZFrz6p51swyej7E_hRWMePsTfQK_GKBMxvwfsIHE-3-V676NHrh6nW--UXiMMyGYj8j5rJPBArrQMgaixIzWjSWJw7UQ50W02Eb6nCF_9Px8VOiAfj4k6eZAJvlOvlXBGcQWB3qy0JtMFU_DI7tiQVEITrRS-0y_ecltH3en4ko3pT3oWKjg",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-critical-missing",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwiY3JpdCI6WyJleHRlbnNpb24iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.k29emzoWHai6---E-up67jfZq5skfK9ONpcU4AI1dP9Iyuc_AF2x5FBOoKTJJjQJOku4Xu2enVTMkURUV5gDMowrLvBehQ2HIEzOjvR7V82fru5dLzx8OSgdlUz07ObZxZjfMswm_fc4eEDihZEWITtmNJ69LoQF1U10_gtX1c1tPWg4jNe4ovGDHFKV9kibXjlEfsnVX8wwOU3hrO0EuikshrpIAOIUElWYiXC04_x-g2VApC2GVbOuaz1elcw2Ce1yD6RqH_Q42T1l8cFSguOgkVgE5HuNi7_-kFGQRfSqrLHMNyyF2gmcVJeO7_GmXECUyrHihnC1kgCuWf7XZA",
+      "accepted": false,
+      "role": "receiver-MAY-selected-reject",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-array",
+      "jws": "W10.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.kq7ZQ7W085x65yMTT-3yCcR2T6k3KpcJMUMfDyMPWA5xtyaVyJpwLifi-EC_vTwwUD4L4FtHnZuJX36Btalw-F_cmENVUHtieJ793Gg-VOrp1WlVGTLpmhJhoQduQnLiiOhum7nn-6y_uHmeX-lyX076PpSUv-z48jiPyas20y-cTWfMxsWENVegpUxXsuaDfaz4II3iuxOTF6gMYz8C_k83TTRIu1gmtvougQm4J9Ep8TTG-j_1e-JE9JdY_pP8yHxFCGVDOqx_cXwqAbZDCT2g5exZaXffcU1ap8xKbQidz29jjSoqx0H5XuAiTGfGeNgh6dPkJlPb1N5uoFzsAg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-null",
+      "jws": "bnVsbA.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.mNOWnTTqIH_H2DaFn4HCkGU9XXXDoiWrYRIiXwadSfiL05RyGh5VsbvSEdvR3Os2JpHBpEmcJzuGBS2-Vor-yAxL0BBu3a9tY2kBTkO0mPb-1_nJReRxCxD4IsLM9ZF4SQPnuEDptD6F1QT2OsIk1zqlt39Q4DQOA7lIfb4o3HJt-H4GIhIf_t2m3GImHUgv3ftj9rA3z7GxJM4poIW__26wEFxl8qYd6AsTolnRHllAHO-uFLsgel4jxZ2orLevq2Oux9yAP5FXQOdqhlelOM9K93PaV3BZ7E2BiiwJfLVNNd0rFZHmRX4X-SLjGs3MoyeclAQgTUFzlxIWYJWi6g",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-invalid-utf8",
+      "jws": "_w.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.OyCW_b8YvPc9OpMcM1bH07aH92nVkQG6_kgzV53z8bSnTaPnR3LPVNmIgTieIeUth8WvyU8zfKkMN5hXYKTFhxoOQbEA20ZvnaaefJABX3pcqecWFrdifELl67mTuLVBtU6PNHKU5AurkTQBMZGtIA4kdUT-ET7KEYK7EKlXU55LWp-k142-gmb_5r5O81OMSXTZ5oB_sTW8JNYzyte99vP0CkAQ9GOOAFu3BZAB6oNnCUbViPUatDHfKxpvsBEclmmh5S-c_GMto_Ch9bbxcXLiT1OZViiQhC5RY0HvN2aBCW15vD2r2zgdBfXZ-pkIyv226g6M32SkEMqfhhrHqQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-invalid-json",
+      "jws": "ew.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.UkKiECBRsn__rjkQat8k_c07jJHv6I2wihoISQ4u5U-AEaPgRzTD97-ISWkf5xPlbRL7anrQy_e2giDLogN0V-qJJicmdd0LCu4IqFwx-xLU06eYDkjOh9wM0YaPgZ1HfcLNRQgCOHY51sqbebWXkXitfWyRi4PzgAgYNSOoixa6WIYPsvbhoZocN36y0r2mTp518kJ9FJESdFhO2LDIz233r7Qf-GpvCOLQoKBvXWGv8qYSTuX58jqljez1dllbMfWgt9kuLpYvE-l5DY0PFWlNYyfl-yLbXXvtphoW5WrNSIreboRJqTBMV9hOLxzoWPLakMm4LeON0Od-OvyyNQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-missing-alg",
+      "jws": "eyJraWQiOiJmaXh0dXJlMjA0OCJ9.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Eg5KjjrAeWeJLcPXzkOEnnNnAqiYJ0DaRW1kD4E0xXs7b8BxtX6Po0oLq6MvZSsOwp8DYJT_-MH5L-KNoHv17UyyJ6UlhZnlauPScPFs-9RgLKS4mdw_yNdeBHUnIU0dHLHZlUxUqREkiXwMO0owr9HPr1yJ1EWQdYpLSbB8jkkNN61OrtlR3nVhG0CwAirFXl-2jzWCXxdvdKNSObI_5JPO_modLjcT865_OyhRC46Cz6pi0D9Xd_miLnyCDerVEiAMc4KD9MuLmeavhvft5AXEy3CKBgAyhB0FV7aw_e-YDl0d58iFU2uoeVEs9iYQOgYXszCTyVcjq6CdeNTsUw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-kid-type",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6W119.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.uDarL4UalG2VmLN7AqxW3yVKMNAmNE2TTsDSMTHsmW2ElG_uukGi8Fox2kzbp1yxqBPGTQrAqiI0HM2Aq2WpchS5CcDqkeoW1Pxl8VukQ_yykzMAhCY7vlBL7nu6NvUxdWNJqhSPn3zYVlyGmTC7KY3yr0GtQP34v-L4JUhRcqQiIYrn0e0N1HgFJVd6ps1iqoxcE7r4tXNCOVj2SDkoCwaRClbLa2sYP-ymqhCeU3BPUCvtRCCWmYLRhR4kzySQJyyI9Qn7sQkH4mmWv10oOphJcFxz4p1LkFWNh-hDd80SPrwvyhG9nM3V34EzgbgQ1DiJXB_1Ou2bGfdeuTa6cQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-standard-base64",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.gMQCwR-0Nfo6no2g9tcfZOaXc2wpMc3s5b4QKG5AXI0gV6gvpwtBoJtk9MyzN_GytMZAbH3l3F_khQmUB08gWybT9VDipxashhPGT-nUcKaY1brkCPzH2pjxMjgOvrCqQZgcEVgdcTymaytHJ6qJihBpuIybcVWfCyTwJIOAhxd0tuN8WBH9vqJeb74czsxQOIJO04yAvbEezgvSFFztuG6MEPHe7M1YLulRw9VGCFsnV2LPQIkqePp81P6TMEgBNrUNL1loJ9UOpxngFKecdTp9YWoNFeaNpc__OrwemXZoCpcityUw5EKzdSDvn5MwZKGoJ8-8OpXiW0oeufZP0A",
+      "accepted": true,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-url-alphabet",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDLWQzZ3ZpYktxY2tNazVTLUxtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVFfNnMtZ0tMRjFQM3NLNHBVWlQxcC1pbkV5U0FtRFU3X3FJZktVTEQxNUFUd19HLXF5ZDlsbWI4amM1LV90WVNhT2Z0alQtQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOV9hYktsTE16NjQtRi1EcVl5X3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QV9pX2lfX2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkotMEZKNkllQ1NLUVJnbU9EZF9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQLS1kT0lqb05YbnFDSjVSYnBFS0VUX0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bl9IZFFBV1JlX3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXLTNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcV80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWtfdS05YmN4cENUY0lNa05fNjNwMWdXTUdDNUlpeDNqY24xXzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5LUJTNFdLX21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eV96amtwWmdIdDk4Nk5ESWdXYm82S289Il19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Qh1G0-w1l8vq-uvrMdGpcA4_iyY3Vq8C5uRkOfV_gb0WYp6D0ymcEZ5NdSaQTLuYrZVOdD1H04sXHIDIe_nujLUV34gEzcMvvwrrKdFg0YG5aghrYO5oqzbMVM38LGlSzf7fDGfOUDkYsJJj5NymWiYD1trDSKIe5lqjfRdk7qw-yggzESOwEHY7h1Yc0ssBsWtLSyJqP90PS3JAWTSXeRaq9FL-HJmrGt-rFaLNe7nejlbK8IC3yx0x9-84iCYSvW-bCY9dYVZD9BCzeg27AmYljP0tcxyK7vj7CU0ZxYtA8EWXLZpKw-X8LgEB2XVB6jp1fyvbZfjYe3GmLhGaAw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-trailing-der",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1JSUMwVENDQWJtZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFzTVNvd0tBWURWUVFERENGTVVsTWdRMjl1Wm05eWJXRnVZMlVnVTNsdWRHaGxkR2xqSUVacGVIUjFjbVV3SGhjTk1qVXdNVEF4TURBd01EQXdXaGNOTXpVd01UQXhNREF3TURBd1dqQXNNU293S0FZRFZRUUREQ0ZNVWxNZ1EyOXVabTl5YldGdVkyVWdVM2x1ZEdobGRHbGpJRVpwZUhSMWNtVXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDK2QzZ3ZpYktxY2tNazVTK0xtVzNBbW5OeDZWOWI1NXdibUpqWFd3WVEvNnMrZ0tMRjFQM3NLNHBVWlQxcCtpbkV5U0FtRFU3L3FJZktVTEQxNUFUdy9HK3F5ZDlsbWI4amM1Ky90WVNhT2Z0alQrQ1U1VGN4REM4empqZmFDOVIwV3hGZWNhblZCdW1BMEZnOS9hYktsTE16NjQrRitEcVl5L3QxMkYxdVlJY1NsOHJldnJseHF1NlR5N3BTZFlwN2dKSGphRE51Qklxc1Y2QS9pL2kvL2pSWXNmSG5WVmYxdG42cmhRR1BRY1ZPYUZWbml3MURGdmEzNUV4T0R5cGNiSU1DZXl3a0o1Q2tuQ3lzTktOaHk5ZGxzNUJxbkorMEZKNkllQ1NLUVJnbU9EZC9GNGY3bWFiQ29QMUVPWUxWZHlmTXJiVVlwc2tMMXFna1lsZEpBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBNjM0ZTV4cXR3Z3RVemJHR3dQKytkT0lqb05YbnFDSjVSYnBFS0VUL0VlODY5S09SSm1kWVdJb0lYU0lRRUtUcjR1bi9IZFFBV1JlL3Jiek1hWllVdVBmeHhtTTdsdVVKaVJXKzNXeFV2OEVLTHd6eXlGWkhCek0yWGlXTmRzWjZUVlNwcS80Vk5HdTVOcGpFNlF1a1VXVm13T3pDRm13ek1EMkRzR3dBb1FVV050ajhoNjl4SjludmhjM2JHWjZFZ0swVGw2aHlZRmxJZ1d0NlRPdWsvdSs5YmN4cENUY0lNa04vNjNwMWdXTUdDNUlpeDNqY24xLzQwY2ZNcVdUaHVIY2ZZQjcyczl5cVE5K0JTNFdLL21xVXVVOHFBVUZsaTEwVHZFZTBLT2NqWkFBV1FjY0tNWEJKcjNuWFQ4eS96amtwWmdIdDk4Nk5ESWdXYm82S29BIl19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.a7tgWG5AgNNlBae3RSmzsbfRn-ltTjinbbVoPRa6vOfD71WIjB_YgWZH8qNrPBQgyiI_ZcpzuLxtCpeUWag2GL9dxyA0Sw0xPkPRblLryLvl8bIWGcm7OZh1ByGFHA2pBW7LpX4ZTG7bfcxQY5ACQkgb2xgYdiw230I2-hoyaOkuRNmVSvIYB_YW8W2szGvtPPNBjRiMFhlVmYhEo4-ngsW2Dz-DKyVLeIfpJqEMIL_eO33jNiORNwmAIDLNhtAEmHGJkTA3m6Ko_EdWDZ0mqUU-Nto3KUF9M2BCkGzUtFfmVGWjxOOu36BizABiVjmN0UnFfAFwGVklBjdgaUT05Q",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-malformed-der",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbIk1BQT0iXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.cuXPJJRBSLecR-GDtq0lzwyVsMwbAw-A8zUGzWcvvlmtNSzmt3hjLWTzHlgYBo94qsfPBD3gV1XehKm8a3Bc59iE1ZgnCfQiN2W_0XAxa3SxQooRgBBp2TNK2VmWhaA3cSWH9btY1XLAassW3sW_1K_zeVKVT7QWKW9dm5Sj6EipdML3ZQkKn5gHWYsjrhKL4o2wvdDNcDfOYbu3AUbf2Tjcm0uOCdmR3K_vBPFtJY9gH032PvftDmRJxyke_M7_y80Ffzi3CcrQizpHRdf7FN0rgSU8DPXS5468YCqvUXX0ebZUBwFS7DfCfR_ocwzDsCCLYr_CMqkar6UYof6xDQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-empty",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbXX0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.PPaMBDtVFykkyNtPQQ0rj84mVjeA447PtJN5lbakOFemaWFgIUy4DRWl5dbRRqXpgbubyLR_pmsc8e5118R2YM_LhWI_4l-D6pKliLD8RY0Ae9lKgdwFVePLBzTGAPZXX9pCKHqiIVxx9w3Oz4vgiJX_BpeVBJHgfQspvT-WVzRH_DHI7solPvKJBTvs_yEEkQ0OJDdUFoHgsAQI9RHfY-bzicJ2WABmNyB2qtE8cBCkFJPD2x9zALffRuy4c2QVI7cJDEpmPDBGwxjqvLdRv3nM-U6CfZqBj_-cZzzVeWKeSbNzSnhNI3K2TgTbjt5SU-4NGwa3scd1JgereR_hzg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-x5c-nonstring",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4IiwieDVjIjpbbnVsbF19.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.AhZZKoXDq-TKhWBICpPBcAQ0ZK0CGbMWO-p-UXuKFmJ_Jmxs23uaZ2SE58aFkMeSyfOjFZRlPt2iNxqZp6noF05ddynjMbaWqi6wq_BY6Lnbys7ue8tVoYMjkGOYx11-OrRbVEuJMRUGANe7iMZZdvmac4K01Z7bbsUC9O8U34lsB0_GX7mml3FRmlKji5JHy1dAKQy7tVL-DkqcYLxNSppFNIMtZ3-i25C6zFhp2VEqZw23Ilfrq6LURtgisQ82P-erI0XIqd2qXzGib0iqd1Hus2E8yko7ly7VK9Y-j2hK0wCd-9KuxKs_u361Ay0pyNstMAcRWm0xSBxRN202yA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-rs512",
+      "jws": "eyJhbGciOiJyczUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Vbio48ZFhHYLaZfow_AG7BHNMj422Bg-MxZ1nI-AgxcUkJizVVWnfW_cp7v60AZ1TKbhColvvC0Z6aG9oJMG8TVeI5X0_7Y3hx2W-nQGx5WXSKT0j1tk4fjLi10XvPCtrXaC3-PMf-YjeriJufcFh82VUlAq2qyfkLhV2djq_EzUN0Qum-1nnWf6a8q1T5Gwb-V1wQSW-abDgruoF2nTSW6pEpI0l-rUgwxYiYqfTW-L1UBvsUu3l-oO9AhlCPi8rL_uAfDVIBoBsY2jdzJH0YO0wEGTfUlrbQafyjyfb4cSSrTLgCyKRL9llzezYh_RkEWnHt8fpMxibkaL-NFOEA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-none",
+      "jws": "eyJhbGciOiJub25lIiwia2lkIjoiZml4dHVyZTIwNDgifQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.a1ifWfSDxd70fc_mk-8zW3tK9wOAU59Z949yHJJbOvJVyZXExTfAbdOQ0GTDRO9c7xfHtI1X_zNVM98S8AUiendgD5DC09NaD0kGq8RxKeEkFjzQQO38KsJkU13eLdJ_nUCSZgqU2X3rlbRLkHlp7zvhOXu1Q6R65tOwq5UVGSEwK_0uEKTHW5p3Y91Vp3yV8HKVG-p32RNAcucsVcgIKD3JHiyf0nDp1cY8baSeONq1TOuIG6Z0838y6ynGwD7Lr9uFVuOWQ8LE8wOmkX4vcI8HWVuVRSdLG33FQb7QHzPLS7LqBcgGh9oLP0LJYiGnP5DUH_RsIxtfjC4XPRNX8A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-HS256",
+      "jws": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.SbS7T5OmfH8XkuEpc1tPiTf7FlSHUdUHmuGM5Kga4r6OToPfBSe0OywUKE8Ch7RYHoElxykrGV8sjvxgNEwRptd38oAcDuvBdn4R9EIZ8PaglhgZ5iK2dghj4AhkuN2chb1aGJ3WyRdXMCKU9cmEWmBFhvW_KBOeA3I732kvssimDUeQsRf7GWm3TUMv5f2d9Hx_crv8YK_3tOndLBEQUHTaJqPwJuQyGwMbesOvJhTY4WuyI8byAEMB1E3sbpYkZEcmxV1umXwI5L3AkgDHZEayrh2NM8PEQ0KDBbahUEA8GzWjwyevepe9UlymUXX6CVk50jZcBO84bmGrCzhL6g",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-header-alg-ES256",
+      "jws": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Rab6vn-ClWKO4iEKAN78AdFfqFxW02-awttw960mMsWSMz7cL2XOucPF9ye91SshKc2MCWii-it5F2JrzdI5O7Ipnu31pvrMZjxmZQOQp_QbZmxvP4Btx9r-KO_w2DwFzUVE4XTa5OczhQCzAgiY8uGF0vnucQnMxIk6jVp7UOT4h8x6Txi-R12HBDr1klA3fwIsehB6dbYqBllyHYbqJRN6Zc0NwL_j_p_Ve2I80Z6uydfUKiNV--UGvf-Qwq7T4IrU3-eQgGDqrmOMgwnfAu1NNTGPY9Bw2QApXhMtbmwZAm5JSv6Rku6Q7zRlMa8JzXaoiwxa9muFLieQp8MxUg",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-missing-actor",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.Ust70GfeisfNlBuwKkH0fvChhyu7ekWNR2fa787TjqbDewi4JQSMwgQkMi8RsCoEDLf1UbwGMmk8P79oQEUA58fJeOnFxx_n8LXJDRpjbR80iK_f7kBbxWhRUqgf1pwngVGxoO1A47uf0IstV30TBbogV_nTQHg6VUn0sPoCYED6emlgMJN91H40_5KtTQu1iN-bUWlDXd5oFIucUiqKVvmmyiZTgjjdl1ZF7bhtxl4RYVSJVFN-6vyikXkdIOSBrjal_BsaEyKWn_frVEP_val_hD6guxADqJ8Mx3BdYO2RKxPxSNWHy57LDdumpMjkXGcC8FHV17oBBnMtRiP8Fw",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-missing-verb",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJvYmplY3QiOnsiaWQiOiJodHRwczovL2V4YW1wbGUub3JnL2FjdGl2aXR5In19.QE33-s-8YsRc4GDQMlf3DnstxtecVQ01jy-3MCyXv4Weh5R5t43G6L8pkBllhfMUZO0A9d3vwZpLXShr7_JXQaiCiYS5_qxvlVSq4S1Y8kDU_GTCTZVfbgBYYc4jAjbx1qKrB9WLtG_T8xdPJr6-ADvtS18dCOpZeYixMo9puqnWPXjb61aNjms17BeK0H9ctgsegPkwTkfg53Ms6tY9uHZ3NFKSEEp6Ydj_FqedyvnWKQ31GB1u0PCTIgJHpNF0DVtl5kXUDyGQKSoxmJrTCShYFO7b5GkFJtivR7vfItD-8Du-aCljSQyI-A_yECl4H_xnHwfgoYhx-MUWgBAwiQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-missing-object",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifX0.dqzmX0GYwjabQ5XpNnUa1dBBUW5iRqKCm26D9-tSyBoV5mWFKA9AnnW_A_oe3rq9X4ZQK1q1zqBbfSgs6R-9xSpSWCy9pLLbNwDO6mYxeqqvc18Ph2blhnTttNBVP5QZxmbYFynmfCmekDiyXv5wRuuib2vKeYbcCKP1l8gY4Sl23DXK7m-xC4pEm_58xwXoRNCfqVJkM00yiA_YI5HWPE_fUKOOhWRggOpw5taqzwOYSyINmRljBjscFzSzPh8X_UdJZRxogfxchFN_GWCcwyP8rTyJQ47S0XWBIkuRyywwbERJUm6zvf7HXGXBJ55Bv_-SXnjIfOHqiz6TNwA9DA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-empty",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0..G7H3mNA0p4Yo5pwTjf7pmTaf0U3fUGkmOuNT4scBAEJFbdcb2-dS-3gf9fdlvvcA80OmySwQM7EYsbqvarG6RS4MOjChkjGWsmyuS62Akl8QUaPIH23uPWcEkthMSc-Bq-pMSek1xqhqz4nRikUxcuSIEjlhBi_ciJoDYUy0qBKkr6TDolboiwlPsbgExdPmYWw-z0-wqmAcogrSRbzFdPrsfsVZ58e3_dSxtR7LoRMkjNn7GS7Tf3ZEBXBjn44Y1LApwNVH0kkEz8Z-uBz7rRvAh8Jq0Mi7mJAcvk5jmZtKwbMGQe2F8sDawTWlePAksJn2lyRah78EmfhIfGUM3A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-invalid-json",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.ew.rqBL9O9-LuQtN1zQDNf8sSt8CwsCozsC7MI2EyQpRBi6pZdV3NSZY7HuLNvJVBauz3-cpS6XWXJw5Qe0cXAzoPbVDmSn39Ba-ry_UDtEqn3TgZuuaH2p8gflYR5G4HqjLsM2ibZ-NZVe03jMFV9VKgxhvHeU3EtLiq5njA8bpfFzz1fG9nDlqiWHR3wCwfDWzMiX7C7ZeC720sxYX7gtYqLEkA8k2F9j_Bdub91GZcoUw-2RjRNCAc6aalAz1ijFxd8A3mfvm7_lBMACaYAex5oTiN7oYcg-0kNAsdBkW0BFxQ93Ft7vlh39FPqS2MXEdwQmNmergXcTSjFGC3CWJQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-invalid-utf8",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0._w.f1P3ztpCcGin9J6tk6Eb7p3Ut9g6GPvLoCF6TYGcvzsX28_pjiRQC8wjpHxRAv0JvgEPDLM-5aDGyDdRIP6uRfN6GeQNfdoSYguGOxENA_WL9shjuYmSQP6MME5wdPyiLpTd5_xS_-Olew2a4mLuO1DxvVN0EI-YEdQRSG-j870rO_PClvMhENhPlCsGpBIRCe84Fsm6DpgUfYg_hBaPhd7pX-Zgtm8WkzEWI3Cz54KT6o3KjKV2UiYxe3zVYci7Qirt1LIg9F5i1bif4z4ncrVodJglcTgVrZoJos39575yokK0hUcU3d9bHl_GMoprYkGw1JyxkByuImrLUh6oyQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-payload-null",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.bnVsbA.sfbY4EC62yOF1FUXdXGGSfGnu3TP1wwuvZm8i25EjnsWXeMa1djdf9B3LycT5THvb_LtrTb920DPSH5FzMYnYGeJ6zjgrK1iWcuwCKBWkRm8_HCSbJXfcIWNP4xuzQ_lMULjEBwSWaLqt2hMMzo9sje0nqaorqvrsNRroTAorfVQxkJgDqdZwDclIrOHUoRTc2foVAOj7n2l-4XVBcemtDd6JhhUMTqtfIG5taZotDOUzYBwKA9irfwnPuNj3Sc8qaaE_u6zhncXgCetjQnigU2FVEIGapL7771e8mtPmReC0Xyw6b4TpwlNDoMvy3A2VIc9W232kkJHMqPpROqa5A",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-two-segments",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-four-segments",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA.AAAA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-padding-segment-0",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0=.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-whitespace-segment-0",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0 .eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-padding-segment-1",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ=.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-whitespace-segment-1",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ .MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-padding-segment-2",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA=",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-whitespace-segment-2",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqA ",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-standard-alphabet-compact",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl/ycUY3XXPIvA7q9bg4FWTu4lJ3e8/kmoYmYfnXHASfEtvp/x0QA/8i/Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS+lnIybiad+i22OAIeKvQmveryrGRC5041+okq/b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b/7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy/bmcbDtVYRbrqwxzhvNr4LI+BIBvy2AQuWP4NAxQDrqA",
+      "accepted": false,
+      "role": "required",
+      "openssl_signed_message_verified": true
+    },
+    {
+      "id": "RS512-nonzero-unused-bits",
+      "jws": "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZpeHR1cmUyMDQ4In0.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.MMGlpYMTcVgbIXLl_ycUY3XXPIvA7q9bg4FWTu4lJ3e8_kmoYmYfnXHASfEtvp_x0QA_8i_Ul3uUNDe5ZvacUoWehUbfIMKvojnjzYokQnyg8WJztIlKM9EDHEQWjGyfS-lnIybiad-i22OAIeKvQmveryrGRC5041-okq_b0ZuK1Z37dJBJLyk5sMGHGdPuXiDRtmVSku4iPUC2MtYobiDdHnOKWtcacUj65b_7DveSJMhWsFNKAjmNo2tooGZtX5M1It2VXdoJvJ1aQhK2QgVIjuv2NlENMB8Cy9Lbmy_bmcbDtVYRbrqwxzhvNr4LI-BIBvy2AQuWP4NAxQDrqB",
+      "accepted": false,
+      "role": "canonical-decoder-policy",
+      "openssl_signed_message_verified": true
+    }
+  ],
+  "fractional_certificate": {
+    "der_base64": "MIIC6zCCAdOgAwIBAgIBATANBgkqhkiG9w0BAQsFADAsMSowKAYDVQQDDCFMUlMgQ29uZm9ybWFuY2UgU3ludGhldGljIEZpeHR1cmUwOBgaMjAyNjEwMjcwMDAwMDAuMTIzNDU2Nzg5MVoYGjIwMjYxMDI3MDAwMDAwLjcwMDAwMDAwMDFaMCwxKjAoBgNVBAMMIUxSUyBDb25mb3JtYW5jZSBTeW50aGV0aWMgRml4dHVyZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL53eC+JsqpyQyTlL4uZbcCac3HpX1vnnBuYmNdbBhD/qz6AosXU/ewrilRlPWn6KcTJICYNTv+oh8pQsPXkBPD8b6rJ32WZvyNzn7+1hJo5+2NP4JTlNzEMLzOON9oL1HRbEV5xqdUG6YDQWD39psqUszPrj4X4OpjL+3XYXW5ghxKXyt6+uXGq7pPLulJ1inuAkeNoM24EiqxXoD+L+L/+NFix8edVV/W2fquFAY9BxU5oVWeLDUMW9rfkTE4PKlxsgwJ7LCQnkKScLKw0o2HL12WzkGqcn7QUnoh4JIpBGCY4N38Xh/uZpsKg/UQ5gtV3J8yttRimyQvWqCRiV0kCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAP+0t9puX8iI1MJHbearDdgs5hDtMNMU7XFo9+ss9fu8jgDKurfs0kcqIMrdWbLVBdwXPdwN/npBx+9T+aCAh0GvYPuqulvEjEpjhh7WZ3yeceKnpB8tJURl+04BaEXvKX/+LtscGCvBTw/sDpgPtqEriRGJB1NXQtFAzWMEoFbGHFrVjMNa3LcBJfCpbqBO4bVLeDA4vnNSjWN8fL/7nWrzxxVUaNb4FR1TiHwhwngkGn7OyTweT6M+s/wADLlD3dG9o7zBqmHhkuQJQqdPZn5h9o5KsUfTCrpMVuCP2zhJ6roFJxbP5EzH8yG3ja+Vv8YJiDxYZ4TBC5sH7hsFSug==",
+    "original_tbs_sha256": "2224f9eb2516bbd837990a3db2f40606ac8f89f50f339521d73594fe78692caa",
+    "openssl_original_certificate_signature_verified": true,
+    "vectors": [
+      {
+        "id": "RS256-original-subnanosecond-certificate",
+        "jws": "eyJhbGciOiJSUzI1NiIsIng1YyI6WyJNSUlDNnpDQ0FkT2dBd0lCQWdJQkFUQU5CZ2txaGtpRzl3MEJBUXNGQURBc01Tb3dLQVlEVlFRRERDRk1VbE1nUTI5dVptOXliV0Z1WTJVZ1UzbHVkR2hsZEdsaklFWnBlSFIxY21Vd09CZ2FNakF5TmpFd01qY3dNREF3TURBdU1USXpORFUyTnpnNU1Wb1lHakl3TWpZeE1ESTNNREF3TURBd0xqY3dNREF3TURBd01ERmFNQ3d4S2pBb0JnTlZCQU1NSVV4U1V5QkRiMjVtYjNKdFlXNWpaU0JUZVc1MGFHVjBhV01nUm1sNGRIVnlaVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFMNTNlQytKc3FweVF5VGxMNHVaYmNDYWMzSHBYMXZubkJ1WW1OZGJCaEQvcXo2QW9zWFUvZXdyaWxSbFBXbjZLY1RKSUNZTlR2K29oOHBRc1BYa0JQRDhiNnJKMzJXWnZ5TnpuNysxaEpvNSsyTlA0SlRsTnpFTUx6T09OOW9MMUhSYkVWNXhxZFVHNllEUVdEMzlwc3FVc3pQcmo0WDRPcGpMKzNYWVhXNWdoeEtYeXQ2K3VYR3E3cFBMdWxKMWludUFrZU5vTTI0RWlxeFhvRCtMK0wvK05GaXg4ZWRWVi9XMmZxdUZBWTlCeFU1b1ZXZUxEVU1XOXJma1RFNFBLbHhzZ3dKN0xDUW5rS1NjTEt3MG8ySEwxMld6a0dxY243UVVub2g0SklwQkdDWTROMzhYaC91WnBzS2cvVVE1Z3RWM0o4eXR0UmlteVF2V3FDUmlWMGtDQXdFQUFUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFQKzB0OXB1WDhpSTFNSkhiZWFyRGRnczVoRHRNTk1VN1hGbzkrc3M5ZnU4amdES3VyZnMwa2NxSU1yZFdiTFZCZHdYUGR3Ti9ucEJ4KzlUK2FDQWgwR3ZZUHVxdWx2RWpFcGpoaDdXWjN5ZWNlS25wQjh0SlVSbCswNEJhRVh2S1gvK0x0c2NHQ3ZCVHcvc0RwZ1B0cUVyaVJHSkIxTlhRdEZBeldNRW9GYkdIRnJWak1OYTNMY0JKZkNwYnFCTzRiVkxlREE0dm5OU2pXTjhmTC83bldyenh4VlVhTmI0RlIxVGlId2h3bmdrR243T3lUd2VUNk0rcy93QURMbEQzZEc5bzd6QnFtSGhrdVFKUXFkUFpuNWg5bzVLc1VmVENycE1WdUNQMnpoSjZyb0ZKeGJQNUV6SDh5RzNqYStWdjhZSmlEeFlaNFRCQzVzSDdoc0ZTdWc9PSJdfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.HW4KY2aLHu6hLkHsz8_Ie4b7RFUjFprR05hqRqJxeFOps5ZX-bd3GHCiBZq4XpDFTIXS2AEahL6f3KDafFTfsrPAQGBVi597NJ_kqbC6fPLxKPNWcbgdP_iZ8XQzlJxqk992TsZOkGSniCZR1uUJqWVc5GFlb5mxpcYbcOgxGIie6yNa_51vOlSZyGY_24wn4qv9uRiU3wgkroh-F4VfTaErkLUU2EuAptvN2Mols8faD9O0k4BUgmb7H3UERpHQCqq50Eu_p3OnuACSQfxwVm0g4L_7ZlzGiHzFd05Tu_RI4bx5UaYnZ8chOx6ZVNqkvx7K17yw9QBsDNxlUStyCg",
+        "role": "original-certificate-time",
+        "openssl_signed_message_verified": true
+      },
+      {
+        "id": "RS384-original-subnanosecond-certificate",
+        "jws": "eyJhbGciOiJSUzM4NCIsIng1YyI6WyJNSUlDNnpDQ0FkT2dBd0lCQWdJQkFUQU5CZ2txaGtpRzl3MEJBUXNGQURBc01Tb3dLQVlEVlFRRERDRk1VbE1nUTI5dVptOXliV0Z1WTJVZ1UzbHVkR2hsZEdsaklFWnBlSFIxY21Vd09CZ2FNakF5TmpFd01qY3dNREF3TURBdU1USXpORFUyTnpnNU1Wb1lHakl3TWpZeE1ESTNNREF3TURBd0xqY3dNREF3TURBd01ERmFNQ3d4S2pBb0JnTlZCQU1NSVV4U1V5QkRiMjVtYjNKdFlXNWpaU0JUZVc1MGFHVjBhV01nUm1sNGRIVnlaVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFMNTNlQytKc3FweVF5VGxMNHVaYmNDYWMzSHBYMXZubkJ1WW1OZGJCaEQvcXo2QW9zWFUvZXdyaWxSbFBXbjZLY1RKSUNZTlR2K29oOHBRc1BYa0JQRDhiNnJKMzJXWnZ5TnpuNysxaEpvNSsyTlA0SlRsTnpFTUx6T09OOW9MMUhSYkVWNXhxZFVHNllEUVdEMzlwc3FVc3pQcmo0WDRPcGpMKzNYWVhXNWdoeEtYeXQ2K3VYR3E3cFBMdWxKMWludUFrZU5vTTI0RWlxeFhvRCtMK0wvK05GaXg4ZWRWVi9XMmZxdUZBWTlCeFU1b1ZXZUxEVU1XOXJma1RFNFBLbHhzZ3dKN0xDUW5rS1NjTEt3MG8ySEwxMld6a0dxY243UVVub2g0SklwQkdDWTROMzhYaC91WnBzS2cvVVE1Z3RWM0o4eXR0UmlteVF2V3FDUmlWMGtDQXdFQUFUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFQKzB0OXB1WDhpSTFNSkhiZWFyRGRnczVoRHRNTk1VN1hGbzkrc3M5ZnU4amdES3VyZnMwa2NxSU1yZFdiTFZCZHdYUGR3Ti9ucEJ4KzlUK2FDQWgwR3ZZUHVxdWx2RWpFcGpoaDdXWjN5ZWNlS25wQjh0SlVSbCswNEJhRVh2S1gvK0x0c2NHQ3ZCVHcvc0RwZ1B0cUVyaVJHSkIxTlhRdEZBeldNRW9GYkdIRnJWak1OYTNMY0JKZkNwYnFCTzRiVkxlREE0dm5OU2pXTjhmTC83bldyenh4VlVhTmI0RlIxVGlId2h3bmdrR243T3lUd2VUNk0rcy93QURMbEQzZEc5bzd6QnFtSGhrdVFKUXFkUFpuNWg5bzVLc1VmVENycE1WdUNQMnpoSjZyb0ZKeGJQNUV6SDh5RzNqYStWdjhZSmlEeFlaNFRCQzVzSDdoc0ZTdWc9PSJdfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.R5QbRVk7TZi2RJ1hc4dWuCxJzAlH23kB7Y8-ERSM1wKXhqx6qWVgX6Z3xzsfnIlyfZTUZUh2Bk5al-J1-Y_Iwr8mHLMKeFvps52Ejt3rtf07qK8_eG8V2wn4bqX7FJ7AbQpPwjqRtChJPPoCjNpLx6CLVPrXCAQ8wM5ReWioK8DXNWIeJkNqRrkk0c2TeGKfRfBfITdx50NbKjdDuUfeEa6EiDQr6o4SLO6gCr5p4Zas-txesGyT1LLdG8uCft8UklyTGu6DJ8nsDq-NhCkMsf0X83ufPRCKAosXmbj_d2_Lew5ux4uZTnX-lzsEhOYPGFi-T6s4rF5SQdoMxpB7XA",
+        "role": "original-certificate-time",
+        "openssl_signed_message_verified": true
+      },
+      {
+        "id": "RS512-original-subnanosecond-certificate",
+        "jws": "eyJhbGciOiJSUzUxMiIsIng1YyI6WyJNSUlDNnpDQ0FkT2dBd0lCQWdJQkFUQU5CZ2txaGtpRzl3MEJBUXNGQURBc01Tb3dLQVlEVlFRRERDRk1VbE1nUTI5dVptOXliV0Z1WTJVZ1UzbHVkR2hsZEdsaklFWnBlSFIxY21Vd09CZ2FNakF5TmpFd01qY3dNREF3TURBdU1USXpORFUyTnpnNU1Wb1lHakl3TWpZeE1ESTNNREF3TURBd0xqY3dNREF3TURBd01ERmFNQ3d4S2pBb0JnTlZCQU1NSVV4U1V5QkRiMjVtYjNKdFlXNWpaU0JUZVc1MGFHVjBhV01nUm1sNGRIVnlaVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFMNTNlQytKc3FweVF5VGxMNHVaYmNDYWMzSHBYMXZubkJ1WW1OZGJCaEQvcXo2QW9zWFUvZXdyaWxSbFBXbjZLY1RKSUNZTlR2K29oOHBRc1BYa0JQRDhiNnJKMzJXWnZ5TnpuNysxaEpvNSsyTlA0SlRsTnpFTUx6T09OOW9MMUhSYkVWNXhxZFVHNllEUVdEMzlwc3FVc3pQcmo0WDRPcGpMKzNYWVhXNWdoeEtYeXQ2K3VYR3E3cFBMdWxKMWludUFrZU5vTTI0RWlxeFhvRCtMK0wvK05GaXg4ZWRWVi9XMmZxdUZBWTlCeFU1b1ZXZUxEVU1XOXJma1RFNFBLbHhzZ3dKN0xDUW5rS1NjTEt3MG8ySEwxMld6a0dxY243UVVub2g0SklwQkdDWTROMzhYaC91WnBzS2cvVVE1Z3RWM0o4eXR0UmlteVF2V3FDUmlWMGtDQXdFQUFUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFQKzB0OXB1WDhpSTFNSkhiZWFyRGRnczVoRHRNTk1VN1hGbzkrc3M5ZnU4amdES3VyZnMwa2NxSU1yZFdiTFZCZHdYUGR3Ti9ucEJ4KzlUK2FDQWgwR3ZZUHVxdWx2RWpFcGpoaDdXWjN5ZWNlS25wQjh0SlVSbCswNEJhRVh2S1gvK0x0c2NHQ3ZCVHcvc0RwZ1B0cUVyaVJHSkIxTlhRdEZBeldNRW9GYkdIRnJWak1OYTNMY0JKZkNwYnFCTzRiVkxlREE0dm5OU2pXTjhmTC83bldyenh4VlVhTmI0RlIxVGlId2h3bmdrR243T3lUd2VUNk0rcy93QURMbEQzZEc5bzd6QnFtSGhrdVFKUXFkUFpuNWg5bzVLc1VmVENycE1WdUNQMnpoSjZyb0ZKeGJQNUV6SDh5RzNqYStWdjhZSmlEeFlaNFRCQzVzSDdoc0ZTdWc9PSJdfQ.eyJhY3RvciI6eyJtYm94IjoibWFpbHRvOnJzYS1ib3VuZGFyeUBleGFtcGxlLm9yZyJ9LCJ2ZXJiIjp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9yc2EifSwib2JqZWN0Ijp7ImlkIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hY3Rpdml0eSJ9fQ.N56y0AryKb_MZFyZ_ktAjoyl9vTLnrMRoTwE5a4BRVJi9BZZXyXCYcaJ_g4lr55vGO3ioAwCYQ-EOuzIrX6iwd8VpnCrKEPj9RRRyiRofAbuitdwo-RqsUCzOIlfXYuC9lbQR10nE62Hmg6LTc4rFmwGsTMdAxHqgatytIdiRBcunffcZKIbwgoVB2vV3YomeBNaCEYaGfTmfA3EBQQZdpe6phzU7E-Wim7bFaRQoLwwYXd7UMPD4hwuRUTe3u0FqXv7zNJtdpkk6t7uhe65ys3VMnsZc9OgLMEhBjk6vBkwYLGcF75lrwQOd0TfSzOV-JOV3nGzSsiI_UKX3HnqtA",
+        "role": "original-certificate-time",
+        "openssl_signed_message_verified": true
+      }
+    ],
+    "clock_cases": [
+      {
+        "time": "2026-10-27T00:00:00.123456789Z",
+        "accepted": false
+      },
+      {
+        "time": "2026-10-27T00:00:00.123456790Z",
+        "accepted": true
+      },
+      {
+        "time": "2026-10-27T00:00:00.7Z",
+        "accepted": true
+      },
+      {
+        "time": "2026-10-27T00:00:00.700000001Z",
+        "accepted": false
+      }
+    ]
+  },
+  "input_sha256": {
+    "scripts/ci/generate_jws_provider_vectors.py": "67919c471fe81a0a3c204be189a09179c080a4e7de55e18a308da6b98045de84",
+    "tests/conformance/fixtures/signing/synthetic-key.pem": "8be00cbf6971462cdcba5104eb3984d66be60a31ed03069ad07b9d31c4aae0ef",
+    "tests/conformance/fixtures/signing/synthetic-2047-key.pem": "28df8fbc0fd331986dd4ac53b111c712aaa52131964b7a5a0d12d618a8be9d6b",
+    "tests/conformance/fixtures/signing/synthetic-certificate.der": "9e237a16a8c44242880b95352df81eb75b60e3312ec5ac912c1e5451c04879cf",
+    "tests/conformance/fixtures/signing/synthetic-2047-certificate.der": "95b7845c43169f0066bd792719627aaee35da4c455ea37206797269de6e070b3"
+  }
+}

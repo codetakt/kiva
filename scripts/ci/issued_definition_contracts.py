@@ -15,6 +15,23 @@ def load_contracts():
     return json.loads((ROOT / CONTRACT).read_text())
 
 
+def branch_interpretations(document, branch):
+    """Retain explicit interpretation provenance without inventing a residual.
+
+    This opt-in field leaves the existing sealed branch definitions intact.
+    Its records are authored interpretations, never inferred review verdicts.
+    """
+    selected = []
+    for identifier in branch.get('interpretation_ids', []):
+        matches = [row for row in document['source_interpretations'] if row['id'] == identifier]
+        if len(matches) != 1 or branch['id'] not in matches[0]['branches']:
+            raise ValueError('unbound source interpretation: ' + identifier)
+        if any(row['id'] == identifier for row in selected):
+            raise ValueError('duplicate source interpretation: ' + identifier)
+        selected.append(matches[0])
+    return selected
+
+
 def branch_procedures():
     document = load_contracts()
     tests = []
@@ -33,6 +50,8 @@ def branch_procedures():
             grading='Keep project-policy outcomes separate from disputed IEEE propositions. Independent IEEE requirements retain their strength; no blanket waiver or automatic PASS.',
             executor='manual; definition only; no target execution',
         ))
+        if interpretations := branch_interpretations(document, branch):
+            tests[-1]['source_interpretations'] = interpretations
     return tests
 
 

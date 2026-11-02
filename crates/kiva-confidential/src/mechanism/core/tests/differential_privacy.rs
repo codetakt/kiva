@@ -15,8 +15,8 @@ fn rejects_single_subject_differential_privacy_policy() {
 #[test]
 fn serde_rejects_single_subject_differential_privacy_policy() {
     let payload = "minimum_population: 1\nmax_epsilon_microunits: 1000000\n";
-    let parsed: Result<DifferentialPrivacyReleasePolicy, serde_yaml::Error> =
-        serde_yaml::from_str(payload);
+    let parsed: Result<DifferentialPrivacyReleasePolicy, serde_saphyr::Error> =
+        serde_saphyr::from_str(payload);
 
     assert!(parsed.is_err());
 }
@@ -34,8 +34,8 @@ fn rejects_over_spent_differential_privacy_budget_ledger() {
 #[test]
 fn serde_rejects_over_spent_differential_privacy_budget_ledger() {
     let payload = "total_epsilon_microunits: 1000000\nspent_epsilon_microunits: 1000001\n";
-    let parsed: Result<DifferentialPrivacyBudgetLedger, serde_yaml::Error> =
-        serde_yaml::from_str(payload);
+    let parsed: Result<DifferentialPrivacyBudgetLedger, serde_saphyr::Error> =
+        serde_saphyr::from_str(payload);
 
     assert!(parsed.is_err());
 }

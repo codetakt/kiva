@@ -1,6 +1,7 @@
 /// Standard LRS resources in the Kiva xAPI surface.
 pub const REQUIRED_LRS_RESOURCES: &[&str] = &[
     "statements",
+    "agents",
     "agents/profile",
     "activities",
     "activities/profile",

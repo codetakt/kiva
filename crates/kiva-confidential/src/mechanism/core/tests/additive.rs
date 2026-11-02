@@ -45,28 +45,28 @@ fn rejects_empty_share_transport_artifacts() {
 
 #[test]
 fn serde_rejects_empty_share_transport_artifacts() {
-    let payload = serde_yaml::to_string(&[0_u8; SECURE_AGGREGATE_ARTIFACT_BYTES]);
+    let payload = serde_saphyr::to_string(&[0_u8; SECURE_AGGREGATE_ARTIFACT_BYTES]);
     assert!(payload.is_ok());
     let Ok(payload) = payload else {
         return;
     };
 
-    let parsed: Result<SecureAggregateTranscriptId, serde_yaml::Error> =
-        serde_yaml::from_str(&payload);
+    let parsed: Result<SecureAggregateTranscriptId, serde_saphyr::Error> =
+        serde_saphyr::from_str(&payload);
 
     assert!(parsed.is_err());
 }
 
 #[test]
 fn serde_rejects_zero_envelope_sequence() {
-    let payload = serde_yaml::to_string(&0_u64);
+    let payload = serde_saphyr::to_string(&0_u64);
     assert!(payload.is_ok());
     let Ok(payload) = payload else {
         return;
     };
 
-    let parsed: Result<SecureAggregateEnvelopeSequence, serde_yaml::Error> =
-        serde_yaml::from_str(&payload);
+    let parsed: Result<SecureAggregateEnvelopeSequence, serde_saphyr::Error> =
+        serde_saphyr::from_str(&payload);
 
     assert!(parsed.is_err());
 }
@@ -367,8 +367,8 @@ fn rejects_duplicate_authenticated_envelope_participant() {
 
 #[test]
 fn validates_bundled_secure_aggregate_vectors() {
-    let parsed: Result<VectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(ADDITIVE_SECURE_AGGREGATE_VECTORS);
+    let parsed: Result<VectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(ADDITIVE_SECURE_AGGREGATE_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;

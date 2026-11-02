@@ -31,6 +31,8 @@ use crate::{
 pub(crate) struct XapiHttpContext {
     statements: StatementRepository,
     documents: DocumentRepository,
+    signature_policy: crate::core::signature_policy::SignaturePolicy,
+    capabilities: crate::surfaces::xapi::capabilities::Capabilities,
     pub(super) guards: RequestGuards,
 }
 
@@ -67,17 +69,35 @@ impl XapiHttpContext {
     pub(super) const fn new(
         statements: StatementRepository,
         documents: DocumentRepository,
+        signature_policy: crate::core::signature_policy::SignaturePolicy,
+        capabilities: crate::surfaces::xapi::capabilities::Capabilities,
         guards: RequestGuards,
     ) -> Self {
         Self {
             statements,
             documents,
+            signature_policy,
+            capabilities,
             guards,
         }
     }
 
     pub(crate) const fn xapi_services(&self) -> XapiServices<'_> {
         XapiServices::new(&self.statements, &self.documents)
+    }
+
+    pub(crate) const fn signature_policy(&self) -> &crate::core::signature_policy::SignaturePolicy {
+        &self.signature_policy
+    }
+
+    pub(crate) const fn capabilities(&self) -> &crate::surfaces::xapi::capabilities::Capabilities {
+        &self.capabilities
+    }
+
+    pub(crate) async fn statement_watermark(
+        &self,
+    ) -> Result<time::OffsetDateTime, crate::surfaces::xapi::outcome::StatementStoreError> {
+        self.statements.consistent_through().await
     }
 
     pub(crate) const fn runtime_limits(&self) -> &RuntimeLimits {

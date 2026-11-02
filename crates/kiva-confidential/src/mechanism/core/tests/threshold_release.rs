@@ -77,8 +77,8 @@ fn signing_key_rotation_revokes_old_key_and_activates_new_key() {
 #[test]
 fn serde_rejects_non_all_party_additive_secure_aggregate_plan() {
     let payload = "release_policy:\n  participant_count: 2\n  release_threshold: 1\n";
-    let parsed: Result<AdditiveSecureAggregatePlan, serde_yaml::Error> =
-        serde_yaml::from_str(payload);
+    let parsed: Result<AdditiveSecureAggregatePlan, serde_saphyr::Error> =
+        serde_saphyr::from_str(payload);
 
     assert!(parsed.is_err());
 }

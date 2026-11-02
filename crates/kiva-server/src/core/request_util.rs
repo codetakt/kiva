@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use kiva_confidential::primitive::SecureAggregateTranscriptId;
 use uuid::Uuid;
 
@@ -12,10 +12,15 @@ pub(crate) fn header_string(
     headers: &HeaderMap,
     name: ::http::header::HeaderName,
 ) -> Option<String> {
-    headers
-        .get(name)
-        .and_then(|value| value.to_str().ok())
-        .map(str::to_owned)
+    headers.get(name).map(header_text)
+}
+
+/// RFC 2616 TEXT is an octet field, including ISO-8859-1 in quoted strings.
+/// Keep a one-to-one octet/character mapping even for non-UTF-8 values; ASCII
+/// `HeaderValue::to_str` and lossy UTF-8 would discard or conflate valid fields.
+/// Stored values must use `latin1_header_value` when emitted back onto the wire.
+pub(crate) fn header_text(value: &HeaderValue) -> String {
+    value.as_bytes().iter().copied().map(char::from).collect()
 }
 
 pub(crate) fn key_component(name: &str, value: &str) -> String {

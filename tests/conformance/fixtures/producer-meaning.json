@@ -1,0 +1,29 @@
+{
+  "authority": "Independent local controlled experience and assignment fixture, declared before LRS submission; not external historical truth",
+  "experience": {
+    "start": "2020-01-01T00:00:00Z",
+    "end": "2020-01-01T00:01:30.25Z",
+    "event": "2020-01-01T00:00:30Z",
+    "duration": "PT1M30.25S",
+    "score": {"raw": 17, "min": 0, "max": 20, "scaled": 0.7},
+    "normalization": "2 * (raw - min) / (max - min) - 1",
+    "known_language": "ja"
+  },
+  "assignments": {
+    "account": {"homePage": "https://accounts.example.org/", "name": "learner-17"},
+    "mailbox": "mailto:learner-17@example.org",
+    "account_system_canonical_page": "https://accounts.example.org/",
+    "account_unique_names": ["learner-17", "learner-18"],
+    "mailbox_assignee": "learner-17",
+    "identifier_log": [
+      {"entity": "completed", "id": "https://example.org/kiva/meaning/verbs/completed", "event": "initial assignment", "owned_namespace": true, "reuse": false},
+      {"entity": "completed", "id": "https://example.org/kiva/meaning/verbs/completed", "event": "same meaning, translated label", "owned_namespace": true, "reuse": true},
+      {"entity": "lesson-17", "id": "urn:example:lesson:17", "event": "independent local vocabulary assignment", "owned_namespace": true, "reuse": false},
+      {"entity": "completed", "id": "https://unowned.example.invalid/completed", "event": "deliberate producer ownership counterexample; valid syntax remains LRS input", "owned_namespace": false, "reuse": false}
+    ]
+  },
+  "literal_language_value": "<b>Learning & practice</b>",
+  "more_info_html": "<!doctype html><html lang=\"ja\"><title>Lesson 17</title><h1>Lesson 17</h1><p>A controlled ninety-second learning activity for learner 17.</p></html>",
+  "human_description": "A controlled ninety-second learning activity for learner 17.",
+  "extension_rendering": {"contract": "local owner text rendering v1", "mode": "text", "value": "<em>owner text & values</em>"}
+}

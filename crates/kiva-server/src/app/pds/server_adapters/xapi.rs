@@ -64,6 +64,7 @@ impl XapiStatementReadPort {
                 .map(|record| PortabilityStatementRecord {
                     statement_id: record.statement_id,
                     statement: record.statement,
+                    opaque_extension_values: record.opaque_values,
                     stored_at: record.stored_at,
                     voided: record.voided,
                 })

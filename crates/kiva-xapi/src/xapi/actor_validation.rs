@@ -1,6 +1,5 @@
 use serde_json::{Map, Value};
 use thiserror::Error;
-use url::Url;
 
 const IFI_PROPERTIES: [&str; 4] = ["mbox", "mbox_sha1sum", "openid", "account"];
 const ACTOR_PROPERTIES: [&str; 7] = [
@@ -56,6 +55,12 @@ pub enum ActorValidationError {
     #[error("{path} Group must not contain multiple inverse functional identifiers")]
     GroupIdentifierCount {
         /// Logical path of the invalid Group.
+        path: String,
+    },
+    /// Document scope cannot be identified by an anonymous Group.
+    #[error("{path} must be an Agent or Identified Group with one inverse functional identifier")]
+    DocumentActorIdentifierRequired {
+        /// Logical path of the document subject.
         path: String,
     },
     /// An anonymous Group omitted its required member array.
@@ -156,6 +161,18 @@ pub fn validate_statement_actors(statement: &Value) -> Result<(), ActorValidatio
 /// Validates an Agent supplied outside a Statement, such as an Agents Resource query.
 pub fn validate_agent(value: &Value) -> Result<(), ActorValidationError> {
     validate_actor_value(value, "Agent", ActorRole::Agent)
+}
+
+/// Validates an Agent or Identified Group used to scope State or Agent Profile.
+/// Group members are validated but do not participate in document identity.
+pub fn validate_document_actor(value: &Value) -> Result<(), ActorValidationError> {
+    validate_actor_value(value, "document agent", ActorRole::AgentOrGroup)?;
+    if super::canonical_actor_ifi(value).is_none() {
+        return Err(ActorValidationError::DocumentActorIdentifierRequired {
+            path: "document agent".to_owned(),
+        });
+    }
+    Ok(())
 }
 
 pub(super) fn validate_filter_agent(value: &Value) -> Result<(), ActorValidationError> {
@@ -385,7 +402,7 @@ fn validate_ifi_values(actor: &Map<String, Value>, path: &str) -> Result<(), Act
             .ok_or_else(|| ActorValidationError::MboxNotString {
                 path: path.to_owned(),
             })?;
-        if !is_mailto_email(value) {
+        if !super::mailbox::valid_mailbox(value) {
             return Err(ActorValidationError::InvalidMbox {
                 path: path.to_owned(),
             });
@@ -409,7 +426,7 @@ fn validate_ifi_values(actor: &Map<String, Value>, path: &str) -> Result<(), Act
             .ok_or_else(|| ActorValidationError::OpenidNotString {
                 path: path.to_owned(),
             })?;
-        if Url::parse(value).is_err() {
+        if iri_string::types::UriStr::new(value).is_err() {
             return Err(ActorValidationError::InvalidOpenid {
                 path: path.to_owned(),
             });
@@ -441,39 +458,17 @@ fn validate_account(value: &Value, path: &str) -> Result<(), ActorValidationErro
         .ok_or_else(|| ActorValidationError::InvalidAccountShape {
             path: path.to_owned(),
         })?;
-    let name = account.get("name").and_then(Value::as_str).ok_or_else(|| {
+    account.get("name").and_then(Value::as_str).ok_or_else(|| {
         ActorValidationError::InvalidAccountShape {
             path: path.to_owned(),
         }
     })?;
-    if name.is_empty() {
-        return Err(ActorValidationError::InvalidAccountShape {
-            path: path.to_owned(),
-        });
-    }
-    if Url::parse(home_page).is_err() {
+    if !super::validation::is_absolute_irl(home_page) {
         return Err(ActorValidationError::InvalidAccountHomePage {
             path: path.to_owned(),
         });
     }
     Ok(())
-}
-
-fn is_mailto_email(value: &str) -> bool {
-    let Some(address) = value.strip_prefix("mailto:") else {
-        return false;
-    };
-    if address.is_empty()
-        || address.chars().any(char::is_whitespace)
-        || address.contains(['?', '#'])
-    {
-        return false;
-    }
-    let mut parts = address.split('@');
-    matches!(
-        (parts.next(), parts.next(), parts.next()),
-        (Some(local), Some(domain), None) if !local.is_empty() && !domain.is_empty()
-    )
 }
 
 #[cfg(test)]
@@ -565,7 +560,6 @@ mod tests {
     fn rejects_invalid_account_shapes() {
         let invalid = [
             json!({"account": "not-an-object"}),
-            json!({"account": {"homePage": "https://example.org", "name": ""}}),
             json!({"account": {"homePage": "https://example.org", "name": "learner", "extra": true}}),
         ];
         for actor in invalid {

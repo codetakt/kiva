@@ -6,6 +6,8 @@ use std::sync::Arc;
 use time::{Duration, OffsetDateTime};
 use tokio::sync::RwLock;
 
+pub(crate) mod xapi_limits;
+
 use crate::core::config::{
     KIVA_MAX_STATEMENT_BODY_BYTES_ENV, KIVA_RATE_LIMIT_PATH_ENV, KIVA_RATE_LIMIT_REQUEST_COUNT_ENV,
     KIVA_RATE_LIMIT_WINDOW_SECONDS_ENV,
@@ -15,7 +17,9 @@ use crate::core::config::{
 #[derive(Debug, Clone, Default)]
 pub(crate) struct RuntimeLimits {
     max_statement_body_bytes: Option<usize>,
+    pub(crate) max_statement_page_size: Option<std::num::NonZeroUsize>,
     rate_limiter: Option<RateLimiter>,
+    pub(crate) xapi: xapi_limits::XapiLimits,
 }
 
 impl RuntimeLimits {
@@ -23,7 +27,13 @@ impl RuntimeLimits {
     pub(crate) fn from_env() -> Result<Self, io::Error> {
         Ok(Self {
             max_statement_body_bytes: optional_env_usize(KIVA_MAX_STATEMENT_BODY_BYTES_ENV)?,
+            max_statement_page_size: optional_env_usize("KIVA_XAPI_STATEMENT_PAGE_SIZE")?
+                .and_then(std::num::NonZeroUsize::new),
             rate_limiter: RateLimiter::from_env()?,
+            xapi: optional_env_string("KIVA_XAPI_LIMITS_JSON")?
+                .map(|json| xapi_limits::XapiLimits::from_json(&json))
+                .transpose()?
+                .unwrap_or_default(),
         })
     }
 

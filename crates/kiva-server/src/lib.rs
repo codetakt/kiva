@@ -60,17 +60,24 @@ pub async fn router_from_env() -> Result<Router, io::Error> {
 }
 
 fn router_with_state(state: &AppState) -> Router {
-    Router::new()
+    let extensions = Router::new()
         .merge(system::router(state.system_http_context()))
         .merge(analytics_routes::router(state.analytics_http_context()))
-        .merge(xapi_routes::router(state.xapi_http_context()))
         .merge(pds_routes::router(
             state.pds_http_context(),
             state.pds_application_http_context(),
         ))
         .merge(confidential_routes::router(
             state.confidential_http_context(),
-        ))
+        ));
+    let router = Router::new()
+        .merge(xapi_routes::router(state.xapi_http_context()))
+        .nest("/extensions", extensions.clone());
+    if state.xapi.capabilities.config.legacy_extension_aliases {
+        router.merge(extensions)
+    } else {
+        router
+    }
 }
 
 #[cfg(test)]

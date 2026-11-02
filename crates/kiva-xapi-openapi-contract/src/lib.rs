@@ -118,7 +118,9 @@ pub struct Attachment {
     pub display: LanguageMap,
     pub description: Option<LanguageMap>,
     pub content_type: String,
-    pub length: u64,
+    // JSON Schema integers include decimal/exponent spellings of whole values.
+    // Preserve the number; exact integrality and bounds belong to admission.
+    pub length: serde_json::Number,
     pub sha2: String,
     pub file_url: Option<Iri>,
 }

@@ -3,9 +3,8 @@
 
 Common fixture preparation omits absent optional fields in both branches.
 The sole branch difference is a valid or unterminated IP-literal URI.
-The exact failed case/check sets are declared before execution. Account locator
-evidence remains unavailable in the valid branch; it cannot conceal malformed
-OpenIDs in the invalid branch. Full-suite runs retain the memory gap baseline.
+The exact failed case/check sets are declared before execution. The bounded HTTP(S) locator provider resolves the valid Account branch;
+malformed OpenIDs still require their own exact failure witnesses. Full-suite runs retain the memory gap baseline.
 """
 import argparse
 import copy
@@ -24,12 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 CASES = {'person-response-all-identifiers-' + field for field in ['mbox', 'mbox_sha1sum', 'openid', 'account']}
 CHECKS = {'account-openid-0', 'mbox-openid-0', 'mbox_sha1sum-openid-0', 'openid-openid-1'}
 ACCOUNT = 'person-response-all-identifiers-account'
-IRL_UNAVAILABLE = ('ORACLE-UNAVAILABLE: /account/0/homePage requires DC-IRL '
-                   'locator/access-mechanism evidence; IRI syntax alone is insufficient')
 PROCEDURE_GAPS = {
-    'full-external-grammar': 'Bounded ASCII mailto and generic URI/IRI grammar only; encoded mailto and locator evidence remain concrete DC-MAILTO/DC-IRL obligations',
     'person-association-inventory': 'Partial executor checks presence and syntax only. Independently controlled no-additional-information and Agent association inventories require the manual person-semantic-identifiers procedure; random identifiers do not establish fallback applicability.',
-    'account-account-0': 'All entries: field types plus DC-MAILTO/DC-IRL; None is an unavailable semantic adapter, never valid',
 }
 
 
@@ -39,12 +34,7 @@ def validate_control_results(report, exit_code, cases, suites, gaps, mode, focus
     targets = {key for key in cases if key[1] in CASES}
     require(len(targets) == len(CASES) and {key[1] for key in targets} == CASES,
             'missing or duplicate Person control definition')
-    account = next(key for key in targets if key[1] == ACCOUNT)
-    require(gaps.get(account, {}).get('outcome') == 'not-run' and
-            gaps[account]['failures'] == [] and
-            gaps[account]['not_run_reasons'] == [IRL_UNAVAILABLE],
-            'Account control must retain the exact IRL provider gap')
-    require(not (targets - {account}) & gaps.keys(), 'unexpected Person baseline gap')
+    require(not targets & gaps.keys(), 'resolved Person provider cases must not remain baseline gaps')
     selected = {key: value for key, value in cases.items() if not focused or key in targets}
     selected_suites = {sid: path for sid, path in suites.items() if any(key[0] == sid for key in selected)}
     expected = {key: copy.deepcopy(value) for key, value in gaps.items() if key in selected}
@@ -59,14 +49,14 @@ def validate_control_results(report, exit_code, cases, suites, gaps, mode, focus
     for suite in report['suites']:
         for case in suite['cases']:
             if (suite['id'], case['id']) in targets:
-                unresolved = [IRL_UNAVAILABLE] if mode == 'valid' and case['id'] == ACCOUNT else []
+                unresolved = []
                 require(case.get('unresolved_checks', []) == unresolved,
                         f'{case["id"]}: unexpected unresolved Person observation')
     return {case['id']: case for suite in report['suites'] for case in suite['cases']}
 
 
 def validate_procedure_checks(checks, exit_code, mode):
-    """Require all four malformed-OpenID witnesses despite the locator gap."""
+    """Require all four malformed-OpenID witnesses and retain independent procedure gaps."""
     require(mode in ('valid', 'invalid'), 'unknown control mode')
     by_id = {check['id']: check for check in checks}
     require(len(by_id) == len(checks), 'duplicate procedure check')
@@ -172,13 +162,13 @@ def main():
     if changes != CASES:
         raise RuntimeError('Unexpected case outcome delta: ' + str(changes ^ CASES))
     for name in CASES:
-        expected = 'not-run' if name == ACCOUNT else 'passed'
+        expected = 'passed'
         if reports['valid'][name]['outcome'] != expected or reports['invalid'][name]['outcome'] != 'failed':
             raise RuntimeError('Missing expected baseline/single-defect FAIL pair: ' + name)
     if not CHECKS <= set(results['valid']['passed_checks']):
         raise RuntimeError('Missing conforming procedure counterparts')
     result = {'axis': 'Suite design', 'scope': 'Bounded returned-Person URI contrast only', 'results': results,
-              'account_locator_evidence': 'unavailable; no IRL conformance claim',
+              'account_locator_evidence': 'HTTP(S) access mechanism after RFC 3987 mapping; other schemes and full grammar qualification remain outside this control',
               'expected_changed_cases': sorted(CASES), 'changed_cases': sorted(changes), 'exact_sets_match': True,
               'input_sha256': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__), args.runner, args.server,
                                ROOT / 'tests/conformance/controls/person_identifier_proxy.py', ROOT / 'scripts/ci/run_lrs_procedures.py',

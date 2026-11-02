@@ -4722,5 +4722,25 @@
     "byte_length": 1045,
     "sha256": "91ac13494a950e27bad7ff9b2baa0f84cb4dc855090cfa1e9a59d766b9afc431",
     "coordinate": "1-based LF only; form-feed is not a line break; end LF included"
+  },
+  "IEEE:1524-1549": {
+    "id": "IEEE:1524-1549",
+    "source": "IEEE",
+    "clause": "4.1.6.1.4",
+    "file": "target/ieee-lrs-suite-audit/20261014T055444Z/source/ieee-layout.txt",
+    "file_sha256": "7e442059c6ecb2e6cb288f2f3fcd6ac563c5a988b9268489746e566b32b14876",
+    "lf_start": 1524,
+    "lf_end": 1549,
+    "byte_start": 98730,
+    "byte_length": 1807,
+    "sha256": "d76a7bc33c54be2fd0e573c32de6edaa5c3ab10eaaceb45d57b9bfcce724fa4f",
+    "coordinate": "1-based LF only; form-feed is not a line break; end LF included if present",
+    "raw_pdf": {
+      "file": "target/ieee-lrs-suite-audit/20261014T055444Z/source/927411-2023.pdf",
+      "sha256": "fa57dbaa0fbc0800b8c5a693af884032e782110c1f446ef865797fd0e0811526"
+    },
+    "physical_pdf_pages": [
+      27
+    ]
   }
 }

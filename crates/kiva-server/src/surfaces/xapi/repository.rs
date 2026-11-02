@@ -47,6 +47,64 @@ impl Default for DocumentRepository {
 }
 
 impl StatementRepository {
+    pub(crate) async fn canonical_sources(
+        &self,
+    ) -> Result<Vec<super::capabilities::CanonicalSource>, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.canonical_sources().await),
+            postgres => repository.canonical_sources().await,
+        })
+    }
+    pub(crate) fn capability_store(&self) -> super::capabilities::CapabilityStore {
+        match self {
+            Self::Memory(_) => super::capabilities::CapabilityStore::default(),
+            Self::Postgres(repository) => repository.capability_store(),
+        }
+    }
+    #[cfg(test)]
+    pub(crate) const fn read_failure(&self) -> &super::storage::read_failure::ReadFailure {
+        match self {
+            Self::Memory(repository) => &repository.read_failure,
+            Self::Postgres(repository) => &repository.read_failure,
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) async fn settled_snapshot(&self) -> Result<Value, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.settled_snapshot().await),
+            postgres => repository.settled_snapshot().await,
+        })
+    }
+
+    pub(crate) async fn opaque_values(
+        &self,
+        ids: &[Uuid],
+    ) -> Result<std::collections::BTreeMap<Uuid, super::lossless::OpaqueValues>, StatementStoreError>
+    {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.opaque_values(ids).await),
+            postgres => repository.opaque_values(ids).await,
+        })
+    }
+
+    pub(crate) async fn consistent_through(
+        &self,
+    ) -> Result<time::OffsetDateTime, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.consistent_through().await),
+            postgres => repository.consistent_through().await,
+        })
+    }
+
+    #[cfg(test)]
+    pub(crate) const fn clock(&self) -> &crate::core::recording_clock::RecordingClock {
+        match self {
+            Self::Memory(repository) => &repository.clock,
+            Self::Postgres(repository) => &repository.clock,
+        }
+    }
+
     pub(crate) fn postgres(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {
         Ok(Self::Postgres(PostgresStatementRepository::new(
             pool, tenant_id,
@@ -57,6 +115,8 @@ impl StatementRepository {
         &self,
         statement_id: Uuid,
     ) -> Result<Option<StoredStatement>, StatementStoreError> {
+        #[cfg(test)]
+        self.read_failure().check()?;
         dispatch_repository!(self, |repository| {
             memory => Ok(repository.get(statement_id).await),
             postgres => repository.get(statement_id).await,
@@ -67,6 +127,8 @@ impl StatementRepository {
         &self,
         limit: Option<usize>,
     ) -> Result<Vec<Value>, StatementStoreError> {
+        #[cfg(test)]
+        self.read_failure().check()?;
         dispatch_repository!(self, |repository| {
             memory => Ok(repository.list(limit).await),
             postgres => repository.list(limit).await,
@@ -109,7 +171,7 @@ impl StatementRepository {
     pub(crate) async fn put_batch(
         &self,
         batch: Vec<(Uuid, StoredStatement)>,
-    ) -> Result<(), PutBatchError> {
+    ) -> Result<Vec<Uuid>, PutBatchError> {
         dispatch_repository!(self, |repository| {
             memory => repository
                 .put_batch(batch)
@@ -121,6 +183,14 @@ impl StatementRepository {
 }
 
 impl DocumentRepository {
+    #[cfg(test)]
+    pub(crate) const fn clock(&self) -> &crate::core::recording_clock::RecordingClock {
+        match self {
+            Self::Memory(repository) => &repository.clock,
+            Self::Postgres(repository) => &repository.clock,
+        }
+    }
+
     pub(crate) fn postgres(pool: PgPool, tenant_id: String) -> Result<Self, io::Error> {
         Ok(Self::Postgres(PostgresDocumentRepository::new(
             pool, tenant_id,

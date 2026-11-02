@@ -50,12 +50,14 @@ createdb -h "$PGHOST_ADDR" -p "$PGPORT_NUM" -U "$PGUSER_NAME" "$PGDATABASE_NAME"
 kiva_apply_postgres_migrations "$ROOT_DIR" "$PGHOST_ADDR" "$PGPORT_NUM" "$PGUSER_NAME" "$PGDATABASE_NAME"
 
 export DATABASE_URL="postgres://${PGUSER_NAME}@${PGHOST_ADDR}:${PGPORT_NUM}/${PGDATABASE_NAME}"
+export KIVA_POSTGRES_TEST_DATABASE_URL="$DATABASE_URL"
+export KIVA_NATIVE_BACKEND=postgres
 export KIVA_TENANT_ID="$KIVA_TENANT"
 export KIVA_LISTEN_ADDR="$KIVA_ADDR"
 kiva_export_conformance_fixture_env
 kiva_build_conformance_binaries
 
-cargo run --release -q -p kiva-server &
+"${CARGO_TARGET_DIR:-target}/release/kiva-server" &
 SERVER_PID="$!"
 
 kiva_wait_for_server "$KIVA_ADDR"

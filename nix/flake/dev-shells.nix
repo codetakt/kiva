@@ -19,6 +19,7 @@ let
     cargo-audit
     cargo-deny
     cargo-nextest
+    git
     nixfmt
     postgresql_18
     python
@@ -32,6 +33,9 @@ let
     export RUST_BACKTRACE=1
     export RUSTDOCFLAGS="-D warnings"
     echo "Loaded Kiva strict development shell"
+    if [ -f scripts/ci/generate_pkix_unicode32.py ]; then
+      python3 -B scripts/ci/generate_pkix_unicode32.py --if-needed
+    fi
   '';
 in
 {

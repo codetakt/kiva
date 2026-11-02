@@ -5,15 +5,37 @@ use super::{
     StatementGetQueryParameters, StatementLimitParameter, StatementPutDecision,
     StatementTimestampParameter, bearer_token, document_delete_decision,
     document_json_merge_decision, document_preconditions_pass, document_put_decision,
-    etag_list_matches, statement_get_query_decision, statement_put_decision,
-    xapi_version_is_supported,
+    etag_list_matches, etag_list_matches_weak, statement_get_query_decision,
+    statement_put_decision, xapi_version_is_supported,
 };
 
 #[test]
-fn supports_xapi_2_0_version_forms_only() {
+fn supports_normal_xapi_2_0_patches_without_integer_narrowing() {
     assert!(xapi_version_is_supported("2.0"));
     assert!(xapi_version_is_supported("2.0.0"));
-    assert!(!xapi_version_is_supported("2.0.1"));
+    for value in [
+        "2.0.1",
+        "2.0.999999",
+        "2.0.184467440737095516160000000000000000000000000000001",
+    ] {
+        assert!(xapi_version_is_supported(value), "{value}");
+    }
+    for value in [
+        "",
+        "2",
+        "2.0.",
+        "2.0.-1",
+        "2.0.01",
+        "2.0.1-beta",
+        "2.0.1+build",
+        "2.0.１",
+        "2.1.0",
+        "1.0.3",
+        " 2.0.0",
+        "2.0.0 ",
+    ] {
+        assert!(!xapi_version_is_supported(value), "{value}");
+    }
 }
 
 #[test]
@@ -35,6 +57,44 @@ fn matches_etag_lists() {
     assert!(etag_list_matches("*", "\"a\""));
     assert!(etag_list_matches("\"a\", \"b\"", "\"b\""));
     assert!(!etag_list_matches("\"a\"", "\"b\""));
+    for (header, tag, expected) in [
+        (r#""stale,*,tag""#, r#""a""#, false),
+        (r#""stale\",*,tag""#, r#""a""#, false),
+        (r#""*""#, r#""a""#, false),
+        (r#""stale,*,tag", "a""#, r#""a""#, true),
+        (r#""stale\",*,tag", "a""#, r#""a""#, true),
+        (r#""a,b""#, r#""a,b""#, true),
+        (r#""\a""#, r#""a""#, true),
+        (r#"W/"a""#, r#""a""#, false),
+        (r#""a""#, r#"W/"a""#, false),
+        (r#"W/"a""#, r#"W/"a""#, false),
+        (r#""a", *"#, r#""a""#, false),
+        (r#""a", "unterminated"#, r#""a""#, false),
+        (r#""a"junk"#, r#""a""#, false),
+        (", \t\"a\", ,", r#""a""#, true),
+    ] {
+        assert_eq!(
+            etag_list_matches(header, tag),
+            expected,
+            "{header} vs {tag}"
+        );
+    }
+    for (header, tag, expected) in [
+        (r#"W/"a""#, r#""a""#, true),
+        (r#""a""#, r#"W/"a""#, true),
+        (r#"W/"a""#, r#"W/"a""#, true),
+        (r#"W/"a,b""#, r#""a,b""#, true),
+        (r#"W/"stale,*,tag""#, r#""a""#, false),
+        (r#""stale\",*,tag", W/"a""#, r#""a""#, true),
+        (r#""a", *"#, r#""a""#, false),
+        (r#"W/"a", "unterminated"#, r#""a""#, false),
+    ] {
+        assert_eq!(
+            etag_list_matches_weak(header, tag),
+            expected,
+            "{header} vs {tag}"
+        );
+    }
 }
 
 #[test]
@@ -53,23 +113,19 @@ fn evaluates_document_preconditions() {
 #[test]
 fn decides_document_put_contract() {
     assert_eq!(
-        document_put_decision(false, true, Some(true)),
+        document_put_decision(false, true, true),
         DocumentWriteDecision::PreconditionFailed
     );
     assert_eq!(
-        document_put_decision(true, false, Some(false)),
+        document_put_decision(true, false, true),
         DocumentWriteDecision::Conflict
     );
     assert_eq!(
-        document_put_decision(true, false, Some(true)),
-        DocumentWriteDecision::Noop
-    );
-    assert_eq!(
-        document_put_decision(true, true, Some(false)),
+        document_put_decision(true, true, true),
         DocumentWriteDecision::Write
     );
     assert_eq!(
-        document_put_decision(true, false, None),
+        document_put_decision(true, false, false),
         DocumentWriteDecision::Write
     );
 }

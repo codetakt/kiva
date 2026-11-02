@@ -26,11 +26,13 @@ KIVA_ADDR="${KIVA_MEMORY_CONFORMANCE_ADDR:-${KIVA_HOST_ADDR}:${KIVA_PORT_NUM}}"
 cd "$ROOT_DIR"
 
 unset DATABASE_URL
+unset KIVA_POSTGRES_TEST_DATABASE_URL
+export KIVA_NATIVE_BACKEND=memory
 export KIVA_LISTEN_ADDR="$KIVA_ADDR"
 kiva_export_conformance_fixture_env
 kiva_build_conformance_binaries
 
-cargo run --release -q -p kiva-server &
+"${CARGO_TARGET_DIR:-target}/release/kiva-server" &
 SERVER_PID="$!"
 
 kiva_wait_for_server "$KIVA_ADDR"

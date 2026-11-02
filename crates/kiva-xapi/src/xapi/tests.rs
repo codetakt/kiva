@@ -4,7 +4,7 @@ use kiva_domain::{Activity, Actor, Iri, Statement, StatementId};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use serde_json::json;
+use serde_json::{Value, json};
 
 use super::{
     AUTHORITY_ACCOUNT_HOME_PAGE, StatementFilterError, XapiError, accepted_language_ranges,
@@ -45,7 +45,7 @@ fn authority_agent_is_deterministic() {
 }
 
 #[test]
-fn language_map_canonicalization_uses_accept_language_order() {
+fn language_map_canonicalization_uses_accept_language_weight() {
     let languages = accepted_language_ranges(Some("fr-CA;q=0.9, en-US"));
     let statement = canonicalize_statement_language_maps(
         json!({
@@ -60,10 +60,10 @@ fn language_map_canonicalization_uses_accept_language_order() {
     );
 
     assert_eq!(
-        statement.pointer("/verb/display/fr-CA"),
-        Some(&json!("a vecu"))
+        statement.pointer("/verb/display/en-US"),
+        Some(&json!("experienced"))
     );
-    assert_eq!(statement.pointer("/verb/display/en-US"), None);
+    assert_eq!(statement.pointer("/verb/display/fr-CA"), None);
 }
 
 #[test]
@@ -157,6 +157,18 @@ fn statement_filtering_reports_agent_json_errors() {
 
 #[test]
 fn iri_validation_checks_the_complete_identifier() {
+    let corpus: Value = serde_json::from_str(include_str!(
+        "../../../../tests/conformance/fixtures/identifier-grammar.json"
+    ))
+    .expect("pinned identifier corpus");
+    for case in corpus["cases"].as_array().expect("identifier cases") {
+        assert_eq!(
+            super::is_absolute_iri(case["value"].as_str().expect("IRI")),
+            case["iri"].as_bool().expect("independent IRI expectation"),
+            "{}",
+            case["id"]
+        );
+    }
     for valid in [
         "urn:example:lesson",
         "https://例え.テスト/学習#項目",
@@ -240,4 +252,86 @@ fn statement_equivalence_normalizes_full_duration_precision() {
         &json!({"result": {"duration": "P1DT12H36M0.1237S"}}),
         &json!({"result": {"duration": "P1DT12H36M0.13S"}}),
     ));
+}
+
+#[test]
+fn duration_decimal_separators_obey_lowest_component_grammar() {
+    for duration in ["PT1,234567S", "PT1.234567S", "P1,5W", "P1Y2,5M", "P2DT0,5H"] {
+        assert!(super::validation::is_duration(duration), "{duration}");
+    }
+    for duration in [
+        "PT1,S", "PT1.S", "PT,5S", "PT1,2.3S", "PT1,5H2M", "P1,5DT1H", "PT1S2M", "P1W1D",
+    ] {
+        assert!(!super::validation::is_duration(duration), "{duration}");
+    }
+}
+
+#[test]
+fn comma_duration_comparison_ignores_only_sub_centiseconds() {
+    for nested in [false, true] {
+        let statement = |duration: &str| {
+            if nested {
+                json!({"object": {"objectType": "SubStatement", "result": {"duration": duration}}})
+            } else {
+                json!({"result": {"duration": duration}})
+            }
+        };
+        assert!(super::statements_equivalent(
+            &statement("PT1,239S"),
+            &statement("PT1.23S")
+        ));
+        assert!(!super::statements_equivalent(
+            &statement("PT1,239S"),
+            &statement("PT1.24S")
+        ));
+    }
+}
+
+#[test]
+fn duration_equality_is_exact_before_centisecond_truncation() {
+    for nested in [false, true] {
+        let statement = |duration: &str| {
+            let mut statement = json!({"actor":{"mbox":"mailto:a@example.test"},
+                "verb":{"id":"urn:verb"},"object":{"id":"urn:activity"},
+                "result":{"duration":duration}});
+            if nested {
+                statement["objectType"] = json!("SubStatement");
+                json!({"actor":{"mbox":"mailto:a@example.test"},"verb":{"id":"urn:verb"},"object":statement})
+            } else {
+                statement
+            }
+        };
+        for (left, right) in [
+            ("PT1S", "PT1.00S"),
+            ("PT01.0100S", "PT1,019999S"),
+            ("PT60S", "PT1M"),
+            ("PT1.5H", "PT90M"),
+            ("PT1H0M0S", "PT3600S"),
+            ("PT0.00001H", "PT0.039S"),
+            ("PT0.000001M", "PT0S"),
+            ("PT9007199254740993.011S", "PT9007199254740993.019S"),
+            ("P01Y02.500M", "P1Y2,5M"),
+            ("P00Y0M1DT1S", "P1DT1.0099S"),
+        ] {
+            assert!(
+                super::statements_equivalent(&statement(left), &statement(right)),
+                "{left}/{right}/{nested}"
+            );
+        }
+        for (left, right) in [
+            ("PT1.009S", "PT1.01S"),
+            ("PT0.00001H", "PT0.04S"),
+            ("PT9007199254740993S", "PT9007199254740992S"),
+            ("P1M", "P30D"),
+            ("P1Y", "P365D"),
+            ("PT1.S", "PT1.S"),
+            ("PT1H2", "PT1H2"),
+            ("PT1H2", "PT1H"),
+        ] {
+            assert!(
+                !super::statements_equivalent(&statement(left), &statement(right)),
+                "{left}/{right}/{nested}"
+            );
+        }
+    }
 }

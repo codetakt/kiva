@@ -28,6 +28,8 @@ pub(crate) use http_context::{
 pub(crate) struct XapiApp {
     pub(crate) statements: StatementRepository,
     pub(crate) documents: DocumentRepository,
+    pub(crate) signature_policy: crate::core::signature_policy::SignaturePolicy,
+    pub(crate) capabilities: crate::surfaces::xapi::capabilities::Capabilities,
 }
 
 #[derive(Debug, Clone)]
@@ -84,8 +86,12 @@ impl AppState {
         let analytics_application = AnalyticsApplicationAdapter::new(pds.clone(), confidential);
         Self {
             xapi: XapiApp {
+                capabilities: crate::surfaces::xapi::capabilities::Capabilities::new(
+                    statements.capability_store(),
+                ),
                 statements,
                 documents,
+                signature_policy: crate::core::signature_policy::SignaturePolicy::default(),
             },
             pds: PdsApp { repository: pds },
             application: ApplicationApp {
@@ -102,6 +108,8 @@ impl AppState {
         XapiHttpContext::new(
             self.xapi.statements.clone(),
             self.xapi.documents.clone(),
+            self.xapi.signature_policy.clone(),
+            self.xapi.capabilities.clone(),
             self.request_guards(),
         )
     }
