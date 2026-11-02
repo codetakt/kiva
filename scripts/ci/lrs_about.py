@@ -58,11 +58,14 @@ def about_content(raw, latest_versions):
                 if any(v != versions[0] for v in versions[1:]) or None in decisions
                 or False in decisions else True)
     extensions = [v for k, v in members(value) if k == 'extensions']
-    for extension in extensions:
-        # About's 4.1 table says Object/map of other properties. Do not import
-        # the Statement model's 4.2 IRI-keyed Extensions restriction here.
-        valid = isinstance(extension, dict)
-        if not valid:
-            required = False
+    # About's 4.1 table says Object/map of other properties. Do not import
+    # the Statement model's 4.2 IRI-keyed Extensions restriction here.
+    extension_decisions = [isinstance(extension, dict) for extension in extensions]
+    if extension_decisions and not any(extension_decisions):
+        required = False
+    elif not all(extension_decisions) and required is not False:
+        # Mixed valid/invalid duplicates are ambiguous, while an independent
+        # version failure remains established regardless of member selection.
+        required = None
     return {'required': required, 'reason': 'required version/extensions; unknown top-level members allowed',
             'duplicate_names': duplicates, 'version_candidates': versions}

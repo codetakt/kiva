@@ -12,6 +12,10 @@ def identity(field, value):
         if not isinstance(value, dict) or not all(isinstance(value.get(k), str) for k in ('homePage', 'name')):
             return None
         return value['homePage'], value['name']
+    if field == 'mbox_sha1sum' and isinstance(value, str):
+        # Hexadecimal spelling does not change a digest's identity. Keep the
+        # response untouched; the executor checks its hex grammar separately.
+        return value.lower()
     return value if isinstance(value, str) else None
 
 

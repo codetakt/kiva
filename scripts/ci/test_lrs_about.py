@@ -41,6 +41,24 @@ class AboutTests(unittest.TestCase):
         self.assertIs(about_content(b'{"version":null,"version":false}', ['2.0.0'])['required'],False)
         self.assertIsNone(about_content(b'{"version":["2.0.0"]}', None)['required'])
 
+    def test_duplicate_extensions_preserve_independent_required_failures(self):
+        for extensions, expected in (([{}, {'name': 'Kiva'}], True),
+                                     ([None, [], False], False),
+                                     ([{}, []], None),
+                                     ([None, {}, {'name': 'Kiva'}], None)):
+            for candidates in (extensions, list(reversed(extensions))):
+                suffix = ''.join(',"extensions":'+json.dumps(v) for v in candidates)+'}'
+                with self.subTest(candidates=candidates):
+                    valid = about_content(('{"version":["2.0.0"]'+suffix).encode(), ['2.0.0'])
+                    self.assertIs(valid['required'], expected)
+                    self.assertEqual(valid['duplicate_names'].count('/extensions'), len(candidates)-1)
+                    # Ambiguous extensions cannot hide a missing/invalid version.
+                    for version in ('null', '["1.0.3"]'):
+                        invalid = about_content(('{"version":'+version+suffix).encode(), ['2.0.0'])
+                        self.assertIs(invalid['required'], False)
+                    unknown = about_content(('{"version":["2.0.0"]'+suffix).encode(), None)
+                    self.assertIs(unknown['required'], False if expected is False else None)
+
     def exercise_peer(self, fault):
         # This server has independent, intentionally faulty cause handling. It
         # is an oracle control, never evidence that the Kiva target passed.

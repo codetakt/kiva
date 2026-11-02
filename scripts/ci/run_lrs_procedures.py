@@ -428,6 +428,8 @@ class Executor:
         return dict(zip(values, verdicts))
 
     def person(self):
+        from lrs_person import identity, person_associations
+
         examples={'mbox':'mailto:unknown-'+str(uuid.uuid4())+'@example.org','mbox_sha1sum':'0123456789abcdef0123456789abcdef01234567','openid':self.prefix+'/openid','account':{'homePage':self.prefix+'/account','name':'learner'}}
         inventories=self.fixture.get('person_inventories',{})
         for field,value in examples.items():
@@ -442,7 +444,10 @@ class Executor:
             self.check(field+'-person',isinstance(got,dict) and got.get('objectType')=='Person',
                 'The returned Person must have objectType Person')
             entries=got.get(field,[]) if isinstance(got,dict) else None
-            self.check(field+'-queried',reply['status']==200 and isinstance(entries,list) and value in entries,'Unknown Agents must return the queried IFI')
+            expected=identity(field,value)
+            self.check(field+'-queried',reply['status']==200 and expected is not None
+                       and isinstance(entries,list) and any(identity(field,item)==expected for item in entries),
+                       'Unknown Agents must return the queried IFI')
             if not isinstance(got,dict):continue
             # Record every local type defect before invoking a grammar adapter.
             # An unavailable adapter must not abort later entries or IFI queries.
@@ -470,7 +475,6 @@ class Executor:
                         locator_validity(item['homePage'],self.fixture.get('locator_evidence'))])
                 self.check(field+'-'+key+'-'+str(index),valid,'All entries: field types plus DC-MAILTO/DC-IRL; None is an unavailable semantic adapter, never valid')
             if inventory is not None:
-                from lrs_person import person_associations
                 for check in person_associations(requested,got,inventory):
                     self.check(field+'-'+check['id'],check['valid'],check['reason'],check['details'])
         # RFC6068 component syntax is now evaluated for every mbox above.
