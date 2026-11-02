@@ -4,6 +4,7 @@
   src,
   cargoArtifacts,
   kani',
+  postgresql,
   pre-commit-check,
   strictClippyArgs,
   ...
@@ -16,6 +17,7 @@ let
       craneLib
       src
       cargoArtifacts
+      postgresql
       ;
   };
   rustUseScan = craneLib.buildPackage {
@@ -64,7 +66,7 @@ in
     doCheck = true;
     doInstallCargoArtifacts = false;
     nativeBuildInputs = [
-      pkgs.postgresql
+      postgresql
       pkgs.python3
     ];
     buildPhaseCargoCommand = "";

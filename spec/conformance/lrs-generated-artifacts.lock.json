@@ -33,24 +33,24 @@
       "bytes": 4465
     },
     "flake.nix": {
-      "sha256": "84f2db7664dff2eb2631dafecf84a9c3934681d0ffd65887b34f66fa07170779",
-      "bytes": 6567
+      "sha256": "a560bef8bc25d40db2a7cb1e281eadd9a2cb3a57d4d81f8e0134e6bfd37eec38",
+      "bytes": 6946
     },
     "nix/flake/checks.nix": {
-      "sha256": "37a3004a4bb3374f0b8f63cea74596d7d3753caeeb3a6e463b83f31235d13925",
-      "bytes": 46326
+      "sha256": "85946c21e36a7a1b8a6084b7f44921312094b136b4c2de3d355d2e3af00ff6a7",
+      "bytes": 46352
     },
     "nix/flake/conformance.nix": {
-      "sha256": "6cd6c0a4ed306ad1e31413d99656412f3f261d11c00eadf05f2b91b1541e7a16",
-      "bytes": 1636
+      "sha256": "e6587f063dee6f0cc4e80057c76307842e190d41ced3973886fe34e195f44204",
+      "bytes": 1645
     },
     "nix/flake/dev-shells.nix": {
-      "sha256": "3d88b58560d90d4edf921ccc8e4a4e47a4c26c719d4052cab21547971444a63a",
-      "bytes": 1374
+      "sha256": "0fb745db1ecb9d4474712ef71f4e5681ce050348e672f93350cc0fa3277d5b29",
+      "bytes": 1385
     },
     "nix/flake/packages.nix": {
-      "sha256": "bfe72e4fe6007edb10a128529b9588fb16ddd799aaa9ea5ee85890b5c356e4a6",
-      "bytes": 4259
+      "sha256": "34d34075865e0d06edb03e7557ad261aadb4b7df2e5b8e369cde9130221d835d",
+      "bytes": 4312
     },
     "scripts/ci/application_operation_catalog_codegen.py": {
       "sha256": "b54d540799d9613c3193641dcc3fd5722e171b563eb7d1d19aa70ac039b6092e",
@@ -1347,7 +1347,7 @@
       "bytes": 99800
     },
     "spec/conformance/issued-test-projection.json": {
-      "sha256": "31b67691bbcb0c0b2e48a3672b853341819bd908de8982ffa3462aedef60a499",
+      "sha256": "362f8829499655a2780898322155202b4dbab8625019e630cc07f066b895ff04",
       "bytes": 51873270
     },
     "spec/conformance/lrs-assertion-manifest.yaml": {

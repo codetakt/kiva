@@ -3,6 +3,7 @@
   craneLib,
   src,
   cargoArtifacts,
+  postgresql,
   ...
 }:
 
@@ -24,7 +25,7 @@ let
           pkgs.curl
           python
         ]
-        ++ pkgs.lib.optionals (name == "postgres") [ pkgs.postgresql ];
+        ++ pkgs.lib.optionals (name == "postgres") [ postgresql ];
         buildPhaseCargoCommand = "";
         checkPhaseCargoCommand = ''
           python -B scripts/ci/check_conformance_regressions.py capture \
