@@ -1,5 +1,6 @@
 //! IEEE xAPI LRS surface.
 
+mod error_representation;
 pub(crate) mod handlers;
 pub(crate) mod lossless;
 pub(crate) mod model;

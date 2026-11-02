@@ -418,6 +418,14 @@ async fn explained(
         .unwrap_or("")
         .to_owned();
     let body = reply.text().await.map_err(|e| e.to_string())?;
+    // Product acceptance adds a positive gate to the inherited cause/status
+    // assertions. The source procedure's advisory disposition remains intact.
+    assert_eq!(
+        media.split(';').next(),
+        Some(accept),
+        "negotiated error representation"
+    );
+    assert!(!body.is_empty(), "negotiated error explanation");
     // Explanation and requested-media selection are recommendations; retain
     // their observations independently from the mandatory status obligation.
     evidence::observation(

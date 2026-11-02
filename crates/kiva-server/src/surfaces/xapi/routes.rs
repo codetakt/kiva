@@ -56,6 +56,7 @@ pub(crate) fn router(state: XapiHttpContext) -> Router {
                 .delete(delete_activity_profile_document),
         )
         .layer(middleware::from_fn(response_version))
+        .layer(middleware::from_fn(super::error_representation::negotiate))
         .with_state(state)
 }
 
