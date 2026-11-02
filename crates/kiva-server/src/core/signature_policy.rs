@@ -23,7 +23,21 @@ mod provider;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
+pub(crate) use tests::extension_schema::integration_cases as certificate_extension_cases;
+#[cfg(test)]
 pub(crate) use tests::name_constraints::integration_cases as name_constraint_cases;
+#[cfg(test)]
+pub(crate) use tests::naming_schema::integration_cases as certificate_naming_cases;
+#[cfg(test)]
+pub(crate) use tests::oid_domain::integration_cases as certificate_oid_cases;
+#[cfg(test)]
+pub(crate) use tests::policies::integration_cases as certificate_policy_cases;
+#[cfg(test)]
+pub(crate) use tests::policy_qualifiers::integration_cases as certificate_qualifier_cases;
+#[cfg(test)]
+pub(crate) use tests::reason_flags::integration_cases as certificate_reason_flag_cases;
+#[cfg(test)]
+pub(crate) use tests::rsa_parameters::integration_cases as certificate_rsa_parameter_cases;
 
 const POLICY_ENV: &str = "KIVA_XAPI_CERTIFICATE_POLICY";
 
@@ -107,6 +121,14 @@ fn invalid(message: impl Into<String>) -> HttpError {
 
 fn provider_error(error: impl std::fmt::Display) -> HttpError {
     invalid(format!("x5c certificate validation failed: {error}"))
+}
+
+fn oid_string(bytes: &[u8]) -> Result<String, HttpError> {
+    // Use the validated base128 decoder for display/comparison too. The other
+    // parser's string formatter splits the first subidentifier as one octet.
+    ::der::asn1::ObjectIdentifier::from_bytes(bytes)
+        .map(|oid| oid.to_string())
+        .map_err(provider_error)
 }
 
 fn timestamp(value: &str) -> Result<OffsetDateTime, HttpError> {
@@ -345,7 +367,9 @@ fn validate_intended_use(
     // Apply the exact JWS minimum to x5c leaf keys as well as separately
     // configured keys. CA/path algorithm policy remains a separate contract.
     der::rsa_spki(certificate.public_key().raw)?;
-    if certificate.public_key().algorithm.algorithm.to_id_string() != "1.2.840.113549.1.1.1" {
+    if oid_string(certificate.public_key().algorithm.algorithm.as_bytes())?
+        != "1.2.840.113549.1.1.1"
+    {
         return Err(invalid(
             "RS256/RS384/RS512 require an unrestricted rsaEncryption signer key",
         ));
@@ -369,8 +393,8 @@ fn validate_intended_use(
         let mut purposes = usage
             .other
             .iter()
-            .map(ToString::to_string)
-            .collect::<Vec<_>>();
+            .map(|oid| oid_string(oid.as_bytes()))
+            .collect::<Result<Vec<_>, _>>()?;
         for (present, oid) in [
             (usage.server_auth, "1.3.6.1.5.5.7.3.1"),
             (usage.client_auth, "1.3.6.1.5.5.7.3.2"),

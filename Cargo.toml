@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-exclude = ["vendor/pkix-path"]
+exclude = ["vendor/pkix-path", "vendor/const-oid"]
 members = [
     "crates/kiva-analytics-openapi-contract",
     "crates/kiva-application",
@@ -105,3 +105,4 @@ strip = "symbols"
 
 [patch.crates-io]
 pkix-path = { path = "vendor/pkix-path" }
+const-oid = { path = "vendor/const-oid" }

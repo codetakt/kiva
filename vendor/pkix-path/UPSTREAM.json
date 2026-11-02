@@ -70,6 +70,49 @@
       "id": "KIVA-PKIX-10",
       "file": "src/lib.rs",
       "reason": "RFC5280 4.2.1.10: remember unsupported name forms from critical constraints and reject when that form occurs in a subsequent non-exempt certificate. Preserve absent-form and nonfinal self-issued applicability boundaries; do not silently accept a registeredID SAN under an unprocessed critical registeredID constraint. Product HTTP controls verify admission, rejection, batch atomicity and preserved attachment bytes."
+    },
+    {
+      "id": "KIVA-PKIX-11",
+      "files": [
+        "src/lib.rs",
+        "src/policy_tree.rs"
+      ],
+      "reason": "RFC5280 6.1.3(d), 6.1.4(b), 6.1.5(g): retain stable actual policy-node parent links through per-parent anyPolicy expansion, grouped mapping, branch deletion and final intersection. Explicit initial anyPolicy preserves the complete valid tree. Mapping subject sets are grouped before replacement, preserving self-mappings independently of encoding order. Signed finite policy-set/relation models, qualifier/branch controls and real PUT/batch HTTP checks exercise the product calling boundary."
+    },
+    {
+      "id": "KIVA-PKIX-12",
+      "file": "src/lib.rs",
+      "reason": "RFC5280 6.1.5(a-b): decrement explicit_policy for every final certificate, including self-issued signers; only a zero leaf requireExplicitPolicy changes that counter during wrap-up. The nonfinal self-issued decrement exception remains in 6.1.4(h). Counter0/1/2, absent/present CA and leaf policies, and final subject/issuer equality are checked through the actual provider and HTTP admission."
+    },
+    {
+      "id": "KIVA-PKIX-13",
+      "files": [
+        "src/lib.rs",
+        "src/policy_qualifiers.rs"
+      ],
+      "reason": "RFC5280 4.2.1.4: validate standard CPS URI and UserNotice qualifier schemas, require PolicyQualifierInfo values and nonempty policy/qualifier collections, and reject unknown critical qualifiers even after policy-tree collapse. Local UserNotice decoding handles NoticeReference, signed arbitrary-size notice numbers and all four DisplayText forms without the upstream GeneralizedTime typo. Explicit text over 200 characters is tolerated as recommended; CPS processing does not fetch external documents. Signed receiver vectors and actual PUT/POST/batch controls cover leaf/intermediate, critical/noncritical and NULL-tree behavior, readback and rejected-batch atomicity."
+    },
+    {
+      "id": "KIVA-PKIX-14",
+      "files": [
+        "src/lib.rs",
+        "src/extension_schema.rs"
+      ],
+      "reason": "RFC5280 receiver schemas enforce nonempty SAN/IAN, EKU, PolicyMappings and present permitted/excluded GeneralSubtrees regardless of criticalness or certificate position. BasicConstraints and PolicyConstraints retain arbitrary-length unsigned integers; InhibitAnyPolicy uses the same unsigned decoder. Saturating conversion occurs only for bounded path/counter comparisons after canonical typed validation, preserving valid limits beyond u8/u32/u64 and rejecting negative/nonminimal integers. Kiva shares this schema gate before the x509-parser bounded decoder. Original signed bytes are never rewritten. Signed boundary/schema controls and real PUT/POST/batch admission, persistence and raw attachment checks cover both backends."
+    },
+    {
+      "id": "KIVA-PKIX-15",
+      "files": [
+        "src/lib.rs",
+        "src/name_schema.rs",
+        "src/extension_schema.rs"
+      ],
+      "reason": "RFC5280 Appendix A typed Name decoding enforces nonempty RDNs, OID-defined attribute types and character-count bounds, preserving empty Name and opaque unknown attributes. Apply the same check to subject/issuer and directoryName in supported nested GeneralNames, plus relative CRL issuer RDNs. Enforce present nonempty outer Extensions, AIA/SIA, CRLDistributionPoints/FreshestCRL and nested GeneralNames. Keep arbitrary ASN.1 integer/bit-string domains in AKI/DP schemas rather than importing provider profile-width limits. Original signed bytes and optional decoder boundaries remain; no AIA/CRL URL fetching is added. Signed schema contrasts and real PUT/POST/batch persistence and atomicity controls exercise leaf and intermediate positions."
+    },
+    {
+      "id": "KIVA-PKIX-16",
+      "file": "src/extension_schema.rs",
+      "reason": "Enforce DER zero unused bits and named-bit-list trailing-zero omission for IMPLICIT ReasonFlags in CRLDistributionPoints/FreshestCRL. Generic BitString decoding and round-trip do not supply either constraint. Retain absent/empty distinction, arbitrary BIT STRING width, unknown noncritical bytes and ordinary BIT STRING semantics; validate every distribution point without rewriting signed bytes. Signed leaf/intermediate contrasts and real PUT/POST/batch controls bind rejection, sibling absence and original attachment preservation."
     }
   ]
 }

@@ -1,7 +1,11 @@
 //! Canonical DER checks complementary to the provider's typed X.509 decoder.
 //! Never rewrite a certificate: signature verification receives its original bytes.
 
-use x509_parser::{extensions::ParsedExtension, prelude::X509Certificate};
+use x509_parser::{
+    asn1_rs::{Any, Class, Tag},
+    extensions::ParsedExtension,
+    prelude::X509Certificate,
+};
 
 use super::{HttpError, invalid};
 
@@ -411,6 +415,11 @@ pub(super) fn certificate(input: &[u8], parsed: &X509Certificate<'_>) -> Result<
         return Err(malformed());
     }
     let validity = children(core[3])?;
+    for name in [core[2], core[4]] {
+        use ::der::Decode;
+        let name = x509_cert::name::Name::from_der(name.encoded).map_err(super::provider_error)?;
+        pkix_path::validate_name_schema(&name).map_err(super::provider_error)?;
+    }
     if validity.len() != 2 || validity.iter().any(|value| !matches!(value.tag, 23 | 24)) {
         return Err(malformed());
     }
@@ -427,13 +436,8 @@ pub(super) fn certificate(input: &[u8], parsed: &X509Certificate<'_>) -> Result<
         }
     }
     rsa_algorithm(
-        &parsed.public_key().algorithm.algorithm.to_id_string(),
-        parsed
-            .public_key()
-            .algorithm
-            .parameters
-            .as_ref()
-            .map(|parameter| (parameter.tag().0, parameter.data)),
+        &super::oid_string(parsed.public_key().algorithm.algorithm.as_bytes())?,
+        parsed.public_key().algorithm.parameters.as_ref(),
         true,
     )?;
     for algorithm in [
@@ -441,15 +445,14 @@ pub(super) fn certificate(input: &[u8], parsed: &X509Certificate<'_>) -> Result<
         &parsed.tbs_certificate.signature,
     ] {
         rsa_algorithm(
-            &algorithm.algorithm.to_id_string(),
-            algorithm
-                .parameters
-                .as_ref()
-                .map(|parameter| (parameter.tag().0, parameter.data)),
+            &super::oid_string(algorithm.algorithm.as_bytes())?,
+            algorithm.parameters.as_ref(),
             false,
         )?;
     }
-    if parsed.public_key().algorithm.algorithm.to_id_string() == "1.2.840.113549.1.1.1" {
+    if super::oid_string(parsed.public_key().algorithm.algorithm.as_bytes())?
+        == "1.2.840.113549.1.1.1"
+    {
         let key = &parsed.public_key().subject_public_key;
         if key.unused_bits != 0 {
             return Err(malformed());
@@ -471,33 +474,35 @@ pub(super) fn certificate(input: &[u8], parsed: &X509Certificate<'_>) -> Result<
 
 fn known_extensions(parsed: &X509Certificate<'_>) -> Result<()> {
     for extension in parsed.extensions() {
+        let oid = ::der::asn1::ObjectIdentifier::from_bytes(extension.oid.as_bytes());
+        let checked = match oid {
+            Ok(oid) => pkix_path::validate_extension_schema(oid, extension.value)
+                .map_err(super::provider_error)?,
+            // An OID outside this decoder's range cannot be one of the known
+            // schemas below. Retain the existing handling for other OIDs.
+            Err(_) => false,
+        };
+        if checked {
+            // The shared typed decoder handles INTEGER (0..MAX) without the
+            // x509-parser u32 cap, and enforces required collection sizes.
+            canonical(extension.value)?;
+            continue;
+        }
         match extension.parsed_extension() {
             ParsedExtension::UnsupportedExtension { .. } | ParsedExtension::Unparsed => {}
             ParsedExtension::ParseError { .. } => return Err(malformed()),
             _ => {
                 canonical(extension.value)?;
-                match extension.oid.to_id_string().as_str() {
-                    "2.5.29.19" => {
-                        // BasicConstraints cA has DEFAULT FALSE.
-                        if children(single(extension.value, 0x30)?)?
-                            .first()
-                            .is_some_and(|value| value.tag == 1 && value.content == [0])
-                        {
-                            return Err(malformed());
-                        }
+                if oid == Ok(::der::asn1::ObjectIdentifier::new_unwrap("2.5.29.15")) {
+                    // Named bit list: trailing zero bits are omitted.
+                    let bits = single(extension.value, 3)?.content;
+                    if bits.len() > 1
+                        && (bits.last() == Some(&0)
+                            || bits.last().map(|last| last.trailing_zeros())
+                                != Some(u32::from(bits[0])))
+                    {
+                        return Err(malformed());
                     }
-                    "2.5.29.15" => {
-                        // Named bit list: trailing zero bits are omitted.
-                        let bits = single(extension.value, 3)?.content;
-                        if bits.len() > 1
-                            && (bits.last() == Some(&0)
-                                || bits.last().map(|last| last.trailing_zeros())
-                                    != Some(u32::from(bits[0])))
-                        {
-                            return Err(malformed());
-                        }
-                    }
-                    _ => {}
                 }
             }
         }
@@ -506,7 +511,11 @@ fn known_extensions(parsed: &X509Certificate<'_>) -> Result<()> {
 }
 
 fn extensions(field: Element<'_>) -> Result<()> {
-    for extension in children(single(field.content, 0x30)?)? {
+    let extensions = children(single(field.content, 0x30)?)?;
+    if extensions.is_empty() {
+        return Err(malformed());
+    }
+    for extension in extensions {
         if extension.tag != 0x30 {
             return Err(malformed());
         }
@@ -522,7 +531,7 @@ fn extensions(field: Element<'_>) -> Result<()> {
     Ok(())
 }
 
-fn rsa_algorithm(oid: &str, parameters: Option<(u32, &[u8])>, spki: bool) -> Result<()> {
+fn rsa_algorithm(oid: &str, parameters: Option<&Any<'_>>, spki: bool) -> Result<()> {
     let rsa_key = spki && oid == "1.2.840.113549.1.1.1";
     let rsa_signature = !spki
         && matches!(
@@ -532,9 +541,15 @@ fn rsa_algorithm(oid: &str, parameters: Option<(u32, &[u8])>, spki: bool) -> Res
                 | "1.2.840.113549.1.1.13"
                 | "1.2.840.113549.1.1.14"
         );
-    if rsa_key && parameters != Some((5, &[][..]))
-        || rsa_signature && parameters.is_some_and(|value| value != (5, &[][..]))
-    {
+    // Tag number 5 alone also denotes values in the application, context and
+    // private classes. RSA parameters require the actual primitive NULL type.
+    let is_null = parameters.is_some_and(|value| {
+        value.class() == Class::Universal
+            && value.header.is_primitive()
+            && value.tag() == Tag::Null
+            && value.data.is_empty()
+    });
+    if rsa_key && !is_null || rsa_signature && parameters.is_some() && !is_null {
         return Err(malformed());
     }
     Ok(())

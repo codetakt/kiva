@@ -8,6 +8,8 @@ use sha2::{Digest, Sha224, Sha256, Sha384, Sha512};
 mod attachments;
 #[path = "review_gaps/document_lists.rs"]
 mod document_lists;
+#[path = "review_gaps/extension_schema.rs"]
+mod extension_schema;
 
 #[path = "review_gaps/document_scope.rs"]
 mod document_scope;
@@ -22,14 +24,26 @@ mod leap_seconds;
 mod mime_persistence;
 #[path = "review_gaps/name_constraints.rs"]
 mod name_constraints;
+#[path = "review_gaps/naming_schema.rs"]
+mod naming_schema;
+#[path = "review_gaps/oid_domain.rs"]
+mod oid_domain;
+#[path = "review_gaps/policies.rs"]
+mod policies;
+#[path = "review_gaps/policy_qualifiers.rs"]
+mod policy_qualifiers;
 #[path = "review_gaps/query.rs"]
 mod query;
 #[path = "review_gaps/query_encoding.rs"]
 mod query_encoding;
 #[path = "review_gaps/query_limit.rs"]
 mod query_limit;
+#[path = "review_gaps/reason_flags.rs"]
+mod reason_flags;
 #[path = "review_gaps/related_activities.rs"]
 mod related_activities;
+#[path = "review_gaps/rsa_parameters.rs"]
+mod rsa_parameters;
 #[path = "review_gaps/sha1_identity.rs"]
 mod sha1_identity;
 #[path = "review_gaps/shape.rs"]

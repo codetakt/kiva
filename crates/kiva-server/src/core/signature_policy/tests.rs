@@ -3,8 +3,15 @@
 use super::{HttpError, SignaturePolicy, hex_lower, provider, timestamp};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+pub(crate) mod extension_schema;
 mod fixtures;
 pub(crate) mod name_constraints;
+pub(crate) mod naming_schema;
+pub(crate) mod oid_domain;
+pub(crate) mod policies;
+pub(crate) mod policy_qualifiers;
+pub(crate) mod reason_flags;
+pub(crate) mod rsa_parameters;
 use fixtures::{X509, certificate, encoded, spki};
 
 fn config(anchor: &X509, path: &[X509]) -> Value {
