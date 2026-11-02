@@ -42,6 +42,12 @@ pub(crate) async fn get_statement(
     services.statements.get(statement_id).await
 }
 
+pub(crate) async fn canonical_sources(
+    services: XapiServices<'_>,
+) -> Result<Vec<super::capabilities::CanonicalSource>, StatementStoreError> {
+    services.statements.canonical_sources().await
+}
+
 pub(crate) async fn list_statements(
     services: XapiServices<'_>,
     limit: Option<usize>,
@@ -67,7 +73,7 @@ pub(crate) async fn put_statement(
 pub(crate) async fn put_statement_batch(
     services: XapiServices<'_>,
     batch: Vec<(Uuid, StoredStatement)>,
-) -> Result<(), PutBatchError> {
+) -> Result<Vec<Uuid>, PutBatchError> {
     services.statements.put_batch(batch).await
 }
 

@@ -39,12 +39,26 @@ class IssuedReleaseControls(unittest.TestCase):
             directory.mkdir(parents=True)
             (directory / 'execution.json').write_text(json.dumps({'implementation': {'backend': backend}}))
         with patch('report_issued_test_results.assess_capture', side_effect=[
-                {'summary': {'test_specification_conformant': True}},
+                {'summary': {'test_specification_conformant': True, 'complete_implementation': True}},
                 {'summary': {'test_specification_conformant': False, 'missing_procedures': 120}}]):
             with self.assertRaisesRegex(ReleaseEvidenceSetError, 'not fully passed: postgres'):
                 self.validate()
         (self.root / 'issued/memory/execution.json').write_text(json.dumps({'implementation': {'backend': 'postgres'}}))
         with self.assertRaisesRegex(ReleaseEvidenceSetError, 'backend mismatch'):
+            self.validate()
+
+    def test_optional_capabilities_are_required_for_full_release(self):
+        for backend in ('memory', 'postgres'):
+            directory = self.root / 'issued' / backend
+            directory.mkdir(parents=True)
+            (directory / 'execution.json').write_text(json.dumps({'implementation': {'backend': backend}}))
+        for complete in (None, False):
+            with patch('report_issued_test_results.assess_capture', return_value={
+                    'summary': {'test_specification_conformant': True, 'complete_implementation': complete}}):
+                with self.assertRaisesRegex(ReleaseEvidenceSetError, 'product capabilities not fully passed'):
+                    self.validate()
+        with patch('report_issued_test_results.assess_capture', return_value={
+                'summary': {'test_specification_conformant': True, 'complete_implementation': True}}):
             self.validate()
 
 

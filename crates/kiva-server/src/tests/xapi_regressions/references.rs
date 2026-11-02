@@ -132,7 +132,7 @@ async fn chain(
             .ok_or("D-03=A terminal representation")?;
         evidence::observation(
             "reference-continuation",
-            &json!({"url":url.as_str(),"more":more,"url_octets":more.len(),"state":"live stored/id cursor; no cache or clock expiry","advisory_url_length":true}),
+            &json!({"url":url.as_str(),"more":more,"url_octets":more.len(),"state":"opaque token for live stored/id cursor; configured wall-clock TTL","advisory_url_length":true}),
         );
         if more.is_empty() {
             break;

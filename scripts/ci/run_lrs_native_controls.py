@@ -104,6 +104,10 @@ def capture(output, backend):
             report['tests']['python::'+name]={'outcome':outcome,'log':'python.log'}
     if implementation_inputs(ROOT) != inputs:
         report['errors'].append('implementation or fixture changed during native execution')
+    from lrs_product_capabilities import assess as product_capabilities
+    report['product_capabilities'] = product_capabilities(ROOT,output,backend,report['tests'])
+    if not report['product_capabilities']['complete']:
+        report['errors'].append('enabled product capabilities did not all pass')
     report['completed'] = dt.datetime.now(dt.UTC).isoformat()
     report['artifacts_sha256'] = {str(path.relative_to(output)):file_sha256(path) for path in sorted(output.rglob('*')) if path.is_file()}
     report['claim'] = 'actual local controls; author evidence, not independent acceptance or whole-contract closure'
@@ -161,6 +165,10 @@ def verify(directory, backend, inputs=None):
         if ('kiva-server::'+str(record.get('test','')) not in observed
                 or not isinstance(record.get('kind'),str) or 'observation' not in record):
             raise ValueError('unbound native runtime observation')
+    from lrs_product_capabilities import assess as product_capabilities
+    product = product_capabilities(ROOT,directory,backend,observed)
+    if product != report.get('product_capabilities') or not product['complete']:
+        raise ValueError('product capability execution is incomplete or inconsistent')
     return report
 
 

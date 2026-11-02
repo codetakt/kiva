@@ -184,11 +184,16 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The native control stores a complete Group-actor Statement with both member names/IFIs, Verb display, Activity definition, Duration, Context, timestamp/version and two distinct binary attachments. An isolated repository starts empty; the control declares all affected resources and protected Documents in three families before capture. Actual multipart PUT/POST retries cover unchanged input and individually changed actor IFI/name/members, verb ID/display, object ID/definition, duration, opaque extension-owned duration, timestamp, version, Context, attachment description, authority and stored. Every allowed response is separately checked, with the exact UUID list for POST 200. After every retry, exact and canonical Statement, old/new Activity, Person, Document bytes/media/ETag, exact Document update instants, complete Statement repository/recording instants and binary attachments equal their prior snapshots. The actual storage comparator records its invocations/results separately as advisory observations; no HTTP status is treated as a Boolean comparison oracle. MIME boundaries may vary and are not treated as stored state.",
+          "rationale": "The native control stores a complete Group-actor Statement with both member names/IFIs, Verb display, Activity definition, Duration, Context, timestamp/version and two distinct binary attachments. An isolated repository starts empty; the control declares all affected resources and protected Documents in three families before capture. Actual multipart PUT/POST retries cover unchanged input and individually changed actor IFI/name/members, verb ID/display, object ID/definition, duration, opaque extension-owned duration, timestamp, version, Context, attachment description, authority and stored. Every allowed response is separately checked, with the exact UUID list for POST 200. After every retry, exact and canonical Statement, old/new Activity, Person, Document bytes/media/ETag, exact Document update instants, complete Statement repository/recording instants and binary attachments equal their prior snapshots. The actual storage comparator records its invocations/results separately as advisory observations; no HTTP status is treated as a Boolean comparison oracle. MIME boundaries may vary and are not treated as stored state. The metadata acquisition boundary additionally enables fetching after original admission and verifies that PUT, POST-object and POST-array replay create no fetch jobs or canonical definitions. Rejected mixed batches schedule nothing; successful mixed batches and new PUT schedule only newly stored Statements, with replayed exact content unchanged.",
           "witnesses": [
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::replay::{backend}_xapi_replay_preserves_all_affected_resources",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_capabilities::replay::{backend}_xapi_replay_does_not_schedule_metadata",
               "http": true
             }
           ]
@@ -895,7 +900,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The full affected-resource snapshot control changes root timestamp through PUT and POST, independently retaining Statement metadata, Activity/Person data, three Document families and binary attachments. The dedicated child-time fixture separately varies the nested timestamp and records actual comparator calls. Root time remains excluded while explicit nested time remains significant. Required unchanged storage is checked for every response; 409 is recorded as SHOULD/advisory rather than inferred as a Boolean comparator or universal SHALL. Leap replay witnesses distinguish equivalent offset spellings from different SubStatement fractions and the preceding second, while retaining root exclusion and unchanged saved JSON.",
+          "rationale": "The full affected-resource snapshot control changes root timestamp through PUT and POST, independently retaining Statement metadata, Activity/Person data, three Document families and binary attachments. The dedicated child-time fixture separately varies the nested timestamp and records actual comparator calls. Root time remains excluded while explicit nested time remains significant. Required unchanged storage is checked for every response; 409 is recorded as SHOULD/advisory rather than inferred as a Boolean comparator or universal SHALL. Leap replay witnesses distinguish equivalent offset spellings from different SubStatement fractions and the preceding second, while retaining root exclusion and unchanged saved JSON. The metadata acquisition boundary additionally enables fetching after original admission and verifies that PUT, POST-object and POST-array replay create no fetch jobs or canonical definitions. Rejected mixed batches schedule nothing; successful mixed batches and new PUT schedule only newly stored Statements, with replayed exact content unchanged.",
           "witnesses": [
             {
               "kind": "native",
@@ -911,6 +916,11 @@
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::review_gaps::leap_seconds::{backend}_xapi_leap_second_preservation_and_replay",
               "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_capabilities::replay::{backend}_xapi_replay_does_not_schedule_metadata",
+              "http": true
             }
           ]
         }
@@ -925,7 +935,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The full affected-resource snapshot control changes root timestamp through PUT and POST, independently retaining Statement metadata, Activity/Person data, three Document families and binary attachments. The dedicated child-time fixture separately varies the nested timestamp and records actual comparator calls. Root time remains excluded while explicit nested time remains significant. Required unchanged storage is checked for every response; 409 is recorded as SHOULD/advisory rather than inferred as a Boolean comparator or universal SHALL.",
+          "rationale": "The full affected-resource snapshot control changes root timestamp through PUT and POST, independently retaining Statement metadata, Activity/Person data, three Document families and binary attachments. The dedicated child-time fixture separately varies the nested timestamp and records actual comparator calls. Root time remains excluded while explicit nested time remains significant. Required unchanged storage is checked for every response; 409 is recorded as SHOULD/advisory rather than inferred as a Boolean comparator or universal SHALL. The metadata acquisition boundary additionally enables fetching after original admission and verifies that PUT, POST-object and POST-array replay create no fetch jobs or canonical definitions. Rejected mixed batches schedule nothing; successful mixed batches and new PUT schedule only newly stored Statements, with replayed exact content unchanged.",
           "witnesses": [
             {
               "kind": "native",
@@ -935,6 +945,11 @@
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::substatement_time::{backend}_xapi_substatement_time_default_and_replay",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_capabilities::replay::{backend}_xapi_replay_does_not_schedule_metadata",
               "http": true
             }
           ]
@@ -1280,7 +1295,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, stored/ID cursor, no clock expiry and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days under Kiva no-expiry policy, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
+          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, opaque stored/ID cursor and a configured wall-clock lifetime and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days without advancing the independent cursor wall clock, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
           "witnesses": [
             {
               "kind": "native",
@@ -1300,7 +1315,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, stored/ID cursor, no clock expiry and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days under Kiva no-expiry policy, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
+          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, opaque stored/ID cursor and a configured wall-clock lifetime and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days without advancing the independent cursor wall clock, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
           "witnesses": [
             {
               "kind": "native",
@@ -1320,7 +1335,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, stored/ID cursor, no clock expiry and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days under Kiva no-expiry policy, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
+          "rationale": "The actual HTTP control posts three known IDs with equal stored times and traverses one-record pages in both sort directions. It independently records Kiva live requery, opaque stored/ID cursor and a configured wall-clock lifetime and D-03=A terminal empty string. Concurrent insertion and voiding of both the prior cursor row and an unseen continuation row test the selected rerun membership; no voided record returns. Empty queries and HEAD are checked separately. A retained link is reused after advancing the independent clock by 40 days without advancing the independent cursor wall clock, without imposing a 24-hour IEEE guarantee. Every terminal membership set is compared to independently known IDs; empty more is never dereferenced. Other-LRS terminal absence remains IEEE-allowed but differs from selected Kiva policy.",
           "witnesses": [
             {
               "kind": "native",
@@ -1413,7 +1428,7 @@
             "/action",
             "/expected"
           ],
-          "rationale": "Actual metadata writes follow the declared retain/merge policy while refused and operation-denied credentials cannot correct inventory. The separately declared live-requery/no-expiry cursor is tested against inserted and voided records, including required StatementRef matches, without forcing the same cache/update choice on another LRS. These native controls retain their before/after values and mandatory response headers.",
+          "rationale": "Actual metadata writes follow the declared retain/merge policy while refused and operation-denied credentials cannot correct inventory. The separately declared live-requery cursor with a wall-clock lifetime is tested against inserted and voided records, including required StatementRef matches, without forcing the same cache/update choice on another LRS. These native controls retain their before/after values and mandatory response headers.",
           "witnesses": [
             {
               "kind": "native",
@@ -2258,7 +2273,7 @@
             "/steps/6",
             "/assertions/2"
           ],
-          "rationale": "The controlled reachable JSON/HTML metadata host establishes conditional applicability as in the resolvable-metadata-advisory witness; no consumer/host/workers are implemented, so network recommendations and alternate-format MAY are explicitly outside this capability. Mandatory fallback and every maintained available property still run. Two separately registered authorized writers submit a spelling change and a major answer change; Kiva's first-known policy retains prior values while merging missing languages/properties. Each exact Statement retains its submitted values. Read-only403 and refused401 writes leave the full independent Activity inventory unchanged. These selected metadata update choices are not promoted to universal mandates.",
+          "rationale": "The controlled reachable JSON/HTML metadata host establishes conditional applicability as in the resolvable-metadata-advisory witness; consumer/host/workers are disabled in this fixture; enabled modes are required by the separate product capability gate, so network recommendations and alternate-format MAY are explicitly outside this capability. Mandatory fallback and every maintained available property still run. Two separately registered authorized writers submit a spelling change and a major answer change; Kiva's first-known policy retains prior values while merging missing languages/properties. Each exact Statement retains its submitted values. Read-only403 and refused401 writes leave the full independent Activity inventory unchanged. These selected metadata update choices are not promoted to universal mandates.",
           "witnesses": [
             {
               "kind": "native",
@@ -6858,7 +6873,7 @@
             "/action",
             "/expected"
           ],
-          "rationale": "A real external BearerTokenVerifier declares two subjects and two distinct credentials mapping to the same subject before requests; actual verifier calls record credential digests, subjects and allowed/denied decisions. Anonymous access allowed/required modes, absent/supplied Agent/identified Group/anonymous Group including empty members, repeated PUT/POST with different new ids, and default/exact/canonical readback all compare complete authorities to an independently pinned deployment mapping. Kiva always overwrites accepted authorities, including authenticated provider submissions; optional trusted retention is not enabled and no preservation recommendation is promoted to a mandate. Reader403/refused401 inputs leave their IDs absent. Python controls separately qualify Group member-order/multiplicity, empty versus missing/null members and uncertain changing display facts; no signature exclusion mask supplies authority determinism. The two-credential alias is a concrete non-injective permitted mapping. This procedure makes no claim about per-Statement visibility permissions, which remain in issued-authority-and-security-fixtures.",
+          "rationale": "A real external BearerTokenVerifier declares two subjects and two distinct credentials mapping to the same subject before requests; actual verifier calls record credential digests, subjects and allowed/denied decisions. Anonymous access allowed/required modes, absent/supplied Agent/identified Group/anonymous Group including empty members, repeated PUT/POST with different new ids, and default/exact/canonical readback all compare complete authorities to an independently pinned deployment mapping. This fixture overwrites accepted authorities, including authenticated provider submissions; optional trusted retention is not enabled here and no preservation recommendation is promoted to a mandate. Reader403/refused401 inputs leave their IDs absent. Python controls separately qualify Group member-order/multiplicity, empty versus missing/null members and uncertain changing display facts; no signature exclusion mask supplies authority determinism. The two-credential alias is a concrete non-injective permitted mapping. This procedure makes no claim about per-Statement visibility permissions, which remain in issued-authority-and-security-fixtures.",
           "witnesses": [
             {
               "kind": "native",
@@ -8054,7 +8069,7 @@
             "/action",
             "/expected"
           ],
-          "rationale": "The mapped replay snapshot procedure covers individually changed immutable and comparison-excluded fields through actual PUT/POST, checks advisory allowed statuses and exact UUID arrays, and compares all affected Statement/Activity/Person/Document/attachment state including stored/authority/version and opaque member multiplicity. Actual delayed admission and correlated PUT/POST arrivals are supplied by the recording fixture; this synchronous backend has no completed acceptance response before hidden C is released. Reads follow its explicit release/handler completion, and the unchanged repository is checked after changed metadata and identical retries. Logical exclusions remain in the separate production signature-comparator map. The Python lossless snapshot oracle keeps known changes ahead of unavailable time/number evidence, compares allowed timestamp/duration/Group/order representations without adding a second duration truncation allowance. Actual HTTP and native receive capture retain every mandatory response header and HEAD body boundary; a finite fixture budget is not a protocol visibility deadline.",
+          "rationale": "The mapped replay snapshot procedure covers individually changed immutable and comparison-excluded fields through actual PUT/POST, checks advisory allowed statuses and exact UUID arrays, and compares all affected Statement/Activity/Person/Document/attachment state including stored/authority/version and opaque member multiplicity. Actual delayed admission and correlated PUT/POST arrivals are supplied by the recording fixture; this synchronous backend has no completed acceptance response before hidden C is released. Reads follow its explicit release/handler completion, and the unchanged repository is checked after changed metadata and identical retries. Logical exclusions remain in the separate production signature-comparator map. The Python lossless snapshot oracle keeps known changes ahead of unavailable time/number evidence, compares allowed timestamp/duration/Group/order representations without adding a second duration truncation allowance. Actual HTTP and native receive capture retain every mandatory response header and HEAD body boundary; a finite fixture budget is not a protocol visibility deadline. The metadata acquisition boundary additionally enables fetching after original admission and verifies that PUT, POST-object and POST-array replay create no fetch jobs or canonical definitions. Rejected mixed batches schedule nothing; successful mixed batches and new PUT schedule only newly stored Statements, with replayed exact content unchanged.",
           "witnesses": [
             {
               "kind": "procedure",
@@ -8075,6 +8090,11 @@
             {
               "kind": "native",
               "id": "python::test_lrs_preservation.PreservationControls.test_timestamp_precision_is_not_an_error_tolerance"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_capabilities::replay::{backend}_xapi_replay_does_not_schedule_metadata",
+              "http": true
             }
           ],
           "supersedes": [
@@ -8353,7 +8373,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "Actual authenticated HTTP installs independently declared A/B/C/D/E at seconds1..5, recursive Object edges B->A/C->B, separate Context edge D->A, independently missing E target and a seedless two-node cycle. Each actual stored time and all submitted identifying fields are checked before querying. Separate actor/verb/Activity/registration filters traverse every page and compare complete ordered ID inventories, excluding Context/missing/cycle false matches. Both directions cross omitted/zero/one/two/three request limits with a real configured maximum2; every continuation reapplies that maximum. Since=B.stored is exclusive and until=C.stored inclusive, selecting C using its own time. Direct B lookup exact/ids/canonical never expands the graph. Between first and later pages F is inserted and an as-yet-unseen eligible target is voided; live cursor expectations preserve targeters/voiders and suppress the newly voided target. Actual continuation URL bytes/length/strategy and verifier credentials are recorded. Companion witnesses cover timestamp ties,40-day no-expiry policy and terminal D-03 selection; the explicit A/B/C voiding sequence also checks both selectors after each stage. Nonnegative limit admission also covers counts beyond 32/64-bit ranges and 300-digit values, zero and leading zeros, GET/HEAD, a two-row server cap and complete continuation traversal. Invalid lexical suffixes and the single-Statement parameter exclusion remain rejected; no machine-word size is imposed as an unstated source maximum.",
+          "rationale": "Actual authenticated HTTP installs independently declared A/B/C/D/E at seconds1..5, recursive Object edges B->A/C->B, separate Context edge D->A, independently missing E target and a seedless two-node cycle. Each actual stored time and all submitted identifying fields are checked before querying. Separate actor/verb/Activity/registration filters traverse every page and compare complete ordered ID inventories, excluding Context/missing/cycle false matches. Both directions cross omitted/zero/one/two/three request limits with a real configured maximum2; every continuation reapplies that maximum. Since=B.stored is exclusive and until=C.stored inclusive, selecting C using its own time. Direct B lookup exact/ids/canonical never expands the graph. Between first and later pages F is inserted and an as-yet-unseen eligible target is voided; live cursor expectations preserve targeters/voiders and suppress the newly voided target. Actual continuation URL bytes/length/strategy and verifier credentials are recorded. Companion witnesses cover timestamp ties, independent 40-day recording-clock advance and terminal D-03 selection; the explicit A/B/C voiding sequence also checks both selectors after each stage. Nonnegative limit admission also covers counts beyond 32/64-bit ranges and 300-digit values, zero and leading zeros, GET/HEAD, a two-row server cap and complete continuation traversal. Invalid lexical suffixes and the single-Statement parameter exclusion remain rejected; no machine-word size is imposed as an unstated source maximum.",
           "witnesses": [
             {
               "kind": "native",
@@ -33055,7 +33075,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "A source-hashed route inventory records every additional Kiva application path and first segment, with explicit advisory reasons for existing separate analytics/PDS/confidential/diagnostic namespaces. Actual authorized HTTP captures documented diagnostic, undefined resource and undefined PATCH responses without inventing an IEEE status. Scope-only original headers/bodies are retained separately from standard xAPI grading. The configured external verifier and selected retention/hosting scope are recorded with a configuration digest. Kiva supplies no fileUrl host: a separately controlled external HTTP host demonstrates permitted/refused credentials and an explicit expiry switch, with original bytes before expiry. LRS admission/exact readback make zero host requests; URL expiry does not delete or mutate its Statement. No automatic Statement retention worker or event is configured, so the conditional configured-retention-event branch is expressly inapplicable, not claimed executed or unlimited retention. Actual ten-year recording-clock advance preserves the exact Statement and complete settled repository snapshot. Standard xAPI mandatory headers remain checked independently.",
+          "rationale": "A source-hashed route inventory records every additional Kiva application path and first segment, with explicit advisory reasons for enabled legacy aliases for analytics/PDS/confidential/diagnostic namespaces alongside preferred extensions locations. Actual authorized HTTP captures documented diagnostic, undefined resource and undefined PATCH responses without inventing an IEEE status. Scope-only original headers/bodies are retained separately from standard xAPI grading. The configured external verifier and selected retention/hosting scope are recorded with a configuration digest. Kiva supplies no fileUrl host: a separately controlled external HTTP host demonstrates permitted/refused credentials and an explicit expiry switch, with original bytes before expiry. LRS admission/exact readback make zero host requests; URL expiry does not delete or mutate its Statement. No automatic Statement retention worker or event is configured, so the conditional configured-retention-event branch is expressly inapplicable, not claimed executed or unlimited retention. Actual ten-year recording-clock advance preserves the exact Statement and complete settled repository snapshot. Standard xAPI mandatory headers remain checked independently.",
           "witnesses": [
             {
               "kind": "native",

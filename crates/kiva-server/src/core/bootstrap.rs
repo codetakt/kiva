@@ -63,6 +63,10 @@ impl AppState {
             )),
         }?;
         state.xapi.signature_policy = signature_policy;
+        state
+            .xapi
+            .capabilities
+            .configure(crate::surfaces::xapi::capabilities::CapabilityConfig::from_env()?);
         Ok(state)
     }
 }

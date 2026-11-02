@@ -120,6 +120,8 @@ def validate_conformance_release_scope(
             report = assess_capture(directory)
             require(report['summary']['test_specification_conformant'],
                     f'issued test specification not fully passed: {backend}: {report["summary"]}')
+            require(report['summary'].get('complete_implementation') is True,
+                    f'product capabilities not fully passed: {backend}: {report["summary"]}')
     if require_adl_run:
         report_path = conformance_root / "reports/adl-run.json"
         require(report_path.is_file(), "release conformance evidence must include an ADL run")

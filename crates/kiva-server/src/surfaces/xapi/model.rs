@@ -292,6 +292,9 @@ pub(crate) struct StoredStatement {
     pub(crate) opaque_values: super::lossless::OpaqueValues,
     pub(crate) stored_at: OffsetDateTime,
     pub(crate) attachments: BTreeMap<String, AttachmentRecord>,
+    // Admission authorization is stored separately; supplied authority cannot
+    // grant permission to modify another provider's canonical inventory.
+    pub(crate) canonical_update_permitted: bool,
     // Admission-only provenance: an omitted incoming timestamp can reuse the
     // existing value on retry. Persisted records do not need this flag.
     pub(crate) defaulted_substatement_timestamp: bool,
@@ -309,6 +312,7 @@ impl StoredStatement {
             opaque_values: BTreeMap::new(),
             stored_at,
             attachments,
+            canonical_update_permitted: false,
             defaulted_substatement_timestamp: false,
             defaulted_timestamp: false,
         }

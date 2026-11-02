@@ -47,6 +47,20 @@ impl Default for DocumentRepository {
 }
 
 impl StatementRepository {
+    pub(crate) async fn canonical_sources(
+        &self,
+    ) -> Result<Vec<super::capabilities::CanonicalSource>, StatementStoreError> {
+        dispatch_repository!(self, |repository| {
+            memory => Ok(repository.canonical_sources().await),
+            postgres => repository.canonical_sources().await,
+        })
+    }
+    pub(crate) fn capability_store(&self) -> super::capabilities::CapabilityStore {
+        match self {
+            Self::Memory(_) => super::capabilities::CapabilityStore::default(),
+            Self::Postgres(repository) => repository.capability_store(),
+        }
+    }
     #[cfg(test)]
     pub(crate) const fn read_failure(&self) -> &super::storage::read_failure::ReadFailure {
         match self {
@@ -157,7 +171,7 @@ impl StatementRepository {
     pub(crate) async fn put_batch(
         &self,
         batch: Vec<(Uuid, StoredStatement)>,
-    ) -> Result<(), PutBatchError> {
+    ) -> Result<Vec<Uuid>, PutBatchError> {
         dispatch_repository!(self, |repository| {
             memory => repository
                 .put_batch(batch)

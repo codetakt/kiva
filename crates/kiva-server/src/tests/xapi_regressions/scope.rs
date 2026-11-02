@@ -68,7 +68,7 @@ async fn verify(state: &AppState) -> Result<(), String> {
     );
     let source = include_str!("../../core/paths.rs");
     let paths=source.split('"').filter(|part|part.starts_with('/')).map(|path|json!({"path":path,"first_segment":path.split('/').nth(1),"uses_extensions_prefix":path.starts_with("/extensions/"),
-        "reason":"existing non-xAPI application surfaces and local conformance diagnostic retain their separate documented namespaces; prefix recommendation is advisory"})).collect::<Vec<_>>();
+        "reason":"compatibility alias enabled in this fixture; preferred /extensions prefix is exposed for every listed path, with aliases disabled in the product namespace gate"})).collect::<Vec<_>>();
     let policy = json!({"route_inventory":paths,"paths_source_sha256":format!("{:x}",Sha256::digest(source.as_bytes())),
         "authentication":"external local verifier; subject-a is an authorized writer; no required universal authentication scheme",
         "retention":{"automatic_statement_worker":false,"configured_event":null,"conditional_event_disposition":"not applicable: this deployment configures no Statement deletion/retention event; no unlimited future retention promise"},

@@ -20,7 +20,7 @@ mod duration_boundaries;
 #[path = "xapi_regressions/errors.rs"]
 mod errors;
 #[path = "xapi_regressions/evidence.rs"]
-mod evidence;
+pub(super) mod evidence;
 #[path = "xapi_regressions/http_transport.rs"]
 mod http_transport;
 #[path = "xapi_regressions/interactions.rs"]

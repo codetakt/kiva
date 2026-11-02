@@ -4,6 +4,30 @@ use super::statement_queries::*;
 use super::*;
 
 impl PostgresStatementRepository {
+    pub(crate) async fn canonical_sources(
+        &self,
+    ) -> Result<Vec<crate::surfaces::xapi::capabilities::CanonicalSource>, StatementStoreError>
+    {
+        let rows=sqlx::query_as::<_,(SqlJson<crate::surfaces::xapi::lossless::StoredJson>,SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,bool)>(
+            "SELECT statement,opaque_values,canonical_update_permitted FROM kiva.xapi_statements WHERE tenant_id=$1 ORDER BY stored_at ASC,statement_id ASC"
+        ).bind(&self.tenant_id).fetch_all(&self.pool).await?;
+        Ok(rows
+            .into_iter()
+            .map(|(statement, opaque, may_update)| {
+                crate::surfaces::xapi::capabilities::CanonicalSource {
+                    statement: statement.0.0,
+                    opaque_values: opaque.0,
+                    may_update,
+                }
+            })
+            .collect())
+    }
+    pub(crate) fn capability_store(&self) -> crate::surfaces::xapi::capabilities::CapabilityStore {
+        crate::surfaces::xapi::capabilities::CapabilityStore::Postgres {
+            pool: self.pool.clone(),
+            tenant: self.tenant_id.clone(),
+        }
+    }
     #[cfg(test)]
     pub(crate) async fn settled_snapshot(&self) -> Result<Value, StatementStoreError> {
         let mut transaction = self.pool.begin().await?;
@@ -101,9 +125,10 @@ impl PostgresStatementRepository {
                 SqlJson<crate::surfaces::xapi::lossless::StoredJson>,
                 OffsetDateTime,
                 SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,
+            bool,
             ),
         >(
-            "SELECT statement, stored_at, opaque_values FROM kiva.xapi_statements \
+            "SELECT statement, stored_at, opaque_values, canonical_update_permitted FROM kiva.xapi_statements \
              WHERE tenant_id = $1 AND statement_id = $2",
         )
         .bind(&self.tenant_id)
@@ -111,13 +136,14 @@ impl PostgresStatementRepository {
         .fetch_optional(&self.pool)
         .await?;
 
-        let Some((statement, stored_at, opaque_values)) = row else {
+        let Some((statement, stored_at, opaque_values, canonical_update_permitted)) = row else {
             return Ok(None);
         };
         let attachments =
             select_statement_attachments(&self.pool, &self.tenant_id, statement_id).await?;
         let mut record = StoredStatement::new(statement.0.0, stored_at, attachments);
         record.opaque_values = opaque_values.0;
+        record.canonical_update_permitted = canonical_update_permitted;
         Ok(Some(record))
     }
 
@@ -276,7 +302,7 @@ impl PostgresStatementRepository {
     pub(crate) async fn put_batch(
         &self,
         batch: Vec<(Uuid, StoredStatement)>,
-    ) -> Result<(), PutBatchError> {
+    ) -> Result<Vec<Uuid>, PutBatchError> {
         let mut transaction = self
             .pool
             .begin()
@@ -287,6 +313,7 @@ impl PostgresStatementRepository {
             .recording_time(&mut transaction)
             .await
             .map_err(PutBatchError::Store)?;
+        let mut inserted = Vec::new();
         for (statement_id, mut statement) in batch {
             statement.record_at(instant);
             let outcome = self
@@ -294,6 +321,7 @@ impl PostgresStatementRepository {
                 .await
                 .map_err(PutBatchError::Store)?;
             if outcome == InsertOutcome::Inserted {
+                inserted.push(statement_id);
                 continue;
             }
 
@@ -321,7 +349,7 @@ impl PostgresStatementRepository {
             .await
             .map_err(StatementStoreError::from)
             .map_err(PutBatchError::Store)?;
-        Ok(())
+        Ok(inserted)
     }
 
     async fn insert_statement(
@@ -349,8 +377,8 @@ impl PostgresStatementRepository {
         let metadata = StatementMetadata::from_statement(&statement.statement, XAPI_VERSION);
         let result = sqlx::query(
             "INSERT INTO kiva.xapi_statements \
-             (tenant_id, statement_id, actor_ifi, verb_id, object_id, authority, statement, stored_at, version, opaque_values) \
-             VALUES ($1, $2, $3, $4, $5, $6::json, $7::json, $8, $9, $10::json) \
+             (tenant_id, statement_id, actor_ifi, verb_id, object_id, authority, statement, stored_at, version, opaque_values, canonical_update_permitted) \
+             VALUES ($1, $2, $3, $4, $5, $6::json, $7::json, $8, $9, $10::json, $11) \
              ON CONFLICT (tenant_id, statement_id) DO NOTHING",
         )
         .bind(&self.tenant_id)
@@ -365,6 +393,7 @@ impl PostgresStatementRepository {
         .bind(statement.stored_at)
         .bind(metadata.version)
         .bind(serde_json::to_string(&statement.opaque_values).map_err(|error| sqlx::Error::Encode(Box::new(error)))?)
+        .bind(statement.canonical_update_permitted)
         .execute(&mut **transaction)
         .await?;
 

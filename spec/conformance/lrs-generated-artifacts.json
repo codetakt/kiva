@@ -86,7 +86,8 @@
     "spec/conformance/reference/unicode-3.2-normalization-test.txt.gz",
     "tests/conformance/fixtures/mailto-contract.json",
     "tests/conformance/fixtures/sha2-integration.json",
-    ".gitignore"
+    ".gitignore",
+    "spec/conformance/lrs-product-capabilities.yaml"
   ],
   "input_globs": [
     "scripts/ci/lrs_projection_*.py",

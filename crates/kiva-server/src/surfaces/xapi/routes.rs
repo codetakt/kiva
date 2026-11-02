@@ -31,6 +31,18 @@ pub(crate) fn router(state: XapiHttpContext) -> Router {
         ));
     Router::new()
         .merge(statements)
+        .route(
+            "/extensions/people/{id}",
+            get(super::capabilities::people::get)
+                .put(super::capabilities::people::put)
+                .delete(super::capabilities::people::delete),
+        )
+        .route(
+            "/extensions/activities/{id}",
+            get(super::capabilities::host::get)
+                .put(super::capabilities::host::put)
+                .delete(super::capabilities::host::delete),
+        )
         .route("/about", get(about))
         .route("/agents", get(get_agent_person))
         .route("/activities", get(get_activity))

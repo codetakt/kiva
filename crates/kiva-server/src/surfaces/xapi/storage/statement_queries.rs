@@ -31,9 +31,10 @@ pub(super) async fn select_statement_in_transaction(
             SqlJson<crate::surfaces::xapi::lossless::StoredJson>,
             OffsetDateTime,
             SqlJson<crate::surfaces::xapi::lossless::OpaqueValues>,
+            bool,
         ),
     >(
-        "SELECT statement, stored_at, opaque_values FROM kiva.xapi_statements \
+        "SELECT statement, stored_at, opaque_values, canonical_update_permitted FROM kiva.xapi_statements \
          WHERE tenant_id = $1 AND statement_id = $2",
     )
     .bind(tenant_id)
@@ -41,13 +42,14 @@ pub(super) async fn select_statement_in_transaction(
     .fetch_optional(&mut **transaction)
     .await?;
 
-    let Some((statement, stored_at, opaque_values)) = row else {
+    let Some((statement, stored_at, opaque_values, canonical_update_permitted)) = row else {
         return Ok(None);
     };
     let attachments =
         select_statement_attachments_in_transaction(transaction, tenant_id, statement_id).await?;
     let mut record = StoredStatement::new(statement.0.0, stored_at, attachments);
     record.opaque_values = opaque_values.0;
+    record.canonical_update_permitted = canonical_update_permitted;
     Ok(Some(record))
 }
 

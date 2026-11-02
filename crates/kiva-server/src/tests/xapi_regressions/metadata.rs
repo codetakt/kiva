@@ -123,7 +123,7 @@ async fn verify(state: &AppState) -> Result<(), String> {
     let client = reqwest::Client::new();
     evidence::observation(
         "canonical-inventory-policy",
-        &json!({"statement_maps":"retained per-Statement definitions; no metadata fetch/correction","activity_resource":"first-known properties; merge missing object fields and language entries; extension-owner values atomic","other_canonical_maps":["Verb display","attachment display/description"],"language_fallback":"first lexical registered key","hosted_metadata":false,"source":"bound projection/language/wire implementation; fixture declared before reads"}),
+        &json!({"statement_maps":"retained per-Statement definitions; canonical inventory and metadata fetch/correction disabled in this fixture","activity_resource":"first-known properties; merge missing object fields and language entries; extension-owner values atomic","other_canonical_maps":["Verb display","attachment display/description"],"language_fallback":"first lexical registered key","hosted_metadata":false,"source":"bound projection/language/wire implementation; fixture declared before reads"}),
     );
     for nested in [false, true] {
         for component in ["choices", "scale", "source", "target", "steps"] {
@@ -285,9 +285,9 @@ async fn verify(state: &AppState) -> Result<(), String> {
     Ok(())
 }
 
-/// Kiva has no metadata fetcher, metadata hosting route, or asynchronous
-/// metadata worker. The source-bound fixture declares that implementation
-/// choice before querying; absence of traffic alone is not its proof.
+/// This fixture explicitly uses the default configuration with canonical metadata
+/// fetching and hosting disabled. Separate product controls exercise enabled
+/// retrieval and hosting; this fixture preserves the original fallback contract.
 async fn hosted_metadata_applicability(client: &reqwest::Client, base: &str) -> Result<(), String> {
     let calls = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
     let observed = Arc::clone(&calls);
@@ -357,10 +357,10 @@ async fn hosted_metadata_applicability(client: &reqwest::Client, base: &str) -> 
             &json!({
                 "activity_id":activity_id,"host_role":"controlled external fixture, not Kiva",
                 "host_representation":format,"independent_definition":definition,
-                "implementation":{"consumer":false,"host":false,"deferred_workers":false},
+                "implementation":{"consumer":false,"host":false,"deferred_workers":false},"configuration_scope":"default capabilities disabled; enabled modes have separate mandatory product gates",
             "source_anchors":["handlers/agents_activities.rs::get_activity","wire.rs::merged_activity_definition","request/projection.rs::formatted_statement"],
-                "applicability":{"fetch_accept_and_first_fetch":"not-applicable: no consumer","incorporation_and_missing_field_retention":"not-applicable: no consumer","alternate_document_consideration":"not-applicable: no consumer; MAY, not mandated parsing","hosting_format":"not-applicable: Kiva is not metadata host"},
-                "mandatory_inventory":inventory,"qualification":"This source-bound synchronous implementation is tested; a quiet interval alone cannot establish permanent absence of network work."
+                "applicability":{"fetch_accept_and_first_fetch":"not-applicable: consumer disabled in this fixture","incorporation_and_missing_field_retention":"not-applicable: consumer disabled in this fixture","alternate_document_consideration":"not-applicable: consumer disabled in this fixture; MAY, not mandated parsing","hosting_format":"not-applicable: hosting disabled in this fixture"},
+                "mandatory_inventory":inventory,"qualification":"This source-bound disabled configuration is tested; a quiet interval alone cannot establish permanent absence of network work."
             }),
         );
         let url = reqwest::Url::parse_with_params(

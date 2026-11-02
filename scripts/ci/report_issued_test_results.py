@@ -161,7 +161,8 @@ def test_specification_conformant(report):
 def implementation_inputs(root=ROOT):
     """Bind all local implementation/build/database inputs, including new files."""
     paths = {'Cargo.toml', 'Cargo.lock', 'flake.nix', 'flake.lock', 'rust-toolchain.toml', 'db/schema.sql',
-             'spec/conformance/implementation-procedure-bindings.json'}
+             'spec/conformance/implementation-procedure-bindings.json',
+             'spec/conformance/lrs-product-capabilities.yaml'}
     for pattern in ('.cargo/**/*', 'crates/**/*', 'vendor/**/*', 'tools/xapi-lrs-conformance/**/*',
                     'db/migrations/*', 'nix/**/*.nix', 'tests/conformance/controls/**/*',
                     'tests/conformance/fixtures/**/*', 'tests/postgres/**/*',
@@ -246,6 +247,14 @@ def assess_capture(directory, root=ROOT):
     except (ValueError, KeyError, TypeError) as error:
         report['http_validation_error'] = str(error)
     report['summary']['test_specification_conformant'] = test_specification_conformant(report)
+    from run_lrs_native_controls import verify as verify_native
+    native = verify_native(directory/'native',receipt['implementation']['backend'],
+                           inputs=implementation_inputs(root))
+    report['product_capabilities'] = native['product_capabilities']
+    report['summary']['product_capabilities_complete'] = native['product_capabilities']['complete']
+    report['summary']['complete_implementation'] = (
+        report['summary']['test_specification_conformant']
+        and report['summary']['product_capabilities_complete'])
     return report
 
 

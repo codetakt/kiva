@@ -8,7 +8,7 @@ use kiva_http_core::{
     StatementGetQueryParameter, StatementGetQueryParameterSet, StatementGetQueryParameters,
     StatementLimitParameter, StatementTimestampParameter, statement_get_query_decision,
 };
-use kiva_xapi::{filter_statements, validate_agent, validate_document_actor};
+use kiva_xapi::{validate_agent, validate_document_actor};
 use serde_json::Value;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use uuid::Uuid;
@@ -251,15 +251,6 @@ pub(crate) fn invalid_statement_timestamp_parameter(
             .get(*name)
             .is_some_and(|value| OffsetDateTime::parse(value, &Rfc3339).is_err())
     })
-}
-
-pub(crate) fn filtered_statements(
-    statements: Vec<Value>,
-    query: &BTreeMap<String, String>,
-    limit: Option<usize>,
-) -> Result<Vec<Value>, HttpError> {
-    filter_statements(statements, query, limit)
-        .map_err(|error| HttpError::new(StatusCode::BAD_REQUEST, error.message()))
 }
 
 pub(crate) fn parse_statement_id(value: &str) -> Result<Uuid, HttpError> {

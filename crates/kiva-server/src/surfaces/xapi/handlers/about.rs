@@ -15,7 +15,14 @@ pub(crate) async fn about(
         return response;
     }
     match state.authorize_about_request(&headers, &query).await {
-        Ok(_credentials) => json_projection_response(StatusCode::OK, wire::about_response()),
+        Ok(_credentials) => json_projection_response(
+            StatusCode::OK,
+            wire::about_response().map(|mut body| {
+                body["extensions"]["https://kiva.dev/xapi/capabilities"] =
+                    state.capabilities().public_profile();
+                body
+            }),
+        ),
         Err(error) => error.into_response(),
     }
 }

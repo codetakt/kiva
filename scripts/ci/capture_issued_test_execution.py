@@ -26,6 +26,9 @@ def capture(backend, output, fixture, server, runner, root=ROOT, workers=1):
     if workers > 1 and any(name.startswith(('KIVA_MEMORY_CONFORMANCE_', 'KIVA_POSTGRES_CONFORMANCE_'))
                            for name in os.environ):
         raise ValueError('parallel capture requires automatic fixture isolation')
+    for name, digest in json.loads(fixture.read_text()).get('policy_inputs', {}).items():
+        if file_sha256(root / name) != digest:
+            raise ValueError('fixture policy changed: ' + name)
     projection_path = root / 'spec/conformance/issued-test-projection.json'
     projection = json.loads(projection_path.read_text())
     names = set(projection['execution_contract']) | set(projection['definition_files'])
@@ -129,7 +132,7 @@ def main():
     report=assess_capture(output)
     (output/'issued-results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(report['summary'],ensure_ascii=False,indent=2))
-    return 0 if report['summary']['test_specification_conformant'] else 2
+    return 0 if report['summary']['complete_implementation'] else 2
 
 
 if __name__ == '__main__':

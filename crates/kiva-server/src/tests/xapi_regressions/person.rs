@@ -62,10 +62,10 @@ async fn verify_person(state: &AppState) -> Result<(), String> {
         "person-inventory-authority",
         &json!({
             "revision":"isolated-native-person-v2","directory_enrichment":false,
-            "source":"handlers/agents_activities.rs::get_agent_person -> request/person.rs::person_from_agent; no directory service or association worker",
+            "source":"handlers/agents_activities.rs::get_agent_person -> request/person.rs::person_from_agent; person_enrichment disabled in this fixture",
             "empty_repository_before_setup":true,"isolation":"fresh memory store or unique PostgreSQL tenant",
             "fallback":"query identity and optional name only; no extra associations are maintained",
-            "enriched_branch":"not applicable to this target capability; separate independent HTTP peers exercise multiple associated arrays without imposing singleton restrictions"
+            "enriched_branch":"disabled in this fixture; separate product HTTP gates require actual Kiva directory enrichment"
         }),
     );
     let unrelated = json!({"mbox":"mailto:unrelated-person-b@example.org", "name":"Only B"});

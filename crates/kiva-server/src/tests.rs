@@ -74,6 +74,8 @@ mod pds_memory;
 mod postgres;
 #[path = "tests/xapi_auth.rs"]
 mod xapi_auth;
+#[path = "tests/xapi_capabilities.rs"]
+mod xapi_capabilities;
 #[path = "tests/xapi_regressions.rs"]
 mod xapi_regressions;
 

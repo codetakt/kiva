@@ -4,38 +4,42 @@
 use super::common::*;
 use crate::core::runtime::xapi_limits::BodyKind;
 use crate::surfaces::xapi::lossless;
-use crate::surfaces::xapi::request::{StatementCursor, statement_page};
+use crate::surfaces::xapi::request::{PageCursor, statement_page};
 
 pub(crate) async fn get_statements(
     State(state): State<XapiHttpContext>,
     headers: HeaderMap,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
-    statement_resource_response(get_statements_inner(state, headers, query, None).await)
+    statement_resource_response(get_statements_inner(state, headers, query, false).await)
 }
 
 pub(crate) async fn get_more_statements(
     State(state): State<XapiHttpContext>,
     headers: HeaderMap,
-    Query(mut query): Query<BTreeMap<String, String>>,
+    Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
-    let cursor = match StatementCursor::from_query(&mut query) {
-        Ok(cursor) => cursor,
-        Err(error) => return statement_resource_response(error.into_response()),
-    };
-    statement_resource_response(get_statements_inner(state, headers, query, Some(cursor)).await)
+    statement_resource_response(get_statements_inner(state, headers, query, true).await)
 }
 
 #[allow(clippy::too_many_lines)]
 async fn get_statements_inner(
     state: XapiHttpContext,
     headers: HeaderMap,
-    query: BTreeMap<String, String>,
-    cursor: Option<StatementCursor>,
+    mut query: BTreeMap<String, String>,
+    continuation: bool,
 ) -> Response {
     let principal = match state.authorize_xapi_read_request(&headers, &query).await {
         Ok(principal) => principal,
         Err(error) => return error.into_response(),
+    };
+    let cursor = if continuation {
+        match PageCursor::resolve(&state, &mut query).await {
+            Ok(cursor) => Some(cursor),
+            Err(error) => return error.into_response(),
+        }
+    } else {
+        None
     };
     if let Err(error) = validate_statement_get_query(&query) {
         return error.into_response();
@@ -47,6 +51,16 @@ async fn get_statements_inner(
         )
         .into_response();
     }
+    let canonical = if query.get("format").map(String::as_str) == Some("canonical")
+        && state.capabilities().config.canonical_inventory
+    {
+        match super::super::capabilities::canonical::Inventory::load(&state).await {
+            Ok(inventory) => Some(inventory),
+            Err(error) => return error.into_response(),
+        }
+    } else {
+        None
+    };
     if let Some(statement_id) = query.get("statementId") {
         let statement_id = match parse_statement_id(statement_id) {
             Ok(statement_id) => statement_id,
@@ -75,7 +89,11 @@ async fn get_statements_inner(
                             HttpError::new(StatusCode::NOT_FOUND, "statement was not found")
                                 .into_response()
                         },
-                        |statement| {
+                        |mut statement| {
+                            if let Some(inventory) = &canonical {
+                                inventory
+                                    .apply(&mut statement.statement, &mut statement.opaque_values);
+                            }
                             let statement = formatted_single_statement(statement, &query, &headers);
                             single_statement_response(StatusCode::OK, &statement, &query)
                         },
@@ -102,7 +120,11 @@ async fn get_statements_inner(
                             HttpError::new(StatusCode::NOT_FOUND, "statement was not found")
                                 .into_response()
                         },
-                        |statement| {
+                        |mut statement| {
+                            if let Some(inventory) = &canonical {
+                                inventory
+                                    .apply(&mut statement.statement, &mut statement.opaque_values);
+                            }
                             let statement = formatted_single_statement(statement, &query, &headers);
                             single_statement_response(StatusCode::OK, &statement, &query)
                         },
@@ -125,7 +147,12 @@ async fn get_statements_inner(
         Ok(statements) => statements,
         Err(error) => return store_error_response(&error),
     };
-    let mut statements = match filtered_statements(statements, &query, None) {
+    let mut statements = match filtered_statements(
+        statements,
+        &query,
+        None,
+        state.capabilities().config.mailbox_hash_queries,
+    ) {
         Ok(statements) => statements,
         Err(error) => return error.into_response(),
     };
@@ -140,12 +167,12 @@ async fn get_statements_inner(
             .and_then(|id| uuid::Uuid::parse_str(id).ok())
             .is_some_and(|id| state.may_read_statement(principal.as_ref(), id))
     });
-    let (statements, more) = statement_page(statements, &query, limit, cursor.as_ref());
-    let statements = statements
-        .into_iter()
-        .map(|statement| formatted_statement(statement, &query, &headers))
-        .collect::<Vec<_>>();
-    let body = json!({"statements": statements, "more": more});
+    let (statements, more) =
+        match statement_page(&state, statements, &query, limit, cursor.as_ref()).await {
+            Ok(page) => page,
+            Err(error) => return error.into_response(),
+        };
+    let mut body = json!({"statements": statements, "more": more});
     let with_attachments = query.get("attachments").map(String::as_str) == Some("true");
     let mut attachments = BTreeMap::new();
     let mut opaque = lossless::OpaqueValues::new();
@@ -165,7 +192,7 @@ async fn get_statements_inner(
         Err(error) => return store_error_response(&error),
     };
     for (index, statement) in body["statements"]
-        .as_array()
+        .as_array_mut()
         .into_iter()
         .flatten()
         .enumerate()
@@ -177,9 +204,12 @@ async fn get_statements_inner(
         else {
             continue;
         };
-        if let Some(values) = raw_values.get(&statement_id) {
-            lossless::extend_prefixed(&mut opaque, values, &format!("/statements/{index}"));
+        let mut values = raw_values.get(&statement_id).cloned().unwrap_or_default();
+        if let Some(inventory) = &canonical {
+            inventory.apply(statement, &mut values);
         }
+        *statement = formatted_statement(std::mem::take(statement), &query, &headers);
+        lossless::extend_prefixed(&mut opaque, &values, &format!("/statements/{index}"));
         if with_attachments {
             match xapi_service::get_statement(state.xapi_services(), statement_id).await {
                 Ok(Some(record)) => attachments.extend(
@@ -254,6 +284,11 @@ async fn put_statement_inner(
         Ok(payload) => payload,
         Err(error) => return error.into_response(),
     };
+    if state.capabilities().config.detailed_interactions
+        && let Err(error) = super::super::capabilities::interaction::validate(&payload.statement)
+    {
+        return error.into_response();
+    }
     for attachment in payload.attachments.values() {
         if let Err(error) = state.runtime_limits().xapi.body(
             authenticated,
@@ -264,6 +299,7 @@ async fn put_statement_inner(
         }
     }
     let stored_at = OffsetDateTime::now_utc();
+    let supplied_authority = payload.statement.get("authority").cloned();
     let mut statement = match normalized_statement_record(
         payload.statement,
         statement_id,
@@ -277,11 +313,19 @@ async fn put_statement_inner(
     };
 
     statement.opaque_values = payload.opaque_values;
+    state.capabilities().finish_admission(
+        &mut statement,
+        authenticated.map(|p| p.subject.as_str()),
+        supplied_authority,
+    );
 
+    let encountered = vec![statement.statement.clone()];
     match xapi_service::put_statement(state.xapi_services(), statement_id, statement).await {
-        Ok(StoreOutcome::Stored | StoreOutcome::Unchanged) => {
+        Ok(StoreOutcome::Stored) => {
+            super::super::capabilities::fetch::encountered(&state, &encountered).await;
             empty_response(StatusCode::NO_CONTENT)
         }
+        Ok(StoreOutcome::Unchanged) => empty_response(StatusCode::NO_CONTENT),
         Ok(StoreOutcome::Conflict) => HttpError::new(
             StatusCode::CONFLICT,
             "statement id already exists with different content",
@@ -300,6 +344,7 @@ pub(crate) async fn post_statements(
     statement_resource_response(post_statements_inner(state, headers, query, body).await)
 }
 
+#[allow(clippy::too_many_lines)]
 async fn post_statements_inner(
     state: XapiHttpContext,
     headers: HeaderMap,
@@ -339,6 +384,11 @@ async fn post_statements_inner(
         Ok(payload) => payload,
         Err(error) => return error.into_response(),
     };
+    if state.capabilities().config.detailed_interactions
+        && let Err(error) = super::super::capabilities::interaction::validate(&payload.statement)
+    {
+        return error.into_response();
+    }
     for attachment in payload.attachments.values() {
         if let Err(error) = state.runtime_limits().xapi.body(
             authenticated,
@@ -349,6 +399,15 @@ async fn post_statements_inner(
         }
     }
     let is_array = payload.statement.is_array();
+    let supplied_authorities = payload.statement.as_array().map_or_else(
+        || vec![payload.statement.get("authority").cloned()],
+        |statements| {
+            statements
+                .iter()
+                .map(|s| s.get("authority").cloned())
+                .collect::<Vec<_>>()
+        },
+    );
     let mut statements = match normalize_statement_batch(
         payload.statement,
         OffsetDateTime::now_utc(),
@@ -360,6 +419,11 @@ async fn post_statements_inner(
         Err(error) => return error.into_response(),
     };
     for (index, (_, record)) in statements.iter_mut().enumerate() {
+        state.capabilities().finish_admission(
+            record,
+            authenticated.map(|p| p.subject.as_str()),
+            supplied_authorities[index].clone(),
+        );
         record.opaque_values = if is_array {
             crate::surfaces::xapi::lossless::subtree(&payload.opaque_values, &format!("/{index}"))
         } else {
@@ -371,8 +435,23 @@ async fn post_statements_inner(
         .map(|(statement_id, _statement)| statement_id.to_string())
         .collect::<Vec<_>>();
 
+    let mut encountered = statements
+        .iter()
+        .map(|(id, record)| (*id, record.statement.clone()))
+        .collect::<BTreeMap<_, _>>();
     match xapi_service::put_statement_batch(state.xapi_services(), statements).await {
-        Ok(()) => json_response(StatusCode::OK, json!(ids)),
+        Ok(inserted) => {
+            // Admission determines novelty under the same lock/transaction as
+            // storage. A replay cannot schedule or retry metadata acquisition.
+            let new_statements = inserted
+                .into_iter()
+                .filter_map(|id| encountered.remove(&id))
+                .collect::<Vec<_>>();
+            if !new_statements.is_empty() {
+                super::super::capabilities::fetch::encountered(&state, &new_statements).await;
+            }
+            json_response(StatusCode::OK, json!(ids))
+        }
         Err(PutBatchError::Conflict(statement_id)) => HttpError::new(
             StatusCode::CONFLICT,
             format!("statement id already exists with different content: {statement_id}"),

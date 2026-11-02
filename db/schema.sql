@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS kiva.xapi_statements (
     authority json,
     statement json NOT NULL,
     opaque_values json NOT NULL DEFAULT '{}'::json,
+    canonical_update_permitted boolean NOT NULL DEFAULT false,
     stored_at timestamptz NOT NULL DEFAULT now(),
     version text NOT NULL DEFAULT '2.0.0',
     voided_by_statement_id uuid,
@@ -1094,3 +1095,11 @@ CREATE INDEX IF NOT EXISTS pds_ledger_events_owner_idx
 
 CREATE INDEX IF NOT EXISTS pds_ledger_events_resource_idx
     ON kiva.pds_ledger_events (tenant_id, resource_kind, resource_id);
+
+CREATE TABLE IF NOT EXISTS kiva.xapi_capability_records (
+    tenant_id text NOT NULL,
+    record_key bytea NOT NULL,
+    body bytea NOT NULL,
+    etag text NOT NULL,
+    PRIMARY KEY (tenant_id, record_key)
+);

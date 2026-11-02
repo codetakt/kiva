@@ -4,6 +4,27 @@ use super::statement_queries::stored_statements_equivalent;
 use super::*;
 
 impl MemoryStatementRepository {
+    pub(crate) async fn canonical_sources(
+        &self,
+    ) -> Vec<crate::surfaces::xapi::capabilities::CanonicalSource> {
+        let stored = self.statements.read().await;
+        let mut records = stored.iter().collect::<Vec<_>>();
+        records.sort_by(|(a_id, a), (b_id, b)| {
+            a.stored_at.cmp(&b.stored_at).then_with(|| a_id.cmp(b_id))
+        });
+        let result = records
+            .into_iter()
+            .map(
+                |(_, record)| crate::surfaces::xapi::capabilities::CanonicalSource {
+                    statement: record.statement.clone(),
+                    opaque_values: record.opaque_values.clone(),
+                    may_update: record.canonical_update_permitted,
+                },
+            )
+            .collect();
+        drop(stored);
+        result
+    }
     #[cfg(test)]
     pub(crate) async fn settled_snapshot(&self) -> Value {
         // Acquire the SAME admission lock used by every memory writer. A
@@ -163,7 +184,10 @@ impl MemoryStatementRepository {
     }
 
     #[allow(clippy::significant_drop_tightening)]
-    pub(crate) async fn put_batch(&self, batch: Vec<(Uuid, StoredStatement)>) -> Result<(), Uuid> {
+    pub(crate) async fn put_batch(
+        &self,
+        batch: Vec<(Uuid, StoredStatement)>,
+    ) -> Result<Vec<Uuid>, Uuid> {
         let _admission = self.admission.lock().await;
         let statements = self.statements.read().await;
         for (statement_id, statement) in &batch {
@@ -184,11 +208,17 @@ impl MemoryStatementRepository {
         drop(statements);
         self.clock.recorded(instant).await;
         let mut statements = self.statements.write().await;
+        let mut inserted = Vec::new();
         for (statement_id, mut statement) in batch {
-            statement.record_at(instant);
-            statements.entry(statement_id).or_insert(statement);
+            if let std::collections::btree_map::Entry::Vacant(entry) =
+                statements.entry(statement_id)
+            {
+                statement.record_at(instant);
+                entry.insert(statement);
+                inserted.push(statement_id);
+            }
         }
-        Ok(())
+        Ok(inserted)
     }
 }
 

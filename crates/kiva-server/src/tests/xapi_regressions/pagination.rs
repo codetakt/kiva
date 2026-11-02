@@ -149,9 +149,9 @@ async fn verify_http(state: &AppState) -> Result<(), String> {
             vec![json!(ids[2])]
         };
         assert_eq!(remaining, expected);
-        // Kiva's live cursor has no clock expiry or cache lifetime. Advancing
-        // the independent clock observes that declared choice, not an IEEE
-        // 24-hour minimum. A retained link re-runs and excludes now-voided rows.
+        // The recording clock is independent of the cursor's wall-clock lifetime.
+        // Advancing it does not expire a still-valid continuation. The retained
+        // link re-runs and excludes now-voided rows; this is no 24-hour guarantee.
         state
             .xapi
             .statements
@@ -161,7 +161,7 @@ async fn verify_http(state: &AppState) -> Result<(), String> {
         assert_eq!(delayed["statements"][0]["id"], json!(ids[2]));
         evidence::observation(
             "continuation-policy",
-            &json!({"strategy":"live requery with stored/id cursor","expiry":"none","terminal":"D-03=A empty string","ascending":ascending,"observed_remaining":remaining,"new_arrival":added["id"],"voided_excluded":[ids[0],ids[1]],"other_lrs_terminal_absence":"allowed by IEEE; Kiva policy mismatch only"}),
+            &json!({"strategy":"live requery with stored/id cursor","expiry":"configured wall-clock TTL; independent of recording clock","terminal":"D-03=A empty string","ascending":ascending,"observed_remaining":remaining,"new_arrival":added["id"],"voided_excluded":[ids[0],ids[1]],"other_lrs_terminal_absence":"allowed by IEEE; Kiva policy mismatch only"}),
         );
     }
     let empty = reqwest::Url::parse_with_params(

@@ -4,9 +4,9 @@ Kiva's xAPI LRS conformance aid uses the pinned IEEE Std 9274.1.1-2023
 requirements baseline. It keeps generic HTTP cases portable by separating
 implementation-specific trigger values from the test cases themselves.
 
-Equivalence with the 2025 edition has not been established. Requirement
-traceability alone does not establish implementation conformance; see the
-[xAPI claim boundary](conformance-claim.md).
+The international adoption and verification scope are recorded in the
+[xAPI claim boundary](conformance-claim.md). Requirement traceability alone
+does not establish implementation conformance.
 
 ## MIME admission policy
 
@@ -29,36 +29,58 @@ preserve independently known failures when parameter knowledge is unavailable.
 
 ## Metadata and Person policies
 
-The current metadata capability is deliberately limited to submitted information.
-`GET /activities` merges first-known Activity properties from accepted Statements,
+The default portable fixture uses submitted metadata. `GET /activities` merges
+first-known Activity properties from accepted Statements,
 in recording order, adding missing properties and language entries. Extension
 owner values and arrays are atomic. Later spelling or answer changes do not
 overwrite earlier values in that resource. Exact Statement output retains each
 submission; canonical Statement output selects languages from that Statement's
-retained maps. Unauthorized submissions do not contribute information.
+retained maps. Unauthorized submissions do not contribute information. Both
+default and configured inventories keep interaction kinds, components and answer
+patterns coherent: incompatible interaction fields are not combined, while
+independent language additions remain available. Exact Statements retain their
+submitted definitions.
 
-Kiva does not consume or host resolvable Activity metadata and has no deferred
-metadata fetch worker. Fetch timing, outbound Accept preferences, fetched-field
-retention and alternate hosted document handling are conditional optional branches,
-not unexecuted mandatory fetch duties. Native controls use a reachable independent
-JSON/HTML metadata host, establish this source-bound capability before requests,
-and still verify mandatory Activity fallback and retained information. A quiet
-network interval alone is not evidence of a permanent no-fetch capability.
+`KIVA_XAPI_CAPABILITIES_JSON` enables the additional
+[LRS capabilities](../../README.md#lrs-capabilities). With `canonical_inventory`,
+canonical Statement responses share the Activity/Verb inventory and configured
+writers may make small corrections. `metadata_origins` enables deferred HTTP(S)
+fetching from allowed origins, including JSON and, when `metadata_html` is enabled,
+embedded or alternate JSON in HTML. Owner definitions take precedence while
+compatible omitted information is retained. Failures preserve Statement admission
+and can retry on later access or new Statement admission. Identical PUT/POST
+replays do not enqueue or retry metadata acquisition; mixed POST batches schedule
+only their newly stored Statements. PostgreSQL persists jobs and successful metadata.
 
-The Person resource has no external directory or enrichment store. It projects the
-requested Agent's IFI and optional name. Its native fixture establishes an empty
-isolated repository before introducing an unrelated Agent. Independent HTTP peer
-controls separately verify that the association oracle accepts multiple related
-identifiers and names, rejects unrelated values, compares complete Account pairs,
-and retains NOT-RUN when association evidence is unavailable. Those peers qualify
-the oracle; they are not executions of a Kiva enrichment feature.
+`activity_hosting` publishes Activity Definitions below `/extensions/activities`
+and requires a public base URL and canonical inventory. Public reads expose only
+published definitions; configured writers use ETags for conditional updates.
+Incompatible partial interaction updates return 409 without changing the body or
+ETag. The default fixture leaves fetching and hosting disabled. Separate mandatory
+product controls enable and execute both features on each backend; disabled
+observations or external peer results cannot establish feature support.
+
+Without `person_enrichment`, `/agents` projects the requested Agent's IFI and
+optional name. When enabled, configured directory writers manage associations at
+`/extensions/people`, and `/agents` includes their known IFIs and names from stored
+Statements. Conflicting associations fail atomically. `rollback_voided_metadata`
+defaults to true and excludes voided Statement contributions from the Activities
+resource, canonical inventory and enriched Person metadata. It also applies to
+`/activities` when `canonical_inventory` is false. Disabling rollback retains
+those contributions; either choice preserves exact Statement readback through
+`voidedStatementId`. Native controls
+exercise these enabled capabilities, including isolation and persistence. External
+peer controls separately qualify the portable association oracle and retain
+NOT-RUN when its required association evidence is unavailable.
 
 ## Interaction policy
 
-Interaction validation checks the interactionType vocabulary and presence,
-common JSON validity, component/list/String types and Language Maps. It does
-not interpret response-pattern grammar, grade answers, or validate characterstring
-parameters. Invalid or unknown parameters remain supplied Strings. Whitespace-free
+Default interaction validation checks the interactionType vocabulary and presence,
+common JSON validity, component/list/String types and Language Maps.
+`detailed_interactions` additionally validates applicable component lists, distinct
+IDs, pattern/component relationships and exact numeric ranges. Neither mode grades
+learner answers or validates characterstring parameter values. Invalid or unknown
+parameters remain supplied Strings. Whitespace-free
 component identifiers are producer advice; the explanatory 250-character fill-in
 description is not a receiver length limit. The separately controlled interpreter
 in conformance fixtures checks list defaults and item-language positions; it is

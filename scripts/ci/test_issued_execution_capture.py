@@ -18,6 +18,7 @@ class CaptureControls(unittest.TestCase):
         self.root = Path(temporary.name)
         for name in ('Cargo.toml', 'case.yaml', 'oracle.py', 'fixture.json', 'server', 'runner'):
             (self.root / name).write_text(name)
+        (self.root / 'fixture.json').write_text('{}')
         self.projection = {'execution_contract': {'oracle.py': file_sha256(self.root / 'oracle.py')},
                            'definition_files': {'case.yaml': file_sha256(self.root / 'case.yaml')},
                            'cases': {'a': {'file': 'case.yaml'}}, 'procedures': {}}
@@ -35,6 +36,17 @@ class CaptureControls(unittest.TestCase):
         collector=patch('capture_issued_test_execution.collect_capture', side_effect=collect)
         collector.start()
         self.addCleanup(collector.stop)
+
+    def test_stale_fixture_is_rejected_before_starting_target(self):
+        (self.root / 'implementation.rs').write_text('changed implementation')
+        fixture = self.root / 'fixture.json'
+        fixture.write_text(json.dumps({'policy_inputs': {'implementation.rs': '0' * 64}}))
+        with patch.dict(os.environ, {}, clear=True), patch('capture_issued_test_execution.subprocess.run') as run:
+            with self.assertRaisesRegex(ValueError, 'fixture policy changed: implementation.rs'):
+                capture('memory', self.output, fixture, self.root / 'server',
+                        self.root / 'runner', root=self.root)
+            run.assert_not_called()
+        self.assertFalse(self.output.exists())
 
     def execute(self, mutation=None, missing=False):
         def wrapper(command, **kwargs):

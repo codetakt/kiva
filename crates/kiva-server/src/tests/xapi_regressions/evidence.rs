@@ -14,7 +14,7 @@ use sha2::{Digest, Sha256};
 
 const TRACE_ID: &str = "x-kiva-native-observation-id";
 
-pub(super) fn observation(kind: &str, value: &serde_json::Value) {
+pub(in crate::tests) fn observation(kind: &str, value: &serde_json::Value) {
     let Some(directory) = std::env::var_os("KIVA_NATIVE_HTTP_TRACE") else {
         return;
     };
@@ -28,7 +28,7 @@ pub(super) fn observation(kind: &str, value: &serde_json::Value) {
     .expect("retain native control");
 }
 
-pub(super) fn router(state: &AppState) -> Router {
+pub(in crate::tests) fn router(state: &AppState) -> Router {
     let router = crate::router_with_state(state);
     let Some(directory) = std::env::var_os("KIVA_NATIVE_HTTP_TRACE") else {
         return router;
@@ -91,7 +91,9 @@ async fn capture(
     Response::from_parts(parts, Body::from(body))
 }
 
-pub(super) async fn received(mut reply: reqwest::Response) -> Result<reqwest::Response, String> {
+pub(in crate::tests) async fn received(
+    mut reply: reqwest::Response,
+) -> Result<reqwest::Response, String> {
     let Some(directory) = std::env::var_os("KIVA_NATIVE_HTTP_TRACE") else {
         return Ok(reply);
     };

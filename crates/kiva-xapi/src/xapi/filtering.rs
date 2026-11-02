@@ -9,7 +9,19 @@ pub fn filter_statements(
     query: &BTreeMap<String, String>,
     limit: Option<usize>,
 ) -> Result<Vec<Value>, StatementFilterError> {
-    let filters = StatementFilters::from_query(query)?;
+    filter_statements_with_ifi_aliases(statements, query, limit, &[])
+}
+
+/// Adds explicitly authorized IFI alternatives to the agent query, without
+/// changing the identity of stored Agents or other filters.
+pub fn filter_statements_with_ifi_aliases(
+    statements: Vec<Value>,
+    query: &BTreeMap<String, String>,
+    limit: Option<usize>,
+    aliases: &[String],
+) -> Result<Vec<Value>, StatementFilterError> {
+    let mut filters = StatementFilters::from_query(query)?;
+    filters.actor_aliases = aliases.to_vec();
     let statement_index = statement_index(&statements);
     let voided_statement_ids = voided_statement_ids(&statements);
     let mut statements = statements
@@ -66,7 +78,9 @@ fn statement_index(statements: &[Value]) -> BTreeMap<Uuid, Value> {
         .collect()
 }
 
-fn voided_statement_ids(statements: &[Value]) -> BTreeSet<Uuid> {
+/// Returns targets of valid voiding Statements for reuse across one repository snapshot.
+#[must_use]
+pub fn voided_statement_ids(statements: &[Value]) -> BTreeSet<Uuid> {
     let index = statement_index(statements);
     statements
         .iter()
@@ -116,6 +130,7 @@ fn is_voided_target(statement: &Value, voided_statement_ids: &BTreeSet<Uuid>) ->
 #[derive(Debug, Default)]
 struct StatementFilters {
     actor_ifi: Option<String>,
+    actor_aliases: Vec<String>,
     verb_id: Option<String>,
     activity_id: Option<String>,
     registration: Option<Uuid>,
@@ -129,6 +144,7 @@ struct StatementFilters {
 impl StatementFilters {
     fn from_query(query: &BTreeMap<String, String>) -> Result<Self, StatementFilterError> {
         Ok(Self {
+            actor_aliases: Vec::new(),
             actor_ifi: query
                 .get("agent")
                 .map(|agent| {
@@ -177,10 +193,13 @@ impl StatementFilters {
 
     fn matches(&self, statement: &Value, statement_index: &BTreeMap<Uuid, Value>) -> bool {
         self.matches_time(statement)
-            && self
-                .actor_ifi
-                .as_deref()
-                .is_none_or(|actor_ifi| self.matches_agent(statement, statement_index, actor_ifi))
+            && self.actor_ifi.as_deref().is_none_or(|actor_ifi| {
+                self.matches_agent(statement, statement_index, actor_ifi)
+                    || self
+                        .actor_aliases
+                        .iter()
+                        .any(|alias| self.matches_agent(statement, statement_index, alias))
+            })
             && self.verb_id.as_deref().is_none_or(|verb_id| {
                 statement.pointer("/verb/id").and_then(Value::as_str) == Some(verb_id)
                     || Self::matches_referenced_statement(statement, statement_index, |target| {

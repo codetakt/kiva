@@ -12,6 +12,8 @@ pub(crate) fn about_response() -> Result<Value, serde_json::Error> {
         extensions: Some(json!(AboutExtensions {
             name: "Kiva",
             standard: "IEEE/ISO/IEC 39274-1-1-2025",
+            requirements_baseline: "IEEE Std 9274.1.1-2023",
+            international_adoption: "ISO/IEC/IEEE 39274-1-1:2025 adopts IEEE Std 9274.1.1-2023",
             status: "validated xAPI LRS HTTP boundary",
             resources: kiva_xapi::REQUIRED_LRS_RESOURCES,
         })),
@@ -97,7 +99,16 @@ fn push_activity_definition<'a>(
 pub(crate) fn merged_activity_definition(statements: &[Value], activity_id: &str) -> Option<Value> {
     let mut merged = serde_json::Map::new();
     for (_, _, definition) in activity_definition_sources(statements, activity_id) {
-        merge_json_objects(&mut merged, definition);
+        let mut incoming = definition.clone();
+        if !super::capabilities::canonical::compatible_interactions(
+            &Value::Object(merged.clone()),
+            &Value::Object(incoming.clone()),
+        ) {
+            incoming.retain(|key, _| {
+                !super::capabilities::canonical::INTERACTION_FIELDS.contains(&key.as_str())
+            });
+        }
+        merge_json_objects(&mut merged, &incoming);
     }
     (!merged.is_empty()).then_some(Value::Object(merged))
 }
@@ -121,6 +132,13 @@ fn merge_json_objects(
             }
             (None, value) => {
                 target.insert(name.clone(), value.clone());
+            }
+            (Some(current @ Value::Array(_)), Value::Array(_))
+                if ["choices", "scale", "source", "target", "steps"].contains(&name.as_str()) =>
+            {
+                // Compatible component lists retain their established order
+                // and values while gaining newly available descriptions.
+                super::capabilities::canonical::merge_components(current, value, false);
             }
             (Some(_), _) => {}
         }
@@ -188,6 +206,10 @@ fn project_context_activities(statement: &mut Value) {
 struct AboutExtensions<'a> {
     name: &'a str,
     standard: &'a str,
+    #[serde(rename = "requirementsBaseline")]
+    requirements_baseline: &'a str,
+    #[serde(rename = "internationalAdoption")]
+    international_adoption: &'a str,
     status: &'a str,
     resources: &'a [&'a str],
 }

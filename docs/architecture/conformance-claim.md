@@ -13,6 +13,24 @@ product revision conforms additionally requires the execution evidence below.
 Official review is the GitHub PR merge. The structural gate does not measure
 review acceptance, and no repository adoption record is required.
 
+The [product capability specification](../../spec/conformance/lrs-product-capabilities.yaml)
+adds required positive controls for useful recommended and optional LRS features.
+`run_lrs_native_controls.py` requires every listed feature to execute successfully
+with its enabling configuration on the selected backend. Disabled configurations,
+advisory observations, skipped tests, external peers and missing HTTP receipts
+cannot pass this gate. Both live and snapshot pagination must execute.
+The full capture reports `product_capabilities_complete` separately from the
+adopted IEEE test gate; `complete_implementation` requires both. A product claim
+must bind successful captures for memory and PostgreSQL to the released bytes.
+
+The capability profile preserves full numeric precision and synchronous committed
+visibility; optional information reduction and deferred admission are not needed
+to provide those functions. It includes the optional Activity metadata host role.
+It does not claim to be a Statement producer/signer, a global identity issuer,
+an arbitrary external attachment host or a parser for every document format.
+IEEE 39274-1-1:2025 is the international adoption of the pinned 2023 baseline,
+as identified by the [IEEE catalog](https://standards.ieee.org/ieee/39274-1-1/12268/).
+
 ## HTTP execution gate after the PR #3 follow-up
 
 The required Nix `memory-conformance` and `postgres-conformance` checks apply the

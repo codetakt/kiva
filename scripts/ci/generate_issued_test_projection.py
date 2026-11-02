@@ -45,6 +45,7 @@ def collect_execution_contract(root=ROOT):
             'scripts/ci/lrs_mailbox.py','scripts/ci/lrs_language_vectors.py',
             'scripts/ci/generate_pkix_unicode32.py',
             'spec/conformance/implementation-procedure-bindings.json',
+            'spec/conformance/lrs-product-capabilities.yaml',
             'tests/conformance/fixtures/mailto-contract.json',
             'tests/conformance/fixtures/sha2-integration.json',
             'tests/conformance/fixtures/pkix-unicode32.json.gz',

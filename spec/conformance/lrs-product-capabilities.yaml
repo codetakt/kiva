@@ -1,0 +1,1302 @@
+schema_version: 1
+requirements_baseline: IEEE Std 9274.1.1-2023
+international_adoption:
+  designation: ISO/IEC/IEEE 39274-1-1:2025
+  source: https://standards.ieee.org/ieee/39274-1-1/12268/
+  relationship: Adoption of 9274.1.1-2023
+purpose: Positive implementation gates for useful recommended and optional LRS capabilities.
+boundaries:
+- Existing adopted IEEE cases and procedure expectations remain unchanged.
+- A capability requires execution on memory and PostgreSQL with its enabling configuration.
+- Advisory observations, an unavailable fixture, a disabled feature or an external peer cannot pass a product capability.
+- Choices that reduce information, such as optional precision truncation, need not be enabled to support full-fidelity
+  storage.
+- Both live and snapshot pagination are product choices; every enabled mode must preserve current authorization
+  and void suppression.
+- Statement signer, global identity provider and arbitrary third-party document formats are not universal LRS roles.
+capabilities:
+- id: negotiated-errors
+  rules:
+  - IP-error-negotiation
+  - IP-error-format-text-plain
+  - IP-error-format-text-html
+  - IP-error-format-application-json
+  - IP-error-explanation
+  required: true
+  fixtures:
+  - memory
+  - postgres
+  procedure:
+  - Trigger real protocol, authentication, validation, conflict, size/rate and storage errors.
+  - Request plain, HTML and JSON with preference weights, exclusions and fallback.
+  - Check the selected representation, the actual cause, required status/headers, HEAD and HTML escaping.
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::{backend}_xapi_product_error_negotiation
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/error_representation.rs
+- id: canonical-inventory
+  rules:
+  - IP-canonical-update-authority
+  - IP-canonical-small-corrections
+  - IP-canonical-major-changes
+  - IP-canonical-map-maintenance
+  - IP-format-canonical
+  required: true
+  procedure:
+  - Declare independent canonical inventory and providers allowed to correct it.
+  - Admit authorized and unauthorized competing definitions in sequential and concurrent requests.
+  - Check small corrections and missing-language additions while preserving major semantics and extension-owned
+    values.
+  - Compare Activities and canonical Statement responses; exact Statements and original signature bytes remain unchanged.
+  - Combine individually valid but incompatible interaction definitions, including partial pattern/component updates.
+    Preserve coherent established interaction fields and independent language additions in both the default Activities
+    projection and the enabled canonical inventory; exact Statements retain each submitted definition.
+  - For compatible component lists, match descriptions by component ID, preserve order and established translations,
+    and add missing languages or descriptions in choices, scale, source, target and steps, including reordered input.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_canonical_and_authority
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/canonical.rs
+- id: resolvable-metadata
+  rules:
+  - IP-metadata-fetch
+  - IP-metadata-incorporate
+  - IP-metadata-other-document
+  required: true
+  procedure:
+  - Use a controlled allowlisted HTTP host serving JSON and an HTML document with an embedded Activity Definition.
+  - Observe first-encounter request timing and Accept; verify incorporation and preservation of omitted information.
+  - Exercise invalid data, failure, redirects, retries, concurrency and persisted retrieval after restart.
+  - Enable fetching after initial admission and verify PUT/POST replays leave metadata work and definitions unchanged; mixed batches schedule only new Statements.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::fetch::{backend}_xapi_product_metadata_fetch
+  - kiva-server::tests::xapi_capabilities::replay::{backend}_xapi_replay_does_not_schedule_metadata
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/fetch.rs
+- id: metadata-host
+  rules:
+  - IP-hosted-metadata-optional
+  - IP-hosted-metadata-canonical
+  required: true
+  procedure:
+  - Publish an authorized definition and retrieve it from the actual Activity identifier URL.
+  - Check access, concurrency preconditions, canonical source semantics and restart persistence.
+  - Reject partial updates that conflict with established interaction components without changing the body or ETag;
+    accept compatible additions and avoid mixing conflicting Statement interaction fields into hosted owner metadata.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_host_and_person_directory
+  - kiva-server::tests::xapi_capabilities::durability::{backend}_xapi_product_metadata_concurrency
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/host.rs
+- id: mailbox-hash-query
+  rules:
+  - IP-mbox-hash-query
+  required: true
+  procedure:
+  - Store plain and corresponding hashed mailbox Actors, Objects and Group members.
+  - Query by mailbox, including related-agent and StatementRef paths, with positive and unrelated negative controls.
+  - Keep permission filtering, page completeness and IFI identity distinctions.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::queries::{backend}_xapi_product_queries
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/filtering.rs
+- id: trusted-authority
+  rules:
+  - IP-authority-trust
+  - IP-authority-trust-caution
+  - IP-authority-overwrite
+  required: true
+  procedure:
+  - Configure trusted and untrusted authenticated providers before admission.
+  - Preserve distinct valid supplied authorities only for a trusted provider; overwrite elsewhere.
+  - Preserve normal verification, batch atomicity, signatures and immutable replay.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_canonical_and_authority
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities.rs
+- id: interaction-validation
+  rules:
+  - IP-interaction-remaining
+  - IP-characterstring-validation
+  required: true
+  procedure:
+  - Enable detailed interaction validation and exercise every interaction kind at root and SubStatement placements.
+  - Validate pattern/component relationships; keep characterstring parameters uninterpreted.
+  - Rejected batches store nothing; accepted data is preserved exactly.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::interactions::{backend}_xapi_product_interactions
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/interaction.rs
+- id: person-enrichment
+  rules:
+  - IP-person-multiple-identifiers
+  - IP-person-fallback
+  - IP-person-array-members
+  required: true
+  procedure:
+  - Establish associations independently using an authorized directory writer.
+  - Retrieve multiple associated values through all four IFI kinds; keep complete Account pairs.
+  - Check association removal, conflicts, unrelated-person isolation and restart persistence.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_host_and_person_directory
+  - kiva-server::tests::xapi_capabilities::durability::{backend}_xapi_product_metadata_concurrency
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/people.rs
+- id: void-metadata-rollback
+  rules:
+  - IP-void-rollback
+  required: true
+  procedure:
+  - Introduce Activity and Agent metadata from independently identified Statement contributions.
+  - Void a contributor and verify reconstruction from surviving sources without undoing unrelated corrections.
+  - Keep original Statements retrievable through voidedStatementId and preserve their exact bytes and attachments.
+  - Exercise rollback enabled and disabled with canonical inventory enabled and disabled; reconstruct Activities and opaque extension values from surviving contributions in Object, SubStatement and Context roles.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_canonical_and_authority
+  - kiva-server::tests::xapi_capabilities::metadata::{backend}_xapi_product_host_and_person_directory
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/capabilities/canonical.rs
+  - crates/kiva-server/src/surfaces/xapi/capabilities/people.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/agents_activities.rs
+- id: pagination-modes
+  rules:
+  - IP-more-self-contained
+  - IP-more-length
+  - IP-more-rerun
+  - IP-more-cache
+  - IP-more-cache-voids
+  required: true
+  procedure:
+  - Exercise live and snapshot modes while adding and voiding Statements between pages.
+  - Use long valid filters and verify bounded continuation URLs and complete ordered pages.
+  - Reauthenticate every continuation and check permission changes, expiry, foreign tokens and restart behavior.
+  - Enable self-contained live links for short filters and require bounded token fallback for long filters.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::queries::{backend}_xapi_product_queries
+  - kiva-server::tests::xapi_capabilities::durability::{backend}_xapi_product_metadata_concurrency
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/pagination.rs
+- id: extension-namespace
+  rules:
+  - IP-additional-resources
+  - IP-extension-namespace
+  - IP-about-extensions
+  required: true
+  procedure:
+  - Inventory all standard and additional resource routes and their public base URLs.
+  - Verify extensions locations, documented compatibility aliases and truthful About capability metadata.
+  fixtures:
+  - memory
+  - postgres
+  native_controls:
+  - kiva-server::tests::xapi_capabilities::queries::{backend}_xapi_product_queries
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+  - crates/kiva-server/src/surfaces/xapi/handlers/about.rs
+  - crates/kiva-server/src/lib.rs
+modal_requirements:
+- rule: IP-structural-validation
+  strength: should
+  source_units:
+  - SRC-4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/0
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-xapi/src/xapi/validation.rs
+- rule: IP-absence-only
+  strength: should-not
+  source_units:
+  - SRC-4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/28
+  disposition: supported-with-source-exception
+  design: Serve implemented extensions. Undefined or unsupported resource/method combinations may be rejected under
+    the recorded exception.
+- rule: IP-multipart-no-attachments
+  strength: permission
+  source_units:
+  - SRC-4.1.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/43
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/lossless.rs
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-server/src/surfaces/xapi/wire.rs
+- rule: IP-multipart-deduplicate
+  strength: should
+  source_units:
+  - SRC-4.1.3.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/52
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+- rule: IP-multipart-part-content-type
+  strength: should
+  source_units:
+  - SRC-4.1.3.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/53
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+- rule: IP-multipart-binary-default
+  strength: should
+  source_units:
+  - SRC-4.1.3.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/60
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+  - crates/kiva-server/src/surfaces/xapi/request/multipart.rs
+- rule: IP-error-explanation
+  strength: should
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/79
+  disposition: required-product-capability
+  capabilities:
+  - negotiated-errors
+- rule: IP-error-negotiation
+  strength: should
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/80
+  disposition: required-product-capability
+  capabilities:
+  - negotiated-errors
+- rule: IP-error-format-text-plain
+  strength: should
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/81
+  disposition: required-product-capability
+  capabilities:
+  - negotiated-errors
+- rule: IP-error-format-text-html
+  strength: should
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/82
+  disposition: required-product-capability
+  capabilities:
+  - negotiated-errors
+- rule: IP-error-format-application-json
+  strength: should
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/83
+  disposition: required-product-capability
+  capabilities:
+  - negotiated-errors
+- rule: IP-size-limit-choice
+  strength: may
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/87
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/core/runtime/xapi_limits.rs
+  - crates/kiva-server/src/tests/xapi_regressions/errors.rs
+- rule: IP-rate-limit-choice
+  strength: may
+  source_units:
+  - SRC-4.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/88
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/core/runtime/xapi_limits.rs
+  - crates/kiva-server/src/tests/xapi_regressions/errors.rs
+- rule: IP-additional-resources
+  strength: may
+  source_units:
+  - SRC-4.1.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/89
+  disposition: required-product-capability
+  capabilities:
+  - extension-namespace
+- rule: IP-extension-namespace
+  strength: should
+  source_units:
+  - SRC-4.1.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/90
+  disposition: required-product-capability
+  capabilities:
+  - extension-namespace
+- rule: IP-statement-put-availability
+  strength: may
+  source_units:
+  - SRC-4.1.6.1.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/102
+  disposition: synchronous-commit-selected
+  design: Respond after commit and visibility. Deferred visibility is permitted, not needed to provide durable admission.
+- rule: IP-statement-put-compare
+  strength: should
+  source_units:
+  - SRC-4.1.6.1.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/104
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/tests/xapi_regressions/replay.rs
+  - crates/kiva-xapi/src/xapi/comparison.rs
+- rule: IP-statement-put-conflict
+  strength: should
+  source_units:
+  - SRC-4.1.6.1.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/105
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/tests/xapi_regressions/replay.rs
+  - crates/kiva-xapi/src/xapi/comparison.rs
+- rule: IP-statement-post-availability
+  strength: may
+  source_units:
+  - SRC-4.1.6.1.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/107
+  disposition: synchronous-commit-selected
+  design: Respond after commit and visibility. Deferred visibility is permitted, not needed to provide durable admission.
+- rule: IP-statement-post-compare
+  strength: should
+  source_units:
+  - SRC-4.1.6.1.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/109
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/tests/xapi_regressions/replay.rs
+  - crates/kiva-xapi/src/xapi/comparison.rs
+- rule: IP-statement-post-conflict
+  strength: should
+  source_units:
+  - SRC-4.1.6.1.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/110
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/tests/xapi_regressions/replay.rs
+  - crates/kiva-xapi/src/xapi/comparison.rs
+- rule: IP-query-permissions
+  strength: may
+  source_units:
+  - SRC-4.1.6.1.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/132
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+- rule: IP-consistent-through-load
+  strength: should
+  source_units:
+  - SRC-4.1.6.1.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/135
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/routes.rs
+- rule: IP-canonical-map-maintenance
+  strength: may
+  source_units:
+  - SRC-4.1.6.1.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/143
+  disposition: required-product-capability
+  capabilities:
+  - canonical-inventory
+- rule: IP-person-multiple-identifiers
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/257
+  disposition: required-product-capability
+  capabilities:
+  - person-enrichment
+- rule: IP-about-extensions
+  strength: permission
+  source_units:
+  - SRC-4.1.6.7.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/262
+  disposition: required-product-capability
+  capabilities:
+  - extension-namespace
+- rule: IP-Statement-id-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/301
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-result-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/309
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-context-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/311
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-timestamp-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/313
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-stored-presence
+  strength: should-not
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/315
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-authority-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/317
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-version-presence
+  strength: should-not
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/319
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Statement-attachments-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/321
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-objectType-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/323
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-name-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/326
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-mbox-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/328
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-mbox_sha1sum-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/330
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-openid-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/332
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Agent-account-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/334
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-AnonymousGroup-name-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/340
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-name-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/347
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-member-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/349
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-mbox-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/351
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-mbox_sha1sum-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/353
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-openid-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/355
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-IdentifiedGroup-account-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/357
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-mbox-uniqueness
+  strength: should
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/362
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-mbox-hash-query
+  strength: may
+  source_units:
+  - SRC-4.2.2.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/363
+  disposition: required-product-capability
+  capabilities:
+  - mailbox-hash-query
+- rule: IP-Verb-display-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/373
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Activity-objectType-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/376
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Activity-definition-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/382
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-ActivityDefinition-name-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/384
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-ActivityDefinition-description-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/386
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-ActivityDefinition-type-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/388
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-ActivityDefinition-moreInfo-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/390
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-ActivityDefinition-extensions-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/392
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-correctResponsesPattern-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/398
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-choices-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/400
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-scale-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/403
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-source-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/406
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-target-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/409
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Interaction-steps-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/412
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-InteractionComponent-description-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/433
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-SubStatement-result-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/452
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-SubStatement-context-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/454
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-SubStatement-timestamp-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/456
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-SubStatement-attachments-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/458
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-score-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/462
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-success-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/464
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-completion-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/466
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-response-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/468
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-duration-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/470
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Result-extensions-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/472
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Score-scaled-presence
+  strength: should
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/474
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Score-raw-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/477
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Score-min-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/480
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Score-max-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/483
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-registration-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/486
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-instructor-presence
+  strength: should-not
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/488
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-team-presence
+  strength: should-not
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/490
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-contextActivities-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/492
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-contextAgents-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/494
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-contextGroups-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/496
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-revision-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/498
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-platform-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/500
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-language-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/502
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-statement-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/504
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Context-extensions-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/506
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-contextAgent-relevantTypes-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/517
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-contextAgent-any-entity
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/520
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-xapi/src/xapi/context_result_validation.rs
+- rule: IP-contextAgent-any-type
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/521
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-xapi/src/xapi/context_result_validation.rs
+- rule: IP-contextGroup-relevantTypes-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/527
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-contextGroup-any-entity
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/530
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-xapi/src/xapi/context_result_validation.rs
+- rule: IP-contextGroup-any-type
+  strength: permission
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/531
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-xapi/src/xapi/context_result_validation.rs
+- rule: IP-Attachment-description-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/539
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Attachment-fileUrl-presence
+  strength: permission
+  source_units:
+  - SRC-4.2.2.6
+  - SRC-4.1.3.4
+  - SRC-4.1.3.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/550
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Person-name-presence
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/556
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Person-mbox-presence
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/558
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Person-mbox_sha1sum-presence
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/560
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Person-openid-presence
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/562
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-Person-account-presence
+  strength: permission
+  source_units:
+  - SRC-4.1.6.3.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/564
+  disposition: supported-core-field
+  design: Accept and preserve valid supplied optional fields; keep the adopted omission and type constraints.
+- rule: IP-contextAgent-types-recommended
+  strength: should
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/568
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-contextGroup-types-recommended
+  strength: should
+  source_units:
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/570
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-statement-deletion-recommendation
+  strength: should-not
+  source_units:
+  - SRC-4.2.4
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/575
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-xapi/src/xapi/filtering.rs
+- rule: IP-hosted-metadata-optional
+  strength: permission
+  source_units:
+  - SRC-4.2.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/577
+  disposition: required-product-capability
+  capabilities:
+  - metadata-host
+- rule: IP-metadata-fetch
+  strength: should
+  source_units:
+  - SRC-4.2.3.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/579
+  disposition: required-product-capability
+  capabilities:
+  - resolvable-metadata
+- rule: IP-metadata-incorporate
+  strength: should
+  source_units:
+  - SRC-4.2.3.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/580
+  disposition: required-product-capability
+  capabilities:
+  - resolvable-metadata
+- rule: IP-metadata-other-document
+  strength: may
+  source_units:
+  - SRC-4.2.3.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/581
+  disposition: required-product-capability
+  capabilities:
+  - resolvable-metadata
+- rule: IP-data-management-scope
+  strength: permission
+  source_units:
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/582
+  disposition: deployment-administration
+  design: Preserve ordinary security, authorization and operational data management. Voiding is distinct from retention
+    deletion; no perpetual retention promise or mandatory expiration event is invented.
+- rule: IP-unauthorized-batch
+  strength: should
+  source_units:
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/583
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/handlers/statements.rs
+- rule: IP-property-size
+  strength: should-not
+  source_units:
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/586
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/core/runtime/xapi_limits.rs
+  - crates/kiva-server/src/tests/xapi_regressions/errors.rs
+- rule: IP-statement-size-security
+  strength: may
+  source_units:
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/587
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/core/runtime/xapi_limits.rs
+  - crates/kiva-server/src/tests/xapi_regressions/errors.rs
+- rule: IP-identifier-validation-waiver
+  strength: may
+  source_units:
+  - SRC-4.2.4.1
+  - SRC-4.2.1
+  - SRC-4.1.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/588
+  disposition: format-validation-retained
+  design: Validate syntax under the adopted D-06 interpretation; do not require identifier assignment, ownership
+    or reachability.
+- rule: IP-substatement-future
+  strength: permission
+  source_units:
+  - SRC-5.2.4.1
+  - SRC-4.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/590
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/lossless.rs
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-server/src/surfaces/xapi/wire.rs
+- rule: IP-empty-objects
+  strength: should-not
+  source_units:
+  - SRC-5.2.4.1
+  - SRC-4.2.2.4
+  - SRC-4.2.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/591
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-interaction-remaining
+  strength: may
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/598
+  disposition: required-product-capability
+  capabilities:
+  - interaction-validation
+- rule: IP-component-whitespace
+  strength: should-not
+  source_units:
+  - SRC-4.2.4.2
+  - SRC-5.2.4.1
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/599
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-stored-validate
+  strength: should
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/603
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-xapi/src/xapi/validation.rs
+- rule: IP-authority-overwrite
+  strength: should
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/605
+  disposition: required-product-capability
+  capabilities:
+  - trusted-authority
+- rule: IP-authority-trust
+  strength: may
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/607
+  disposition: required-product-capability
+  capabilities:
+  - trusted-authority
+- rule: IP-authority-trust-caution
+  strength: should
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/608
+  disposition: required-product-capability
+  capabilities:
+  - trusted-authority
+- rule: IP-version-admission
+  strength: should-not
+  source_units:
+  - SRC-4.2.4.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/611
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-xapi/src/xapi/validation.rs
+- rule: IP-canonical-update-authority
+  strength: should
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/612
+  disposition: required-product-capability
+  capabilities:
+  - canonical-inventory
+- rule: IP-canonical-small-corrections
+  strength: may
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/613
+  disposition: required-product-capability
+  capabilities:
+  - canonical-inventory
+- rule: IP-canonical-major-changes
+  strength: should-not
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/614
+  disposition: required-product-capability
+  capabilities:
+  - canonical-inventory
+- rule: IP-more-self-contained
+  strength: may
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/617
+  disposition: required-product-capability
+  capabilities:
+  - pagination-modes
+- rule: IP-more-length
+  strength: should-not
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/618
+  disposition: required-product-capability
+  capabilities:
+  - pagination-modes
+- rule: IP-more-rerun
+  strength: may
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/619
+  disposition: required-product-capability
+  capabilities:
+  - pagination-modes
+- rule: IP-more-cache
+  strength: may
+  source_units:
+  - SRC-4.2.4.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/620
+  disposition: required-product-capability
+  capabilities:
+  - pagination-modes
+- rule: IP-more-cache-voids
+  strength: may
+  source_units:
+  - SRC-4.2.4.3
+  - SRC-4.1.6.1.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/621
+  disposition: required-product-capability
+  capabilities:
+  - pagination-modes
+- rule: IP-void-rollback
+  strength: may
+  source_units:
+  - SRC-4.2.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/625
+  disposition: required-product-capability
+  capabilities:
+  - void-metadata-rollback
+- rule: IP-signature-certificate-recommended
+  strength: should
+  source_units:
+  - SRC-4.2.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/630
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-signature-chain-recommended
+  strength: should
+  source_units:
+  - SRC-4.2.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/631
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-signature-error-message
+  strength: should
+  source_units:
+  - SRC-4.2.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/633
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/core/response.rs
+  - crates/kiva-server/src/tests/xapi_regressions/errors.rs
+- rule: IP-extension-values-domain
+  strength: permission
+  source_units:
+  - SRC-4.2.7.2
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/640
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/lossless.rs
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-server/src/surfaces/xapi/wire.rs
+- rule: IP-language-map-population
+  strength: should
+  source_units:
+  - SRC-4.2.7.3
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/644
+  disposition: sender-or-identifier-owner-responsibility
+  design: Preserve valid submitted content. Do not invent translations, relationship semantics or identifier ownership,
+    or impose a sender recommendation as an LRS rejection rule.
+- rule: IP-uuid-variant
+  strength: should
+  source_units:
+  - SRC-4.2.7.4
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/650
+  disposition: supported-core-behavior
+  implementation:
+  - crates/kiva-server/src/surfaces/xapi/request/normalization.rs
+  - crates/kiva-xapi/src/xapi/validation.rs
+- rule: IP-timestamp-precision
+  strength: may
+  source_units:
+  - SRC-4.2.7.5
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/652
+  disposition: preserve-precision-selected
+  design: Retain received precision; optional truncation would discard available information.
+- rule: IP-duration-truncate
+  strength: may
+  source_units:
+  - SRC-4.2.7.6
+  adopted_test_projection: spec/conformance/issued-test-projection.json#/rules/657
+  disposition: preserve-precision-selected
+  design: Retain received precision; optional truncation would discard available information.
