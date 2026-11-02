@@ -33,8 +33,8 @@
       "bytes": 4465
     },
     "flake.nix": {
-      "sha256": "a8ff7fd599fdd03c985f3b7e903729f94f4373c826415fd4bb3a1e88847a8bd8",
-      "bytes": 6183
+      "sha256": "84f2db7664dff2eb2631dafecf84a9c3934681d0ffd65887b34f66fa07170779",
+      "bytes": 6567
     },
     "nix/flake/checks.nix": {
       "sha256": "37a3004a4bb3374f0b8f63cea74596d7d3753caeeb3a6e463b83f31235d13925",
@@ -1335,7 +1335,7 @@
       "bytes": 99800
     },
     "spec/conformance/issued-test-projection.json": {
-      "sha256": "b6c41f2ca69e76888805a8da212242f3894278122d5899e1e066464799bebd95",
+      "sha256": "5ddc62816edcc7f05631148feca912e0e25c7620c758c3ea9cbecb9a35926a78",
       "bytes": 51872915
     },
     "spec/conformance/lrs-assertion-manifest.yaml": {

@@ -740,7 +740,7 @@ mod tests {
             "../../../tests/conformance/fixtures/preservation-properties.json"
         ))
         .expect("identifier controls");
-        let suite: serde_json::Value = serde_yaml::from_str(include_str!(
+        let suite: serde_json::Value = serde_saphyr::from_str(include_str!(
             "../../../tests/conformance/http/statement-authz-authority-isolated.yaml"
         ))
         .expect("authority case");

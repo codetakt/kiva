@@ -91,7 +91,7 @@ pub enum Error {
         /// Path that could not be parsed.
         path: PathBuf,
         /// YAML parser error.
-        source: serde_yaml::Error,
+        source: Box<serde_saphyr::Error>,
     },
 
     /// JSON report serialization failed.
@@ -143,12 +143,13 @@ pub fn load_endpoint_profile(path: &Path) -> Result<EndpointProfile, Error> {
         path: path.to_path_buf(),
         source,
     })?;
-    let document = serde_yaml::from_slice::<EndpointProfileDocument>(&bytes).map_err(|source| {
-        Error::ParseYaml {
-            path: path.to_path_buf(),
-            source,
-        }
-    })?;
+    let document =
+        serde_saphyr::from_slice::<EndpointProfileDocument>(&bytes).map_err(|source| {
+            Error::ParseYaml {
+                path: path.to_path_buf(),
+                source: Box::new(source),
+            }
+        })?;
     EndpointProfile::from_document(path, document)
 }
 
@@ -3826,7 +3827,7 @@ mod tests {
             "other-profile",
         ] {
             let mut document: super::EndpointProfileDocument =
-                serde_yaml::from_str(text).expect("example profile");
+                serde_saphyr::from_str(text).expect("example profile");
             let config = document
                 .profiles
                 .get_mut("signature-validation-context")
@@ -4313,8 +4314,8 @@ expect:
         use super::CaseOutcome::{Failed, Passed};
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/conformance/http/generated/behaviors.yaml");
-        let suite: serde_json::Value = serde_yaml::from_str(
-            &std::fs::read_to_string(path).expect("expanded behavior definitions"),
+        let suite: serde_json::Value = super::exact_yaml::from_slice(
+            &std::fs::read(path).expect("expanded behavior definitions"),
         )
         .expect("generated suite");
         let step = suite["cases"]
@@ -4428,8 +4429,8 @@ expect:
     fn issued_sha1_query_cases() -> Vec<serde_json::Value> {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/conformance/http/generated/issued-readback.yaml");
-        let suite: serde_json::Value = serde_yaml::from_str(
-            &std::fs::read_to_string(path).expect("expanded readback definitions"),
+        let suite: serde_json::Value = super::exact_yaml::from_slice(
+            &std::fs::read(path).expect("expanded readback definitions"),
         )
         .expect("generated suite");
         let cases: Vec<_> = suite["cases"]
@@ -4837,8 +4838,8 @@ expect:
         use super::CaseOutcome::{Failed, NotRun, Passed};
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/conformance/http/generated/issued-completion.yaml");
-        let suite: serde_json::Value = serde_yaml::from_str(
-            &std::fs::read_to_string(path).expect("expanded completion definitions"),
+        let suite: serde_json::Value = super::exact_yaml::from_slice(
+            &std::fs::read(path).expect("expanded completion definitions"),
         )
         .expect("generated suite");
         let case = suite["cases"]
@@ -5179,8 +5180,8 @@ expect:
 
     #[test]
     fn definite_timestamp_defects_fail_even_on_expected_error_responses()
-    -> Result<(), serde_yaml::Error> {
-        let expectation: super::ResponseExpectation = serde_yaml::from_str(
+    -> Result<(), serde_saphyr::Error> {
+        let expectation: super::ResponseExpectation = serde_saphyr::from_str(
             "status: 400\nheaders:\n  X-Experience-API-Consistent-Through: {iso8601: true}",
         )?;
         for timestamp in [
@@ -5263,7 +5264,7 @@ expect:
                 };
                 write!(stream, "HTTP/1.1 404 Not Found\r\n{version}X-Experience-API-Consistent-Through: 2020-01-01T00:00:00Z\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").expect("fixture response");
             });
-            let case = serde_yaml::from_str(
+            let case = serde_saphyr::from_str(
                 r"
 id: delayed-retrieval
 requirements: [xapi-lrs-4.1.6.1-statement-put]
@@ -5587,7 +5588,7 @@ expect:
         use std::fmt::Write;
         // Exercise the authored expectation so losing this assertion in the YAML
         // also loses the control, even when the Statement's version is retained.
-        let suite: serde_json::Value = serde_yaml::from_str(include_str!(
+        let suite: serde_json::Value = serde_saphyr::from_str(include_str!(
             "../../../tests/conformance/http/statement-object-validation-isolated.yaml"
         ))
         .expect("authored suite");
@@ -6079,7 +6080,7 @@ expect:
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/conformance/http/statement-query-filter-isolated.yaml");
         let text = std::fs::read_to_string(path).expect("query cases");
-        let mut suite: super::SuiteDocument = serde_yaml::from_str(&text).expect("query suite");
+        let mut suite: super::SuiteDocument = serde_saphyr::from_str(&text).expect("query suite");
         let case = suite
             .cases
             .iter_mut()
@@ -6719,7 +6720,7 @@ expect:
 
     #[test]
     fn json_oracles_reject_invalid_utf8_without_rejecting_binary_documents() {
-        let expectation: super::ResponseExpectation = serde_yaml::from_str(
+        let expectation: super::ResponseExpectation = serde_saphyr::from_str(
             "status: 200\njson: {pointers: {'/version/0': {equals: '2.0.0'}}}\ncapture: {text: {pointer: /extra}}",
         ).expect("JSON expectation");
         let valid = b"{\"version\":[\"2.0.0\"],\"extra\":\"valid\"}";
@@ -6729,13 +6730,13 @@ expect:
         assert!(!super::evaluate_body(&expectation, invalid, &mut captures).is_empty());
         assert!(captures.is_empty());
         let binary: super::ResponseExpectation =
-            serde_yaml::from_str("status: 200\nbody: {non_empty: true}")
+            serde_saphyr::from_str("status: 200\nbody: {non_empty: true}")
                 .expect("binary expectation");
         assert!(super::evaluate_body(&binary, &[0, 255, 128], &mut BTreeMap::new()).is_empty());
     }
     #[tokio::test]
     async fn unavailable_target_fixtures_are_not_run_and_never_pass() {
-        let document: super::SuiteDocument = serde_yaml::from_str(
+        let document: super::SuiteDocument = serde_saphyr::from_str(
             r"
 suite:
   id: unavailable-fixtures
@@ -6793,7 +6794,7 @@ cases:
 
     #[test]
     fn conditional_steps_require_a_reachable_previous_response() {
-        let document: super::SuiteDocument = serde_yaml::from_str(
+        let document: super::SuiteDocument = serde_saphyr::from_str(
             r"
 suite: {id: conditional, standard: IEEE/ISO/IEC 39274-1-1-2025}
 cases:
@@ -6822,7 +6823,7 @@ cases:
 
     #[test]
     fn diagnostic_status_does_not_exempt_independent_headers() {
-        let mut expectation: super::ResponseExpectation = serde_yaml::from_str(
+        let mut expectation: super::ResponseExpectation = serde_saphyr::from_str(
             r"
 status: 204
 status_classification: diagnostic
@@ -6853,19 +6854,19 @@ headers:
 
     #[test]
     fn explicit_json_null_is_preserved_in_requests_and_expectations() -> Result<(), super::Error> {
-        let request: super::RequestSpec = serde_yaml::from_str(
+        let request: super::RequestSpec = serde_saphyr::from_str(
             "method: POST\npath: /activities/state\nbody: null",
         )
         .map_err(|source| super::Error::ParseYaml {
             path: PathBuf::from("null-fixture"),
-            source,
+            source: Box::new(source),
         })?;
         assert_eq!(request.body, Some(serde_json::Value::Null));
         let expectation: super::ResponseExpectation =
-            serde_yaml::from_str("status: 200\njson:\n  pointers:\n    '': {equals: null}")
+            serde_saphyr::from_str("status: 200\njson:\n  pointers:\n    '': {equals: null}")
                 .map_err(|source| super::Error::ParseYaml {
                     path: PathBuf::from("null-fixture"),
-                    source,
+                    source: Box::new(source),
                 })?;
         super::validate_expectation("null", &expectation, &BTreeSet::new())?;
         assert!(super::evaluate_body(&expectation, b"null", &mut BTreeMap::new()).is_empty());

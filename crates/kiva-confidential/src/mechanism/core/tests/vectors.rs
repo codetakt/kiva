@@ -4,8 +4,8 @@ use super::*;
 
 #[test]
 fn validates_bundled_shamir_threshold_vectors() {
-    let parsed: Result<ShamirVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(SHAMIR_THRESHOLD_VECTORS);
+    let parsed: Result<ShamirVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(SHAMIR_THRESHOLD_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -53,7 +53,8 @@ fn validates_bundled_shamir_threshold_vectors() {
 
 #[test]
 fn validates_bundled_psi_cohort_vectors() {
-    let parsed: Result<PsiVectorFile, serde_yaml::Error> = serde_yaml::from_str(PSI_COHORT_VECTORS);
+    let parsed: Result<PsiVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(PSI_COHORT_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -110,8 +111,8 @@ fn validates_bundled_psi_cohort_vectors() {
 
 #[test]
 fn validates_bundled_psi_oprf_vectors() {
-    let parsed: Result<PsiOprfVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(PSI_OPRF_VECTORS);
+    let parsed: Result<PsiOprfVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(PSI_OPRF_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -193,8 +194,8 @@ fn validates_bundled_psi_oprf_vectors() {
 
 #[test]
 fn validates_bundled_threshold_frost_vectors() {
-    let parsed: Result<ThresholdFrostVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(THRESHOLD_FROST_VECTORS);
+    let parsed: Result<ThresholdFrostVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(THRESHOLD_FROST_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -287,8 +288,8 @@ fn validates_bundled_threshold_frost_vectors() {
 
 #[test]
 fn validates_bundled_tee_attestation_vectors() {
-    let parsed: Result<TeeVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(TEE_ATTESTATION_VECTORS);
+    let parsed: Result<TeeVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(TEE_ATTESTATION_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -326,8 +327,8 @@ fn validates_bundled_tee_attestation_vectors() {
 
 #[test]
 fn validates_bundled_tee_aws_nitro_attestation_vectors() {
-    let parsed: Result<TeeAwsNitroVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(TEE_AWS_NITRO_ATTESTATION_VECTORS);
+    let parsed: Result<TeeAwsNitroVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(TEE_AWS_NITRO_ATTESTATION_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -382,8 +383,8 @@ fn validates_bundled_tee_aws_nitro_attestation_vectors() {
 #[test]
 #[allow(clippy::too_many_lines)]
 fn validates_bundled_fhe_feasibility_vectors() {
-    let parsed: Result<FheVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(FHE_FEASIBILITY_VECTORS);
+    let parsed: Result<FheVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(FHE_FEASIBILITY_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;
@@ -501,8 +502,8 @@ fn validates_bundled_fhe_feasibility_vectors() {
 #[test]
 #[allow(clippy::too_many_lines)]
 fn validates_bundled_fhe_runtime_vectors() {
-    let parsed: Result<FheRuntimeVectorFile, serde_yaml::Error> =
-        serde_yaml::from_str(FHE_RUNTIME_VECTORS);
+    let parsed: Result<FheRuntimeVectorFile, serde_saphyr::Error> =
+        serde_saphyr::from_str(FHE_RUNTIME_VECTORS);
     assert!(parsed.is_ok());
     let Ok(parsed) = parsed else {
         return;

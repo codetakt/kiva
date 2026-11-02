@@ -35,6 +35,8 @@ kiva-xapi-openapi-contract = { path = "../kiva-xapi-openapi-contract", version =
 der.workspace = true
 pkix-path.workspace = true
 ring.workspace = true
+reqwest.workspace = true
+scraper = { version = "0.27", default-features = false }
 signature.workspace = true
 spki.workspace = true
 x509-cert.workspace = true
@@ -54,7 +56,6 @@ x509-parser.workspace = true
 idna = { version = "1.1.0", default-features = false, features = ["alloc"] }
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 ed25519-dalek.workspace = true
-reqwest.workspace = true
 
 [[bin]]
 name = "kiva-server"

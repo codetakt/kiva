@@ -22,14 +22,14 @@ fn validates_secure_aggregate_field_membership() {
 
 #[test]
 fn serde_rejects_invalid_secure_aggregate_field_membership() {
-    let payload = serde_yaml::to_string(&SECURE_AGGREGATE_FIELD_MODULUS);
+    let payload = serde_saphyr::to_string(&SECURE_AGGREGATE_FIELD_MODULUS);
     assert!(payload.is_ok());
     let Ok(payload) = payload else {
         return;
     };
 
-    let parsed: Result<SecureAggregateFieldElement, serde_yaml::Error> =
-        serde_yaml::from_str(&payload);
+    let parsed: Result<SecureAggregateFieldElement, serde_saphyr::Error> =
+        serde_saphyr::from_str(&payload);
 
     assert!(parsed.is_err());
 }
@@ -417,7 +417,7 @@ fn confidential_job_admission_fails_closed() {
 #[test]
 fn serde_rejects_invalid_release_policy() {
     let payload = "participant_count: 1\nrelease_threshold: 1\n";
-    let parsed: Result<ReleasePolicy, serde_yaml::Error> = serde_yaml::from_str(payload);
+    let parsed: Result<ReleasePolicy, serde_saphyr::Error> = serde_saphyr::from_str(payload);
 
     assert!(parsed.is_err());
 }

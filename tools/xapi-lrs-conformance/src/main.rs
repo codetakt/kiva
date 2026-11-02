@@ -282,10 +282,10 @@ fn load_auth_profile_file(
         path: path.to_path_buf(),
         source,
     })?;
-    serde_yaml::from_slice::<AuthProfileFileDocument>(&bytes).map_err(|source| {
+    serde_saphyr::from_slice::<AuthProfileFileDocument>(&bytes).map_err(|source| {
         xapi_lrs_conformance::Error::ParseYaml {
             path: path.to_path_buf(),
-            source,
+            source: Box::new(source),
         }
     })
 }

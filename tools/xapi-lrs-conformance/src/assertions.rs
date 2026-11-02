@@ -2067,7 +2067,7 @@ mod tests {
 
     #[test]
     fn person_mailbox_contract_checks_each_additional_position() {
-        let check: super::Check=serde_yaml::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}").expect("Person mailbox shape");
+        let check: super::Check=serde_saphyr::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}").expect("Person mailbox shape");
         let fixture: Value = serde_json::from_str(include_str!(
             "../../../tests/conformance/fixtures/mailto-contract.json"
         ))
@@ -2104,7 +2104,7 @@ mod tests {
 
     #[test]
     fn person_identifiers_check_every_enrichment_entry() {
-        let check: super::Check = serde_yaml::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}\n    openid: {type: array, items: {type: string, format: uri}}\n    mbox_sha1sum: {type: array, items: {type: string, format: sha1}}")
+        let check: super::Check = serde_saphyr::from_str("kind: json-shape\nshape:\n  type: object\n  properties:\n    mbox: {type: array, items: {type: string, format: mailto-iri}}\n    openid: {type: array, items: {type: string, format: uri}}\n    mbox_sha1sum: {type: array, items: {type: string, format: sha1}}")
             .expect("Person identifier shape");
         let valid = serde_json::json!({"mbox": ["mailto:a@example.org", "MAILTO:b@example.org"], "openid": ["urn:example:person", "scheme:"], "mbox_sha1sum": ["0123456789abcdef0123456789abcdef01234567"]});
         assert!(
@@ -2156,7 +2156,7 @@ mod tests {
 
     #[test]
     fn utc_output_distinguishes_unknown_offset_from_normalized_zero() {
-        let check: super::Check = serde_yaml::from_str(
+        let check: super::Check = serde_saphyr::from_str(
             "kind: json-time\npointer: /timestamp\nexpected: 2026-07-29T09:00:00Z\nutc: true",
         )
         .expect("UTC check");
@@ -2189,7 +2189,7 @@ mod tests {
 
     #[test]
     fn successful_alternative_requires_its_json_body() -> Result<(), Box<dyn std::error::Error>> {
-        let check: Check = serde_yaml::from_str(
+        let check: Check = serde_saphyr::from_str(
             "kind: json-shape\nstatus: 200\nshape:\n  type: array\n  min_items: 1\n  max_items: 1\n  items: {type: string, format: uuid}",
         )?;
         check.validate()?;
@@ -2431,7 +2431,7 @@ mod tests {
             "Content-Type",
             "multipart/mixed; BOUNDARY=\"outer-boundary\"".parse()?,
         );
-        let check: Check = serde_yaml::from_str("kind: multipart")?;
+        let check: Check = serde_saphyr::from_str("kind: multipart")?;
         assert!(
             check
                 .evaluate(200, &headers, &bytes, &BTreeMap::new())
@@ -2452,7 +2452,7 @@ mod tests {
 
     #[test]
     fn last_modified_compares_the_maximum_stored_time() -> Result<(), Box<dyn std::error::Error>> {
-        let check: Check = serde_yaml::from_str(
+        let check: Check = serde_saphyr::from_str(
             "kind: header-time\nheader: Last-Modified\nmax_pointer: /statements",
         )?;
         let body = br#"{"statements":[{"stored":"2026-10-05T00:00:01.123Z"},{"stored":"2026-10-05T00:00:02.456Z"}]}"#;
@@ -2475,7 +2475,7 @@ mod tests {
     #[test]
     fn integer_shape_rejects_known_fractions_without_guessing_lost_tokens()
     -> Result<(), Box<dyn std::error::Error>> {
-        let shape: super::Shape = serde_yaml::from_str("type: integer")?;
+        let shape: super::Shape = serde_saphyr::from_str("type: integer")?;
         for value in [serde_json::json!(1.5), serde_json::json!(-1.5)] {
             assert!(
                 matches!(shape.check(&value, ""), Err(error) if !error.starts_with("ORACLE-UNAVAILABLE:"))
@@ -2489,7 +2489,7 @@ mod tests {
     #[test]
     fn shape_rejects_missing_required_and_wrongly_typed_array_members()
     -> Result<(), Box<dyn std::error::Error>> {
-        let check: Check = serde_yaml::from_str(
+        let check: Check = serde_saphyr::from_str(
             "kind: json-shape\nshape:\n  type: object\n  required: [version]\n  properties:\n    version:\n      type: array\n      items: {type: string}",
         )?;
         for bytes in [br"{}".as_slice(), br#"{"version":[1]}"#.as_slice()] {

@@ -97,6 +97,13 @@
           inherit src;
           cargoToml = ./Cargo.toml;
           cargoLock = ./Cargo.lock;
+          # Registry crates such as der need the patched const-oid API even
+          # while workspace crates are stubbed for dependency caching. Bind
+          # this cache input to the vendored crate, not the whole source tree.
+          extraDummyScript = ''
+            rm -rf "$out/vendor/const-oid"
+            cp -r ${./vendor/const-oid} "$out/vendor/const-oid"
+          '';
         };
 
         strictClippyArgs =

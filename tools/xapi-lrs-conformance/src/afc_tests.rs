@@ -282,7 +282,7 @@ cases:
             false,
         ),
     ] {
-        let document: super::SuiteDocument = serde_yaml::from_str(&input).expect("fixture YAML");
+        let document: super::SuiteDocument = serde_saphyr::from_str(&input).expect("fixture YAML");
         assert_eq!(
             super::validate_case_steps("branch", &document.cases[0]).is_ok(),
             valid
