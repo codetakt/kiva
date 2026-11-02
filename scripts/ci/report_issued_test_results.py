@@ -313,8 +313,21 @@ def assess(projection, http, case_receipt, procedure_reports, root=None):
                     failed_checks.append({'procedure': name, 'check': check.get('id')})
     rows = []
     case_contexts = {n:set() for n in observations}
+    procedure_interpretations = {}
     for rule in projection['rules']:
         branches = rule.get('test_design', {}).get('interpretation_branches', [])
+        for branch in branches:
+            if branch.get('source_interpretations'):
+                name = branch['procedure']
+                context = dict(branch=branch['id'], classification=branch['classification'],
+                    interpretations=branch['source_interpretations'],
+                    source_residual=branch.get('source_residual', ''),
+                    policy_selections=branch.get('policy_selections', {}),
+                    outcome=procedures.get(name, {}).get('outcome', 'not-run'),
+                    claim='Outcome under the stated source interpretation; not issuer adjudication or independent acceptance.')
+                if name in procedure_interpretations and procedure_interpretations[name] != context:
+                    raise ValueError('inconsistent procedure interpretation: ' + name)
+                procedure_interpretations[name] = context
         # Historical parent issue IDs are not blanket waivers after disposition.
         # Keep concrete residual branches and policy choices as separate data;
         # neither changes an observed raw outcome or creates review acceptance.
@@ -368,6 +381,7 @@ def assess(projection, http, case_receipt, procedure_reports, root=None):
         failed_procedure_checks=failed_checks,
         incomplete_procedure_coverage=sorted(uncovered),
         case_interpretation_contexts={n:sorted(ids) for n,ids in sorted(case_contexts.items()) if ids},
+        procedure_interpretation_contexts=procedure_interpretations,
         case_context_scope='Conservative union of issues on corresponding detailed rules, not proof that every issue affects every assertion. Raw FAIL remains a fixture/profile observation; no unqualified IEEE verdict is inferred.',
         rules=rows)
 

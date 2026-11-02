@@ -37,7 +37,7 @@
             "/action",
             "/expected"
           ],
-          "rationale": "The actual repository clock is independently fixed at .125 and .875 in the same second for all three Document families. Exact lists are asserted at each instant minus/equal/plus one microsecond. A third update crosses an HTTP-date second. Bytes/media/ETag and last modification are captured; stale mutations leave them and the since membership unchanged. State deletion uses an explicit registration, preserving separately changed Agent/activity/registration scopes. Absence of registration has its separate all-registrations meaning. All setup/read/error/HEAD headers and statuses are checked. Valid JSON POST conditional rejection is established by the full condition matrix and unchanged precise repository snapshot. The text/plain recording fixture has an unconditional POST merge error400, separate from ordinary stale412. Additional Document GET/HEAD witnesses cover all three families, UTC year crossings and offset-equivalent bounds, plus submicrosecond exclusion on both sides of the Unix and PostgreSQL epochs. Fixed repository times and literal expected ID sets verify the exclusive since comparison; no floating-point conversion or broader ISO grammar claim is used.",
+          "rationale": "The actual repository clock is independently fixed at .125 and .875 in the same second for all three Document families. Exact lists are asserted at each instant minus/equal/plus one microsecond. A third update crosses an HTTP-date second. Bytes/media/ETag and last modification are captured; stale mutations leave them and the since membership unchanged. State deletion uses an explicit registration, preserving separately changed Agent/activity/registration scopes. Absence of registration has its separate all-registrations meaning. All setup/read/error/HEAD headers and statuses are checked. Valid JSON POST conditional rejection is established by the full condition matrix and unchanged precise repository snapshot. The text/plain recording fixture has an unconditional POST merge error400, separate from ordinary stale412. Additional Document GET/HEAD witnesses cover all three families, UTC year crossings and offset-equivalent bounds, plus submicrosecond exclusion on both sides of the Unix and PostgreSQL epochs. Fixed repository times and literal expected ID sets verify the exclusive since comparison; no floating-point conversion or broader ISO grammar claim is used. Additional SHA-1 identity controls store uppercase digests and read/list with lower, upper and mixed hexadecimal spellings. The same document body and ETag are selected; stale and current conditional POST/DELETE operate on that shared address, while a different digest remains a separate scope. Original Agent JSON and NUL-containing document IDs are preserved.",
           "witnesses": [
             {
               "kind": "native",
@@ -52,6 +52,11 @@
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::review_gaps::document_since::{backend}_xapi_document_since_range_and_precision",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::sha1_identity::{backend}_xapi_sha1_identity_scopes",
               "http": true
             }
           ],
@@ -97,7 +102,7 @@
             "/steps/4",
             "/assertions"
           ],
-          "rationale": "The native HTTP control fixes the exact issued .125/.875 clock instants, three families, URL-selected one/two byte documents and A/B scopes. It checks precise since boundaries, unchanged bytes/media/ETag/time after each stale PUT/POST/DELETE and unconditional PUT, including the exact 409 retry instructions. Each independent State scope selector is varied. HEAD body and mandatory headers are checked; entity metadata is not promoted from SHOULD to MUST. Disputed missing-selector policy is outside these fixed selectors. Valid JSON POST conditional rejection is established by the full condition matrix and unchanged precise repository snapshot. The text/plain recording fixture has an unconditional POST merge error400, separate from ordinary stale412.",
+          "rationale": "The native HTTP control fixes the exact issued .125/.875 clock instants, three families, URL-selected one/two byte documents and A/B scopes. It checks precise since boundaries, unchanged bytes/media/ETag/time after each stale PUT/POST/DELETE and unconditional PUT, including the exact 409 retry instructions. Each independent State scope selector is varied. HEAD body and mandatory headers are checked; entity metadata is not promoted from SHOULD to MUST. Disputed missing-selector policy is outside these fixed selectors. Valid JSON POST conditional rejection is established by the full condition matrix and unchanged precise repository snapshot. The text/plain recording fixture has an unconditional POST merge error400, separate from ordinary stale412. Additional SHA-1 identity controls store uppercase digests and read/list with lower, upper and mixed hexadecimal spellings. The same document body and ETag are selected; stale and current conditional POST/DELETE operate on that shared address, while a different digest remains a separate scope. Original Agent JSON and NUL-containing document IDs are preserved.",
           "witnesses": [
             {
               "kind": "native",
@@ -107,6 +112,11 @@
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::preconditions::{backend}_xapi_document_precondition_matrix",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::sha1_identity::{backend}_xapi_sha1_identity_scopes",
               "http": true
             }
           ]
@@ -7074,7 +7084,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "Real RSA-signed HTTP PUT/POST pairs exercise the production attachment admission -> signature logical comparator, capturing both complete input values and its actual Boolean return after cryptographic verification. Identical pairs, all listed root exclusions, legal nested duration/Actor/Verb/Activity changes, default discriminators, Group reorder and substantive negatives are explicit. PT1.011/1.019/1.01 versus1.02 exercises centiseconds; local-part/path and selected simple IRI spelling are significant. Owner strings named duration remain exact in readback; Context/other Result/Activity definition changes are outside the general invariant, while the actual strict replay comparator rejects an owner duration change even inside the same centisecond and preserves all affected resources. Repeated owner members are checked with separate SP03 preservation witnesses; excluded Context differences do not become a false signature mismatch. Kiva SP01 signature selection is distinct from the general source relation; no409 Boolean inference or independent acceptance.",
+          "rationale": "Real RSA-signed HTTP PUT/POST pairs exercise the production attachment admission -> signature logical comparator, capturing both complete input values and its actual Boolean return after cryptographic verification. Identical pairs, all listed root exclusions, legal nested duration/Actor/Verb/Activity changes, default discriminators, Group reorder and substantive negatives are explicit. PT1.011/1.019/1.01 versus1.02 exercises centiseconds; local-part/path and selected simple IRI spelling are significant. Owner strings named duration remain exact in readback; Context/other Result/Activity definition changes are outside the general invariant, while the actual strict replay comparator rejects an owner duration change even inside the same centisecond and preserves all affected resources. Repeated owner members are checked with separate SP03 preservation witnesses; excluded Context differences do not become a false signature mismatch. Kiva SP01 signature selection is distinct from the general source relation; no409 Boolean inference or independent acceptance. Additional real signed PUT/POST pairs cover root and SubStatement StatementRef UUIDs, Actor/Object Agent SHA-1, identified Group SHA-1 and anonymous Group member SHA-1. Lower/upper/mixed spellings are equal by the identifier type, a changed value fails, and received spelling plus original JWS bytes remain unchanged. Additional signed HTTP pairs exercise the SP-01 ASCII Case exclusion for Agent/Group human-readable names in root and SubStatement Actor/Object/member roles, including combined member reorder, unchanged non-ASCII characters, different-name/IFI negatives, and significant IRI/Account-name spelling. Stored Actor/Object JSON and original JWS bytes remain unchanged. These controls add implementation evidence without defining an unspecified Unicode casefold algorithm.",
           "witnesses": [
             {
               "kind": "native",
@@ -38117,7 +38127,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "Typed certificate DER, original-octet signatures and exact called RSA/time schemas are qualified separately. Scope is the selected certificate receiver; conditional CRL and optional ASN.1 services are not claimed executed. Author controls are not independent semantic acceptance. Canonical fractional certificate times beyond milliseconds and nanoseconds are compared on original decimal digits without rounding; independent Python-RSA/OpenSSL-signed original certificates exercise exact before/inside/after HTTP PUT and POST controls. The validated leaf key is handed directly to the JWS verifier; an auxiliary typed time view never substitutes signed bytes.",
+          "rationale": "Typed certificate DER, original-octet signatures and exact called RSA/time schemas are qualified separately. Scope is the selected certificate receiver; conditional CRL and optional ASN.1 services are not claimed executed. Author controls are not independent semantic acceptance. Canonical fractional certificate times beyond milliseconds and nanoseconds are compared on original decimal digits without rounding; independent Python-RSA/OpenSSL-signed original certificates exercise exact before/inside/after HTTP PUT and POST controls. The validated leaf key is handed directly to the JWS verifier; an auxiliary typed time view never substitutes signed bytes. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract. Additional bounded ReasonFlags witnesses check zero unused bits and minimal named-bit encodings in both distribution extensions, leaf/intermediate positions and every distribution point. Signed positive controls retain absence, empty, wide bit strings, opaque unknown extensions and ordinary BIT STRINGs. HTTP admission, rejected-batch sibling absence and original signature attachment readback exercise the calling boundary; these finite observations do not establish all DER meanings. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38155,6 +38165,55 @@
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::rsa_provider::{backend}_xapi_independent_rsa_provider_boundaries",
               "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::reason_flags::certificate_reason_flags_enforce_der_without_narrowing_bit_strings"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::reason_flags::{backend}_xapi_certificate_reason_flags_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38162,7 +38221,7 @@
           "obligations": [
             "/vectors/0"
           ],
-          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted.",
+          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract. Additional bounded ReasonFlags witnesses check zero unused bits and minimal named-bit encodings in both distribution extensions, leaf/intermediate positions and every distribution point. Signed positive controls retain absence, empty, wide bit strings, opaque unknown extensions and ordinary BIT STRINGs. HTTP admission, rejected-batch sibling absence and original signature attachment readback exercise the calling boundary; these finite observations do not establish all DER meanings. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38175,6 +38234,55 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::intermediate_constraints_and_unknown_critical_extensions_are_enforced"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::reason_flags::certificate_reason_flags_enforce_der_without_narrowing_bit_strings"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::reason_flags::{backend}_xapi_certificate_reason_flags_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38182,7 +38290,7 @@
           "obligations": [
             "/vectors/1"
           ],
-          "rationale": "Original TBS signatures and a signature valid only for the provider time view are separately controlled. The adapter verifies the original bytes, while SHA256/384/512 outer/TBS OID mismatches fail despite a fresh mathematical signature; NULL/absent interoperability is retained.",
+          "rationale": "Original TBS signatures and a signature valid only for the provider time view are separately controlled. The adapter verifies the original bytes, while SHA256/384/512 outer/TBS OID mismatches fail despite a fresh mathematical signature; NULL/absent interoperability is retained. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof.",
           "witnesses": [
             {
               "kind": "native",
@@ -38199,6 +38307,19 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::original_certificate_times_support_1950_pivot_and_fractional_endpoints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38206,7 +38327,7 @@
           "obligations": [
             "/vectors/2"
           ],
-          "rationale": "Called certificate schema and RSA forms are typed and executed: unrestricted rsaEncryption SPKI NULL, all three SHA2 signature OIDs with absent/NULL parameters, rejected PSS/OAEP conversion and correct leaf algorithm/key/parameters. Other certificate algorithms, CRL wire processing, CER/PER/XML/full ASN.1 compiler and unused later types are not selected. This does not waive used types or mandatory path conditions.",
+          "rationale": "Called certificate schema and RSA forms are typed and executed: unrestricted rsaEncryption SPKI NULL, all three SHA2 signature OIDs with absent/NULL parameters, rejected PSS/OAEP conversion and correct leaf algorithm/key/parameters. Other certificate algorithms, CRL wire processing, CER/PER/XML/full ASN.1 compiler and unused later types are not selected. This does not waive used types or mandatory path conditions. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38220,6 +38341,15 @@
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::rsa_provider::{backend}_xapi_independent_rsa_provider_boundaries",
               "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38227,7 +38357,7 @@
           "obligations": [
             "/vectors/3"
           ],
-          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted.",
+          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38240,6 +38370,33 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::intermediate_constraints_and_unknown_critical_extensions_are_enforced"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38287,7 +38444,7 @@
           "obligations": [
             "/vectors/6"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification.",
           "witnesses": [
             {
               "kind": "native",
@@ -38300,6 +38457,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38307,7 +38473,7 @@
           "obligations": [
             "/vectors/7"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Additional bounded ReasonFlags witnesses check zero unused bits and minimal named-bit encodings in both distribution extensions, leaf/intermediate positions and every distribution point. Signed positive controls retain absence, empty, wide bit strings, opaque unknown extensions and ordinary BIT STRINGs. HTTP admission, rejected-batch sibling absence and original signature attachment readback exercise the calling boundary; these finite observations do not establish all DER meanings.",
           "witnesses": [
             {
               "kind": "native",
@@ -38320,6 +38486,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::reason_flags::certificate_reason_flags_enforce_der_without_narrowing_bit_strings"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::reason_flags::{backend}_xapi_certificate_reason_flags_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38327,7 +38502,7 @@
           "obligations": [
             "/vectors/8"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract.",
           "witnesses": [
             {
               "kind": "native",
@@ -38340,6 +38515,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38367,7 +38551,7 @@
           "obligations": [
             "/vectors/10"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof.",
           "witnesses": [
             {
               "kind": "native",
@@ -38380,6 +38564,19 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38387,7 +38584,7 @@
           "obligations": [
             "/vectors/11"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract.",
           "witnesses": [
             {
               "kind": "native",
@@ -38400,6 +38597,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38431,7 +38637,7 @@
           "obligations": [
             "/vectors/13"
           ],
-          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted.",
+          "rationale": "Independently encoded and freshly signed certificate controls distinguish typed fields, mandatory components, CHOICE/version wrappers, DEFAULT omission and known extension inner type from generic TLV canonicality. Unknown noncritical extnValue remains opaque; unknown critical processing is separately exercised. CRL DER is conditional on the unselected CRL mechanism; no CRL decoding result is asserted. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract. Additional bounded ReasonFlags witnesses check zero unused bits and minimal named-bit encodings in both distribution extensions, leaf/intermediate positions and every distribution point. Signed positive controls retain absence, empty, wide bit strings, opaque unknown extensions and ordinary BIT STRINGs. HTTP admission, rejected-batch sibling absence and original signature attachment readback exercise the calling boundary; these finite observations do not establish all DER meanings. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof.",
           "witnesses": [
             {
               "kind": "native",
@@ -38444,6 +38650,46 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::intermediate_constraints_and_unknown_critical_extensions_are_enforced"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::reason_flags::certificate_reason_flags_enforce_der_without_narrowing_bit_strings"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::reason_flags::{backend}_xapi_certificate_reason_flags_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38467,7 +38713,7 @@
           "obligations": [
             "/vectors/15"
           ],
-          "rationale": "Called certificate schema and RSA forms are typed and executed: unrestricted rsaEncryption SPKI NULL, all three SHA2 signature OIDs with absent/NULL parameters, rejected PSS/OAEP conversion and correct leaf algorithm/key/parameters. Other certificate algorithms, CRL wire processing, CER/PER/XML/full ASN.1 compiler and unused later types are not selected. This does not waive used types or mandatory path conditions.",
+          "rationale": "Called certificate schema and RSA forms are typed and executed: unrestricted rsaEncryption SPKI NULL, all three SHA2 signature OIDs with absent/NULL parameters, rejected PSS/OAEP conversion and correct leaf algorithm/key/parameters. Other certificate algorithms, CRL wire processing, CER/PER/XML/full ASN.1 compiler and unused later types are not selected. This does not waive used types or mandatory path conditions. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38480,6 +38726,15 @@
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::rsa_provider::{backend}_xapi_independent_rsa_provider_boundaries",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
               "http": true
             }
           ]
@@ -38509,7 +38764,7 @@
           "obligations": [
             "/vectors/17"
           ],
-          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific.",
+          "rationale": "Concrete length0/127/128, nested scope, positive/negative signed INTEGER boundaries, BOOLEAN/ENUMERATED, unused-bit counts, named-bit minimality, SET order, OID base128/first arcs and Unicode scalar/alphabet controls distinguish syntax from issuer profile. Signature-positive noncanonical certificates fail, so a broken signature is not the negative premise. NULL schema presence remains OID-specific. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38522,6 +38777,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         }
@@ -38536,7 +38800,7 @@
             "/steps",
             "/assertions"
           ],
-          "rationale": "Actual configured certificate validation, including all mandatory conditions and returned policy/key outputs, is exercised with explicit trust/time/purpose/status and single-cause contrasts. Preprovided paths are selected; discovery, extra algorithms and legacy-CA confirmation are not silently assumed. Canonical fractional certificate times beyond milliseconds and nanoseconds are compared on original decimal digits without rounding; independent Python-RSA/OpenSSL-signed original certificates exercise exact before/inside/after HTTP PUT and POST controls. The validated leaf key is handed directly to the JWS verifier; an auxiliary typed time view never substitutes signed bytes.",
+          "rationale": "Actual configured certificate validation, including all mandatory conditions and returned policy/key outputs, is exercised with explicit trust/time/purpose/status and single-cause contrasts. Preprovided paths are selected; discovery, extra algorithms and legacy-CA confirmation are not silently assumed. Canonical fractional certificate times beyond milliseconds and nanoseconds are compared on original decimal digits without rounding; independent Python-RSA/OpenSSL-signed original certificates exercise exact before/inside/after HTTP PUT and POST controls. The validated leaf key is handed directly to the JWS verifier; an auxiliary typed time view never substitutes signed bytes. CertificatePolicies qualifiers are checked at leaf and intermediate positions with both critical flags and with/without a surviving policy tree: unknown critical qualifiers, malformed CPS/UserNotice and missing required values reject; valid URI/NoticeReference/DisplayText forms and noncritical unknown qualifiers retain acceptance. Actual PUT, POST and mixed batches verify exact admission statuses, complete rejection without sibling persistence, and original accepted attachment bytes. These finite controls supplement, rather than establish exhaustive, RFC5280 semantic coverage. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional signed Name/RDN and nested collection schema contrasts exercise typed sizes/values at subject, issuer and extension locations, with actual HTTP admission and batch atomicity. These finite controls do not replace the complete delegated contract. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38610,6 +38874,55 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::der::tests::noncanonical_certificates_fail_even_with_correct_original_byte_signatures"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policy_qualifiers::policy_qualifiers_obey_receiver_contract_even_without_policy_tree"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policy_qualifiers::{backend}_xapi_certificate_qualifiers_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::naming_schema::certificate_naming_schema_preserves_types_sizes_and_optional_absence"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::naming_schema::{backend}_xapi_certificate_naming_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38642,7 +38955,7 @@
           "obligations": [
             "/vectors/1"
           ],
-          "rationale": "Otherwise valid intermediate-only before/after/exact endpoint controls, original-signature tampering, issuer linkage, each-certificate status and mandatory constraint extensions are independently exercised. Evaluation time is explicit and independent of Statement.timestamp.",
+          "rationale": "Otherwise valid intermediate-only before/after/exact endpoint controls, original-signature tampering, issuer linkage, each-certificate status and mandatory constraint extensions are independently exercised. Evaluation time is explicit and independent of Statement.timestamp. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38667,6 +38980,28 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::path_policy_extension_counters_and_self_issued_decrement_rules_are_effective"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38771,7 +39106,7 @@
           "obligations": [
             "/vectors/6"
           ],
-          "rationale": "Successive permitted subtrees narrow by intersection; disjoint empty is not unset, omitted name type retains its previous constraint. Empty subject+criticalSAN, one failing of multiple SANs, noncritical SAN and non-final self-issued exception versus final position are exercised. Unsupported critical min/max constraints fail with and without relevant names. Selected RSA algorithm/parameter output and distinct-key rollover are checked; no general unsupported key-algorithm inheritance claim.",
+          "rationale": "Successive permitted subtrees narrow by intersection; disjoint empty is not unset, omitted name type retains its previous constraint. Empty subject+criticalSAN, one failing of multiple SANs, noncritical SAN and non-final self-issued exception versus final position are exercised. Unsupported critical min/max constraints fail with and without relevant names. Selected RSA algorithm/parameter output and distinct-key rollover are checked; no general unsupported key-algorithm inheritance claim. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -38796,6 +39131,15 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::self_issued_rollover_accepts_a_new_key_only_when_signed_by_trusted_old_key"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38803,7 +39147,7 @@
           "obligations": [
             "/vectors/7"
           ],
-          "rationale": "Each initial policy choice and actual final tree, permitted/inhibited anyPolicy, mapping0/1 counters including self-issued decrement exception, requireExplicitPolicy and absent/empty trees are controlled. Repeated independent validations cannot inherit mutable state from an earlier path.",
+          "rationale": "Each initial policy choice and actual final tree, permitted/inhibited anyPolicy, mapping0/1 counters including self-issued decrement exception, requireExplicitPolicy and absent/empty trees are controlled. Repeated independent validations cannot inherit mutable state from an earlier path. Additional controls retain actual policy parents and qualifiers, explicit initial anyPolicy, absent-policy outcomes, self-mapping order, and final self-issued counter applicability. Independent bit-set intersection and relation composition models challenge combinations beyond the original examples. Actual PUT and POST batch responses, sibling non-admission and raw signature readback check the product decision. These are bounded models, not exhaustive policy equivalence. CertificatePolicies qualifiers are checked at leaf and intermediate positions with both critical flags and with/without a surviving policy tree: unknown critical qualifiers, malformed CPS/UserNotice and missing required values reject; valid URI/NoticeReference/DisplayText forms and noncritical unknown qualifiers retain acceptance. Actual PUT, POST and mixed batches verify exact admission statuses, complete rejection without sibling persistence, and original accepted attachment bytes. These finite controls supplement, rather than establish exhaustive, RFC5280 semantic coverage. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification.",
           "witnesses": [
             {
               "kind": "native",
@@ -38820,6 +39164,45 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::successive_name_constraints_intersect_and_self_issued_exceptions_are_position_bound"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_review_counterexamples_have_correct_path_results"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_sets_follow_independent_intersection_model"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_mappings_follow_independent_relation_composition"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_tree_retains_distinct_parents_and_leaf_qualifiers"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policies::{backend}_xapi_certificate_policies_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policy_qualifiers::policy_qualifiers_obey_receiver_contract_even_without_policy_tree"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policy_qualifiers::{backend}_xapi_certificate_qualifiers_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38827,7 +39210,7 @@
           "obligations": [
             "/vectors/8"
           ],
-          "rationale": "Each initial policy choice and actual final tree, permitted/inhibited anyPolicy, mapping0/1 counters including self-issued decrement exception, requireExplicitPolicy and absent/empty trees are controlled. Repeated independent validations cannot inherit mutable state from an earlier path.",
+          "rationale": "Each initial policy choice and actual final tree, permitted/inhibited anyPolicy, mapping0/1 counters including self-issued decrement exception, requireExplicitPolicy and absent/empty trees are controlled. Repeated independent validations cannot inherit mutable state from an earlier path. Additional controls retain actual policy parents and qualifiers, explicit initial anyPolicy, absent-policy outcomes, self-mapping order, and final self-issued counter applicability. Independent bit-set intersection and relation composition models challenge combinations beyond the original examples. Actual PUT and POST batch responses, sibling non-admission and raw signature readback check the product decision. These are bounded models, not exhaustive policy equivalence. CertificatePolicies qualifiers are checked at leaf and intermediate positions with both critical flags and with/without a surviving policy tree: unknown critical qualifiers, malformed CPS/UserNotice and missing required values reject; valid URI/NoticeReference/DisplayText forms and noncritical unknown qualifiers retain acceptance. Actual PUT, POST and mixed batches verify exact admission statuses, complete rejection without sibling persistence, and original accepted attachment bytes. These finite controls supplement, rather than establish exhaustive, RFC5280 semantic coverage. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification.",
           "witnesses": [
             {
               "kind": "native",
@@ -38844,6 +39227,45 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::successive_name_constraints_intersect_and_self_issued_exceptions_are_position_bound"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_review_counterexamples_have_correct_path_results"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_sets_follow_independent_intersection_model"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_mappings_follow_independent_relation_composition"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policies::policy_tree_retains_distinct_parents_and_leaf_qualifiers"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policies::{backend}_xapi_certificate_policies_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policy_qualifiers::policy_qualifiers_obey_receiver_contract_even_without_policy_tree"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policy_qualifiers::{backend}_xapi_certificate_qualifiers_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38851,7 +39273,7 @@
           "obligations": [
             "/vectors/9"
           ],
-          "rationale": "All eight mandatory extension semantics are active in signed controls: KU, policies, SAN, basicConstraints, nameConstraints, policyConstraints, EKU and inhibitAnyPolicy. pathLen0 permits an end entity and rejects an extra ordinary CA; CA flag and present/absent KU are distinct. Supported optional mappings do not waive critical processing. Unknown noncritical/critical contrasts are independent.",
+          "rationale": "All eight mandatory extension semantics are active in signed controls: KU, policies, SAN, basicConstraints, nameConstraints, policyConstraints, EKU and inhibitAnyPolicy. pathLen0 permits an end entity and rejects an extra ordinary CA; CA flag and present/absent KU are distinct. Supported optional mappings do not waive critical processing. Unknown noncritical/critical contrasts are independent. CertificatePolicies qualifiers are checked at leaf and intermediate positions with both critical flags and with/without a surviving policy tree: unknown critical qualifiers, malformed CPS/UserNotice and missing required values reject; valid URI/NoticeReference/DisplayText forms and noncritical unknown qualifiers retain acceptance. Actual PUT, POST and mixed batches verify exact admission statuses, complete rejection without sibling persistence, and original accepted attachment bytes. These finite controls supplement, rather than establish exhaustive, RFC5280 semantic coverage. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification.",
           "witnesses": [
             {
               "kind": "native",
@@ -38876,6 +39298,24 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::path_policy_extension_counters_and_self_issued_decrement_rules_are_effective"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policy_qualifiers::policy_qualifiers_obey_receiver_contract_even_without_policy_tree"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policy_qualifiers::{backend}_xapi_certificate_qualifiers_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -38883,7 +39323,7 @@
           "obligations": [
             "/vectors/10"
           ],
-          "rationale": "Successive permitted subtrees narrow by intersection; disjoint empty is not unset, omitted name type retains its previous constraint. Empty subject+criticalSAN, one failing of multiple SANs, noncritical SAN and non-final self-issued exception versus final position are exercised. Unsupported critical min/max constraints fail with and without relevant names. Selected RSA algorithm/parameter output and distinct-key rollover are checked; no general unsupported key-algorithm inheritance claim.",
+          "rationale": "Successive permitted subtrees narrow by intersection; disjoint empty is not unset, omitted name type retains its previous constraint. Empty subject+criticalSAN, one failing of multiple SANs, noncritical SAN and non-final self-issued exception versus final position are exercised. Unsupported critical min/max constraints fail with and without relevant names. Selected RSA algorithm/parameter output and distinct-key rollover are checked; no general unsupported key-algorithm inheritance claim. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof.",
           "witnesses": [
             {
               "kind": "native",
@@ -38908,6 +39348,19 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::self_issued_rollover_accepts_a_new_key_only_when_signed_by_trusted_old_key"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         },
@@ -39048,7 +39501,7 @@
           "obligations": [
             "/vectors/16"
           ],
-          "rationale": "Explicit external anchor with one/multiple path certificates, optional transported anchor exclusion, repeated/reordered/missing links and unrelated trust are executed. No networking or received-root trust inference. Validated output binds actual leaf SPKI, algorithm/parameters, anchor and policy tree; missing required trust remains a rejection, not a verified path.",
+          "rationale": "Explicit external anchor with one/multiple path certificates, optional transported anchor exclusion, repeated/reordered/missing links and unrelated trust are executed. No networking or received-root trust inference. Validated output binds actual leaf SPKI, algorithm/parameters, anchor and policy tree; missing required trust remains a rejection, not a verified path. Original-byte signed leaf/intermediate controls distinguish universal primitive empty NULL from application/context/private tag-5 values, constructed/nonempty NULL and OCTET STRING. Signature NULL/absent and mandatory SPKI NULL remain separate. PUT/POST/batch observations include stored bytes and absence of every rejected batch member.",
           "witnesses": [
             {
               "kind": "native",
@@ -39065,6 +39518,15 @@
             {
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::signatures::{backend}_xapi_signed_admission_checks_trust_and_preserves_batch_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::rsa_parameters::rsa_parameter_types_govern_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::rsa_parameters::{backend}_xapi_certificate_rsa_parameter_types_governs_admission_and_atomicity",
               "http": true
             }
           ]
@@ -39089,7 +39551,7 @@
           "obligations": [
             "/vectors/18"
           ],
-          "rationale": "All eight mandatory extension semantics are active in signed controls: KU, policies, SAN, basicConstraints, nameConstraints, policyConstraints, EKU and inhibitAnyPolicy. pathLen0 permits an end entity and rejects an extra ordinary CA; CA flag and present/absent KU are distinct. Supported optional mappings do not waive critical processing. Unknown noncritical/critical contrasts are independent.",
+          "rationale": "All eight mandatory extension semantics are active in signed controls: KU, policies, SAN, basicConstraints, nameConstraints, policyConstraints, EKU and inhibitAnyPolicy. pathLen0 permits an end entity and rejects an extra ordinary CA; CA flag and present/absent KU are distinct. Supported optional mappings do not waive critical processing. Unknown noncritical/critical contrasts are independent. CertificatePolicies qualifiers are checked at leaf and intermediate positions with both critical flags and with/without a surviving policy tree: unknown critical qualifiers, malformed CPS/UserNotice and missing required values reject; valid URI/NoticeReference/DisplayText forms and noncritical unknown qualifiers retain acceptance. Actual PUT, POST and mixed batches verify exact admission statuses, complete rejection without sibling persistence, and original accepted attachment bytes. These finite controls supplement, rather than establish exhaustive, RFC5280 semantic coverage. Signed extension controls additionally exercise nonempty known collection schemas, absent versus present-empty optional subtrees, canonical nonnegative limits across u8/u32/u64 boundaries, and negative/nonminimal/incorrect-tag contrasts. The actual HTTP decision, saved Statement/attachment and rejected-batch sibling absence are checked. These finite witnesses do not establish exhaustive ASN.1 or PKIX qualification. Additional bounded OID observations cover minimal two-arc/short encodings, root-2 second arcs, 39/40-octet and RFC5280 20-arc/100-character boundaries; malformed/nonminimal/overflow rejection and identity remain distinct. Signed leaf/intermediate contrasts retain unknown-critical rejection, and short/multi-octet/long OID policy, EKU and issuer-name equal/different outcomes. Real PUT/POST/batch controls observe admission, readback, original signature attachment bytes and rejected sibling absence. These are finite observations, not whole-contract semantic proof.",
           "witnesses": [
             {
               "kind": "native",
@@ -39114,6 +39576,37 @@
             {
               "kind": "native",
               "id": "kiva-server::core::signature_policy::tests::path_policy_extension_counters_and_self_issued_decrement_rules_are_effective"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::policy_qualifiers::policy_qualifiers_obey_receiver_contract_even_without_policy_tree"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::policy_qualifiers::{backend}_xapi_certificate_qualifiers_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::extension_schema::extension_schema_handles_collection_sizes_and_unbounded_constraints"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::extension_schema::{backend}_xapi_certificate_extension_schemas_govern_admission_and_atomicity",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::oid_domain_codec_preserves_identity_and_rejects_malformed_values"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::core::signature_policy::tests::oid_domain::certificate_oid_domain_governs_path_validation"
+            },
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::review_gaps::oid_domain::{backend}_xapi_certificate_oid_domain_governs_admission_and_atomicity",
+              "http": true
             }
           ]
         }
@@ -113412,6 +113905,48 @@
               "kind": "native",
               "id": "kiva-server::tests::xapi_regressions::scope::{backend}_xapi_extension_hosting_and_retention_scope",
               "http": true
+            }
+          ]
+        }
+      ]
+    },
+    "issued-definition-REF-FILTER-01": {
+      "rubric_sha256": "63e45346051d95f01b07b1e4a256d356141c71e1cefafab8a51c6a41761f3241",
+      "bindings": [
+        {
+          "obligations": [
+            "/fixture",
+            "/steps",
+            "/assertions/0",
+            "/assertions/1"
+          ],
+          "rationale": "Actual authenticated HTTP creates and reads eight independently identified records at assigned seconds 1..8. Explicit expected inventories discriminate two predicates on different nodes, four predicates on four nodes, a same-node control, independently absent selectors, Context-only and absent Object targets, and a two-node cycle with three actual seeds but no Activity seed. Forty query variants cross ten inventories with both ordering directions and limits one/two under maximum two; every real continuation is followed, checking each observed prefix and the terminal complete order. Time boundaries use the targeter, and exact single-ID retrieval plus forbidden ID/filter combinations remain separate controls. The expected sets are declared from SP-REFERENCE-CONJUNCTION before invoking the server, not inferred by replaying its filter algorithm.",
+          "witnesses": [
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::references::conjunction::{backend}_xapi_reference_conjunction_interpretation",
+              "http": true
+            }
+          ]
+        },
+        {
+          "obligations": [
+            "/assertions/2"
+          ],
+          "rationale": "The native trace includes the fixed interpretation ID and expected inventories. Python projection controls verify the linked source interpretation and competing reading, reject missing/duplicate/wrong-branch references, and pass passed/failed/not-run outcomes through the real result reporter without changing them or converting them into issuer/whole-rule acceptance. Existing source residuals stay distinct. These are author interpretation and execution witnesses, not independent semantic approval.",
+          "witnesses": [
+            {
+              "kind": "native",
+              "id": "kiva-server::tests::xapi_regressions::references::conjunction::{backend}_xapi_reference_conjunction_interpretation",
+              "http": true
+            },
+            {
+              "kind": "native",
+              "id": "python::test_reference_interpretation_projection.ReferenceInterpretationProjection.test_pass_failure_and_unavailability_retain_the_same_interpretation"
+            },
+            {
+              "kind": "native",
+              "id": "python::test_reference_interpretation_projection.ReferenceInterpretationProjection.test_unknown_duplicate_and_wrong_branch_interpretations_are_rejected"
             }
           ]
         }

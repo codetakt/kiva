@@ -3,7 +3,7 @@
 The pinned IEEE Std 9274.1.1-2023 catalog and merged detailed ledger in
 [the baseline](issued-ledger-baseline.json) define the responsibility set.
 The projection connects 673 rules and 103 exceptions to 17,933 HTTP cases and
-145 procedures. Its reproducible indexes preserve each rule's actor, normative
+146 procedures. Its reproducible indexes preserve each rule's actor, normative
 strength, conditions, exception branches and interpretation/dependency boundaries.
 
 ## Definition sources
@@ -12,7 +12,7 @@ strength, conditions, exception branches and interpretation/dependency boundarie
   concrete observations; [procedure definitions](lrs-review-tests.yaml) and
   [issued procedures](issued-test-procedures.yaml) supply controlled scenarios.
 - [Interpretation and dependency contracts](issued-definition-contracts.json)
-  specify 57 branches, Kiva policy choices, source interpretations, equality and
+  specify 58 branches, Kiva policy choices, source interpretations, equality and
   output matrices, version/error-cause combinations and document preconditions.
 - [Contract vectors](definition-contract-vectors.yaml) define positive, negative
   and boundary expectations for twelve incorporated primitive contracts.
@@ -100,3 +100,24 @@ from structural coverage. The [CI known-gap policy](../../docs/architecture/conf
 checks exact regression outcomes while preserving raw FAIL and NOT-RUN results.
 A successful integration check does not establish LRS conformance. Hosted artifact
 collection is described in [the CI guide](hosted-conformance.md).
+
+## StatementRef conjunction interpretation
+
+`REF-FILTER-01` binds `SP-REFERENCE-CONJUNCTION` to the original
+`IP-statementref-filters` responsibility and its selector/time/sequence rules.
+The explicit reading inherits each non-time predicate through Object StatementRef
+edges before conjoining the predicates. Different predicates can have different
+witnesses along the same chain; the returned Statement supplies time and sequence.
+The contract records the competing common-witness reading and the clause-based
+reason for rejecting it. This is a project source interpretation, not official
+IEEE adjudication or a new unrestricted permission. Existing source residuals
+remain unchanged.
+
+The separate procedure discriminates split-node positives, four independently
+absent predicates, Context references, missing targets, seeded/seedless aspects
+of cycles, targeter times, complete pagination and single-ID exclusions. Its
+memory/PostgreSQL native HTTP witnesses are named in the implementation manifest.
+Execution reports retain the interpretation, classification and actual procedure
+outcome in `procedure_interpretation_contexts`; a failed or unavailable witness
+cannot be hidden by the interpretation label. The existing 17,933 HTTP cases and
+145 predecessor procedures are preserved; this supplement adds one procedure.

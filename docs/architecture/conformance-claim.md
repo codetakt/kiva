@@ -21,7 +21,7 @@ The follow-up removes all 117 former residual cases after local execution on
 both disposable backends. The baseline now has no permitted FAIL or NOT-RUN:
 all 17,933 HTTP cases per backend must PASS without unresolved checks.
 This gate concerns the HTTP case inventory; it does not establish full LRS
-conformance or completion of the separate 145 procedures.
+conformance or completion of the separate 146 procedures.
 
 The former failures covered SHA-384/512 attachments, comma decimal durations and
 PostgreSQL U+0000 Statement storage. The former NOT-RUN cases required explicit
@@ -38,7 +38,7 @@ exhaustive passing HTTP evidence, and complete decided procedure rubrics with
 explicit links to their checks. Full release validation reassesses captures for
 both backends and rejects HTTP-only or partial procedure evidence. The 25 portable
 partial executors are supplemented by actual native HTTP, storage, provider and
-oracle controls. The implementation procedure manifest links all 145 rubrics to
+oracle controls. The implementation procedure manifest links all 146 rubrics to
 explicit witnesses, including their actor, policy and applicability boundaries.
 Those author links do not establish execution: the gate reconstructs them from
 fresh passing observations and preserves every unresolved partial-executor check

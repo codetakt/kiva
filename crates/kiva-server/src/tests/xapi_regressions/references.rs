@@ -7,6 +7,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+#[path = "references/conjunction.rs"]
+mod conjunction;
+
 #[tokio::test]
 async fn memory_xapi_reference_graph_targeter_time_and_related_scopes() -> Result<(), String> {
     verify(&memory_test_state_with_auth(AuthConfig::default())).await

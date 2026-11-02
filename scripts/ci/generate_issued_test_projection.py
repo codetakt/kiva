@@ -15,7 +15,7 @@ import yaml
 
 from lrs_issued_bindings import select, DIRECT, identifier_format_bindings
 from issued_test_design import obligations, review_binding
-from issued_definition_contracts import load_contracts
+from issued_definition_contracts import load_contracts, branch_interpretations
 from lrs_procedure_definitions import load_procedures
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -208,6 +208,9 @@ def project():
             policy_selections={d['id']: d['selection'] for d in definition_contracts['decision_options'] if d['id'] in b['decision_ids']},
             project_policy=b.get('project_policy'),
             definition_state='authored expectations; source residuals remain explicit') for b in branches]
+        for branch, projected in zip(branches, design['interpretation_branches']):
+            if interpretations := branch_interpretations(definition_contracts, branch):
+                projected['source_interpretations'] = interpretations
         design['incorporated_contracts'] = [d['id'] for d in definition_contracts['dependency_contracts'] if rule['id'] in d['rule_ids']]
         if not names and not proc:
             raise ValueError('rule has no concrete test or procedure: ' + rule['id'])

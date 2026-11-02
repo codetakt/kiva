@@ -45,7 +45,7 @@ hashes must be checked against the implementation before use. The portable runne
 executes 25 partial procedures. `run_lrs_native_controls.py` additionally records
 the actual Rust/Python test inventory, binaries, toolchains, per-test outcomes
 and native HTTP/control observations. `collect_lrs_procedure_evidence.py` combines
-these with the full HTTP report through the explicit 145-procedure manifest.
+these with the full HTTP report through the explicit 146-procedure manifest.
 It checks exact rubric leaves, dependency order and every selected witness;
 missing executions or incomplete dependencies cannot be replaced by map counts.
 Only exact named partial capability gaps can be superseded, retaining their

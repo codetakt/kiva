@@ -126,7 +126,7 @@ possible. Before invoking standalone reporting tools, run `generate` as above.
 The two authorized local backend checks preserve raw FAIL/NOT-RUN results and
 produce a separate regression decision; see [the claim boundary](../../docs/architecture/conformance-claim.md).
 Full implementation claims additionally require both complete backend captures
-with all 145 procedures; the HTTP integration gate alone is insufficient.
+with all 146 procedures; the HTTP integration gate alone is insufficient.
 
 For the two authorized local backend checks, evidence capture and gate enforcement
 are separate. For example:
