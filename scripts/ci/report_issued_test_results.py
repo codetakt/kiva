@@ -33,6 +33,8 @@ def verify_execution_receipt(projection, projection_path, artifact_paths, receip
     """
     if receipt.get('schema_version') != 1 or receipt.get('kind') != 'issued-test-execution-receipt':
         raise ValueError('unsupported execution receipt')
+    if receipt.get('errors'):
+        raise ValueError('incomplete execution capture: ' + str(receipt['errors']))
     if receipt.get('projection_sha256') != file_sha256(projection_path):
         raise ValueError('execution receipt does not bind the current projection')
     inputs = receipt.get('input_sha256', {})
@@ -93,6 +95,160 @@ def execution_complete(report):
                 'missing_procedures', 'incomplete_procedures')))
 
 
+def definition_obligations(spec):
+    """Address every authored rubric item without interpreting or weakening it."""
+    obligations = {}
+    def visit(value, pointer):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                visit(child, pointer + '/' + key.replace('~', '~0').replace('/', '~1'))
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                visit(child, pointer + '/' + str(index))
+        else:
+            obligations[pointer] = hashlib.sha256(json.dumps(value, ensure_ascii=False,
+                sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    for field in ('setup', 'action', 'expected', 'fixture', 'steps', 'assertions',
+                  'rubric', 'vectors', 'association_controls'):
+        if field in spec:
+            visit(spec[field], '/' + field)
+    return obligations
+
+
+def procedure_coverage_complete(result, spec):
+    """Require explicit evidence links for the whole rubric, not one PASS label.
+
+    These links remain author evidence: a hash cannot establish that a check
+    semantically discharges the linked prose. Independent review remains separate.
+    """
+    obligations = definition_obligations(spec)
+    coverage = result.get('definition_coverage')
+    checks = result.get('checks', [])
+    if not obligations or not isinstance(coverage, dict) or set(coverage) != set(obligations):
+        return False
+    identifiers = [c.get('id') for c in checks if isinstance(c, dict)]
+    if (len(identifiers) != len(checks) or not all(isinstance(i, str) and i for i in identifiers)
+            or len(set(identifiers)) != len(identifiers)):
+        return False
+    for pointer, digest in obligations.items():
+        entry = coverage[pointer]
+        if not isinstance(entry, dict) or entry.get('sha256') != digest:
+            return False
+        links = entry.get('checks')
+        if (not isinstance(links, list) or not links
+                or any(not isinstance(i, str) or i not in identifiers for i in links)
+                or len(set(links)) != len(links)):
+            return False
+    return True
+
+
+def test_specification_conformant(report):
+    """All current mandatory test observations pass; this is not an IEEE ruling."""
+    summary = report['summary']
+    return (execution_complete(report)
+            and summary.get('implementation_evidence_verified') is True
+            and summary.get('http_evidence_verified') is True
+            and summary.get('wrapper_exit') == 0
+            and summary.get('http_report_status') == 'passed'
+            and set(summary['http_outcomes']) <= {'passed'}
+            and summary.get('http_cases_observed', 0) > 0
+            and not summary.get('inconsistent_http_cases', 0)
+            and not summary.get('failed_procedure_checks', 0)
+            and not summary.get('incomplete_procedure_coverage', 1)
+            and not summary['procedure_outcomes'].get('failed', 0))
+
+
+def implementation_inputs(root=ROOT):
+    """Bind all local implementation/build/database inputs, including new files."""
+    paths = {'Cargo.toml', 'Cargo.lock', 'flake.nix', 'flake.lock', 'rust-toolchain.toml', 'db/schema.sql',
+             'spec/conformance/implementation-procedure-bindings.json'}
+    for pattern in ('.cargo/**/*', 'crates/**/*', 'vendor/**/*', 'tools/xapi-lrs-conformance/**/*',
+                    'db/migrations/*', 'nix/**/*.nix', 'tests/conformance/controls/**/*',
+                    'tests/conformance/fixtures/**/*', 'tests/postgres/**/*',
+                    'scripts/ci/**/*.py', 'scripts/ci/**/*.sh', 'spec/openapi/**/*',
+                    'generated/**/*', 'spec/conformance/reference/*'):
+        paths.update(str(path.relative_to(root)) for path in root.glob(pattern) if path.is_file())
+    return {name: file_sha256(root / name) for name in sorted(paths) if (root / name).is_file()}
+
+
+def verify_implementation_receipt(receipt, root=ROOT):
+    implementation = receipt.get('implementation', {})
+    if implementation.get('backend') not in ('memory', 'postgres'):
+        raise ValueError('implementation receipt needs the executed backend')
+    if implementation.get('input_sha256') != implementation_inputs(root):
+        raise ValueError('implementation source/build/database input drift')
+    for key in ('server_binary_sha256', 'runner_binary_sha256'):
+        value = implementation.get(key)
+        if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
+            raise ValueError('implementation receipt lacks ' + key)
+
+
+def verify_passing_http(http, root=ROOT):
+    # Reuse the exhaustive HTTP gate with NO known-gap exceptions. Validate
+    # attempts and totals as well as the final labels, against actual definitions.
+    import jsonschema
+    from check_conformance_regressions import SCHEMA, compare, definitions
+    try:
+        jsonschema.Draft202012Validator(load(root / SCHEMA)).validate(http)
+    except jsonschema.ValidationError as error:
+        raise ValueError('invalid HTTP evidence: ' + error.message) from error
+    cases, suites, _ = definitions(root)
+    compare(http, 0, cases, suites, {})
+
+
+def assess_capture(directory, root=ROOT):
+    """Reassess original captured evidence, never trust a supplied PASS summary."""
+    projection_path = root / 'spec/conformance/issued-test-projection.json'
+    projection = load(projection_path)
+    paths = [directory / name for name in
+             ('http.json', 'case-receipt.json', 'procedure-evidence.json', 'fixture.json')]
+    receipt = load(directory / 'execution.json')
+    artifacts = receipt.get('artifacts_sha256', {})
+    for name in ('http.json', 'http.xml', 'case-receipt.json', 'fixture.json',
+                 'execution.log', 'procedures/summary.json', 'procedures/http.jsonl',
+                 'native/receipt.json', 'procedure-evidence.json'):
+        if name not in artifacts:
+            raise ValueError('missing capture artifact: ' + name)
+    for name, digest in artifacts.items():
+        path = directory / name
+        if (Path(name).is_absolute() or '..' in Path(name).parts
+                or not path.resolve().is_relative_to(directory.resolve())
+                or file_sha256(path) != digest):
+            raise ValueError('capture artifact drift: ' + name)
+    verify_execution_receipt(projection, projection_path, paths, receipt, root)
+    verify_implementation_receipt(receipt, root)
+    if receipt.get('fixture_sha256') != file_sha256(paths[-1]):
+        raise ValueError('execution fixture drift')
+    http = load(paths[0])
+    workers = receipt.get('workers', 1)
+    if type(workers) is not int or not 1 <= workers <= 8:
+        raise ValueError('invalid capture worker count')
+    if workers > 1:
+        import jsonschema
+        from check_conformance_regressions import SCHEMA, definitions
+        from run_parallel_conformance import verify_aggregate
+        cases, suites, files = definitions(root)
+        verify_aggregate(directory / 'shards', workers, http, directory / 'http.xml',
+                         cases, suites, files, jsonschema.Draft202012Validator(load(root / SCHEMA)))
+    from collect_lrs_procedure_evidence import collect_capture, combined_wrapper_exit
+    reconstructed=collect_capture(directory,receipt['implementation']['backend'],root)
+    if reconstructed != load(paths[2]):
+        raise ValueError('procedure discharge summary differs from original execution witnesses')
+    if receipt.get('wrapper_exit') != combined_wrapper_exit(receipt.get('partial_wrapper_exit'),reconstructed,http,root):
+        raise ValueError('procedure discharge exit mismatch')
+    report = assess(projection, http, load(paths[1])['cases'], [reconstructed], root=root)
+    report['summary'].update(execution_evidence_verified=True,
+                             implementation_evidence_verified=True,
+                             wrapper_exit=receipt.get('wrapper_exit'))
+    try:
+        verify_passing_http(http, root)
+        report['summary']['http_evidence_verified'] = True
+    except (ValueError, KeyError, TypeError) as error:
+        report['http_validation_error'] = str(error)
+    report['summary']['test_specification_conformant'] = test_specification_conformant(report)
+    return report
+
+
 def unresolved_http_checks(case):
     """Retain partial execution independently of the case's FAIL verdict.
 
@@ -113,7 +269,8 @@ def unresolved_http_checks(case):
     return reasons
 
 
-def assess(projection, http, case_receipt, procedure_reports):
+def assess(projection, http, case_receipt, procedure_reports, root=None):
+    root = root or ROOT
     observations = {}
     for suite in http['suites']:
         for case in suite['cases']:
@@ -128,15 +285,19 @@ def assess(projection, http, case_receipt, procedure_reports):
     unresolved = {name: reasons for name, case in observations.items()
                   if (reasons := unresolved_http_checks(case))}
     incomplete_http = unexecuted | unresolved.keys()
+    inconsistent_http = {name for name, case in observations.items()
+                         if case.get('outcome') == 'passed' and case.get('failures')}
     procedures = {}
     incomplete = set()
+    uncovered = set()
+    failed_checks = []
     for report in procedure_reports:
         for name, result in report['procedures'].items():
             if name in procedures or name not in projection['procedures']:
                 raise ValueError('duplicate or unknown procedure: ' + name)
             # run_lrs_procedures uses compact insertion-order JSON for its rubric
             # receipt, so validate that format against the current actual spec.
-            definitions = load_procedures(ROOT / projection['procedures'][name]['file'])
+            definitions = load_procedures(root / projection['procedures'][name]['file'])
             spec = next(p for p in definitions if p['id'] == name)
             expected_hash = hashlib.sha256(json.dumps(spec, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
             if result.get('rubric_sha256') != expected_hash:
@@ -144,6 +305,12 @@ def assess(projection, http, case_receipt, procedure_reports):
             procedures[name] = result
             if procedure_incomplete(result, spec):
                 incomplete.add(name)
+            if not procedure_coverage_complete(result, spec):
+                uncovered.add(name)
+            for check in result.get('checks', []) or []:
+                if (isinstance(check, dict) and check.get('outcome') == 'failed'
+                        and check_level(spec, check.get('id')) != 'advisory'):
+                    failed_checks.append({'procedure': name, 'check': check.get('id')})
     rows = []
     case_contexts = {n:set() for n in observations}
     for rule in projection['rules']:
@@ -176,8 +343,15 @@ def assess(projection, http, case_receipt, procedure_reports):
     return dict(schema_version=1, claim='Execution observations only; no rule-wide or whole-standard conformance verdict.',
         summary=dict(rules=len(rows), http_cases_observed=len(observations), http_outcomes=dict(Counter(c['outcome'] for c in observations.values())),
             http_mode=http.get('mode'), http_execution_mode=http.get('mode') == 'execute-http',
+            http_report_status=http.get('status'),
             http_report_complete=http.get('status') in ('passed', 'failed'),
             execution_evidence_verified=False,
+            implementation_evidence_verified=False,
+            http_evidence_verified=False,
+            test_specification_conformant=False,
+            inconsistent_http_cases=len(inconsistent_http),
+            failed_procedure_checks=len(failed_checks),
+            incomplete_procedure_coverage=len(uncovered),
             unexecuted_http_cases=len(unexecuted),
             incomplete_http_cases=len(incomplete_http),
             stale_cases=len(stale), missing_http_cases=len(set(projection['cases']) - observations.keys()),
@@ -190,6 +364,9 @@ def assess(projection, http, case_receipt, procedure_reports):
         stale_cases=sorted(stale), unexecuted_http_cases=sorted(unexecuted), missing_http_cases=sorted(set(projection['cases']) - observations.keys()),
         incomplete_http_cases=sorted(incomplete_http), unresolved_http_checks=unresolved,
         incomplete_procedures=sorted(incomplete),
+        inconsistent_http_cases=sorted(inconsistent_http),
+        failed_procedure_checks=failed_checks,
+        incomplete_procedure_coverage=sorted(uncovered),
         case_interpretation_contexts={n:sorted(ids) for n,ids in sorted(case_contexts.items()) if ids},
         case_context_scope='Conservative union of issues on corresponding detailed rules, not proof that every issue affects every assertion. Raw FAIL remains a fixture/profile observation; no unqualified IEEE verdict is inferred.',
         rules=rows)
@@ -205,6 +382,8 @@ def main():
     parser.add_argument('--procedures', type=Path, action='append', default=[])
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--require-complete', action='store_true')
+    parser.add_argument('--require-conforming', action='store_true',
+                        help='Require current implementation evidence and PASS for the complete test specification, including every procedure rubric item')
     args = parser.parse_args()
     paths = [args.projection, args.http, args.case_receipt, *args.procedures]
     if args.evidence_receipt:
@@ -217,14 +396,28 @@ def main():
                                  [args.http, args.case_receipt, *args.procedures],
                                  load(args.evidence_receipt))
         report['summary']['execution_evidence_verified'] = True
+        if args.require_conforming or 'implementation' in load(args.evidence_receipt):
+            verify_implementation_receipt(load(args.evidence_receipt))
+            report['summary']['implementation_evidence_verified'] = True
+            report['summary']['wrapper_exit'] = load(args.evidence_receipt).get('wrapper_exit')
     report['input_sha256'] = {str(p):file_sha256(p) for p in paths}
     if report['input_sha256'] != before:
         raise ValueError('execution evidence changed while being assessed')
     report['execution_evidence_scope'] = ('Input/output identities only; producer trust and built-runner provenance require separate execution acceptance. '
                                         'Absent receipts and unsupported applicability exemptions never establish completeness.')
+    # A failed HTTP run is still retained as execution evidence; malformed
+    # reports are rejected by schema validation rather than accepted as PASS.
+    try:
+        verify_passing_http(load(args.http))
+        report['summary']['http_evidence_verified'] = True
+    except (ValueError, KeyError, TypeError) as error:
+        report['http_validation_error'] = str(error)
+    report['summary']['test_specification_conformant'] = test_specification_conformant(report)
     args.output.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report['summary'], indent=2))
     if args.require_complete and not execution_complete(report):
+        raise SystemExit(2)
+    if args.require_conforming and not report['summary']['test_specification_conformant']:
         raise SystemExit(2)
 
 

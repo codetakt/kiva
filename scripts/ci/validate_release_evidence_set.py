@@ -109,6 +109,17 @@ def validate_conformance_release_scope(
             conformance["verification"]["postgres"],
             "release conformance evidence must include PostgreSQL execution verification",
         )
+        from report_issued_test_results import assess_capture
+        for backend in ('memory', 'postgres'):
+            directory = conformance_root / 'issued' / backend
+            require(directory.is_dir(),
+                    f'release evidence lacks full issued-test execution: {backend}')
+            receipt = load_json(directory / 'execution.json')
+            require(receipt.get('implementation', {}).get('backend') == backend,
+                    f'issued execution backend mismatch: {backend}')
+            report = assess_capture(directory)
+            require(report['summary']['test_specification_conformant'],
+                    f'issued test specification not fully passed: {backend}: {report["summary"]}')
     if require_adl_run:
         report_path = conformance_root / "reports/adl-run.json"
         require(report_path.is_file(), "release conformance evidence must include an ADL run")

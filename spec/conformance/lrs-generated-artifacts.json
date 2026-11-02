@@ -23,6 +23,8 @@
     "scripts/ci/probe_lrs_authority_filter.py",
     "scripts/ci/report_conformance_case_matrix.py",
     "scripts/ci/report_issued_test_results.py",
+    "scripts/ci/capture_issued_test_execution.py",
+    "scripts/ci/validate_release_evidence_set.py",
     "scripts/ci/report_lrs_interpretations.py",
     "scripts/ci/run_lrs_procedures.py",
     "scripts/ci/run_issued_revision_controls.py",
@@ -70,16 +72,45 @@
     "flake.nix",
     "nix/flake/packages.nix",
     "nix/flake/conformance.nix",
-    "tests/conformance/fixtures/preservation-properties.json"
+    "tests/conformance/fixtures/preservation-properties.json",
+    "scripts/ci/collect_lrs_procedure_evidence.py",
+    "scripts/ci/generate_pkix_unicode32.py",
+    "scripts/ci/lrs_language_vectors.py",
+    "scripts/ci/lrs_mailbox.py",
+    "scripts/ci/run_lrs_native_controls.py",
+    "spec/conformance/implementation-procedure-bindings.json",
+    "spec/conformance/issued-definition-tests.yaml",
+    "spec/conformance/issued-supplemental-tests.yaml",
+    "spec/conformance/reference/rfc3454.txt",
+    "spec/conformance/reference/unicode-3.2-normalization-test.json",
+    "spec/conformance/reference/unicode-3.2-normalization-test.txt.gz",
+    "tests/conformance/fixtures/mailto-contract.json",
+    "tests/conformance/fixtures/sha2-integration.json",
+    ".gitignore"
   ],
   "input_globs": [
     "scripts/ci/lrs_projection_*.py",
     "scripts/ci/test_*.py",
     "tools/xapi-lrs-conformance/src/*.rs",
     "tests/conformance/http/**/*.yaml",
-    "spec/requirements/lrs-requirements-ledger/*"
+    "spec/requirements/lrs-requirements-ledger/*",
+    "scripts/ci/**/*.py",
+    "tools/xapi-lrs-conformance/src/**/*.rs",
+    "tests/conformance/controls/*.json",
+    "tests/conformance/fixtures/**/*.json",
+    "tests/conformance/fixtures/**/*.der",
+    "tests/conformance/fixtures/**/*.pem"
   ],
   "stages": [
+    {
+      "id": "pkix-unicode32",
+      "script": "scripts/ci/generate_pkix_unicode32.py",
+      "args": [],
+      "outputs": [
+        "tests/conformance/fixtures/pkix-unicode32.json.gz",
+        "vendor/pkix-path/src/rfc4518/unicode32.rs"
+      ]
+    },
     {
       "id": "cases-and-procedures",
       "script": "scripts/ci/generate_lrs_projection_cases.py",

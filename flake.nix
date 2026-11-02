@@ -88,7 +88,7 @@
           cp -r ${sourceInputs} "$out"
           chmod -R u+w "$out"
           cd "$out"
-          python3 -B scripts/ci/generate_pkix_unicode32.py
+          python3 -B scripts/ci/generate_pkix_unicode32.py --if-needed
         '';
 
         cargoArtifacts = craneLib.buildDepsOnly {
@@ -110,12 +110,21 @@
         pre-commit-check = git-hooks.lib.${system}.run {
           inherit src;
           hooks = {
+            generated-artifacts-index = {
+              enable = true;
+              name = "generated artifacts stay untracked";
+              entry = "${pkgs.python3}/bin/python3 scripts/ci/check_generated_artifacts_index.py";
+              language = "system";
+              pass_filenames = false;
+              always_run = true;
+            };
             check-added-large-files = {
               enable = true;
               # Source-bound conformance artifacts are checked for reproducibility and drift.
               excludes = [
                 "^tests/conformance/http/generated/(behaviors|tables)\\.yaml$"
                 "^spec/conformance/lrs-(assertion-manifest|duty-review|table-bindings)\\.yaml$"
+                "^spec/conformance/implementation-procedure-bindings\\.json$"
               ];
             };
             end-of-file-fixer.enable = true;

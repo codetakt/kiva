@@ -34,7 +34,7 @@ let
     export RUSTDOCFLAGS="-D warnings"
     echo "Loaded Kiva strict development shell"
     if [ -f scripts/ci/generate_pkix_unicode32.py ]; then
-      python3 -B scripts/ci/generate_pkix_unicode32.py
+      python3 -B scripts/ci/generate_pkix_unicode32.py --if-needed
     fi
   '';
 in
